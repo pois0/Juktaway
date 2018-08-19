@@ -6,7 +6,6 @@ import android.content.DialogInterface;
 import android.os.Bundle;
 import android.support.v4.app.DialogFragment;
 
-import info.justaway.JustawayApplication;
 import info.justaway.R;
 import info.justaway.model.TwitterManager;
 import info.justaway.settings.BasicSettings;

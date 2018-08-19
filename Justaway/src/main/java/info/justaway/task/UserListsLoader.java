@@ -2,7 +2,6 @@ package info.justaway.task;
 
 import android.content.Context;
 
-import info.justaway.JustawayApplication;
 import info.justaway.model.AccessTokenManager;
 import info.justaway.model.TwitterManager;
 import twitter4j.ResponseList;

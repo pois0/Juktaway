@@ -3,7 +3,6 @@ package info.justaway.util;
 import android.content.Context;
 import android.view.View;
 import android.view.inputmethod.InputMethodManager;
-
 import info.justaway.JustawayApplication;
 
 public class KeyboardUtil {

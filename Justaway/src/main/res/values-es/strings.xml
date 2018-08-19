@@ -209,7 +209,6 @@
     <string name="toast_update_profile_success">Guardado</string>
     <string name="toast_update_status_already">El tweet fue enviado</string>
     <string name="toast_update_status_failure">No se pudo enviar el tweet</string>
-    <string name="twitter_callback_url">justaway://twitter</string>
     <string name="widget_title_post_mode">Post Only Mode</string>
     <string name="label_search_tweet">" Buscar tweet"</string>
     <string name="label_search_user">" Buscar usuario"</string>

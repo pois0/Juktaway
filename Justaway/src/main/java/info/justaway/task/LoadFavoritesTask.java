@@ -2,7 +2,6 @@ package info.justaway.task;
 
 import android.os.AsyncTask;
 
-import info.justaway.JustawayApplication;
 import info.justaway.model.AccessTokenManager;
 import info.justaway.model.FavRetweetManager;
 import info.justaway.model.TwitterManager;

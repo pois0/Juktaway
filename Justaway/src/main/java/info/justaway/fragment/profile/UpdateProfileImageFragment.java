@@ -12,7 +12,6 @@ import android.widget.LinearLayout;
 
 import java.io.File;
 
-import info.justaway.JustawayApplication;
 import info.justaway.R;
 import info.justaway.model.TwitterManager;
 import info.justaway.util.ImageUtil;

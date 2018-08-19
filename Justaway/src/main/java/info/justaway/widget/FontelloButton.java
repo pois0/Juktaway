@@ -3,7 +3,6 @@ package info.justaway.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.Button;
-
 import info.justaway.JustawayApplication;
 
 public class FontelloButton extends Button {

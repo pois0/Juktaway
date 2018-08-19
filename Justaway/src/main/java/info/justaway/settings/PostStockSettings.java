@@ -4,10 +4,9 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
+import info.justaway.JustawayApplication;
 
 import java.util.ArrayList;
-
-import info.justaway.JustawayApplication;
 
 public class PostStockSettings {
 

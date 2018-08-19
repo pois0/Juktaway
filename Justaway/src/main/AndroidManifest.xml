@@ -44,8 +44,8 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:host="twitter"
-                    android:scheme="justaway"/>
+                    android:host="justaway.super"
+                    android:scheme="http"/>
             </intent-filter>
         </activity>
         <activity

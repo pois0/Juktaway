@@ -3,7 +3,6 @@ package info.justaway.widget;
 import android.content.Context;
 import android.util.AttributeSet;
 import android.widget.TextView;
-
 import info.justaway.JustawayApplication;
 
 public class FontelloTextView extends TextView {

@@ -3,7 +3,6 @@ package info.justaway.util;
 import android.app.ProgressDialog;
 import android.content.Context;
 import android.widget.Toast;
-
 import info.justaway.JustawayApplication;
 
 public class MessageUtil {

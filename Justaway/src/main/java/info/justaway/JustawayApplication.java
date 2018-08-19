@@ -26,12 +26,12 @@ public class JustawayApplication extends Application {
             StrictMode.setThreadPolicy(new StrictMode.ThreadPolicy.Builder().permitAll().build());
         }
 
-        /**
-         * 画像のキャッシュや角丸の設定を行う
+        /*
+          画像のキャッシュや角丸の設定を行う
          */
         ImageUtil.init();
 
-        /**
+        /*
          * 設定ファイル読み込み
          */
         MuteSettings.init();
