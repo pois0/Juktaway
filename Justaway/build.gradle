@@ -1,11 +1,17 @@
 apply plugin: 'com.android.application'
+apply plugin: 'kotlin-android'
+apply plugin: 'kotlin-kapt'
+apply plugin: 'kotlin-android-extensions'
 
 dependencies {
-    //noinspection GradleDynamicVersion
-    implementation "com.android.support:appcompat-v7:25.3.1"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+
+    //noinspection GradleCompatible,GradleDynamicVersion
+    implementation "com.android.support:appcompat-v7:27.1.1"
     implementation "com.google.code.gson:gson:2.8.2"
     implementation "com.google.guava:guava:25.0-android"
     implementation "de.greenrobot:eventbus:2.2.0"
+    kapt "com.android.databinding:compiler:3.1.4"
 
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
@@ -73,6 +79,10 @@ android {
         targetCompatibility JavaVersion.VERSION_1_7
     }
 
+    dataBinding {
+        enabled = true
+    }
+
     lintOptions {
         //checkReleaseBuilds false
         abortOnError false
@@ -102,5 +112,8 @@ allprojects {
             options.compilerArgs << "-Xlint:unchecked" << "-Xlint:deprecation"
         }
     }
+}
+repositories {
+    mavenCentral()
 }
 
