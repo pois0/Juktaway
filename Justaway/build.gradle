@@ -8,6 +8,10 @@ dependencies {
 
     //noinspection GradleCompatible,GradleDynamicVersion
     implementation "com.android.support:appcompat-v7:27.1.1"
+    implementation 'com.android.support:support-annotations:27.1.1'
+    implementation 'com.android.support:support-compat:27.1.1'
+    implementation 'com.android.support:support-core-ui:27.1.1'
+
     implementation "com.google.code.gson:gson:2.8.2"
     implementation "com.google.guava:guava:25.0-android"
     implementation "de.greenrobot:eventbus:2.2.0"
@@ -20,6 +24,7 @@ dependencies {
     implementation "com.nostra13.universalimageloader:universal-image-loader:1.9.1"
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
     implementation "com.viewpagerindicator:library:${viewpagerIndicatorVersion}"
+    implementation "com.romandanylyk:pageindicatorview:1.0.1@aar"
     annotationProcessor "com.jakewharton:butterknife:${butterKnifeVersion}"
 
     implementation "com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9"

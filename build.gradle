@@ -24,6 +24,7 @@ subprojects {
         }
         maven { url 'https://maven.google.com' }
         mavenCentral()
+        jcenter()
     }
 
     project.plugins.whenPluginAdded { plugin ->

@@ -6,13 +6,14 @@ import android.appwidget.AppWidgetProvider
 import android.content.Context
 import android.content.Intent
 import android.widget.RemoteViews
+import info.justaway.PostActivity
 import info.justaway.R
 
 class PostWidget: AppWidgetProvider() {
     override fun onUpdate(context: Context?, appWidgetManager: AppWidgetManager?, appWidgetIds: IntArray?) {
         super.onUpdate(context, appWidgetManager, appWidgetIds)
         val pendingIntent = PendingIntent.getActivity(context, 0,
-                Intent().apply {
+                Intent(context, PostActivity::class.java).apply {
                     putExtra("widget", true)
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 }, PendingIntent.FLAG_CANCEL_CURRENT)

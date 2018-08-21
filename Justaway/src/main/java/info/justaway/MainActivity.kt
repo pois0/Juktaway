@@ -27,7 +27,6 @@ import de.greenrobot.event.EventBus
 import info.justaway.adapter.SearchAdapter
 import info.justaway.adapter.main.AccessTokenAdapter
 import info.justaway.adapter.main.MainPagerAdapter
-import info.justaway.databinding.*
 import info.justaway.event.AlertDialogEvent
 import info.justaway.event.NewRecordEvent
 import info.justaway.event.action.AccountChangeEvent
@@ -72,7 +71,7 @@ class MainActivity: FragmentActivity() {
             override fun onPostExecute(res: TwitterException?) {
                 MessageUtil.dismissProgressDialog()
                 res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) }
-                        ?: ref.get()?.mLayout?.quickTweetEdit?.setText("")
+                        ?: ref.get()?.quick_tweet_edit?.setText("")
             }
         }
 
@@ -84,12 +83,10 @@ class MainActivity: FragmentActivity() {
                 res?.run { MessageUtil.showToast(
                         if (res.errorCode == ERROR_CODE_DUPLICATE_STATUS) R.string.toast_update_status_already
                         else R.string.toast_update_status_failure
-                )} ?: ref.get()?.mLayout?.quickTweetEdit?.setText("")
+                )} ?: ref.get()?.quick_tweet_edit?.setText("")
             }
         }
     }
-
-    internal lateinit var mLayout: ActivityMainBinding
 
     private var mDefaultTextColor: Int = 0
     private var mDisabledTextColor: Int = 0
@@ -113,8 +110,6 @@ class MainActivity: FragmentActivity() {
                 R.layout.row_switch_account,
                 ThemeUtil.getThemeTextColor(R.attr.holo_blue),
                 ThemeUtil.getThemeTextColor(R.attr.text_color))
-
-        mLayout = DataBindingUtil.setContentView(this, R.layout.activity_main)!!
 
         //認証用のアクティビティの起動
         if (!AccessTokenManager.hasAccessToken()) {
