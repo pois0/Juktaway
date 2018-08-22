@@ -29,6 +29,6 @@ public class FontelloButton extends Button {
     }
 
     private void init() {
-        setTypeface(JustawayApplication.getFontello());
+        setTypeface(JustawayApplication.font);
     }
 }

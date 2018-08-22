@@ -31,7 +31,7 @@ public class NotificationService extends Service {
         if (mStarted) {
             return;
         }
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
         Intent intent = new Intent();
         intent.setClass(application, NotificationService.class);
         application.startService(intent);
@@ -42,7 +42,7 @@ public class NotificationService extends Service {
         if (!mStarted) {
             return;
         }
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
         Intent intent = new Intent();
         intent.setClass(application, NotificationService.class);
         application.stopService(intent);
@@ -94,7 +94,7 @@ public class NotificationService extends Service {
     @SuppressWarnings("UnusedDeclaration")
     public void onEvent(NotificationEvent event) {
         SharedPreferences preferences = getSharedPreferences("settings", Context.MODE_PRIVATE);
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
 
         long userId = AccessTokenManager.getUserId();
 

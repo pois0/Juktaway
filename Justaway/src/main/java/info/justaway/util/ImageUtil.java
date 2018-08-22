@@ -33,7 +33,7 @@ public class ImageUtil {
                 .build();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(JustawayApplication.getApplication())
+                .Builder(JustawayApplication.app)
                 .defaultDisplayImageOptions(defaultOptions)
                 .build();
 

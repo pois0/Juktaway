@@ -17,7 +17,7 @@ public class AccessTokenManager {
     private static AccessToken sAccessToken;
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.getApplication()
+        return JustawayApplication.app
                 .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 

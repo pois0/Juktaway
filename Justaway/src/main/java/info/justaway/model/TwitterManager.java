@@ -59,11 +59,11 @@ public class TwitterManager {
     }
 
     private static String getConsumerKey() {
-        return JustawayApplication.getApplication().getString(R.string.twitter_consumer_key);
+        return JustawayApplication.app.getString(R.string.twitter_consumer_key);
     }
 
     private static String getConsumerSecret() {
-        return JustawayApplication.getApplication().getString(R.string.twitter_consumer_secret);
+        return JustawayApplication.app.getString(R.string.twitter_consumer_secret);
     }
 
     public static Twitter getTwitter() {

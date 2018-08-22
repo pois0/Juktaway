@@ -18,7 +18,7 @@ public class PostStockSettings {
     private static final String DRAFT_LIST_FILE = "DraftListFile";
 
     public PostStockSettings() {
-        mApplication = JustawayApplication.getApplication();
+        mApplication = JustawayApplication.app;
         loadPostStockSettings();
     }
 

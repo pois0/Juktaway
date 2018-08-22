@@ -21,7 +21,7 @@ public class TabManager {
     private static ArrayList<Tab> sTabs = new ArrayList<>();
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.getApplication()
+        return JustawayApplication.app
                 .getSharedPreferences("settings", Context.MODE_PRIVATE);
     }
 
@@ -89,15 +89,15 @@ public class TabManager {
 
         public String getName() {
             if (id == TIMELINE_TAB_ID) {
-                return JustawayApplication.getApplication().getString(R.string.title_main);
+                return JustawayApplication.app.getString(R.string.title_main);
             } else if (id == INTERACTIONS_TAB_ID) {
-                return JustawayApplication.getApplication().getString(R.string.title_interactions);
+                return JustawayApplication.app.getString(R.string.title_interactions);
             } else if (id == DIRECT_MESSAGES_TAB_ID) {
-                return JustawayApplication.getApplication().getString(R.string.title_direct_messages);
+                return JustawayApplication.app.getString(R.string.title_direct_messages);
             } else if (id == FAVORITES_TAB_ID) {
-                return JustawayApplication.getApplication().getString(R.string.title_favorites);
+                return JustawayApplication.app.getString(R.string.title_favorites);
             } else if (id <= SEARCH_TAB_ID) {
-                return JustawayApplication.getApplication().getString(R.string.title_search) + ":" + name;
+                return JustawayApplication.app.getString(R.string.title_search) + ":" + name;
             } else {
                 return name;
             }

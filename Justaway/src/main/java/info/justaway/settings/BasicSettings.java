@@ -42,7 +42,7 @@ public class BasicSettings {
     private static final String QUICK_MODE = "quickMode";
 
     public static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.getApplication()
+        return JustawayApplication.app
                 .getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE);
     }
 

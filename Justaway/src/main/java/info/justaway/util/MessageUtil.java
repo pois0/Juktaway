@@ -9,18 +9,18 @@ public class MessageUtil {
     private static ProgressDialog sProgressDialog;
 
     public static void showToast(String text) {
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
         Toast.makeText(application, text, Toast.LENGTH_SHORT).show();
     }
 
     public static void showToast(int id) {
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
         String text = application.getString(id);
         Toast.makeText(application, text, Toast.LENGTH_SHORT).show();
     }
 
     public static void showToast(int id, String description) {
-        JustawayApplication application = JustawayApplication.getApplication();
+        JustawayApplication application = JustawayApplication.app;
         String text = application.getString(id) + "\n" + description;
         Toast.makeText(application, text, Toast.LENGTH_SHORT).show();
     }

@@ -26,7 +26,7 @@ public class MuteSettings {
     }
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.getApplication()
+        return JustawayApplication.app
                 .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 

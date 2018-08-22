@@ -11,7 +11,7 @@ public class KeyboardUtil {
     }
 
     public static InputMethodManager getInputMethodManager() {
-        return (InputMethodManager) JustawayApplication.getApplication()
+        return (InputMethodManager) JustawayApplication.app
                 .getSystemService(Context.INPUT_METHOD_SERVICE);
     }
 

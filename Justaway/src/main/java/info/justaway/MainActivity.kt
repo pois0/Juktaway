@@ -102,6 +102,7 @@ class MainActivity: FragmentActivity() {
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        JustawayApplication.app
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         mDefaultTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color)
@@ -619,7 +620,7 @@ class MainActivity: FragmentActivity() {
         }
     }
 
-    private val onKeyListener = View.OnKeyListener { v, keyCode, event ->
+    private val onKeyListener = View.OnKeyListener { _, keyCode, event ->
         if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
             if (action_bar_search_text.text == null) return@OnKeyListener false
             KeyboardUtil.hideKeyboard(action_bar_search_text)

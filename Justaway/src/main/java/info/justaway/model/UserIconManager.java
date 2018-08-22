@@ -29,7 +29,7 @@ public class UserIconManager {
     private static HashMap<String, String> sUserNameMap = new HashMap<String, String>();
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.getApplication()
+        return JustawayApplication.app
                 .getSharedPreferences(PREF_NAME_USER_ICON_MAP, Context.MODE_PRIVATE);
     }
 

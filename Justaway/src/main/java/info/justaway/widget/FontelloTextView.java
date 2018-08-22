@@ -29,6 +29,6 @@ public class FontelloTextView extends TextView {
     }
 
     private void init() {
-        setTypeface(JustawayApplication.getFontello());
+        setTypeface(JustawayApplication.font);
     }
 }
