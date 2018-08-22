@@ -7,15 +7,15 @@ import android.annotation.SuppressLint
 import android.app.ActionBar
 import android.app.Activity
 import android.content.Intent
-import android.databinding.DataBindingUtil
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.app.ActionBarDrawerToggle
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
+import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
@@ -101,6 +101,7 @@ class MainActivity: FragmentActivity() {
     private var mSwitchAccessToken: AccessToken? = null
 
 
+    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         JustawayApplication.app
         super.onCreate(savedInstanceState)
@@ -210,7 +211,7 @@ class MainActivity: FragmentActivity() {
         }
 
         mDrawerToggle = object: ActionBarDrawerToggle(this,
-                drawer_layout, R.drawable.ic_dark_drawer, R.string.open, R.string.close) {
+                drawer_layout, Toolbar(this), R.string.open, R.string.close) {
             override fun onDrawerClosed(drawerView: View) {
                 invalidateOptionsMenu()
             }
@@ -219,7 +220,7 @@ class MainActivity: FragmentActivity() {
                 invalidateOptionsMenu()
             }
         }
-        drawer_layout.setDrawerListener(mDrawerToggle)
+        drawer_layout.addDrawerListener(mDrawerToggle)
 
         setup()
     }
@@ -678,6 +679,7 @@ class MainActivity: FragmentActivity() {
         }
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(e: AccountChangeEvent) {
         mAccessTokenAdapter.notifyDataSetInvalidated()
         setupTab()
@@ -693,7 +695,7 @@ class MainActivity: FragmentActivity() {
         }
     }
 
-    fun <T> getIntent(cls: Class<T>): Intent {
+    private fun <T> getIntent(cls: Class<T>): Intent {
         return Intent(this, cls)
     }
 
