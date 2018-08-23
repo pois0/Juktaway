@@ -10,7 +10,6 @@ import info.justaway.adapter.account.AccessTokenAdapter
 import info.justaway.fragment.dialog.AccountSwitchDialogFragment
 import info.justaway.listener.RemoveAccountListener
 import info.justaway.model.AccessTokenManager
-import info.justaway.util.MessageUtil
 import info.justaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
 import twitter4j.auth.AccessToken

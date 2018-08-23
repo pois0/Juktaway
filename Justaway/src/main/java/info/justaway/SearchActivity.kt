@@ -1,0 +1,221 @@
+package info.justaway
+
+import android.app.Activity
+import android.content.Context
+import android.content.Intent
+import android.os.AsyncTask
+import android.os.Bundle
+import android.support.v4.app.FragmentActivity
+import android.support.v4.app.LoaderManager
+import android.support.v4.content.Loader
+import android.view.KeyEvent
+import android.view.Menu
+import android.view.MenuItem
+import android.view.View
+import android.view.inputmethod.InputMethodManager
+import android.widget.AbsListView
+import de.greenrobot.event.EventBus
+import info.justaway.adapter.TwitterAdapter
+import info.justaway.event.AlertDialogEvent
+import info.justaway.event.action.StatusActionEvent
+import info.justaway.event.model.StreamingDestroyStatusEvent
+import info.justaway.listener.PressEnterListener
+import info.justaway.listener.StatusClickListener
+import info.justaway.listener.StatusLongClickListener
+import info.justaway.model.Row
+import info.justaway.model.TabManager
+import info.justaway.model.TwitterManager
+import info.justaway.task.AbstractAsyncTaskLoader
+import info.justaway.util.KeyboardUtil
+import info.justaway.util.MessageUtil
+import info.justaway.util.ThemeUtil
+import kotlinx.android.synthetic.main.activity_search.*
+import twitter4j.Query
+import twitter4j.QueryResult
+import twitter4j.SavedSearch
+import java.lang.ref.WeakReference
+
+/**
+ * Created on 2018/08/24.
+ */
+class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryResult> {
+    companion object {
+        const val RESULT_CREATE_SAVED_SEARCH = 100
+
+        private class CreateSavedSearchTask(context: SearchActivity): AsyncTask<String, Void, SavedSearch>() {
+            val ref = WeakReference(context)
+
+            override fun doInBackground(vararg params: String): SavedSearch? {
+                return try {
+                    TwitterManager.getTwitter().createSavedSearch(params[0])
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+
+            override fun onPostExecute(savedSearch: SavedSearch?) {
+                if (savedSearch == null) return
+                ref.get()?.setResult(RESULT_CREATE_SAVED_SEARCH)
+                MessageUtil.showToast(ref.get()?.getString(R.string.toast_save_success))
+            }
+        }
+
+        private class SearchLoader(context: Context, val query: Query): AbstractAsyncTaskLoader<QueryResult>(context) {
+            override fun loadInBackground(): QueryResult? {
+                return try {
+                    TwitterManager.getTwitter().search(query)
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }
+        }
+    }
+
+    private lateinit var mAdapter: TwitterAdapter
+    private var mNextQuery: Query? = null
+
+    override fun onCreate(savedInstanceState: Bundle?) {
+        super.onCreate(savedInstanceState)
+        ThemeUtil.setTheme(this)
+        setContentView(R.layout.activity_search)
+
+        actionBar?.run {
+            setHomeButtonEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
+        }
+
+        mAdapter = TwitterAdapter(this, R.layout.row_tweet)
+        search_list.let {l ->
+            l.adapter = mAdapter
+            l.onItemClickListener = StatusClickListener(this)
+            l.onItemLongClickListener = StatusLongClickListener(this)
+        }
+
+        searchWords.setOnKeyListener (PressEnterListener {
+            search()
+            true
+        })
+
+        intent.getStringExtra("query")?.let {
+            searchWords.setText(it)
+            search()
+        } ?: KeyboardUtil.showKeyboard(searchWords)
+
+        search_list.setOnScrollListener(object: AbsListView.OnScrollListener {
+            override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
+
+            override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+                // 最後までスクロールされたかどうかの判定
+                if (totalItemCount == firstVisibleItem + visibleItemCount) additionalReading()
+
+            }
+        })
+
+        search_button.setOnClickListener { search() }
+        tweet_button.setOnClickListener {
+            searchWords.text?.let {
+                startActivity(Intent(this, PostActivity::class.java).apply {
+                    putExtra("status", " " + it.toString())
+                })
+            }
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onPause() {
+        EventBus.getDefault().unregister(this)
+        super.onPause()
+    }
+
+    fun onEventMainThread(event: AlertDialogEvent) {
+        event.dialogFragment.show(supportFragmentManager, "dialog")
+    }
+
+    fun onEventMainThread(event: StatusActionEvent) {
+        mAdapter.notifyDataSetChanged()
+    }
+
+    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
+        mAdapter.removeStatus(event.statusId!!)
+    }
+
+    override fun onCreateOptionsMenu(menu: Menu): Boolean {
+        menuInflater.inflate(R.menu.search, menu)
+        return true
+    }
+
+    override fun onOptionsItemSelected(item: MenuItem): Boolean {
+        when (item.itemId) {
+            android.R.id.home -> finish()
+            R.id.save_search ->
+                searchWords.text?.let {
+                    CreateSavedSearchTask(this).execute(it.toString())
+                }
+            R.id.search_to_tab -> {
+                TabManager.saveTabs(TabManager.loadTabs().apply {
+                    searchWords.text.toString().let {
+                        add(TabManager.Tab(TabManager.SEARCH_TAB_ID - Math.abs(it.hashCode())).apply {
+                            name = it
+                        })
+                    }
+                })
+                setResult(Activity.RESULT_OK)
+            }
+        }
+        return true
+    }
+
+    private fun additionalReading() {
+        if (mNextQuery != null) {
+            guruguru.visibility = View.VISIBLE
+
+            supportLoaderManager.restartLoader(0, Bundle(1).apply {
+                putSerializable("query", mNextQuery)
+            }, this)
+            mNextQuery = null
+        }
+    }
+
+    private fun search() {
+        KeyboardUtil.hideKeyboard(searchWords)
+        searchWords.text?.let {
+            mAdapter.clear()
+            search_list.visibility = View.GONE
+            guruguru.visibility = View.GONE
+            mNextQuery = null
+
+            supportLoaderManager.restartLoader(0, Bundle(1).apply {
+                putSerializable("query", Query(it.toString() + " exclude:retweets"))
+            }, this).forceLoad()
+        }
+    }
+
+    override fun onCreateLoader(id: Int, args: Bundle?): Loader<QueryResult> {
+        return SearchLoader(this, args?.getSerializable("query") as Query)
+    }
+
+    override fun onLoadFinished(loader: Loader<QueryResult>, result: QueryResult?) {
+        result?.apply {
+            if (hasNext()) mNextQuery = nextQuery()
+
+            val count = mAdapter.count
+
+            tweets?.forEach { mAdapter.add(Row.newStatus(it)) }
+
+            search_list.visibility = View.VISIBLE
+            if (count == 0) search_list.setSelection(0)
+            guruguru.visibility = View.GONE
+
+            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                    .hideSoftInputFromWindow(searchWords.windowToken, 0)
+        } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
+    }
+
+    override fun onLoaderReset(loader: android.support.v4.content.Loader<QueryResult>) {}
+}
