@@ -144,9 +144,6 @@
             android:name=".NotificationSettingsActivity"
             android:label="@string/title_notification"/>
         <activity
-            android:name=".MuteActivity"
-            android:label="@string/title_mute"/>
-        <activity
             android:name=".PerformanceActivity"
             android:label="@string/title_performance"/>
         <activity
@@ -163,6 +160,9 @@
         <activity
             android:name=".UserSearchActivity"
             android:label="@string/title_user_search"/>
+        <activity
+            android:name=".MuteActivity"
+            android:label="@string/title_mute" />
     </application>
 
 </manifest>

@@ -7,20 +7,20 @@
               tools:ignore="UseCompoundDrawables">
 
     <ImageView
-        android:id="@+id/icon"
-        android:layout_width="24dp"
-        android:layout_height="24dp"
-        android:layout_marginRight="8dp"
-        tools:src="@drawable/ic_launcher"
-        android:contentDescription="@string/description_icon"/>
+            android:id="@+id/spinner_switch_account_icon"
+            android:layout_width="24dp"
+            android:layout_height="24dp"
+            android:layout_marginRight="8dp"
+            tools:src="@drawable/ic_launcher"
+            android:contentDescription="@string/description_icon" android:layout_marginEnd="8dp"/>
 
     <TextView
-        android:id="@+id/screen_name"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:layout_toRightOf="@id/icon"
-        android:textSize="18sp"
-        tools:text="justawayfactory"/>
+            android:id="@+id/spinner_switch_account_screen_name"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:layout_toRightOf="@id/spinner_switch_account_icon"
+            android:textSize="18sp"
+            tools:text="justawayfactory" android:layout_toEndOf="@id/spinner_switch_account_icon"/>
 
 </RelativeLayout>
