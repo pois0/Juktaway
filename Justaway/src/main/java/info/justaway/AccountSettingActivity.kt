@@ -8,6 +8,7 @@ import android.view.Menu
 import android.view.MenuItem
 import info.justaway.adapter.account.AccessTokenAdapter
 import info.justaway.fragment.dialog.AccountSwitchDialogFragment
+import info.justaway.listener.OnTrashListener
 import info.justaway.listener.RemoveAccountListener
 import info.justaway.model.AccessTokenManager
 import info.justaway.util.ThemeUtil
@@ -32,9 +33,11 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
 
         mAccountAdapter = AccessTokenAdapter(this, R.layout.row_account) .apply {
             AccessTokenManager.getAccessTokens()?.forEach { add(it) }
-            setOnTrashListener {
-                AccountSwitchDialogFragment.newInstance(getItem(it)).show(supportFragmentManager, "dialog")
-            }
+            setOnTrashListener(object: OnTrashListener {
+                override fun onTrash(position: Int) {
+                    AccountSwitchDialogFragment.newInstance(getItem(position)).show(supportFragmentManager, "dialog")
+                }
+            })
         }
 
         with (list_view) {
@@ -69,7 +72,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
         return true
     }
 
-    override fun removeAccount(accessToken: AccessToken?) {
+    override fun removeAccount(accessToken: AccessToken) {
         mAccountAdapter.remove(accessToken)
         AccessTokenManager.removeAccessToken(accessToken)
     }
