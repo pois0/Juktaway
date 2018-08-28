@@ -35,7 +35,7 @@ public class UserIconManager {
 
     public static void displayUserIcon(User user, final ImageView view) {
         String url;
-        String size = BasicSettings.getUserIconSize();
+        String size = BasicSettings.INSTANCE.getUserIconSize();
         switch (size) {
             case "bigger":
                 url = user.getBiggerProfileImageURL();
@@ -50,7 +50,7 @@ public class UserIconManager {
                 view.setVisibility(View.GONE);
                 return;
         }
-        if (BasicSettings.getUserIconRoundedOn()) {
+        if (BasicSettings.INSTANCE.getUserIconRoundedOn()) {
             ImageUtil.displayRoundedImage(url, view);
         } else {
             ImageUtil.displayImage(url, view);

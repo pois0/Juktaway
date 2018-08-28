@@ -12,7 +12,7 @@ object ThemeUtil {
 
     fun setTheme(activity: Activity) {
         activity.setTheme(
-                if (BasicSettings.getThemeName() == "black")
+                if (BasicSettings.themeName == "black")
                     R.style.BlackTheme
                 else R.style.WhiteTheme)
         sTheme = activity.theme

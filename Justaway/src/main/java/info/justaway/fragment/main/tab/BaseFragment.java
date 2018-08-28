@@ -76,7 +76,7 @@ public abstract class BaseFragment extends Fragment implements OnRefreshListener
         mListView.setOnItemLongClickListener(new StatusLongClickListener(getActivity()));
         mListView.setOnScrollListener(mOnScrollListener);
         mFooter.setVisibility(View.GONE);
-        mListView.setFastScrollEnabled(BasicSettings.getFastScrollOn());
+        mListView.setFastScrollEnabled(BasicSettings.INSTANCE.getFastScrollOn());
 
         return v;
     }
@@ -321,7 +321,7 @@ public abstract class BaseFragment extends Fragment implements OnRefreshListener
      */
     @SuppressWarnings("UnusedDeclaration")
     public void onEventMainThread(BasicSettingsChangeEvent event) {
-        mListView.setFastScrollEnabled(BasicSettings.getFastScrollOn());
+        mListView.setFastScrollEnabled(BasicSettings.INSTANCE.getFastScrollOn());
     }
 
     @SuppressWarnings("UnusedDeclaration")

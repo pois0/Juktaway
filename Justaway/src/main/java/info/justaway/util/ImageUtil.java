@@ -55,7 +55,7 @@ public class ImageUtil {
             return;
         }
         view.setTag(url);
-        if (BasicSettings.getUserIconRoundedOn()) {
+        if (BasicSettings.INSTANCE.getUserIconRoundedOn()) {
             if (sRoundedDisplayImageOptions == null) {
                 sRoundedDisplayImageOptions = new DisplayImageOptions.Builder()
                         .cacheInMemory(true)

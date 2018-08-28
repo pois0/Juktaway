@@ -138,7 +138,7 @@ public class UserTimelineFragment extends Fragment implements OnRefreshListener 
                 Paging paging = new Paging();
                 if (mMaxId > 0) {
                     paging.setMaxId(mMaxId - 1);
-                    paging.setCount(BasicSettings.getPageCount());
+                    paging.setCount(BasicSettings.INSTANCE.getPageCount());
                 }
                 return TwitterManager.getTwitter().getUserTimeline(params[0], paging);
             } catch (Exception e) {

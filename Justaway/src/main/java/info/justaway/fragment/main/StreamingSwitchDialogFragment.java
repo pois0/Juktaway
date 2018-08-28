@@ -32,7 +32,7 @@ public class StreamingSwitchDialogFragment extends DialogFragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        BasicSettings.setStreamingMode(turnOn);
+                        BasicSettings.INSTANCE.setStreamingMode(turnOn);
                         if (turnOn) {
                             TwitterManager.startStreaming();
                             MessageUtil.INSTANCE.showToast(R.string.toast_create_streaming);

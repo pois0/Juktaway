@@ -257,7 +257,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
             holder = (ViewHolder) view.getTag();
         }
 
-        Integer fontSize = BasicSettings.getFontSize();
+        Integer fontSize = BasicSettings.INSTANCE.getFontSize();
         if (!fontSize.equals(holder.mStatus.getTag())) {
             holder.mStatus.setTag(fontSize);
             holder.mStatus.setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize);
@@ -476,7 +476,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                 holder.mMenuAndViaContainer.setVisibility(View.VISIBLE);
                 holder.mActionContainer.setVisibility(View.VISIBLE);
             } else {
-                if (BasicSettings.getUserIconSize().equals("none")) {
+                if (BasicSettings.INSTANCE.getUserIconSize().equals("none")) {
                     holder.mRetweetIcon.setVisibility(View.GONE);
                 } else {
                     holder.mRetweetIcon.setVisibility(View.VISIBLE);
@@ -531,7 +531,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
             holder.mQuotedStatus.setText(quotedStatus.getText());
 
             // プレビュー表示On
-            if (BasicSettings.getDisplayThumbnailOn()) {
+            if (BasicSettings.INSTANCE.getDisplayThumbnailOn()) {
                 ImageUtil.displayThumbnailImages(mContext, holder.mQuotedImagesContainer, holder.mImagesContainerWrapper, holder.mQuotedPlay, quotedStatus);
             } else {
                 holder.mQuotedImagesContainer.setVisibility(View.GONE);
@@ -543,7 +543,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         }
 
         // プレビュー表示On
-        if (BasicSettings.getDisplayThumbnailOn()) {
+        if (BasicSettings.INSTANCE.getDisplayThumbnailOn()) {
             ImageUtil.displayThumbnailImages(mContext, holder.mImagesContainer, holder.mImagesContainerWrapper, holder.mPlay, status);
         } else {
             holder.mImagesContainer.setVisibility(View.GONE);

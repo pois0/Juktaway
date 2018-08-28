@@ -53,7 +53,7 @@ public class UserListFragment extends BaseFragment {
                 Paging paging = new Paging();
                 if (mMaxId > 0 && !mReloading) {
                     paging.setMaxId(mMaxId - 1);
-                    paging.setCount(BasicSettings.getPageCount());
+                    paging.setCount(BasicSettings.INSTANCE.getPageCount());
                 } else {
                     ResponseList<User> members = twitter.getUserListMembers(mUserListId, 0);
                     for (User user : members) {

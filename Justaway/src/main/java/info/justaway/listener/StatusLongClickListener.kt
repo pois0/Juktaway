@@ -21,7 +21,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
     override fun onItemLongClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long): Boolean {
         return adapterView?.let { getAdapter(it) }?.getItem(position)?.takeUnless{it.isDirectMessage}?.status?.let { status ->
             val source = status.retweetedStatus ?: status
-            when (BasicSettings.getLongTapAction()) {
+            when (BasicSettings.longTapAction) {
                 "talk" ->
                     if (source.inReplyToStatusId > 0) {
                         TalkFragment().apply {

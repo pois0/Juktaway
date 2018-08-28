@@ -74,7 +74,7 @@ public class TalkFragment extends DialogFragment {
 
         int inReplyToAreaPixels = status.getInReplyToStatusId() > 0 ? metrics.heightPixels : 0;
 
-        if (BasicSettings.getTalkOrderNewest()) {
+        if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
             mHeaderView.setLayoutParams(new AbsListView.LayoutParams(
                     AbsListView.LayoutParams.MATCH_PARENT, 100));
             mFooterView.setLayoutParams(new AbsListView.LayoutParams(
@@ -104,14 +104,14 @@ public class TalkFragment extends DialogFragment {
         mTwitter = TwitterManager.getTwitter();
         mAdapter.add(Row.Companion.newStatus(status));
 
-        if (!BasicSettings.getTalkOrderNewest()) {
+        if (!BasicSettings.INSTANCE.getTalkOrderNewest()) {
             mListView.setSelectionFromTop(1, 0);
         }
 
         if (status.getInReplyToStatusId() > 0) {
             new LoadTalk().execute(status.getInReplyToStatusId());
         } else {
-            if (BasicSettings.getTalkOrderNewest()) {
+            if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                 dialog.findViewById(R.id.guruguru_footer).setVisibility(View.GONE);
             } else {
                 dialog.findViewById(R.id.guruguru_header).setVisibility(View.GONE);
@@ -197,7 +197,7 @@ public class TalkFragment extends DialogFragment {
             }
             if (status != null) {
 
-                if (BasicSettings.getTalkOrderNewest()) {
+                if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                     mAdapter.add(Row.Companion.newStatus(status));
                 } else {
                     // 表示している要素の位置
@@ -221,14 +221,14 @@ public class TalkFragment extends DialogFragment {
                 if (inReplyToStatusId > 0) {
                     new LoadTalk().execute(inReplyToStatusId);
                 } else {
-                    if (BasicSettings.getTalkOrderNewest()) {
+                    if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                         dialog.findViewById(R.id.guruguru_footer).setVisibility(View.GONE);
                     } else {
                         dialog.findViewById(R.id.guruguru_header).setVisibility(View.GONE);
                     }
                 }
             } else {
-                if (BasicSettings.getTalkOrderNewest()) {
+                if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                     dialog.findViewById(R.id.guruguru_footer).setVisibility(View.GONE);
                 } else {
                     dialog.findViewById(R.id.guruguru_header).setVisibility(View.GONE);
@@ -324,7 +324,7 @@ public class TalkFragment extends DialogFragment {
             if (dialog == null) {
                 return;
             }
-            if (BasicSettings.getTalkOrderNewest()) {
+            if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                 dialog.findViewById(R.id.guruguru_header).setVisibility(View.GONE);
             } else {
                 dialog.findViewById(R.id.guruguru_footer).setVisibility(View.GONE);
@@ -332,7 +332,7 @@ public class TalkFragment extends DialogFragment {
             if (statuses == null || statuses.size() == 0) {
                 return;
             }
-            if (BasicSettings.getTalkOrderNewest()) {
+            if (BasicSettings.INSTANCE.getTalkOrderNewest()) {
                 // 表示している要素の位置
                 int position = mListView.getLastVisiblePosition();
 

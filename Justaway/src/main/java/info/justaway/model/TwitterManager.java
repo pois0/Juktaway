@@ -30,7 +30,7 @@ public class TwitterManager {
 
     public static void switchAccessToken(final AccessToken accessToken) {
         AccessTokenManager.setAccessToken(accessToken);
-        if (BasicSettings.getStreamingMode()) {
+        if (BasicSettings.INSTANCE.getStreamingMode()) {
             MessageUtil.INSTANCE.showToast(R.string.toast_destroy_streaming);
             sUserStreamAdapter.stop();
             new AsyncTask<Void, Void, Void>() {
@@ -126,14 +126,14 @@ public class TwitterManager {
         sTwitterStream.addListener(sUserStreamAdapter);
         sTwitterStream.addConnectionLifeCycleListener(new MyConnectionLifeCycleListener());
         sTwitterStream.user();
-        BasicSettings.resetNotification();
+        BasicSettings.INSTANCE.resetNotification();
     }
 
     public static void stopStreaming() {
         if (sTwitterStream == null) {
             return;
         }
-        BasicSettings.setStreamingMode(false);
+        BasicSettings.INSTANCE.setStreamingMode(false);
         sUserStreamAdapter.stop();
         new AsyncTask<Void, Void, Void>() {
             @Override

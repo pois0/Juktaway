@@ -140,7 +140,7 @@ class MainActivity: FragmentActivity() {
             }
         }
         action_bar_streaming_button.setOnClickListener {
-            StreamingSwitchDialogFragment.newInstance(!BasicSettings.getStreamingMode()).show(supportFragmentManager, "dialog")
+            StreamingSwitchDialogFragment.newInstance(!BasicSettings.streamingMode).show(supportFragmentManager, "dialog")
         }
         action_bar_search_button.setOnClickListener {
             startSearch()
@@ -236,7 +236,7 @@ class MainActivity: FragmentActivity() {
         MyUncaughtExceptionHandler.showBugReportDialogIfExist(this)
 
         with (window) {
-            if (BasicSettings.getKeepScreenOn()) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            if (BasicSettings.keepScreenOn) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             else clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
@@ -294,7 +294,7 @@ class MainActivity: FragmentActivity() {
         EventBus.getDefault().post(BasicSettingsChangeEvent())
 
         title = mMainPagerAdapter.getPageTitle(mViewPager.currentItem)
-        if (BasicSettings.getQuickMode()) showQuickPanel()
+        if (BasicSettings.quickMode) showQuickPanel()
         else hideQuickPanel()
 
 
@@ -315,7 +315,7 @@ class MainActivity: FragmentActivity() {
             when {
                 TwitterManager.getTwitterStreamConnected() ->
                     ThemeUtil.setThemeTextColor(this, R.attr.holo_green)
-                BasicSettings.getStreamingMode() ->
+                BasicSettings.streamingMode ->
                     ThemeUtil.setThemeTextColor(this, R.attr.holo_red)
                 else -> setTextColor(Color.WHITE)
             }
@@ -407,7 +407,7 @@ class MainActivity: FragmentActivity() {
             action_bar_sub_title.text = matcher.group(1)
         } else {
             action_bar_title.text = title
-            action_bar_sub_title.text = when (BasicSettings.getDisplayAccountName()) {
+            action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
                 BasicSettings.DisplayAccountName.SCREEN_NAME ->
                      "@" + AccessTokenManager.getScreenName()
                 BasicSettings.DisplayAccountName.DISPLAY_NAME ->
@@ -546,8 +546,8 @@ class MainActivity: FragmentActivity() {
         })
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
-        if (BasicSettings.getQuickMode()) showQuickPanel()
-        if (BasicSettings.getStreamingMode()) TwitterManager.startStreaming()
+        if (BasicSettings.quickMode) showQuickPanel()
+        if (BasicSettings.streamingMode) TwitterManager.startStreaming()
     }
 
     private fun showTopView() {
@@ -665,7 +665,7 @@ class MainActivity: FragmentActivity() {
     }
 
     fun onEventMainThread(e: StreamingConnectionEvent) {
-        if (BasicSettings. getStreamingMode()) {
+        if (BasicSettings.streamingMode) {
             ThemeUtil.setThemeTextColor(action_bar_streaming_button, when (e.status) {
                 StreamingConnectionEvent.Status.STREAMING_CONNECT ->
                     R.attr.holo_green
