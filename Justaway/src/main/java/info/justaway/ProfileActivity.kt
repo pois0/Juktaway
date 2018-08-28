@@ -466,13 +466,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
 
         val args = Bundle().apply {
             putSerializable("user", mUser)
-            putSerializable("relationShip", mRelationship)
+            putSerializable("relationship", mRelationship)
         }
         SimplePagerAdapter(this, pager).apply {
             addTab(SummaryFragment::class.java, args)
             addTab(DescriptionFragment::class.java, args)
-            notifyDataSetChanged()
-        }
+        }.notifyDataSetChanged()
         symbol.setViewPager(pager)
 
         /*
@@ -514,14 +513,13 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             putSerializable("user", mUser)
         }
 
-        with (SimplePagerAdapter(this, list_pager)) {
+        SimplePagerAdapter(this, list_pager).apply {
             addTab(UserTimelineFragment::class.java, listArgs)
             addTab(FollowingListFragment::class.java, listArgs)
             addTab(FollowersListFragment::class.java, listArgs)
             addTab(UserListMembershipsFragment::class.java, listArgs)
             addTab(FavoritesListFragment::class.java, listArgs)
-            notifyDataSetChanged()
-        }
+        }.notifyDataSetChanged()
         list_pager.offscreenPageLimit = 5
 
         val tabs = arrayOf<TextView>(statuses_count, friends_count, followers_count, listed_count, favourites_count)
