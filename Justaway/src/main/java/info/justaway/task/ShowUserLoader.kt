@@ -14,7 +14,7 @@ class ShowUserLoader : AbstractAsyncTaskLoader<Profile> {
     private var mScreenName: String? = ""
     private var mUserId: Long = 0
 
-    constructor(context: Context, screenName: String) : super(context) {
+    constructor(context: Context, screenName: String?) : super(context) {
         this.mScreenName = screenName
     }
 
