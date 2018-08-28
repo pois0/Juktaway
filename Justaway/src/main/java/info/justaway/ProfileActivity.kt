@@ -428,7 +428,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             return
         }
         if (profile.error != null && profile.error!!.isNotEmpty()) {
-            MessageUtil.showToast(R.string.toast_load_data_failure, profile.error)
+            MessageUtil.showToast(R.string.toast_load_data_failure, profile.error!!)
             return
         }
         mUser = profile.user!!

@@ -8,7 +8,6 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
-import android.view.KeyEvent
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -56,8 +55,10 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
 
             override fun onPostExecute(savedSearch: SavedSearch?) {
                 if (savedSearch == null) return
-                ref.get()?.setResult(RESULT_CREATE_SAVED_SEARCH)
-                MessageUtil.showToast(ref.get()?.getString(R.string.toast_save_success))
+                ref.get()?.run {
+                    setResult(RESULT_CREATE_SAVED_SEARCH)
+                    MessageUtil.showToast(getString(R.string.toast_save_success))
+                }
             }
         }
 
@@ -115,7 +116,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
 
         search_button.setOnClickListener { search() }
         tweet_button.setOnClickListener {
-            searchWords.text?.let {
+            searchWords.text?.let { _ ->
                 startActivity(Intent(this, PostActivity::class.java).apply {
                     putExtra("status", " " + it.toString())
                 })
