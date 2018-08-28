@@ -166,19 +166,19 @@ public class TwitterManager {
         @Override
         public void onConnect() {
             sTwitterStreamConnected = true;
-            EventBus.getDefault().post(StreamingConnectionEvent.onConnect());
+            EventBus.getDefault().post(StreamingConnectionEvent.Companion.onCleanUp());
         }
 
         @Override
         public void onDisconnect() {
             sTwitterStreamConnected = false;
-            EventBus.getDefault().post(StreamingConnectionEvent.onDisconnect());
+            EventBus.getDefault().post(StreamingConnectionEvent.Companion.onDisconnect());
         }
 
         @Override
         public void onCleanUp() {
             sTwitterStreamConnected = false;
-            EventBus.getDefault().post(StreamingConnectionEvent.onCleanUp());
+            EventBus.getDefault().post(StreamingConnectionEvent.Companion.onCleanUp());
         }
     }
 }
