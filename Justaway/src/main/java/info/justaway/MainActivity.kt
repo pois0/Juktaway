@@ -352,7 +352,7 @@ class MainActivity: FragmentActivity() {
                 cancelSearch()
             R.id.profile ->
                 startActivity(getIntent(ProfileActivity::class.java).run {
-                    putExtra("userId", AccessTokenManager.getUserId())
+                    putExtra("screenName", AccessTokenManager.getScreenName())
                 })
             R.id.tab_settings -> {
                 startActivityForResult(getIntent(TabSettingsActivity::class.java), REQUEST_TAB_SETTINGS)
