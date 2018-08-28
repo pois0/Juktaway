@@ -96,19 +96,7 @@ public class SettingsActivity extends Activity {
                 return;
             }
             longTapPreference.setSummary(longTapPreference.getEntry());
-            longTapPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
-                @Override
-                public boolean onPreferenceChange(Preference preference, Object newValue) {
-                    ListPreference listPreference = (ListPreference) preference;
-                    int listId = listPreference.findIndexOfValue((String) newValue);
-                    CharSequence[] entries;
-                    entries = listPreference.getEntries();
-                    if (entries != null) {
-                        preference.setSummary(entries[listId]);
-                    }
-                    return true;
-                }
-            });
+            changedPreference(longTapPreference);
 
             ListPreference themePreference = (ListPreference) findPreference("themeName");
             if (themePreference == null) {
@@ -128,6 +116,22 @@ public class SettingsActivity extends Activity {
                     FragmentManager fragmentManager = getFragmentManager();
                     if (fragmentManager != null) {
                         new ThemeSwitchDialogFragment().show(fragmentManager, "dialog");
+                    }
+                    return true;
+                }
+            });
+        }
+
+        public static void changedPreference(ListPreference longTapPreference) {
+            longTapPreference.setOnPreferenceChangeListener(new Preference.OnPreferenceChangeListener() {
+                @Override
+                public boolean onPreferenceChange(Preference preference, Object newValue) {
+                    ListPreference listPreference = (ListPreference) preference;
+                    int listId = listPreference.findIndexOfValue((String) newValue);
+                    CharSequence[] entries;
+                    entries = listPreference.getEntries();
+                    if (entries != null) {
+                        preference.setSummary(entries[listId]);
                     }
                     return true;
                 }
