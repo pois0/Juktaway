@@ -64,7 +64,7 @@ public class ActionUtil {
 
             if (statusId != null && statusId == 0L) {
                 // 処理中は 0
-                MessageUtil.showToast(R.string.toast_destroy_retweet_progress);
+                MessageUtil.INSTANCE.showToast(R.string.toast_destroy_retweet_progress);
             } else if (statusId != null && statusId > 0 && retweetedStatusId > 0) {
                 new UnRetweetTask(retweetedStatusId, statusId).execute();
             }

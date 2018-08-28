@@ -83,7 +83,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         if (!Relationship.isVisible(status)) {
             return;
         }
-        Row row = Row.newStatus(status);
+        Row row = Row.Companion.newStatus(status);
         if (MuteSettings.isMute(row)) {
             return;
         }
@@ -116,7 +116,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         if (mStopped) {
             return;
         }
-        Row row = Row.newFavorite(source, target, status);
+        Row row = Row.Companion.newFavorite(source, target, status);
         // 自分の fav を反映
         if (source.getId() == AccessTokenManager.getUserId()) {
             FavRetweetManager.setFav(status.getId());
@@ -172,7 +172,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         if (mStopped) {
             return;
         }
-        Row row = Row.newDirectMessage(directMessage);
+        Row row = Row.Companion.newDirectMessage(directMessage);
         if (MuteSettings.isMute(row)) {
             return;
         }

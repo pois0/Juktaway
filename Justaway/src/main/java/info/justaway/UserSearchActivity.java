@@ -35,7 +35,7 @@ public class UserSearchActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtil.setTheme(this);
+        ThemeUtil.INSTANCE.setTheme(this);
         setContentView(R.layout.activity_user_search);
 
         ActionBar actionBar = getActionBar();
@@ -146,7 +146,7 @@ public class UserSearchActivity extends FragmentActivity {
         protected void onPostExecute(ResponseList<User> users) {
             mProgressBar.setVisibility(View.GONE);
             if (users == null) {
-                MessageUtil.showToast(R.string.toast_load_data_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_load_data_failure);
                 return;
             }
             for (User user : users) {

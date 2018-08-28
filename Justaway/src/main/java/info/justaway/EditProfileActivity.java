@@ -40,7 +40,7 @@ public class EditProfileActivity extends FragmentActivity implements LoaderManag
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtil.setTheme(this);
+        ThemeUtil.INSTANCE.setTheme(this);
         setContentView(R.layout.activity_edit_profile);
         ButterKnife.bind(this);
 
@@ -66,7 +66,7 @@ public class EditProfileActivity extends FragmentActivity implements LoaderManag
 
     @OnClick(R.id.save_button)
     void saveProfile() {
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_process));
+        MessageUtil.INSTANCE.showProgressDialog(this, getString(R.string.progress_process));
         new UpdateProfileTask().execute();
     }
 
@@ -123,12 +123,12 @@ public class EditProfileActivity extends FragmentActivity implements LoaderManag
 
         @Override
         protected void onPostExecute(User user) {
-            MessageUtil.dismissProgressDialog();
+            MessageUtil.INSTANCE.dismissProgressDialog();
             if (user != null) {
-                MessageUtil.showToast(R.string.toast_update_profile_success);
+                MessageUtil.INSTANCE.showToast(R.string.toast_update_profile_success);
                 finish();
             } else {
-                MessageUtil.showToast(R.string.toast_update_profile_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_update_profile_failure);
             }
         }
     }

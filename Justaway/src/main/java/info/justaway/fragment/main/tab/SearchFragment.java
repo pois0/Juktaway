@@ -90,7 +90,7 @@ public class SearchFragment extends BaseFragment {
             if (mReloading) {
                 clear();
                 for (twitter4j.Status status : queryResult.getTweets()) {
-                    mAdapter.add(Row.newStatus(status));
+                    mAdapter.add(Row.Companion.newStatus(status));
                 }
                 mReloading = false;
                 if (queryResult.hasNext()) {
@@ -103,7 +103,7 @@ public class SearchFragment extends BaseFragment {
                 mPullToRefreshLayout.setRefreshComplete();
             } else {
                 for (twitter4j.Status status : queryResult.getTweets()) {
-                    mAdapter.extensionAdd(Row.newStatus(status));
+                    mAdapter.extensionAdd(Row.Companion.newStatus(status));
                 }
                 mAutoLoader = true;
                 mQuery = queryResult.nextQuery();

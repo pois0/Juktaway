@@ -422,15 +422,17 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
     //TODO data binding
     override fun onLoadFinished(loader: Loader<Profile>, profile: Profile?) {
         MessageUtil.dismissProgressDialog()
+
         if (profile == null) {
             MessageUtil.showToast(R.string.toast_load_data_failure, "(null)")
             return
         }
-        if (profile.error != null && !profile.error.isEmpty()) {
+        if (profile.error != null && profile.error!!.isNotEmpty()) {
             MessageUtil.showToast(R.string.toast_load_data_failure, profile.error)
             return
         }
-        mUser = profile.user
+        mUser = profile.user!!
+        mRelationship = profile.relationship!!
 
         favourites_count.text = getString(R.string.label_favourites, String.format("%1$,3d", mUser.favouritesCount))
         statuses_count.text = getString(R.string.label_tweets, String.format("%1$,3d", mUser.statusesCount))
@@ -441,8 +443,6 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         mUser.profileBannerMobileRetinaURL?.let {
             ImageUtil.displayImage(it, banner)
         }
-
-        mRelationship = profile.relationship
 
         with (menu) {
             if (mRelationship.isSourceBlockingTarget) {

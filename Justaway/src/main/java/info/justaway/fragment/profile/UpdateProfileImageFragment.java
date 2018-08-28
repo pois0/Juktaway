@@ -62,7 +62,7 @@ public class UpdateProfileImageFragment extends DialogFragment {
                 new DialogInterface.OnClickListener() {
                     @Override
                     public void onClick(DialogInterface dialog, int which) {
-                        MessageUtil.showProgressDialog(getActivity(), getString(R.string.progress_process));
+                        MessageUtil.INSTANCE.showProgressDialog(getActivity(), getString(R.string.progress_process));
                         new UpdateProfileImageTask().execute();
                         dismiss();
                     }
@@ -93,11 +93,11 @@ public class UpdateProfileImageFragment extends DialogFragment {
 
         @Override
         protected void onPostExecute(User user) {
-            MessageUtil.dismissProgressDialog();
+            MessageUtil.INSTANCE.dismissProgressDialog();
             if (user != null) {
-                MessageUtil.showToast(R.string.toast_update_profile_image_success);
+                MessageUtil.INSTANCE.showToast(R.string.toast_update_profile_image_success);
             } else {
-                MessageUtil.showToast(R.string.toast_update_profile_image_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_update_profile_image_failure);
             }
         }
     }

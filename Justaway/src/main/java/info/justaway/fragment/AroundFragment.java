@@ -66,7 +66,7 @@ public class AroundFragment extends DialogFragment {
 
         Status status = (Status) getArguments().getSerializable("status");
         if (status != null) {
-            mAdapter.add(Row.newStatus(status));
+            mAdapter.add(Row.Companion.newStatus(status));
             new BeforeStatusTask().execute(status);
         }
 
@@ -122,13 +122,13 @@ public class AroundFragment extends DialogFragment {
             if (statuses != null) {
                 if (statuses.size() > 0) {
                     for (twitter4j.Status status : statuses) {
-                        mAdapter.add(Row.newStatus(status));
+                        mAdapter.add(Row.Companion.newStatus(status));
                     }
                     mAdapter.notifyDataSetChanged();
                     new AfterStatusTask().execute(statuses.get(0));
                 }
             } else {
-                MessageUtil.showToast(R.string.toast_load_data_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_load_data_failure);
             }
         }
     }
@@ -173,7 +173,7 @@ public class AroundFragment extends DialogFragment {
             if (statuses != null) {
                 int i = 0;
                 for (twitter4j.Status status : statuses) {
-                    mAdapter.insert(Row.newStatus(status), i);
+                    mAdapter.insert(Row.Companion.newStatus(status), i);
                     i++;
                 }
                 mAdapter.notifyDataSetChanged();

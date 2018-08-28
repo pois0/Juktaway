@@ -31,7 +31,7 @@ public class TwitterManager {
     public static void switchAccessToken(final AccessToken accessToken) {
         AccessTokenManager.setAccessToken(accessToken);
         if (BasicSettings.getStreamingMode()) {
-            MessageUtil.showToast(R.string.toast_destroy_streaming);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_streaming);
             sUserStreamAdapter.stop();
             new AsyncTask<Void, Void, Void>() {
                 @Override
@@ -47,7 +47,7 @@ public class TwitterManager {
                     new Handler().postDelayed(new Runnable() {
                         @Override
                         public void run() {
-                            MessageUtil.showToast(R.string.toast_create_streaming);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_create_streaming);
                             sUserStreamAdapter.start();
                             sTwitterStream.user();
                         }

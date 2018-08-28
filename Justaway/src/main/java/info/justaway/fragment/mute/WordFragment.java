@@ -64,7 +64,7 @@ public class WordFragment extends Fragment {
                                         adapter.add(word);
                                         MuteSettings.addWord(word);
                                         MuteSettings.saveMuteSettings();
-                                        MessageUtil.showToast(R.string.toast_create_mute);
+                                        MessageUtil.INSTANCE.showToast(R.string.toast_create_mute);
                                     }
                                 }
                         )

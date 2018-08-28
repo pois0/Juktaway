@@ -33,7 +33,7 @@ public class ReFetchFavoriteStatus extends AsyncTask<Row, Void, twitter4j.Status
         if (status != null) {
             mRow.setStatus(status);
             EventBus.getDefault().post(new StreamingCreateFavoriteEvent(mRow));
-            MessageUtil.showToast(mRow.getSource().getScreenName() + " fav "
+            MessageUtil.INSTANCE.showToast(mRow.getSource().getScreenName() + " fav "
                     + mRow.getStatus().getText());
         }
     }

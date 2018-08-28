@@ -204,7 +204,7 @@ public class SearchAdapter extends ArrayAdapter<String> implements Filterable {
         @Override
         protected void onPostExecute(Boolean success) {
             if (success) {
-                MessageUtil.showToast(R.string.toast_destroy_success);
+                MessageUtil.INSTANCE.showToast(R.string.toast_destroy_success);
             }
         }
     }

@@ -92,7 +92,7 @@ public class StatusActivity extends FragmentActivity {
         } else {
             Status status = (Status) intent.getSerializableExtra("status");
             if (status != null) {
-                mAdapter.add(Row.newStatus(status));
+                mAdapter.add(Row.Companion.newStatus(status));
                 long inReplyToStatusId = status.getInReplyToStatusId();
                 if (inReplyToStatusId > 0) {
                     showProgressDialog(getString(R.string.progress_loading));
@@ -160,14 +160,14 @@ public class StatusActivity extends FragmentActivity {
         protected void onPostExecute(twitter4j.Status status) {
             dismissProgressDialog();
             if (status != null) {
-                mAdapter.add(Row.newStatus(status));
+                mAdapter.add(Row.Companion.newStatus(status));
                 mAdapter.notifyDataSetChanged();
                 Long inReplyToStatusId = status.getInReplyToStatusId();
                 if (inReplyToStatusId > 0) {
                     new LoadTask().execute(inReplyToStatusId);
                 }
             } else {
-                MessageUtil.showToast(R.string.toast_load_data_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_load_data_failure);
             }
         }
     }

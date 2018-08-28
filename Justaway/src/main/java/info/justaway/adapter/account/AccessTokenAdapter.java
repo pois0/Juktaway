@@ -43,7 +43,7 @@ public class AccessTokenAdapter extends ArrayAdapter<AccessToken> {
         super(context, textViewResourceId);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mLayout = textViewResourceId;
-        mColorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue);
+        mColorBlue = ThemeUtil.INSTANCE.getThemeTextColor(R.attr.holo_blue);
     }
 
     @Override

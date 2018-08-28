@@ -84,7 +84,7 @@ public class UserListFragment extends BaseFragment {
                     if (mMaxId <= 0L || mMaxId > status.getId()) {
                         mMaxId = status.getId();
                     }
-                    mAdapter.add(Row.newStatus(status));
+                    mAdapter.add(Row.Companion.newStatus(status));
                 }
                 mReloading = false;
                 mPullToRefreshLayout.setRefreshComplete();
@@ -97,7 +97,7 @@ public class UserListFragment extends BaseFragment {
                     // 最初のツイートに登場ユーザーをStreaming APIからの取り込み対象にすることでAPI節約!!!
                     mMembers.append(status.getUser().getId(), true);
 
-                    mAdapter.extensionAdd(Row.newStatus(status));
+                    mAdapter.extensionAdd(Row.Companion.newStatus(status));
                 }
                 mAutoLoader = true;
                 mListView.setVisibility(View.VISIBLE);

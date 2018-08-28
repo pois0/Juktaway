@@ -40,7 +40,7 @@ public class UserListActivity extends FragmentActivity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtil.setTheme(this);
+        ThemeUtil.INSTANCE.setTheme(this);
         setContentView(R.layout.activity_user_list);
         ButterKnife.bind(this);
 
@@ -57,8 +57,8 @@ public class UserListActivity extends FragmentActivity {
         }
         mIsFollowing = mUserList.isFollowing();
 
-        mColorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue);
-        mColorWhite = ThemeUtil.getThemeTextColor(R.attr.text_color);
+        mColorBlue = ThemeUtil.INSTANCE.getThemeTextColor(R.attr.holo_blue);
+        mColorWhite = ThemeUtil.INSTANCE.getThemeTextColor(R.attr.text_color);
         mUsersLabel.setTextColor(mColorBlue);
 
         setTitle(mUserList.getFullName());
@@ -149,14 +149,14 @@ public class UserListActivity extends FragmentActivity {
                     @Override
                     protected void onPostExecute(Boolean success) {
                         if (success) {
-                            MessageUtil.showToast(R.string.toast_create_user_list_subscription_success);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_create_user_list_subscription_success);
                             mIsFollowing = true;
                             ResponseList<UserList> userLists = UserListCache.getUserLists();
                             if (userLists != null) {
                                 userLists.add(0, mUserList);
                             }
                         } else {
-                            MessageUtil.showToast(R.string.toast_create_user_list_subscription_failure);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_create_user_list_subscription_failure);
                         }
                     }
                 }.execute();
@@ -177,14 +177,14 @@ public class UserListActivity extends FragmentActivity {
                     @Override
                     protected void onPostExecute(Boolean success) {
                         if (success) {
-                            MessageUtil.showToast(R.string.toast_destroy_user_list_subscription_success);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_user_list_subscription_success);
                             mIsFollowing = false;
                             ResponseList<UserList> userLists = UserListCache.getUserLists();
                             if (userLists != null) {
                                 userLists.remove(mUserList);
                             }
                         } else {
-                            MessageUtil.showToast(R.string.toast_destroy_user_list_subscription_failure);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_user_list_subscription_failure);
                         }
                     }
                 }.execute();

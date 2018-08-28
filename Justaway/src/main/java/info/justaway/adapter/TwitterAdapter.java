@@ -323,8 +323,8 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         holder.mStatus.setText("D " + message.getRecipientScreenName()
                 + " " + message.getText());
         holder.mDatetime
-                .setText(TimeUtil.getAbsoluteTime(message.getCreatedAt()));
-        holder.mDatetimeRelative.setText(TimeUtil.getRelativeTime(message.getCreatedAt()));
+                .setText(TimeUtil.INSTANCE.getAbsoluteTime(message.getCreatedAt()));
+        holder.mDatetimeRelative.setText(TimeUtil.INSTANCE.getRelativeTime(message.getCreatedAt()));
         holder.mVia.setVisibility(View.GONE);
         holder.mQuotedTweet.setVisibility(View.GONE);
         holder.mRetweetContainer.setVisibility(View.GONE);
@@ -376,13 +376,13 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
             @Override
             public void onClick(View v) {
                 if (status.getUser().isProtected()) {
-                    MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share);
+                    MessageUtil.INSTANCE.showToast(R.string.toast_protected_tweet_can_not_share);
                     return;
                 }
                 Long id = FavRetweetManager.getRtId(status);
                 if (id != null) {
                     if (id == 0) {
-                        MessageUtil.showToast(R.string.toast_destroy_retweet_progress);
+                        MessageUtil.INSTANCE.showToast(R.string.toast_destroy_retweet_progress);
                     } else {
                         DialogFragment dialog = new DestroyRetweetDialogFragment();
                         Bundle args = new Bundle(1);
@@ -431,8 +431,8 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
 
         holder.mDisplayName.setText(status.getUser().getName());
         holder.mScreenName.setText("@" + status.getUser().getScreenName());
-        holder.mDatetimeRelative.setText(TimeUtil.getRelativeTime(status.getCreatedAt()));
-        holder.mDatetime.setText(TimeUtil.getAbsoluteTime(status.getCreatedAt()));
+        holder.mDatetimeRelative.setText(TimeUtil.INSTANCE.getRelativeTime(status.getCreatedAt()));
+        holder.mDatetime.setText(TimeUtil.INSTANCE.getAbsoluteTime(status.getCreatedAt()));
 
         String via = StatusUtil.getClientName(status.getSource());
         holder.mVia.setText("via " + via);
@@ -444,7 +444,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         if (BuildConfig.DEBUG) {
             if (via.equals("Justaway for Android")) {
                 if (mColorBlue == 0) {
-                    mColorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue);
+                    mColorBlue = ThemeUtil.INSTANCE.getThemeTextColor(R.attr.holo_blue);
                 }
                 holder.mVia.setTextColor(mColorBlue);
             } else {

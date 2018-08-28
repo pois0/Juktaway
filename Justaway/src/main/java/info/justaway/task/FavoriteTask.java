@@ -38,13 +38,13 @@ public class FavoriteTask extends AsyncTask<Void, Void, TwitterException> {
     @Override
     protected void onPostExecute(TwitterException e) {
         if (e == null) {
-            MessageUtil.showToast(R.string.toast_favorite_success);
+            MessageUtil.INSTANCE.showToast(R.string.toast_favorite_success);
         } else if (e.getErrorCode() == 139) {
-            MessageUtil.showToast(R.string.toast_favorite_already);
+            MessageUtil.INSTANCE.showToast(R.string.toast_favorite_already);
         } else {
             FavRetweetManager.removeFav(mStatusId);
             EventBus.getDefault().post(new StatusActionEvent());
-            MessageUtil.showToast(R.string.toast_favorite_failure);
+            MessageUtil.INSTANCE.showToast(R.string.toast_favorite_failure);
         }
     }
 }

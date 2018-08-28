@@ -35,7 +35,7 @@ public class ChooseUserListsActivity extends FragmentActivity implements
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtil.setTheme(this);
+        ThemeUtil.INSTANCE.setTheme(this);
         setContentView(R.layout.activity_choose_user_lists);
 
         ActionBar actionBar = getActionBar();

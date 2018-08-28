@@ -34,7 +34,7 @@ public class SignInActivity extends Activity {
     @Override
     protected void onCreate(Bundle savedInstanceState) {
         super.onCreate(savedInstanceState);
-        ThemeUtil.setTheme(this);
+        ThemeUtil.INSTANCE.setTheme(this);
         setContentView(R.layout.activity_signin);
 
         ButterKnife.bind(this);
@@ -56,7 +56,7 @@ public class SignInActivity extends Activity {
                     if (oauth_verifier != null && !oauth_verifier.isEmpty()) {
                         mStartOauthButton.setVisibility(View.GONE);
                         mConnectWithTwitter.setVisibility(View.GONE);
-                        MessageUtil.showProgressDialog(this, getString(R.string.progress_process));
+                        MessageUtil.INSTANCE.showProgressDialog(this, getString(R.string.progress_process));
                         new VerifyOAuthTask().execute(oauth_verifier);
                     }
                 }
@@ -106,7 +106,7 @@ public class SignInActivity extends Activity {
         if (oauth_verifier == null || oauth_verifier.isEmpty()) {
             return;
         }
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_process));
+        MessageUtil.INSTANCE.showProgressDialog(this, getString(R.string.progress_process));
         new VerifyOAuthTask().execute(oauth_verifier);
     }
 
@@ -134,10 +134,10 @@ public class SignInActivity extends Activity {
 
         @Override
         protected void onPostExecute(User user) {
-            MessageUtil.dismissProgressDialog();
+            MessageUtil.INSTANCE.dismissProgressDialog();
             if (user != null) {
                 UserIconManager.addUserIconMap(user);
-                MessageUtil.showToast(R.string.toast_sign_in_success);
+                MessageUtil.INSTANCE.showToast(R.string.toast_sign_in_success);
                 successOAuth();
             }
         }
@@ -146,7 +146,7 @@ public class SignInActivity extends Activity {
 
     @OnClick(R.id.start_oauth_button)
     void startOAuth() {
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_process));
+        MessageUtil.INSTANCE.showProgressDialog(this, getString(R.string.progress_process));
         AsyncTask<Void, Void, RequestToken> task = new AsyncTask<Void, Void, RequestToken>() {
             @Override
             protected RequestToken doInBackground(Void... params) {
@@ -161,14 +161,14 @@ public class SignInActivity extends Activity {
 
             @Override
             protected void onPostExecute(RequestToken token) {
-                MessageUtil.dismissProgressDialog();
+                MessageUtil.INSTANCE.dismissProgressDialog();
                 if (token == null) {
-                    MessageUtil.showToast(R.string.toast_connection_failure);
+                    MessageUtil.INSTANCE.showToast(R.string.toast_connection_failure);
                     return;
                 }
                 final String url = token.getAuthorizationURL();
                 if (url == null) {
-                    MessageUtil.showToast(R.string.toast_get_authorization_url_failure);
+                    MessageUtil.INSTANCE.showToast(R.string.toast_get_authorization_url_failure);
                     return;
                 }
                 mRequestToken = token;

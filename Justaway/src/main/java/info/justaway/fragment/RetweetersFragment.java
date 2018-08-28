@@ -80,7 +80,7 @@ public class RetweetersFragment extends DialogFragment {
                 }
                 mAdapter.notifyDataSetChanged();
             } else {
-                MessageUtil.showToast(R.string.toast_load_data_failure);
+                MessageUtil.INSTANCE.showToast(R.string.toast_load_data_failure);
             }
         }
     }

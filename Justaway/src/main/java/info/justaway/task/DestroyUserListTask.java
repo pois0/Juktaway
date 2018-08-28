@@ -32,11 +32,11 @@ public  class DestroyUserListTask extends AsyncTask<Void, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean success) {
         if (success) {
-            MessageUtil.showToast(R.string.toast_destroy_user_list_success);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_user_list_success);
             EventBus.getDefault().post(new DestroyUserListEvent(mUserList.getId()));
             UserListCache.getUserLists().remove(mUserList);
         } else {
-            MessageUtil.showToast(R.string.toast_destroy_user_list_failure);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_user_list_failure);
         }
     }
 }

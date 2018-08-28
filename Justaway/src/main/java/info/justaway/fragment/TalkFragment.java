@@ -102,7 +102,7 @@ public class TalkFragment extends DialogFragment {
         mListView.setOnItemLongClickListener(new HeaderStatusLongClickListener(getActivity()));
 
         mTwitter = TwitterManager.getTwitter();
-        mAdapter.add(Row.newStatus(status));
+        mAdapter.add(Row.Companion.newStatus(status));
 
         if (!BasicSettings.getTalkOrderNewest()) {
             mListView.setSelectionFromTop(1, 0);
@@ -198,7 +198,7 @@ public class TalkFragment extends DialogFragment {
             if (status != null) {
 
                 if (BasicSettings.getTalkOrderNewest()) {
-                    mAdapter.add(Row.newStatus(status));
+                    mAdapter.add(Row.Companion.newStatus(status));
                 } else {
                     // 表示している要素の位置
                     int position = mListView.getLastVisiblePosition();
@@ -207,7 +207,7 @@ public class TalkFragment extends DialogFragment {
                     View view = mListView.getChildAt(position);
                     int y = view != null ? view.getTop() : 0;
 
-                    mAdapter.insert(Row.newStatus(status), 0);
+                    mAdapter.insert(Row.Companion.newStatus(status), 0);
 
                     mListView.setSelectionFromTop(position + 1, y);
 
@@ -341,7 +341,7 @@ public class TalkFragment extends DialogFragment {
                 int y = view != null ? view.getTop() : 0;
 
                 for (final twitter4j.Status status : statuses) {
-                    mAdapter.insert(Row.newStatus(status), 0);
+                    mAdapter.insert(Row.Companion.newStatus(status), 0);
                 }
 
                 mListView.setSelectionFromTop(position + statuses.size(), y);
@@ -352,7 +352,7 @@ public class TalkFragment extends DialogFragment {
                 }
             } else {
                 for (final twitter4j.Status status : statuses) {
-                    mAdapter.add(Row.newStatus(status));
+                    mAdapter.add(Row.Companion.newStatus(status));
                 }
             }
         }

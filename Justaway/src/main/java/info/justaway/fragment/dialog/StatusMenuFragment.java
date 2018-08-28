@@ -76,7 +76,7 @@ public class StatusMenuFragment extends DialogFragment {
     public Dialog onCreateDialog(Bundle savedInstanceState) {
 
         mActivity = getActivity();
-        ThemeUtil.setTheme(mActivity);
+        ThemeUtil.INSTANCE.setTheme(mActivity);
 
         final MenuAdapter adapter = new MenuAdapter(getActivity(), R.layout.row_menu);
         ListView listView = new ListView(mActivity);
@@ -534,7 +534,7 @@ public class StatusMenuFragment extends DialogFragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 MuteSettings.addSource(StatusUtil.getClientName(source.getSource()));
                                 MuteSettings.saveMuteSettings();
-                                MessageUtil.showToast(R.string.toast_create_mute);
+                                MessageUtil.INSTANCE.showToast(R.string.toast_create_mute);
                                 dismiss();
                             }
                         })
@@ -561,7 +561,7 @@ public class StatusMenuFragment extends DialogFragment {
                                 public void onClick(DialogInterface dialogInterface, int i) {
                                     MuteSettings.addWord("#" + hashtag.getText());
                                     MuteSettings.saveMuteSettings();
-                                    MessageUtil.showToast(R.string.toast_create_mute);
+                                    MessageUtil.INSTANCE.showToast(R.string.toast_create_mute);
                                     dismiss();
                                 }
                             })
@@ -588,7 +588,7 @@ public class StatusMenuFragment extends DialogFragment {
                             public void onClick(DialogInterface dialogInterface, int i) {
                                 MuteSettings.addUser(source.getUser().getId(), source.getUser().getScreenName());
                                 MuteSettings.saveMuteSettings();
-                                MessageUtil.showToast(R.string.toast_create_mute);
+                                MessageUtil.INSTANCE.showToast(R.string.toast_create_mute);
                                 dismiss();
                             }
                         })

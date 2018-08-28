@@ -24,10 +24,10 @@ public class DestroyDirectMessageTask extends AsyncTask<Long, Void, DirectMessag
     @Override
     protected void onPostExecute(DirectMessage directMessage) {
         if (directMessage != null) {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_success);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_direct_message_success);
             EventBus.getDefault().post(new StreamingDestroyMessageEvent(directMessage.getId()));
         } else {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_failure);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_direct_message_failure);
         }
     }
 }

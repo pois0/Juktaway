@@ -54,16 +54,16 @@ public class RegisterListAdapter extends ArrayAdapter<UserListWithRegistered> {
                         return;
                     }
                     userListWithRegistered.setRegistered(b);
-                    MessageUtil.showProgressDialog(getContext(), getContext().getString(R.string.progress_process));
+                    MessageUtil.INSTANCE.showProgressDialog(getContext(), getContext().getString(R.string.progress_process));
                     if (b) {
                         CreateUserListMembersTask task = new CreateUserListMembersTask() {
                             @Override
                             protected void onPostExecute(Boolean success) {
-                                MessageUtil.dismissProgressDialog();
+                                MessageUtil.INSTANCE.dismissProgressDialog();
                                 if (success) {
-                                    MessageUtil.showToast(R.string.toast_add_to_list_success);
+                                    MessageUtil.INSTANCE.showToast(R.string.toast_add_to_list_success);
                                 } else {
-                                    MessageUtil.showToast(R.string.toast_add_to_list_failure);
+                                    MessageUtil.INSTANCE.showToast(R.string.toast_add_to_list_failure);
                                     userListWithRegistered.setRegistered(false);
                                     notifyDataSetChanged();
                                 }
@@ -76,11 +76,11 @@ public class RegisterListAdapter extends ArrayAdapter<UserListWithRegistered> {
 
                             @Override
                             protected void onPostExecute(Boolean success) {
-                                MessageUtil.dismissProgressDialog();
+                                MessageUtil.INSTANCE.dismissProgressDialog();
                                 if (success) {
-                                    MessageUtil.showToast(R.string.toast_remove_from_list_success);
+                                    MessageUtil.INSTANCE.showToast(R.string.toast_remove_from_list_success);
                                 } else {
-                                    MessageUtil.showToast(R.string.toast_remove_from_list_failure);
+                                    MessageUtil.INSTANCE.showToast(R.string.toast_remove_from_list_failure);
                                     userListWithRegistered.setRegistered(true);
                                     notifyDataSetChanged();
                                 }

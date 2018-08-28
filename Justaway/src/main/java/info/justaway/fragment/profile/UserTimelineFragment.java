@@ -160,7 +160,7 @@ public class UserTimelineFragment extends Fragment implements OnRefreshListener 
                     if (mMaxId == 0L || mMaxId > status.getId()) {
                         mMaxId = status.getId();
                     }
-                    mAdapter.add(Row.newStatus(status));
+                    mAdapter.add(Row.Companion.newStatus(status));
                 }
                 mReload = false;
                 mPullToRefreshLayout.setRefreshComplete();
@@ -171,7 +171,7 @@ public class UserTimelineFragment extends Fragment implements OnRefreshListener 
                 if (mMaxId == 0L || mMaxId > status.getId()) {
                     mMaxId = status.getId();
                 }
-                mAdapter.add(Row.newStatus(status));
+                mAdapter.add(Row.Companion.newStatus(status));
             }
             mAutoLoader = true;
             mPullToRefreshLayout.setRefreshComplete();

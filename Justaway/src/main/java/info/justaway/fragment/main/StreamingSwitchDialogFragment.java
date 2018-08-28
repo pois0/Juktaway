@@ -35,10 +35,10 @@ public class StreamingSwitchDialogFragment extends DialogFragment {
                         BasicSettings.setStreamingMode(turnOn);
                         if (turnOn) {
                             TwitterManager.startStreaming();
-                            MessageUtil.showToast(R.string.toast_create_streaming);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_create_streaming);
                         } else {
                             TwitterManager.stopStreaming();
-                            MessageUtil.showToast(R.string.toast_destroy_streaming);
+                            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_streaming);
                         }
                         dismiss();
                     }

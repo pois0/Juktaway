@@ -135,7 +135,7 @@ public class FavoritesListFragment extends Fragment {
                 if (mMaxId == 0L || mMaxId > status.getId()) {
                     mMaxId = status.getId();
                 }
-                mAdapter.add(Row.newStatus(status));
+                mAdapter.add(Row.Companion.newStatus(status));
             }
             mAutoLoader = true;
             mListView.setVisibility(View.VISIBLE);

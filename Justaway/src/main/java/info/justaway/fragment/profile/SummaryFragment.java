@@ -109,17 +109,17 @@ public class SummaryFragment extends Fragment {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             mRuntimeFlg = true;
-                                            MessageUtil.showProgressDialog(getActivity(), getString(R.string.progress_process));
+                                            MessageUtil.INSTANCE.showProgressDialog(getActivity(), getString(R.string.progress_process));
                                             DestroyFriendshipTask task = new DestroyFriendshipTask() {
                                                 @Override
                                                 protected void onPostExecute(Boolean success) {
-                                                    MessageUtil.dismissProgressDialog();
+                                                    MessageUtil.INSTANCE.dismissProgressDialog();
                                                     if (success) {
-                                                        MessageUtil.showToast(R.string.toast_destroy_friendship_success);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_destroy_friendship_success);
                                                         follow.setText(R.string.button_follow);
                                                         mFollowFlg = false;
                                                     } else {
-                                                        MessageUtil.showToast(R.string.toast_destroy_friendship_failure);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_destroy_friendship_failure);
                                                     }
                                                     mRuntimeFlg = false;
                                                 }
@@ -147,17 +147,17 @@ public class SummaryFragment extends Fragment {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             mRuntimeFlg = true;
-                                            MessageUtil.showProgressDialog(getActivity(), getString(R.string.progress_process));
+                                            MessageUtil.INSTANCE.showProgressDialog(getActivity(), getString(R.string.progress_process));
                                             DestroyBlockTask task = new DestroyBlockTask() {
                                                 @Override
                                                 protected void onPostExecute(Boolean success) {
-                                                    MessageUtil.dismissProgressDialog();
+                                                    MessageUtil.INSTANCE.dismissProgressDialog();
                                                     if (success) {
-                                                        MessageUtil.showToast(R.string.toast_destroy_block_success);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_destroy_block_success);
                                                         follow.setText(R.string.button_follow);
                                                         mBlocking = false;
                                                     } else {
-                                                        MessageUtil.showToast(R.string.toast_destroy_block_failure);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_destroy_block_failure);
                                                     }
                                                     mRuntimeFlg = false;
                                                 }
@@ -184,17 +184,17 @@ public class SummaryFragment extends Fragment {
                                         @Override
                                         public void onClick(DialogInterface dialog, int which) {
                                             mRuntimeFlg = true;
-                                            MessageUtil.showProgressDialog(getActivity(), getString(R.string.progress_process));
+                                            MessageUtil.INSTANCE.showProgressDialog(getActivity(), getString(R.string.progress_process));
                                             FollowTask task = new FollowTask() {
                                                 @Override
                                                 protected void onPostExecute(Boolean success) {
-                                                    MessageUtil.dismissProgressDialog();
+                                                    MessageUtil.INSTANCE.dismissProgressDialog();
                                                     if (success) {
-                                                        MessageUtil.showToast(R.string.toast_follow_success);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_follow_success);
                                                         follow.setText(R.string.button_unfollow);
                                                         mFollowFlg = true;
                                                     } else {
-                                                        MessageUtil.showToast(R.string.toast_follow_failure);
+                                                        MessageUtil.INSTANCE.showToast(R.string.toast_follow_failure);
                                                     }
                                                     mRuntimeFlg = false;
                                                 }

@@ -30,10 +30,10 @@ public class DestroyStatusTask extends AsyncTask<Long, Void, Boolean> {
     @Override
     protected void onPostExecute(Boolean success) {
         if (success) {
-            MessageUtil.showToast(R.string.toast_destroy_status_success);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_status_success);
             EventBus.getDefault().post(new StreamingDestroyStatusEvent(mStatusId));
         } else {
-            MessageUtil.showToast(R.string.toast_destroy_status_failure);
+            MessageUtil.INSTANCE.showToast(R.string.toast_destroy_status_failure);
         }
     }
 }
