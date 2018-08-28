@@ -75,7 +75,7 @@ class MainActivity: FragmentActivity() {
             }
         }
 
-        private class UpdateQuickStatusTask(context: MainActivity): UpdateStatusTask(null, null) {
+        private class UpdateQuickStatusTask(context: MainActivity): UpdateStatusTask(null, arrayListOf()) {
             private val ref = WeakReference(context)
 
             override fun onPostExecute(res: TwitterException?) {
