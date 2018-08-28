@@ -140,7 +140,7 @@ public class MainPagerAdapter extends FragmentPagerAdapter {
     public CharSequence getPageTitle(int position) {
         TabInfo tab = mTabs.get(position);
         if (tab.mTabTitle.equals("-")) {
-            UserList userList = UserListCache.getUserList(tab.mArgs.getInt("userListId"));
+            UserList userList = UserListCache.INSTANCE.getUserList(tab.mArgs.getInt("userListId"));
             if (userList != null) {
                 if (userList.getUser().getId() == AccessTokenManager.getUserId()) {
                     tab.mTabTitle = userList.getName();

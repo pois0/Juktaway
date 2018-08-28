@@ -145,7 +145,8 @@ public class SettingsActivity extends Activity {
 
         @Override
         public void onAttach(Activity activity) {
-            super.onAttach(activity);
+            super
+                    .onAttach(activity);
 
             mActivity = (SettingsActivity) activity;
         }

@@ -75,7 +75,7 @@ public class FavoritesFragment extends BaseFragment {
             if (mReloading) {
                 clear();
                 for (twitter4j.Status status : statuses) {
-                    FavRetweetManager.setFav(status.getId());
+                    FavRetweetManager.INSTANCE.setFav(status.getId());
                     if (mMaxId <= 0L || mMaxId > status.getId()) {
                         mMaxId = status.getId();
                     }
@@ -85,7 +85,7 @@ public class FavoritesFragment extends BaseFragment {
                 mPullToRefreshLayout.setRefreshComplete();
             } else {
                 for (twitter4j.Status status : statuses) {
-                    FavRetweetManager.setFav(status.getId());
+                    FavRetweetManager.INSTANCE.setFav(status.getId());
                     if (mMaxId <= 0L || mMaxId > status.getId()) {
                         mMaxId = status.getId();
                     }

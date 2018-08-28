@@ -207,7 +207,7 @@ public class StatusMenuFragment extends DialogFragment {
         /**
          * ふぁぼ / あんふぁぼ
          */
-        if (FavRetweetManager.isFav(status)) {
+        if (FavRetweetManager.INSTANCE.isFav(status)) {
             adapter.add(new Menu(R.string.context_menu_destroy_favorite, new Runnable() {
                 @Override
                 public void run() {
@@ -245,7 +245,7 @@ public class StatusMenuFragment extends DialogFragment {
         /**
          * 自分がRTした事があるツイート
          */
-        if (FavRetweetManager.getRtId(status) != null) {
+        if (FavRetweetManager.INSTANCE.getRtId(status) != null) {
 
             /**
              * RT解除
@@ -267,7 +267,7 @@ public class StatusMenuFragment extends DialogFragment {
                 /**
                  * 未ふぁぼ
                  */
-                if (!FavRetweetManager.isFav(status)) {
+                if (!FavRetweetManager.INSTANCE.isFav(status)) {
 
                     /**
                      * ふぁぼ＆RT

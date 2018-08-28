@@ -48,13 +48,13 @@ public class ActionUtil {
             Long retweetedStatusId = -1L;
 
             // リツイート
-            Long statusId = FavRetweetManager.getRtId(status.getId());
+            Long statusId = FavRetweetManager.INSTANCE.getRtId(status.getId());
             if (statusId != null && statusId > 0) {
                 // そのStatusそのものをRTしている
                 retweetedStatusId = status.getId();
             } else {
                 if (retweet != null) {
-                    statusId = FavRetweetManager.getRtId(retweet.getId());
+                    statusId = FavRetweetManager.INSTANCE.getRtId(retweet.getId());
                     if (statusId != null && statusId > 0) {
                         // そのStatusがRTした元StatusをRTしている
                         retweetedStatusId = retweet.getId();

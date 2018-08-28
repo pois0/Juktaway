@@ -153,7 +153,7 @@ public class ChooseUserListsActivity extends FragmentActivity implements
                 mAdapter.add(userListWithRegistered);
             }
         }
-        UserListCache.setUserLists(userLists);
+        UserListCache.INSTANCE.setUserLists(userLists);
     }
 
     @Override

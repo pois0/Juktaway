@@ -151,7 +151,7 @@ public class UserListActivity extends FragmentActivity {
                         if (success) {
                             MessageUtil.INSTANCE.showToast(R.string.toast_create_user_list_subscription_success);
                             mIsFollowing = true;
-                            ResponseList<UserList> userLists = UserListCache.getUserLists();
+                            ResponseList<UserList> userLists = UserListCache.INSTANCE.getUserLists();
                             if (userLists != null) {
                                 userLists.add(0, mUserList);
                             }
@@ -179,7 +179,7 @@ public class UserListActivity extends FragmentActivity {
                         if (success) {
                             MessageUtil.INSTANCE.showToast(R.string.toast_destroy_user_list_subscription_success);
                             mIsFollowing = false;
-                            ResponseList<UserList> userLists = UserListCache.getUserLists();
+                            ResponseList<UserList> userLists = UserListCache.INSTANCE.getUserLists();
                             if (userLists != null) {
                                 userLists.remove(mUserList);
                             }

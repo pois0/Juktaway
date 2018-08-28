@@ -169,7 +169,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         if (status != null && status.isRetweeted()) {
             Status retweet = status.getRetweetedStatus();
             if (retweet != null && status.getUser().getId() == AccessTokenManager.getUserId()) {
-                FavRetweetManager.setRtId(retweet.getId(), status.getId());
+                FavRetweetManager.INSTANCE.setRtId(retweet.getId(), status.getId());
             }
         }
     }
@@ -379,7 +379,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                     MessageUtil.INSTANCE.showToast(R.string.toast_protected_tweet_can_not_share);
                     return;
                 }
-                Long id = FavRetweetManager.getRtId(status);
+                Long id = FavRetweetManager.INSTANCE.getRtId(status);
                 if (id != null) {
                     if (id == 0) {
                         MessageUtil.INSTANCE.showToast(R.string.toast_destroy_retweet_progress);
@@ -415,13 +415,13 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
             }
         });
 
-        if (FavRetweetManager.getRtId(status) != null) {
+        if (FavRetweetManager.INSTANCE.getRtId(status) != null) {
             holder.mDoRetweet.setTextColor(ContextCompat.getColor(mContext, R.color.holo_green_light));
         } else {
             holder.mDoRetweet.setTextColor(Color.parseColor("#666666"));
         }
 
-        if (FavRetweetManager.isFav(status)) {
+        if (FavRetweetManager.INSTANCE.isFav(status)) {
             holder.mDoFav.setTag("is_fav");
             holder.mDoFav.setTextColor(ContextCompat.getColor(mContext, R.color.holo_orange_light));
         } else {
