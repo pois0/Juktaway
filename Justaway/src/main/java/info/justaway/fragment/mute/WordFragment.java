@@ -45,7 +45,7 @@ public class WordFragment extends Fragment {
             @Override
             public void onClick(View v) {
                 final EditText editText = new EditText(getActivity());
-                KeyboardUtil.showKeyboard(editText);
+                KeyboardUtil.INSTANCE.showKeyboard(editText);
                 new AlertDialog.Builder(getActivity())
                         .setTitle(R.string.title_create_mute_word)
                         .setView(editText)

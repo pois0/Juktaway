@@ -128,11 +128,7 @@ public class MuteSettings {
     }
 
     public static ArrayList<String> getSources() {
-        ArrayList<String> sources = new ArrayList<String>();
-        for (String key : sMuteSettingsData.sourceMap.keySet()) {
-            sources.add(key);
-        }
-        return sources;
+        return new ArrayList<>(sMuteSettingsData.sourceMap.keySet());
     }
 
     public static HashMap<Long, String> getUserMap() {

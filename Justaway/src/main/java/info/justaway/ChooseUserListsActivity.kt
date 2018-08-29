@@ -5,6 +5,7 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.content.Loader
 import android.view.MenuItem
+import android.view.View
 import android.widget.ListView
 import de.greenrobot.event.EventBus
 import info.justaway.adapter.SubscribeUserListAdapter
@@ -38,7 +39,7 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
             setDisplayHomeAsUpEnabled(true)
         }
 
-        val listView = findViewById<ListView>(R.id.list)
+        val listView = findViewById<View>(R.id.list) as ListView
         mAdapter = SubscribeUserListAdapter(this, R.layout.row_subscribe_user_list)
         listView.adapter = mAdapter
 
