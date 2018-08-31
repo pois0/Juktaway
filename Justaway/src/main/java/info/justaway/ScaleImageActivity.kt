@@ -94,7 +94,7 @@ class ScaleImageActivity: FragmentActivity() {
                 symbol.visibility = View.GONE
             for (url: String in urls) {
                 imageUrls.add(url)
-                simplePagerAdapter.addTab(ScaleImageFragment::class.java, Bundle().apply {
+                simplePagerAdapter.addTab(ScaleImageFragment::class, Bundle().apply {
                     putString("url", url)
                 })
             }
@@ -139,7 +139,7 @@ class ScaleImageActivity: FragmentActivity() {
             }
             symbol.visibility = View.GONE
             imageUrls.add(it)
-            simplePagerAdapter.addTab(ScaleImageFragment::class.java, Bundle().apply {
+            simplePagerAdapter.addTab(ScaleImageFragment::class, Bundle().apply {
                 putString("url", it)
             })
             simplePagerAdapter.notifyDataSetChanged()

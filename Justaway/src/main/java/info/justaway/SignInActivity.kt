@@ -16,6 +16,7 @@ import twitter4j.TwitterException
 import twitter4j.User
 import twitter4j.auth.RequestToken
 import java.lang.ref.WeakReference
+import java.util.*
 
 /**
  * Created on 2018/08/29.
@@ -148,7 +149,7 @@ class SignInActivity: Activity() {
         finish()
     }
 
-    fun startOAuth() {
+    private fun startOAuth() {
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
         AddUserOAuthTask(this).execute()
     }

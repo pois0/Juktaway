@@ -29,6 +29,7 @@ dependencies {
 
     implementation "com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9"
     implementation fileTree(include: '*.jar', dir: 'libs')
+    implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
 }
 
 android {

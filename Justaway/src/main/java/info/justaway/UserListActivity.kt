@@ -112,8 +112,8 @@ class UserListActivity: FragmentActivity() {
              */
             val args = Bundle().apply { putLong("listId", mUserList.id) }
             SimplePagerAdapter(this, list_pager).apply {
-                addTab(UserMemberFragment::class.java, args)
-                addTab(UserListStatusesFragment::class.java, args)
+                addTab(UserMemberFragment::class, args)
+                addTab(UserListStatusesFragment::class, args)
             }.notifyDataSetChanged()
             list_pager.addOnPageChangeListener (object: ViewPager.SimpleOnPageChangeListener() {
                 override fun onPageSelected(position: Int) {

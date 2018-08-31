@@ -469,8 +469,8 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             putSerializable("relationship", mRelationship)
         }
         SimplePagerAdapter(this, pager).apply {
-            addTab(SummaryFragment::class.java, args)
-            addTab(DescriptionFragment::class.java, args)
+            addTab(SummaryFragment::class, args)
+            addTab(DescriptionFragment::class, args)
         }.notifyDataSetChanged()
         symbol.setViewPager(pager)
 
@@ -514,11 +514,11 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         }
 
         SimplePagerAdapter(this, list_pager).apply {
-            addTab(UserTimelineFragment::class.java, listArgs)
-            addTab(FollowingListFragment::class.java, listArgs)
-            addTab(FollowersListFragment::class.java, listArgs)
-            addTab(UserListMembershipsFragment::class.java, listArgs)
-            addTab(FavoritesListFragment::class.java, listArgs)
+            addTab(UserTimelineFragment::class, listArgs)
+            addTab(FollowingListFragment::class, listArgs)
+            addTab(FollowersListFragment::class, listArgs)
+            addTab(UserListMembershipsFragment::class, listArgs)
+            addTab(FavoritesListFragment::class, listArgs)
         }.notifyDataSetChanged()
         list_pager.offscreenPageLimit = 5
 
