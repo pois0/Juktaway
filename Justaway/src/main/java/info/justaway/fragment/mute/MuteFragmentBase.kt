@@ -16,10 +16,11 @@ internal abstract class MuteFragmentBase<T>: Fragment() {
     internal abstract val currentMuteTargets: List<T>
     internal abstract fun getAdapter(): MuteTargetAdapter<T>
     internal abstract val resource: Int
+    internal abstract val listId: Int
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         mAdapter = getAdapter()
         return inflater.inflate(resource, container, false)?.apply {
-            findViewById<ListView>(R.id.list).adapter = mAdapter
+            findViewById<ListView>(listId).adapter = mAdapter
             currentMuteTargets.forEach { mAdapter.add(it) }
         }
     }
