@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
-import info.justaway.R
 
 /**
  * Created on 2018/08/31.

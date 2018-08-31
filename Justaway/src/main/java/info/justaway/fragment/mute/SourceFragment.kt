@@ -1,7 +1,6 @@
 package info.justaway.fragment.mute
 
 import android.content.DialogInterface
-import android.os.Bundle
 import info.justaway.R
 import info.justaway.settings.MuteSettings
 
