@@ -258,15 +258,17 @@ class PostActivity: FragmentActivity() {
         hashtag_button.setOnClickListener {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = HashtagAdapter(this, R.layout.row_word)
-            list_list.adapter = adapter
-            list_list.setOnItemClickListener { _, _, i, _ ->
-                status_text?.run {
-                    setText(text.toString() + adapter.getItem(i))
-                    mHashtagDialog?.dismiss()
+            PostStockSettings().hashtags?.forEach { tag -> adapter.add(tag) }
+            view.findViewById<ListView>(R.id.list_list).apply {
+                this.adapter = adapter
+                setOnItemClickListener { _, _, i, _ ->
+                    status_text?.run {
+                        setText(text.toString() + adapter.getItem(i))
+                        mHashtagDialog?.dismiss()
+                    }
                 }
             }
 
-            PostStockSettings().hashtags?.forEach { tag -> adapter.add(tag) }
             mHashtagDialog = AlertDialog.Builder(this)
                     .setTitle(R.string.dialog_title_hashtag)
                     .setView(view)
@@ -276,6 +278,7 @@ class PostActivity: FragmentActivity() {
         draft_button.setOnClickListener {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = DraftAdapter(this, R.layout.row_word)
+            PostStockSettings().drafts?.forEach { tag -> adapter.add(tag) }
             //TODO
             view.findViewById<ListView>(R.id.list_list).apply {
                 this.adapter = adapter
@@ -290,7 +293,6 @@ class PostActivity: FragmentActivity() {
                 }
             }
 
-            PostStockSettings().hashtags?.forEach { tag -> adapter.add(tag) }
             mDraftDialog = AlertDialog.Builder(this)
                     .setTitle(R.string.dialog_title_draft)
                     .setView(view)
