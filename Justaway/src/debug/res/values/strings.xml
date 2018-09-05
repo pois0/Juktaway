@@ -1,7 +1,0 @@
-<?xml version="1.0" encoding="utf-8"?>
-<resources>
-
-    <string name="android_package_name" translatable="false">info.justaway.debug</string>
-    <string name="app_name" translatable="false">Justaway Debug</string>
-
-</resources>
