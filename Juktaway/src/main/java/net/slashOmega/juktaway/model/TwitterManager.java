@@ -4,7 +4,7 @@ import android.os.AsyncTask;
 import android.os.Handler;
 
 import de.greenrobot.event.EventBus;
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import net.slashOmega.juktaway.R;
 import net.slashOmega.juktaway.adapter.MyUserStreamAdapter;
 import net.slashOmega.juktaway.event.action.AccountChangeEvent;
@@ -59,11 +59,11 @@ public class TwitterManager {
     }
 
     private static String getConsumerKey() {
-        return JustawayApplication.app.getString(R.string.twitter_consumer_key);
+        return JuktawayApplication.app.getString(R.string.twitter_consumer_key);
     }
 
     private static String getConsumerSecret() {
-        return JustawayApplication.app.getString(R.string.twitter_consumer_secret);
+        return JuktawayApplication.app.getString(R.string.twitter_consumer_secret);
     }
 
     public static Twitter getTwitter() {

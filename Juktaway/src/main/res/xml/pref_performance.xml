@@ -9,7 +9,7 @@
     <ListPreference
         android:key="user_icon_size"
         android:title="@string/pref_title_user_icon_size"
-        android:defaultValue="bigger"
+        android:defaultValue="large"
         android:entries="@array/pref_user_icon_size_titles"
         android:entryValues="@array/pref_user_icon_size_values"
         android:negativeButtonText="@null"

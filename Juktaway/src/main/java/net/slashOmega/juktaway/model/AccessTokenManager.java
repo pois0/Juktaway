@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import twitter4j.auth.AccessToken;
 
 public class AccessTokenManager {
@@ -17,7 +17,7 @@ public class AccessTokenManager {
     private static AccessToken sAccessToken;
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.app
+        return JuktawayApplication.app
                 .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 

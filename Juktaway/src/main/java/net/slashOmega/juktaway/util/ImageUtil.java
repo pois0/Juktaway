@@ -14,7 +14,7 @@ import com.nostra13.universalimageloader.core.ImageLoaderConfiguration;
 
 import java.util.ArrayList;
 
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import net.slashOmega.juktaway.ScaleImageActivity;
 import net.slashOmega.juktaway.VideoActivity;
 import net.slashOmega.juktaway.display.FadeInRoundedBitmapDisplayer;
@@ -33,11 +33,19 @@ public class ImageUtil {
                 .build();
 
         ImageLoaderConfiguration config = new ImageLoaderConfiguration
-                .Builder(JustawayApplication.app)
+                .Builder(JuktawayApplication.app)
                 .defaultDisplayImageOptions(defaultOptions)
                 .build();
 
         ImageLoader.getInstance().init(config);
+    }
+
+    public static void displayImage(String url, ImageView view, boolean isRounded) {
+        if (isRounded) {
+            displayImage(url, view);
+        } else {
+            displayRoundedImage(url, view);
+        }
     }
 
     public static void displayImage(String url, ImageView view) {

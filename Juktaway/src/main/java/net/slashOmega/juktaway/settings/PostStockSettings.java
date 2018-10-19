@@ -4,13 +4,13 @@ import android.content.Context;
 import android.content.SharedPreferences;
 
 import com.google.gson.Gson;
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 
 import java.util.ArrayList;
 
 public class PostStockSettings {
 
-    private JustawayApplication mApplication;
+    private JuktawayApplication mApplication;
     private PostStockSettingsDate mPostStockSettingsDate;
     private static final String PREF_NAME = "post_settings";
     private static final String PREF_KEY = "data";
@@ -18,7 +18,7 @@ public class PostStockSettings {
     private static final String DRAFT_LIST_FILE = "DraftListFile";
 
     public PostStockSettings() {
-        mApplication = JustawayApplication.app;
+        mApplication = JuktawayApplication.app;
         loadPostStockSettings();
     }
 

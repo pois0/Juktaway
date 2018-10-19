@@ -3,7 +3,7 @@ package net.slashOmega.juktaway.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.Button
-import net.slashOmega.juktaway.JustawayApplication
+import net.slashOmega.juktaway.JuktawayApplication
 
 class FontelloButton : Button {
 
@@ -19,5 +19,5 @@ class FontelloButton : Button {
         init()
     }
 
-    private fun init() { typeface = JustawayApplication.font }
+    private fun init() { typeface = JuktawayApplication.font }
 }

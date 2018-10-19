@@ -49,18 +49,18 @@ class SettingsActivity: Activity() {
                 }
             } ?: return
 
-            (findPreference("font_size") as ListPreference?)?.apply {
+            (findPreference("font_size") as? ListPreference)?.apply {
                 summary = "$value pt"
                 setOnPreferenceChangeListener { pref, newValue ->
                     pref.summary = newValue.toString() + " pt"
                     true
                 }
             } ?: return
-            (findPreference("long_tap") as ListPreference?)?.apply {
+            (findPreference("long_tap") as? ListPreference)?.apply {
                 summary = entry
                 changedPreference(this)
             } ?: return
-            (findPreference("themeName") as ListPreference?)?.apply {
+            (findPreference("themeName") as? ListPreference)?.apply {
                 summary = entry
                 setOnPreferenceChangeListener { pref, newValue ->
                     (pref as ListPreference).apply {

@@ -3,7 +3,6 @@ package net.slashOmega.juktaway.model;
 import android.content.Context;
 import android.content.SharedPreferences;
 import android.os.AsyncTask;
-import android.view.View;
 import android.widget.ImageView;
 
 import com.google.gson.Gson;
@@ -11,7 +10,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import net.slashOmega.juktaway.settings.BasicSettings;
 import net.slashOmega.juktaway.util.ImageUtil;
 import twitter4j.ResponseList;
@@ -29,26 +28,23 @@ public class UserIconManager {
     private static HashMap<String, String> sUserNameMap = new HashMap<String, String>();
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.app
+        return JuktawayApplication.app
                 .getSharedPreferences(PREF_NAME_USER_ICON_MAP, Context.MODE_PRIVATE);
     }
 
     public static void displayUserIcon(User user, final ImageView view) {
-        String url;
-        String size = BasicSettings.INSTANCE.getUserIconSize();
+        String url = null;
+        BasicSettings.UserIconSize size = BasicSettings.INSTANCE.getUserIconSize();
         switch (size) {
-            case "bigger":
+            case LARGE:
                 url = user.getBiggerProfileImageURL();
                 break;
-            case "normal":
+            case NORMAL:
                 url = user.getProfileImageURL();
                 break;
-            case "mini":
+            case SMALL:
                 url = user.getMiniProfileImageURL();
                 break;
-            default:
-                view.setVisibility(View.GONE);
-                return;
         }
         if (BasicSettings.INSTANCE.getUserIconRoundedOn()) {
             ImageUtil.displayRoundedImage(url, view);

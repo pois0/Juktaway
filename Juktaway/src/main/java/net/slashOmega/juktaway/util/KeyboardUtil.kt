@@ -3,12 +3,12 @@ package net.slashOmega.juktaway.util
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import net.slashOmega.juktaway.JustawayApplication
+import net.slashOmega.juktaway.JuktawayApplication
 
 object KeyboardUtil {
 
     private val inputMethodManager: InputMethodManager
-        get() = JustawayApplication.app
+        get() = JuktawayApplication.app
                 .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
     @JvmOverloads

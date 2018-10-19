@@ -91,10 +91,24 @@ class MainActivity: FragmentActivity() {
     private var mDefaultTextColor: Int = 0
     private var mDisabledTextColor: Int = 0
     private var mSearchAdapter: SearchAdapter? = null
-    private lateinit var mAccessTokenAdapter: AccessTokenAdapter
-    private lateinit var mMainPagerAdapter: MainPagerAdapter
-    private lateinit var mViewPager: ViewPager
-    private lateinit var mDrawerToggle: ActionBarDrawerToggle
+    private val mAccessTokenAdapter by lazy {
+        AccessTokenAdapter(this,
+                R.layout.row_switch_account,
+                ThemeUtil.getThemeTextColor(R.attr.holo_blue),
+                ThemeUtil.getThemeTextColor(R.attr.text_color))
+    }
+    private val mMainPagerAdapter by lazy { MainPagerAdapter(this, mViewPager) }
+    private val mViewPager by lazy { pager }
+    private val mDrawerToggle by lazy{ object: ActionBarDrawerToggle(this,
+            drawer_layout, Toolbar(this), R.string.open, R.string.close) {
+        override fun onDrawerClosed(drawerView: View) {
+            invalidateOptionsMenu()
+        }
+
+        override fun onDrawerOpened(drawerView: View) {
+            invalidateOptionsMenu()
+        }
+    }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
 
@@ -103,15 +117,11 @@ class MainActivity: FragmentActivity() {
 
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
-        JustawayApplication.app
+        JuktawayApplication.app
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         mDefaultTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color)
         mDisabledTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color_disabled)
-        mAccessTokenAdapter = AccessTokenAdapter(this,
-                R.layout.row_switch_account,
-                ThemeUtil.getThemeTextColor(R.attr.holo_blue),
-                ThemeUtil.getThemeTextColor(R.attr.text_color))
 
         //認証用のアクティビティの起動
         if (!AccessTokenManager.hasAccessToken()) {
@@ -210,16 +220,6 @@ class MainActivity: FragmentActivity() {
             true
         }
 
-        mDrawerToggle = object: ActionBarDrawerToggle(this,
-                drawer_layout, Toolbar(this), R.string.open, R.string.close) {
-            override fun onDrawerClosed(drawerView: View) {
-                invalidateOptionsMenu()
-            }
-
-            override fun onDrawerOpened(drawerView: View) {
-                invalidateOptionsMenu()
-            }
-        }
         drawer_layout.addDrawerListener(mDrawerToggle)
 
         setup()
@@ -522,9 +522,6 @@ class MainActivity: FragmentActivity() {
     }
 
     private fun setup() {
-        mViewPager = pager
-        mMainPagerAdapter = MainPagerAdapter(this, mViewPager)
-
         setupTab()
 
         footer.visibility = View.VISIBLE

@@ -9,7 +9,7 @@ import com.google.gson.Gson;
 import java.util.ArrayList;
 import java.util.HashMap;
 
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import net.slashOmega.juktaway.model.Row;
 import net.slashOmega.juktaway.util.StatusUtil;
 import twitter4j.Status;
@@ -26,7 +26,7 @@ public class MuteSettings {
     }
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.app
+        return JuktawayApplication.app
                 .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE);
     }
 

@@ -9,9 +9,9 @@ import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.MuteSettings
 import net.slashOmega.juktaway.util.ImageUtil
 
-class JustawayApplication: Application() {
+class JuktawayApplication: Application() {
     companion object {
-        lateinit var app: JustawayApplication
+        lateinit var app: JuktawayApplication
         //TODO private set
         lateinit var font: Typeface
         //TODO private set

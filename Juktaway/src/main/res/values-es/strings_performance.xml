@@ -12,9 +12,9 @@
     </string-array>
     <string-array name="pref_user_icon_size_values">
         <item>none</item>
-        <item>mini</item>
+        <item>small</item>
         <item>normal</item>
-        <item>bigger</item>
+        <item>large</item>
     </string-array>
 
     <string name="pref_title_display_thumbnail_on">Mostrar miniaturas</string>

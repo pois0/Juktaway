@@ -25,7 +25,7 @@ class NotificationService: Service() {
 
         fun start() {
             if (mStarted) return
-            val app = JustawayApplication.app
+            val app = JuktawayApplication.app
             app.startService(Intent().apply { setClass(app, NotificationService::class.java) })
             mStarted = true
         }
@@ -34,7 +34,7 @@ class NotificationService: Service() {
             if (!mStarted) {
                 return
             }
-            val app = JustawayApplication.app
+            val app = JuktawayApplication.app
             app.stopService(Intent().apply { setClass(app, NotificationService::class.java) })
             mStarted = false
         }
@@ -60,7 +60,7 @@ class NotificationService: Service() {
 
     fun onEvent(event: NotificationEvent) {
         val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
-        val application = JustawayApplication.app
+        val application = JuktawayApplication.app
 
         val userId = AccessTokenManager.getUserId()
 

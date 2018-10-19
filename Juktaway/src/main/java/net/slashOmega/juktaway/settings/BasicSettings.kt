@@ -3,7 +3,7 @@ package net.slashOmega.juktaway.settings
 import android.content.Context
 import android.content.SharedPreferences
 
-import net.slashOmega.juktaway.JustawayApplication
+import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.NotificationService
 
 object BasicSettings {
@@ -11,11 +11,11 @@ object BasicSettings {
     private const val PREF_NAME_SETTINGS = "settings"
     var fontSize: Int = 0
         private set
-    var longTapAction: String? = null
+    lateinit var longTapAction: String
         private set
-    var themeName: String? = null
+    lateinit var themeName: String
         private set
-    var displayAccountName: DisplayAccountName? = null
+    lateinit var displayAccountName: DisplayAccountName
         private set
     var userIconRoundedOn: Boolean = false
         private set
@@ -25,7 +25,7 @@ object BasicSettings {
         private set
     var talkOrderNewest: Boolean = false
         private set
-    var userIconSize: String? = null
+    lateinit var userIconSize: UserIconSize
         private set
     var pageCount: Int = 0
         private set
@@ -36,7 +36,7 @@ object BasicSettings {
     private const val QUICK_MODE = "quickMode"
 
     private val sharedPreferences: SharedPreferences
-        get() = JustawayApplication.app
+        get() = JuktawayApplication.app
                 .getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE)
 
     val quickMode: Boolean
@@ -48,9 +48,10 @@ object BasicSettings {
     var streamingMode: Boolean
         get() = mStreamingMode
         set(streamingMode) {
-            val editor = sharedPreferences.edit()
-            editor.putBoolean(STREAMING_MODE, streamingMode)
-            editor.apply()
+            sharedPreferences.edit().run {
+                putBoolean(STREAMING_MODE, streamingMode)
+                apply()
+            }
             mStreamingMode = streamingMode
         }
 
@@ -63,21 +64,30 @@ object BasicSettings {
         NONE("NONE")
     }
 
+    enum class UserIconSize(val value: String) {
+        LARGE("large"), NORMAL("normal"), SMALL("small"), NONE("none");
+        companion object {
+            fun fromString(str: String) = UserIconSize.values().find { it.value == str } ?: throw IllegalArgumentException(str)
+        }
+    }
+
+
     fun setQuickMod(quickMode: Boolean) {
-        val editor = sharedPreferences.edit()
-        editor.putBoolean(QUICK_MODE, quickMode)
-        editor.apply()
+        sharedPreferences.edit().run {
+            putBoolean(QUICK_MODE, quickMode)
+            apply()
+        }
     }
 
     fun init() {
         val preferences = sharedPreferences
-        fontSize = Integer.parseInt(preferences.getString("font_size", "12"))
+        fontSize = preferences.getString("font_size", "12").toInt()
         longTapAction = preferences.getString("long_tap", "nothing")
         themeName = preferences.getString("themeName", "black")
         userIconRoundedOn = preferences.getBoolean("user_icon_rounded_on", true)
-        userIconSize = preferences.getString("user_icon_size", "bigger")
+        userIconSize = UserIconSize.fromString(preferences.getString("user_icon_size", "large"))
         displayThumbnailOn = preferences.getBoolean("display_thumbnail_on", true)
-        pageCount = Integer.parseInt(preferences.getString("page_count", "200"))
+        pageCount = preferences.getInt("page_count", 200)
         mStreamingMode = sharedPreferences.getBoolean(STREAMING_MODE, true)
         fastScrollOn = preferences.getBoolean("fast_scroll_on", true)
         talkOrderNewest = preferences.getBoolean("talk_order_newest", false)

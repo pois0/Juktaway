@@ -7,7 +7,7 @@ import com.google.gson.Gson;
 
 import java.util.ArrayList;
 
-import net.slashOmega.juktaway.JustawayApplication;
+import net.slashOmega.juktaway.JuktawayApplication;
 import net.slashOmega.juktaway.R;
 
 public class TabManager {
@@ -21,7 +21,7 @@ public class TabManager {
     private static ArrayList<Tab> sTabs = new ArrayList<>();
 
     private static SharedPreferences getSharedPreferences() {
-        return JustawayApplication.app
+        return JuktawayApplication.app
                 .getSharedPreferences("settings", Context.MODE_PRIVATE);
     }
 
@@ -89,15 +89,15 @@ public class TabManager {
 
         public String getName() {
             if (id == TIMELINE_TAB_ID) {
-                return JustawayApplication.app.getString(R.string.title_main);
+                return JuktawayApplication.app.getString(R.string.title_main);
             } else if (id == INTERACTIONS_TAB_ID) {
-                return JustawayApplication.app.getString(R.string.title_interactions);
+                return JuktawayApplication.app.getString(R.string.title_interactions);
             } else if (id == DIRECT_MESSAGES_TAB_ID) {
-                return JustawayApplication.app.getString(R.string.title_direct_messages);
+                return JuktawayApplication.app.getString(R.string.title_direct_messages);
             } else if (id == FAVORITES_TAB_ID) {
-                return JustawayApplication.app.getString(R.string.title_favorites);
+                return JuktawayApplication.app.getString(R.string.title_favorites);
             } else if (id <= SEARCH_TAB_ID) {
-                return JustawayApplication.app.getString(R.string.title_search) + ":" + name;
+                return JuktawayApplication.app.getString(R.string.title_search) + ":" + name;
             } else {
                 return name;
             }
