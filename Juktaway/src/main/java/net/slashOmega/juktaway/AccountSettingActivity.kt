@@ -33,11 +33,11 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
 
         mAccountAdapter = AccessTokenAdapter(this, R.layout.row_account) .apply {
             AccessTokenManager.getAccessTokens()?.forEach { add(it) }
-            setOnTrashListener(object: OnTrashListener {
+            mOnTrashListener = object: OnTrashListener {
                 override fun onTrash(position: Int) {
                     AccountSwitchDialogFragment.newInstance(getItem(position)).show(supportFragmentManager, "dialog")
                 }
-            })
+            }
         }
 
         with (list_view) {
