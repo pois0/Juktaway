@@ -21,7 +21,7 @@ import net.slashOmega.juktaway.model.AccessTokenManager
 class NotificationService: Service() {
     companion object {
         const val EXTRA_VOICE_REPLY = "extra_voice_reply"
-        var mStarted: Boolean = false
+        private var mStarted: Boolean = false
 
         fun start() {
             if (mStarted) return

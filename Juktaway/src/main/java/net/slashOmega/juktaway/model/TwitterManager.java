@@ -126,7 +126,7 @@ public class TwitterManager {
         sTwitterStream.addListener(sUserStreamAdapter);
         sTwitterStream.addConnectionLifeCycleListener(new MyConnectionLifeCycleListener());
         sTwitterStream.user();
-        BasicSettings.INSTANCE.resetNotification();
+        // BasicSettings.INSTANCE.resetNotification();
     }
 
     public static void stopStreaming() {

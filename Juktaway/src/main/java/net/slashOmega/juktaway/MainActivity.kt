@@ -301,7 +301,7 @@ class MainActivity: FragmentActivity() {
         }
 
         BasicSettings.init()
-        BasicSettings.resetNotification()
+        // BasicSettings.resetNotification()
         EventBus.getDefault().post(BasicSettingsChangeEvent())
 
         title = mMainPagerAdapter.getPageTitle(mViewPager.currentItem)
