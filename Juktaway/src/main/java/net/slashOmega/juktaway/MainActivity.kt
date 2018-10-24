@@ -99,7 +99,7 @@ class MainActivity: FragmentActivity() {
     }
     private val mMainPagerAdapter by lazy { MainPagerAdapter(this, mViewPager) }
     private val mViewPager by lazy { pager }
-    private val mDrawerToggle by lazy{ object: ActionBarDrawerToggle(this,
+    private val mDrawerToggle by lazy { object: ActionBarDrawerToggle(this,
             drawer_layout, Toolbar(this), R.string.open, R.string.close) {
         override fun onDrawerClosed(drawerView: View) {
             invalidateOptionsMenu()
@@ -176,6 +176,17 @@ class MainActivity: FragmentActivity() {
                 layoutInflater.inflate(R.layout.drawer_menu, null, false),
                 null, true)
         account_list.adapter = mAccessTokenAdapter
+        account_list.setOnItemClickListener { _, _, position, _ ->
+            if (mAccessTokenAdapter.count <= position) {
+                startActivityForResult(Intent(this, AccountSettingActivity::class.java), REQUEST_ACCOUNT_SETTING)
+                return@setOnItemClickListener
+            }
+            mAccessTokenAdapter.getItem(position)?.takeIf { AccessTokenManager.getUserId() != it.userId }?.let {
+                TwitterManager.switchAccessToken(it)
+                mAccessTokenAdapter.notifyDataSetChanged()
+            }
+            drawer_layout.closeDrawer(left_drawer)
+        }
 
         send_button.setOnClickListener {
             val msg = quick_tweet_edit.string
@@ -374,7 +385,7 @@ class MainActivity: FragmentActivity() {
 
         outState?.putInt("signalButtonColor", action_bar_streaming_button.currentHintTextColor)
 
-        with (tab_menus) {
+        tab_menus.run {
             val tabColors = IntArray(childCount)
             for (i in 0 until childCount) {
                 (getChildAt(i) as Button?)?.run {
@@ -500,7 +511,7 @@ class MainActivity: FragmentActivity() {
 
     private val mMenuOnClickListener = View.OnClickListener {
         val pos = it.tag as Int
-        mMainPagerAdapter.findFragmentByPosition(pos)?.run {
+        mMainPagerAdapter.findFragmentByPosition(pos).run {
             if (mViewPager.currentItem == pos) {
                 if (goToTop()) {
                     showTopView()
@@ -515,10 +526,10 @@ class MainActivity: FragmentActivity() {
     }
 
     private val mMenuOnLongClickListener = View.OnLongClickListener {
-        mMainPagerAdapter.findFragmentByPosition(it.tag as Int)?.run {
+        mMainPagerAdapter.findFragmentByPosition(it.tag as Int).run {
             reload()
             true
-        } ?: false
+        }
     }
 
     private fun setup() {

@@ -19,7 +19,7 @@ class AccessTokenAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Acces
     var mOnTrashListener: OnTrashListener? = null
     private val mColorBlue by lazy { ThemeUtil.getThemeTextColor(R.attr.holo_blue) }
 
-    override val View.mView: (Int, ViewGroup) -> Unit
+    override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { position, _ ->
             val token = getItem(position)
             UserIconManager.displayUserIcon(token.userId, icon)

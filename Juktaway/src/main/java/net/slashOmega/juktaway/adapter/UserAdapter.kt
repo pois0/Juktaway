@@ -33,7 +33,7 @@
 //            lock.visibility = if (user.isProtected) View.VISIBLE else View.INVISIBLE
 //
 //            setOnClickListener {
-//                mContext?.startActivity(Intent(it.context, ProfileActivity::class.java).apply {
+//                mContext?.startActivity(Intent(it.mContext, ProfileActivity::class.java).apply {
 //                    putExtra("screenName", user.screenName)
 //                })
 //            }

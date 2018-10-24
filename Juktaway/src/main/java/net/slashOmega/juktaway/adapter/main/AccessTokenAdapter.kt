@@ -17,12 +17,11 @@ class AccessTokenAdapter(context: Context?, resourceId: Int, val highlightColor:
         AccessTokenManager.getAccessTokens()?.forEach { add(it) }
     }
 
-    override val View.mView: (Int, ViewGroup) -> Unit
+    override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ ->
             val token = getItem(pos)
             UserIconManager.displayUserIcon(token.userId, icon)
             screen_name.text = token.screenName
             screen_name.setTextColor(if (AccessTokenManager.getUserId() == token.userId) highlightColor else defaultColor)
         }
-
 }

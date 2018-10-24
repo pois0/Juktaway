@@ -11,7 +11,7 @@ import android.widget.ArrayAdapter
  */
 abstract class ArrayAdapterBase<T>(protected val mContext: Context?, protected val mLayout: Int) : ArrayAdapter<T>(mContext, mLayout) {
     protected val mInflater by lazy { mContext?.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as? LayoutInflater }
-    protected abstract val View.mView: (Int, ViewGroup) -> Unit
+    protected abstract val View.mView: (Int, ViewGroup?) -> Unit
     override fun getView(position: Int, convertView: View?, parent: ViewGroup?)
-            = convertView ?: mInflater?.inflate(mLayout, null)?.apply { mView }
+            = (convertView ?: mInflater?.inflate(mLayout, null))?.apply { mView(position, parent) }
 }
