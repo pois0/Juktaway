@@ -64,7 +64,7 @@ public class UserAdapter extends ArrayAdapter<User> {
         final User user = getItem(position);
 
         String iconUrl = user.getBiggerProfileImageURL();
-        ImageUtil.displayRoundedImage(iconUrl, holder.mIcon);
+        ImageUtil.INSTANCE.displayRoundedImage(iconUrl, holder.mIcon);
 
         holder.mDisplayName.setText(user.getName());
         holder.mScreenName.setText("@" + user.getScreenName());

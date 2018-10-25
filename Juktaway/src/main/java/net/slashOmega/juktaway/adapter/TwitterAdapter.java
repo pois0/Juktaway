@@ -480,7 +480,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                     holder.mRetweetIcon.setVisibility(View.GONE);
                 } else {
                     holder.mRetweetIcon.setVisibility(View.VISIBLE);
-                    ImageUtil.displayRoundedImage(retweet.getUser().getProfileImageURL(), holder.mRetweetIcon);
+                    ImageUtil.INSTANCE.displayRoundedImage(retweet.getUser().getProfileImageURL(), holder.mRetweetIcon);
                 }
                 holder.mRetweetBy.setText("RT by " + retweet.getUser().getName() + " @" + retweet.getUser().getScreenName());
                 holder.mActionContainer.setVisibility(View.GONE);
@@ -532,7 +532,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
 
             // プレビュー表示On
             if (BasicSettings.INSTANCE.getDisplayThumbnailOn()) {
-                ImageUtil.displayThumbnailImages(mContext, holder.mQuotedImagesContainer, holder.mImagesContainerWrapper, holder.mQuotedPlay, quotedStatus);
+                ImageUtil.INSTANCE.displayThumbnailImages(mContext, holder.mQuotedImagesContainer, holder.mImagesContainerWrapper, holder.mQuotedPlay, quotedStatus);
             } else {
                 holder.mQuotedImagesContainer.setVisibility(View.GONE);
                 holder.mQuotedImagesContainerWrapper.setVisibility(View.GONE);
@@ -544,7 +544,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
 
         // プレビュー表示On
         if (BasicSettings.INSTANCE.getDisplayThumbnailOn()) {
-            ImageUtil.displayThumbnailImages(mContext, holder.mImagesContainer, holder.mImagesContainerWrapper, holder.mPlay, status);
+            ImageUtil.INSTANCE.displayThumbnailImages(mContext, holder.mImagesContainer, holder.mImagesContainerWrapper, holder.mPlay, status);
         } else {
             holder.mImagesContainer.setVisibility(View.GONE);
             holder.mImagesContainerWrapper.setVisibility(View.GONE);

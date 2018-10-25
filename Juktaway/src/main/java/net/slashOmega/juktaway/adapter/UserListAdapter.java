@@ -61,7 +61,7 @@ public class UserListAdapter extends ArrayAdapter<UserList> {
 
         ImageView icon = (ImageView) view.findViewById(R.id.icon);
         String iconUrl = userList.getUser().getBiggerProfileImageURL();
-        ImageUtil.displayRoundedImage(iconUrl, icon);
+        ImageUtil.INSTANCE.displayRoundedImage(iconUrl, icon);
 
         holder.list_name.setText(userList.getName());
         holder.screen_name.setText(userList.getUser().getScreenName()

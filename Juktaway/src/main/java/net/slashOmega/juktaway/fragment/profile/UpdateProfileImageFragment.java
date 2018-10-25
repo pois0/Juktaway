@@ -54,7 +54,7 @@ public class UpdateProfileImageFragment extends DialogFragment {
         image.setLayoutParams(new LinearLayout.LayoutParams(
                 340,
                 340));
-        ImageUtil.displayImage(uri.toString(), image);
+        ImageUtil.INSTANCE.displayImage(uri.toString(), image);
         layout.addView(image);
         builder.setView(layout);
 
