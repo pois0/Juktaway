@@ -359,7 +359,7 @@ class MainActivity: FragmentActivity() {
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         if (mDrawerToggle.onOptionsItemSelected(item)) return true
         when (item?.itemId) {
-            R.id.home ->
+            android.R.id.home ->
                 cancelSearch()
             R.id.profile ->
                 startActivity(getIntent(ProfileActivity::class.java).run {

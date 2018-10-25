@@ -25,8 +25,8 @@ class UserListActivity: FragmentActivity() {
         private var mCurrentPosition = 0
         private var mColorBlue: Int = 0
         private var mColorWhite: Int = 0
-        private val MENU_CREATE = 1
-        private val MENU_DESTROY = 2
+        private const val MENU_CREATE = 1
+        private const val MENU_DESTROY = 2
 
         private class CreateMenu(activity: UserListActivity): AsyncTask<Void, Void, Boolean>() {
             val ref = WeakReference(activity)
@@ -87,7 +87,7 @@ class UserListActivity: FragmentActivity() {
         }
     }
 
-    private lateinit var mUserList: UserList
+    private val mUserList by lazy { intent.getSerializableExtra("userList") as UserList}
     private var mIsFollowing: Boolean = false
 
 
@@ -146,7 +146,7 @@ class UserListActivity: FragmentActivity() {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         return item?.let { when (it.itemId) {
-            R.id.home -> {
+            android.R.id.home -> {
                 finish()
                 true
             }

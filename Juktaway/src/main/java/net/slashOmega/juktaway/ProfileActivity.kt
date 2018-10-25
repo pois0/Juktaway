@@ -367,7 +367,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                 true
             } else {
                 when (it.itemId) {
-                    R.id.home ->
+                    android.R.id.home ->
                         finish()
                     R.id.send_reply -> {
                         val text = "@" + mUser.screenName

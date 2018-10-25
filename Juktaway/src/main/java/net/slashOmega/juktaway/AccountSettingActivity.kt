@@ -66,7 +66,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
                 startActivity(Intent(this, SignInActivity::class.java).apply {
                     putExtra("add_account", true)
                 })
-            R.id.home ->
+            android.R.id.home ->
                 finish()
         }
         return true
