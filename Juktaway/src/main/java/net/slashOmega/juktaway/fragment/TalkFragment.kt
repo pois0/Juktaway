@@ -4,13 +4,13 @@ import android.app.Dialog
 import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentActivity
 import android.support.v4.util.LongSparseArray
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.AbsListView
 import android.widget.AbsListView.LayoutParams
+import android.widget.ListView
 import com.google.common.primitives.Longs
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.list_talk.*
@@ -57,9 +57,9 @@ class TalkFragment: DialogFragment() {
                     if (status.inReplyToStatusId > 0) {
                         LoadTalk(this).execute(status.inReplyToStatusId)
                     } else {
-                        removeGuruGuru()
+                        dialog.removeGuruGuru()
                     }
-                } ?: removeGuruGuru()
+                } ?: dialog.removeGuruGuru()
             }}
         }
 
@@ -125,7 +125,7 @@ class TalkFragment: DialogFragment() {
 
     private val mTwitter by lazy { TwitterManager.getTwitter() }
     private val mAdapter by lazy { TwitterAdapter(activity, R.layout.row_tweet) }
-    private val mListView by lazy { list }
+    private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }
     private val mFooterView by lazy { View(activity) }
     private val mOnScrollListener = object: AbsListView.OnScrollListener {
@@ -149,6 +149,7 @@ class TalkFragment: DialogFragment() {
             requestFeature(Window.FEATURE_NO_TITLE)
             setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         }
+
         setContentView(R.layout.list_talk)
 
         (arguments?.getSerializable("status") as? Status)?.let { status ->
@@ -158,7 +159,7 @@ class TalkFragment: DialogFragment() {
             mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, headerH)
             mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, footerH)
 
-            mListView.apply {
+            mListView = list.apply {
                 addHeaderView(mHeaderView, null, false)
                 addFooterView(mFooterView, null, false)
                 adapter = mAdapter
@@ -192,5 +193,5 @@ class TalkFragment: DialogFragment() {
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) { mAdapter.removeStatus(event.statusId!!) }
 
-    fun removeGuruGuru() { (if (BasicSettings.talkOrderNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
+    private fun Dialog.removeGuruGuru() { (if (BasicSettings.talkOrderNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
 }
