@@ -126,9 +126,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         super.onPause()
     }
 
-    override fun onRefreshStarted(view: View) {
-        reload()
-    }
+    override fun onRefreshStarted(view: View) { reload() }
 
     fun reload() {
         mReloading = true
