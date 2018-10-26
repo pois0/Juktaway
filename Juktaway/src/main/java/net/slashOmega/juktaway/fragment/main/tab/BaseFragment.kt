@@ -44,6 +44,9 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     protected lateinit var mFooter: ProgressBar
     protected lateinit var mPullToRefreshLayout: PullToRefreshLayout
 
+    abstract var tabId: Long
+        protected set
+
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
      * 2. スクロールが終わった瞬間に表示位置がトップだったらボタンのハイライトを消すためにイベント発行
@@ -155,7 +158,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         } else true
     }
 
-    var isTop = mListView.firstVisiblePosition == 0
+    val isTop by lazy { mListView.firstVisiblePosition == 0 }
 
     /**
      * ツイートの表示処理、画面のスクロール位置によって適切な処理を行う、まだバグがある
@@ -193,7 +196,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
 
         val autoScroll = position == 0 && y == 0 && mStackRows.size < 3
 
-        if (highlight) EventBus.getDefault().post(NewRecordEvent(getTabId(), getSearchWord(), autoScroll))
+        if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
 
         if (autoScroll) {
             mListView.setSelection(0)
@@ -231,7 +234,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         if (!mScrolling && isTop) {
             showStack()
         } else {
-            EventBus.getDefault().post(NewRecordEvent(getTabId(), getSearchWord(), false))
+            EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
         }
     }
 
@@ -243,9 +246,9 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     /**
      * タブ固有のID、ユーザーリストではリストのIDを、その他はマイナスの固定値を返す
      */
-    abstract fun getTabId(): Long
 
-    fun getSearchWord(): String = ""
+
+    open var mSearchWord = ""
 
 
     /**
@@ -272,7 +275,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
      *
      * @param event ツイート
      */
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
+    open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
         val removePositions = mAdapter?.removeStatus(event.statusId!!) ?: ArrayList(0)
         for (removePosition in removePositions) {
             if (removePosition >= 0) {
@@ -292,7 +295,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
      *
      * @param event ツイート
      */
-    fun onEventMainThread(event: StreamingCreateStatusEvent) {
+    open fun onEventMainThread(event: StreamingCreateStatusEvent) {
         addStack(event.row)
     }
 
@@ -302,6 +305,6 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
      * @param event アプリが表示しているタブのID
      */
     fun onEventMainThread(event: PostAccountChangeEvent) {
-        if (event.tabId == getTabId()) reload() else clear()
+        if (event.tabId == tabId) reload() else clear()
     }
 }
