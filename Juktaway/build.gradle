@@ -30,6 +30,7 @@ dependencies {
     implementation "com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9"
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
+    implementation "org.jetbrains.anko:anko:$anko_version"
 }
 
 android {
@@ -39,7 +40,7 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 14
+        minSdkVersion 15
         //noinspection OldTargetApi
         targetSdkVersion 24
 
