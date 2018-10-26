@@ -312,7 +312,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
             holder.mDoReply.setOnClickListener(new View.OnClickListener() {
                 @Override
                 public void onClick(View v) {
-                    ActionUtil.doReplyDirectMessage(message, mContext);
+                    ActionUtil.INSTANCE.doReplyDirectMessage(message, mContext);
                 }
             });
         }
@@ -368,7 +368,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         holder.mDoReply.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
-                ActionUtil.doReplyAll(status, mContext);
+                ActionUtil.INSTANCE.doReplyAll(status, mContext);
             }
         });
 
@@ -406,11 +406,11 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                 if (holder.mDoFav.getTag().equals("is_fav")) {
                     holder.mDoFav.setTag("no_fav");
                     holder.mDoFav.setTextColor(Color.parseColor("#666666"));
-                    ActionUtil.doDestroyFavorite(status.getId());
+                    ActionUtil.INSTANCE.doDestroyFavorite(status.getId());
                 } else {
                     holder.mDoFav.setTag("is_fav");
                     holder.mDoFav.setTextColor(ContextCompat.getColor(mContext, R.color.holo_orange_light));
-                    ActionUtil.doFavorite(status.getId());
+                    ActionUtil.INSTANCE.doFavorite(status.getId());
                 }
             }
         });
@@ -567,7 +567,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActionUtil.doQuote(status, getActivity());
+                            ActionUtil.INSTANCE.doQuote(status, getActivity());
                             dismiss();
                         }
                     }
@@ -576,7 +576,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActionUtil.doRetweet(status.getId());
+                            ActionUtil.INSTANCE.doRetweet(status.getId());
                             dismiss();
                         }
                     }
@@ -609,7 +609,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
                     new DialogInterface.OnClickListener() {
                         @Override
                         public void onClick(DialogInterface dialog, int which) {
-                            ActionUtil.doDestroyRetweet(status);
+                            ActionUtil.INSTANCE.doDestroyRetweet(status);
                             dismiss();
                         }
                     }

@@ -105,7 +105,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_reply_direct_message, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doReplyDirectMessage(directMessage, mActivity);
+                    ActionUtil.INSTANCE.doReplyDirectMessage(directMessage, mActivity);
                     dismiss();
                 }
             }));
@@ -116,7 +116,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_destroy_direct_message, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doDestroyDirectMessage(directMessage.getId());
+                    ActionUtil.INSTANCE.doDestroyDirectMessage(directMessage.getId());
                     dismiss();
                 }
             }));
@@ -173,7 +173,7 @@ public class StatusMenuFragment extends DialogFragment {
         adapter.add(new Menu(R.string.context_menu_reply, new Runnable() {
             @Override
             public void run() {
-                ActionUtil.doReply(source, mActivity);
+                ActionUtil.INSTANCE.doReply(source, mActivity);
                 dismiss();
             }
         }));
@@ -185,7 +185,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_reply_all, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doReplyAll(source, mActivity);
+                    ActionUtil.INSTANCE.doReplyAll(source, mActivity);
                     dismiss();
                 }
             }));
@@ -198,7 +198,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_qt, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doQuote(source, mActivity);
+                    ActionUtil.INSTANCE.doQuote(source, mActivity);
                     dismiss();
                 }
             }));
@@ -211,7 +211,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_destroy_favorite, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doDestroyFavorite(status.getId());
+                    ActionUtil.INSTANCE.doDestroyFavorite(status.getId());
                     dismiss();
                 }
             }));
@@ -219,7 +219,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_create_favorite, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doFavorite(status.getId());
+                    ActionUtil.INSTANCE.doFavorite(status.getId());
                     dismiss();
                 }
             }));
@@ -236,7 +236,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_destroy_status, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doDestroyStatus(status.getId());
+                    ActionUtil.INSTANCE.doDestroyStatus(status.getId());
                     dismiss();
                 }
             }));
@@ -253,7 +253,7 @@ public class StatusMenuFragment extends DialogFragment {
             adapter.add(new Menu(R.string.context_menu_destroy_retweet, new Runnable() {
                 @Override
                 public void run() {
-                    ActionUtil.doDestroyRetweet(status);
+                    ActionUtil.INSTANCE.doDestroyRetweet(status);
                     dismiss();
                 }
             }));
@@ -275,8 +275,8 @@ public class StatusMenuFragment extends DialogFragment {
                     adapter.add(new Menu(R.string.context_menu_favorite_and_retweet, new Runnable() {
                         @Override
                         public void run() {
-                            ActionUtil.doFavorite(status.getId());
-                            ActionUtil.doRetweet(status.getId());
+                            ActionUtil.INSTANCE.doFavorite(status.getId());
+                            ActionUtil.INSTANCE.doRetweet(status.getId());
                             dismiss();
                         }
                     }));
@@ -288,7 +288,7 @@ public class StatusMenuFragment extends DialogFragment {
                 adapter.add(new Menu(R.string.context_menu_retweet, new Runnable() {
                     @Override
                     public void run() {
-                        ActionUtil.doRetweet(status.getId());
+                        ActionUtil.INSTANCE.doRetweet(status.getId());
                         dismiss();
                     }
                 }));
