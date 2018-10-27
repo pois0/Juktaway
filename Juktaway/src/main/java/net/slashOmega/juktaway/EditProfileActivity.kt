@@ -100,12 +100,12 @@ class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Use
 
     override fun onLoaderReset(arg0: android.support.v4.content.Loader<User>) {}
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQ_PICK_PROFILE_IMAGE -> if (resultCode == Activity.RESULT_OK) {
                 try {
-                    val uri = data.data ?: return
+                    val uri = data?.data ?: return
                     FileUtil.writeToTempFile(cacheDir, contentResolver.openInputStream(uri)!!)?.let {
                         val dialog = UpdateProfileImageFragment.newInstance(it, uri)
                         dialog.show(supportFragmentManager, "dialog")

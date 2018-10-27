@@ -23,14 +23,16 @@ class JuktawayApplication: Application() {
         if (!BuildConfig.DEBUG)
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
 
-        // 画像のキャッシュ,角丸の設定
-        ImageUtil.init()
+
 
         // load setting files
         MuteSettings.init()
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
         Relationship.init()
+
+        // 画像のキャッシュ,角丸の設定
+        ImageUtil.init()
 
         font = Typeface.createFromAsset(assets, "fontello.ttf")
 

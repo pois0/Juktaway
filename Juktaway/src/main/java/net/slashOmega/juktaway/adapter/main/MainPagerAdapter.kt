@@ -15,7 +15,7 @@ import kotlin.reflect.jvm.jvmName
 /**
  * Created on 2018/10/20.
  */
-class MainPagerAdapter(val mContext: FragmentActivity, val mViewPager: ViewPager) : FragmentPagerAdapter(mContext.supportFragmentManager) {
+class MainPagerAdapter(private val mContext: FragmentActivity, private val mViewPager: ViewPager) : FragmentPagerAdapter(mContext.supportFragmentManager) {
     /**
      * タブ内のActivity、引数を設定する。
      *

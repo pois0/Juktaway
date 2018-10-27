@@ -377,13 +377,15 @@ class PostActivity: FragmentActivity() {
                 }, REQUEST_CAMERA)
     }
 
-    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent) {
+    override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
         if (resultCode != Activity.RESULT_OK) return
-        when (requestCode) {
-            REQUEST_GALLERY -> setImage(data.data)
-            REQUEST_CAMERA -> mImageUri?.let { setImage(it) }
-            REQUEST_TWICCA -> status_text.setText(data.getStringExtra(Intent.EXTRA_TEXT))
+        data?.apply {
+            when (requestCode) {
+                REQUEST_GALLERY -> setImage(this.data)
+                REQUEST_CAMERA -> mImageUri?.let { setImage(it) }
+                REQUEST_TWICCA -> status_text.setText(getStringExtra(Intent.EXTRA_TEXT))
+            }
         }
     }
 
