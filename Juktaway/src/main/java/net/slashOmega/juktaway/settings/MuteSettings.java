@@ -86,7 +86,7 @@ public class MuteSettings {
             }
         }
         Status source = retweetedStatus != null ? retweetedStatus : status;
-        if (sMuteSettingsData.sourceMap.get(StatusUtil.getClientName(source.getSource())) != null) {
+        if (sMuteSettingsData.sourceMap.get(StatusUtil.INSTANCE.getClientName(source.getSource())) != null) {
             return true;
         }
         String text = source.getText();

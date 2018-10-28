@@ -434,7 +434,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         holder.mDatetimeRelative.setText(TimeUtil.INSTANCE.getRelativeTime(status.getCreatedAt()));
         holder.mDatetime.setText(TimeUtil.INSTANCE.getAbsoluteTime(status.getCreatedAt()));
 
-        String via = StatusUtil.getClientName(status.getSource());
+        String via = StatusUtil.INSTANCE.getClientName(status.getSource());
         holder.mVia.setText("via " + via);
         holder.mVia.setVisibility(View.VISIBLE);
 
@@ -490,7 +490,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         } else {
 
             // 自分へのリプ
-            if (StatusUtil.isMentionForMe(status)) {
+            if (StatusUtil.INSTANCE.isMentionForMe(status)) {
                 holder.mActionIcon.setText(R.string.fontello_at);
                 holder.mActionIcon.setTextColor(ContextCompat.getColor(mContext, R.color.holo_red_light));
                 holder.mActionByDisplayName.setText(status.getUser().getName());
@@ -520,8 +520,8 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         });
 
         // RTの場合はRT元
-        String statusString = StatusUtil.getExpandedText(status);
-        holder.mStatus.setText(StatusUtil.generateUnderline(statusString));
+        String statusString = StatusUtil.INSTANCE.getExpandedText(status);
+        holder.mStatus.setText(StatusUtil.INSTANCE.generateUnderline(statusString));
 
         // 引用ツイート
         Status quotedStatus = status.getQuotedStatus();
