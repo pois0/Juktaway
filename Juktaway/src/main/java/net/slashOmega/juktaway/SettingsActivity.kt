@@ -105,8 +105,8 @@ class SettingsActivity: Activity() {
                 SettingsFragment()).commit()
 
         actionBar?.run{
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+            setHomeButtonEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
         }
     }
 

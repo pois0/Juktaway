@@ -15,9 +15,9 @@ class PerformanceActivity : Activity() {
         fragmentManager.beginTransaction().replace(android.R.id.content,
                 SettingsFragment()).commit()
 
-        actionBar.run {
-            actionBar.setHomeButtonEnabled(true)
-            actionBar.setDisplayHomeAsUpEnabled(true)
+        actionBar?.run {
+            setHomeButtonEnabled(true)
+            setDisplayHomeAsUpEnabled(true)
         }
     }
 
