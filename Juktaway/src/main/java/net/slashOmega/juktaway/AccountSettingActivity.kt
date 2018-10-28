@@ -34,9 +34,9 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
         mAccountAdapter = AccessTokenAdapter(this, R.layout.row_account) .apply {
             AccessTokenManager.getAccessTokens()?.forEach { add(it) }
             mOnTrashListener = object: OnTrashListener {
-                override fun onTrash(position: Int) {
-                    AccountSwitchDialogFragment.newInstance(getItem(position)).show(supportFragmentManager, "dialog")
-                }
+                override fun onTrash(position: Int) { getItem(position)?.let {
+                    AccountSwitchDialogFragment.newInstance(it).show(supportFragmentManager, "dialog")
+                }}
             }
         }
 
@@ -44,7 +44,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
             adapter = mAccountAdapter
             setOnItemClickListener { _, _, i, _ ->
                 mAccountAdapter.getItem(i).also {
-                    if (it.userId != AccessTokenManager.getUserId()) {
+                    if (it?.userId != AccessTokenManager.getUserId()) {
                         setResult(Activity.RESULT_OK, Intent().apply {
                             putExtra("accessToken", it)
                         })

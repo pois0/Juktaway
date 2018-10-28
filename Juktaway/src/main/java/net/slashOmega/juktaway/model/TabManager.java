@@ -28,7 +28,7 @@ public class TabManager {
     public static ArrayList<Tab> loadTabs() {
         sTabs.clear();
         String json = getSharedPreferences().getString(TABS.concat(
-                String.valueOf(AccessTokenManager.getUserId())).concat("/v2"), null);
+                String.valueOf(AccessTokenManager.INSTANCE.getUserId())).concat("/v2"), null);
         if (json != null) {
             Gson gson = new Gson();
             TabData tabData = gson.fromJson(json, TabData.class);
@@ -51,8 +51,8 @@ public class TabManager {
         Gson gson = new Gson();
         String json = gson.toJson(tabData);
         SharedPreferences.Editor editor = getSharedPreferences().edit();
-        editor.remove(TABS.concat(String.valueOf(AccessTokenManager.getUserId())));
-        editor.putString(TABS.concat(String.valueOf(AccessTokenManager.getUserId())).concat("/v2"), json);
+        editor.remove(TABS.concat(String.valueOf(AccessTokenManager.INSTANCE.getUserId())));
+        editor.putString(TABS.concat(String.valueOf(AccessTokenManager.INSTANCE.getUserId())).concat("/v2"), json);
         editor.apply();
         sTabs = tabs;
     }

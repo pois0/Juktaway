@@ -45,8 +45,8 @@ class RetweetersFragment: DialogFragment() {
     private val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
-        window.requestFeature(Window.FEATURE_NO_TITLE)
-        window.setFlags(WindowManager.LayoutParams.FLAGS_CHANGED, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+        window?.requestFeature(Window.FEATURE_NO_TITLE)
+        window?.setFlags(WindowManager.LayoutParams.FLAGS_CHANGED, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         setContentView(R.layout.fragment_retweeters)
 
         list.adapter = mAdapter

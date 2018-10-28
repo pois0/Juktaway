@@ -124,7 +124,6 @@
     <string name="notification_retweet">"Retweet: "</string>
     <string name="notification_favorite_ticker">" marcó como favorito: "</string>
     <string name="notification_retweet_ticker">" hizo retweet: "</string>
-    <string name="official_website">http://justaway.info/</string>
     <string name="open">abrir</string>
     <string name="progress_loading" tools:ignore="TypographyEllipsis">Cargando...</string>
     <string name="progress_process" tools:ignore="TypographyEllipsis">Procesando...</string>

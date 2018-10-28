@@ -18,7 +18,7 @@ public class Relationship {
     private static final LongSparseArray<Boolean> mMyIDMap = new LongSparseArray<>();
 
     public static void init() {
-        ArrayList<AccessToken> accessTokens = AccessTokenManager.getAccessTokens();
+        ArrayList<AccessToken> accessTokens = AccessTokenManager.INSTANCE.getAccessTokens();
         if (accessTokens == null || accessTokens.size() == 0) {
             return;
         }

@@ -18,6 +18,7 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
@@ -117,14 +118,13 @@ class MainActivity: FragmentActivity() {
 
     @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
-        JuktawayApplication.app
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         mDefaultTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color)
         mDisabledTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color_disabled)
 
         //認証用のアクティビティの起動
-        if (!AccessTokenManager.hasAccessToken()) {
+        if (AccessTokenManager.getAccessToken() == null) {
             startActivity(Intent(this, SignInActivity::class.java))
             finish()
             return
@@ -265,7 +265,7 @@ class MainActivity: FragmentActivity() {
                 if (resultCode == Activity.RESULT_OK)
                     mSwitchAccessToken = data?.getSerializableExtra("accessToken") as AccessToken
                 mAccessTokenAdapter.clear()
-                AccessTokenManager.getAccessTokens()?.forEach {
+                AccessTokenManager.getAccessTokens().forEach {
                     mAccessTokenAdapter.add(it)
                 }
             }

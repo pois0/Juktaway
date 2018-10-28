@@ -51,7 +51,7 @@ public class StatusUtil {
      * @return true ... 自分宛てのメンション
      */
     public static boolean isMentionForMe(Status status) {
-        long userId = AccessTokenManager.getUserId();
+        long userId = AccessTokenManager.INSTANCE.getUserId();
         if (status.getInReplyToUserId() == userId) {
             return true;
         }

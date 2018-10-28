@@ -21,16 +21,17 @@ class AccessTokenAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Acces
 
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { position, _ ->
-            val token = getItem(position)
-            UserIconManager.displayUserIcon(token.userId, icon)
-            screen_name.text = token.screenName
+            getItem(position)?.let { token ->
+                UserIconManager.displayUserIcon(token.userId, icon)
+                screen_name.text = token.screenName
 
-            if (AccessTokenManager.getUserId() == token.userId) {
-                screen_name.setTextColor(mColorBlue)
-                trash.visibility = View.GONE
-            }
-            trash.setOnClickListener { _ ->
-                mOnTrashListener?.onTrash(position)
+                if (AccessTokenManager.getUserId() == token.userId) {
+                    screen_name.setTextColor(mColorBlue)
+                    trash.visibility = View.GONE
+                }
+                trash.setOnClickListener { _ ->
+                    mOnTrashListener?.onTrash(position)
+                }
             }
         }
 }

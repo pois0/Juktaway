@@ -257,8 +257,8 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         val args = Bundle(1)
         with (intent) {
             if (Intent.ACTION_VIEW == action && data != null
-                    && data.lastPathSegment != null
-                    && data.lastPathSegment.isNotEmpty()) {
+                    && data?.lastPathSegment != null
+                    && data?.lastPathSegment?.isNotEmpty() == true) {
                 args.putString("screenName", data.lastPathSegment)
             } else {
                 val screenName = getStringExtra("screenName")

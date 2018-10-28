@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TwitterManager
@@ -80,8 +81,8 @@ class SignInActivity: Activity() {
             override fun onPostExecute(user: User?) {
                 MessageUtil.dismissProgressDialog()
                 user?.let {
+                    Log.d("OAuth", "Success Logging in")
                     UserIconManager.addUserIconMap(it)
-                    MessageUtil.showToast(R.string.toast_sign_in_success)
                     ref.get()?.successOAuth()
                 }
             }
@@ -143,6 +144,7 @@ class SignInActivity: Activity() {
     }
 
     private fun successOAuth() {
+        MessageUtil.showToast(R.string.toast_sign_in_success)
         startActivity(Intent(this, MainActivity::class.java).apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })

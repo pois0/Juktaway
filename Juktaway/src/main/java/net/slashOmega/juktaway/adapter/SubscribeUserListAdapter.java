@@ -79,7 +79,7 @@ public class SubscribeUserListAdapter extends ArrayAdapter<UserListWithRegistere
         viewHolder.mTrash.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View view) {
-                if (AccessTokenManager.getUserId() == userList.getUser().getId()) {
+                if (AccessTokenManager.INSTANCE.getUserId() == userList.getUser().getId()) {
                     // 自分のリストの場合はリスト削除
                     DialogFragment dialog = new DestroyUserListDialogFragment();
                     Bundle args = new Bundle(1);
@@ -97,7 +97,7 @@ public class SubscribeUserListAdapter extends ArrayAdapter<UserListWithRegistere
             }
         });
 
-        if (AccessTokenManager.getUserId() == userList.getUser().getId()) {
+        if (AccessTokenManager.INSTANCE.getUserId() == userList.getUser().getId()) {
             viewHolder.mCheckBox.setText(userList.getName());
         } else {
             viewHolder.mCheckBox.setText(userList.getFullName());

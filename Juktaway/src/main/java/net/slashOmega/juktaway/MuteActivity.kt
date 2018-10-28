@@ -23,7 +23,7 @@ class MuteActivity: FragmentActivity() {
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_mute)
 
-        actionBar.apply {
+        actionBar?.apply {
             setHomeButtonEnabled(true)
             setDisplayHomeAsUpEnabled(true)
         }

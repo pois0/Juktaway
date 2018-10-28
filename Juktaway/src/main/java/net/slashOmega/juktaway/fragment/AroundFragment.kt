@@ -89,8 +89,8 @@ class AroundFragment: DialogFragment() {
     private val mAdapter by lazy { TwitterAdapter(activity, R.layout.row_tweet) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
-        window.requestFeature(WindowManager.LayoutParams.FLAG_FULLSCREEN)
-        window.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
+        window?.requestFeature(WindowManager.LayoutParams.FLAG_FULLSCREEN)
+        window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         setContentView(R.layout.fragment_around)
 
         mProgressBarTop = findViewById<View>(R.id.guruguru_top) as ProgressBar

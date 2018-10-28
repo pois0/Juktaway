@@ -145,7 +145,7 @@ class TalkFragment: DialogFragment() {
     }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
-        window.apply {
+        window?.apply {
             requestFeature(Window.FEATURE_NO_TITLE)
             setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         }

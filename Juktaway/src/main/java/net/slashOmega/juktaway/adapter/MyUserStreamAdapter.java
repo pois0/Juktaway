@@ -87,7 +87,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         if (MuteSettings.isMute(row)) {
             return;
         }
-        long userId = AccessTokenManager.getUserId();
+        long userId = AccessTokenManager.INSTANCE.getUserId();
         Status retweetedStatus = status.getRetweetedStatus();
         if (status.getInReplyToUserId() == userId || (retweetedStatus != null && retweetedStatus.getUser().getId() == userId)) {
             EventBus.getDefault().post(new NotificationEvent(row));
@@ -118,7 +118,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         }
         Row row = Row.Companion.newFavorite(source, target, status);
         // 自分の fav を反映
-        if (source.getId() == AccessTokenManager.getUserId()) {
+        if (source.getId() == AccessTokenManager.INSTANCE.getUserId()) {
             FavRetweetManager.INSTANCE.setFav(status.getId());
             EventBus.getDefault().post(new StreamingCreateFavoriteEvent(row));
             return;
@@ -157,7 +157,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             return;
         }
         // 自分の unfav を反映
-        if (arg0.getId() == AccessTokenManager.getUserId()) {
+        if (arg0.getId() == AccessTokenManager.INSTANCE.getUserId()) {
             FavRetweetManager.INSTANCE.removeFav(arg2.getId());
         }
         if (mPause) {

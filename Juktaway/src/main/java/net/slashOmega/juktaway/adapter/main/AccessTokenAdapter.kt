@@ -12,16 +12,17 @@ import twitter4j.auth.AccessToken
 /**
  * Created on 2018/10/20.
  */
-class AccessTokenAdapter(context: Context?, resourceId: Int, val highlightColor: Int, val defaultColor: Int) : ArrayAdapterBase<AccessToken>(context, resourceId) {
+class AccessTokenAdapter(context: Context?, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<AccessToken>(context, resourceId) {
     init {
         AccessTokenManager.getAccessTokens()?.forEach { add(it) }
     }
 
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ ->
-            val token = getItem(pos)
-            UserIconManager.displayUserIcon(token.userId, icon)
-            screen_name.text = token.screenName
-            screen_name.setTextColor(if (AccessTokenManager.getUserId() == token.userId) highlightColor else defaultColor)
+            getItem(pos)?.let { token ->
+                UserIconManager.displayUserIcon(token.userId, icon)
+                screen_name.text = token.screenName
+                screen_name.setTextColor(if (AccessTokenManager.getUserId() == token.userId) highlightColor else defaultColor)
+            }
         }
 }

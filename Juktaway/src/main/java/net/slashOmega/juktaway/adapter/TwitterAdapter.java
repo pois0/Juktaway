@@ -168,7 +168,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         Status status = row.getStatus();
         if (status != null && status.isRetweeted()) {
             Status retweet = status.getRetweetedStatus();
-            if (retweet != null && status.getUser().getId() == AccessTokenManager.getUserId()) {
+            if (retweet != null && status.getUser().getId() == AccessTokenManager.INSTANCE.getUserId()) {
                 FavRetweetManager.INSTANCE.setRtId(retweet.getId(), status.getId());
             }
         }
@@ -297,7 +297,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
     @SuppressLint("SetTextI18n")
     private void renderMessage(ViewHolder holder, final DirectMessage message) {
 
-        long userId = AccessTokenManager.getUserId();
+        long userId = AccessTokenManager.INSTANCE.getUserId();
 
         holder.mDoRetweet.setVisibility(View.GONE);
         holder.mDoFav.setVisibility(View.GONE);
@@ -330,7 +330,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         holder.mRetweetContainer.setVisibility(View.GONE);
         holder.mImagesContainer.setVisibility(View.GONE);
         holder.mImagesContainerWrapper.setVisibility(View.GONE);
-        UserIconManager.displayUserIcon(message.getSender(), holder.mIcon);
+        UserIconManager.INSTANCE.displayUserIcon(message.getSender(), holder.mIcon);
         holder.mIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {
@@ -347,7 +347,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
     private void renderStatus(final ViewHolder holder, final Status status, Status retweet,
                               User favorite) {
 
-        long userId = AccessTokenManager.getUserId();
+        long userId = AccessTokenManager.INSTANCE.getUserId();
 
         if (status.getFavoriteCount() > 0) {
             holder.mFavCount.setText(String.valueOf(status.getFavoriteCount()));
@@ -509,7 +509,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
         } else {
             holder.mLock.setVisibility(View.INVISIBLE);
         }
-        UserIconManager.displayUserIcon(status.getUser(), holder.mIcon);
+        UserIconManager.INSTANCE.displayUserIcon(status.getUser(), holder.mIcon);
         holder.mIcon.setOnClickListener(new View.OnClickListener() {
             @Override
             public void onClick(View v) {

@@ -29,7 +29,7 @@ public class TwitterManager {
     private static boolean sTwitterStreamConnected;
 
     public static void switchAccessToken(final AccessToken accessToken) {
-        AccessTokenManager.setAccessToken(accessToken);
+        AccessTokenManager.INSTANCE.setAccessToken(accessToken);
         if (BasicSettings.INSTANCE.getStreamingMode()) {
             MessageUtil.INSTANCE.showToast(R.string.toast_destroy_streaming);
             sUserStreamAdapter.stop();
@@ -72,7 +72,7 @@ public class TwitterManager {
         }
         Twitter twitter = getTwitterInstance();
 
-        AccessToken token = AccessTokenManager.getAccessToken();
+        AccessToken token = AccessTokenManager.INSTANCE.getAccessToken();
         if (token != null) {
             twitter.setOAuthAccessToken(token);
             // アクセストークンまである時だけキャッシュしておく
@@ -94,10 +94,7 @@ public class TwitterManager {
     }
 
     public static TwitterStream getTwitterStream() {
-        AccessToken token = AccessTokenManager.getAccessToken();
-        if (token == null) {
-            return null;
-        }
+        AccessToken token = AccessTokenManager.INSTANCE.getAccessToken();
         ConfigurationBuilder configurationBuilder = new ConfigurationBuilder();
         twitter4j.conf.Configuration conf = configurationBuilder.setOAuthConsumerKey(getConsumerKey())
                 .setOAuthConsumerSecret(getConsumerSecret())
@@ -116,7 +113,7 @@ public class TwitterManager {
         if (sTwitterStream != null) {
             if (!sTwitterStreamConnected) {
                 sUserStreamAdapter.start();
-                sTwitterStream.setOAuthAccessToken(AccessTokenManager.getAccessToken());
+                sTwitterStream.setOAuthAccessToken(AccessTokenManager.INSTANCE.getAccessToken());
                 sTwitterStream.user();
             }
             return;
