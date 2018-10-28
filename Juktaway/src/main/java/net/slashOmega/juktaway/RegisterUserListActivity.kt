@@ -33,12 +33,13 @@ class RegisterUserListActivity : FragmentActivity(), LoaderManager.LoaderCallbac
             setDisplayHomeAsUpEnabled(true)
         }
 
-        list_list.adapter = RegisterListAdapter(this,
+        mAdapter = RegisterListAdapter(this,
                 R.layout.row_subscribe_user_list, intent.getLongExtra("userId", -1))
 
         supportLoaderManager.initLoader(0, Bundle(1).apply {
                     putLong("userId", intent.getLongExtra("userId", -1))
                 }, this)
+        list_list.adapter = mAdapter
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
