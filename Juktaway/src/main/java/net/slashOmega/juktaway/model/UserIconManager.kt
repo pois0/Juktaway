@@ -1,109 +1,85 @@
 package net.slashOmega.juktaway.model
 
 import android.content.Context
-import android.os.AsyncTask
-import android.util.Log
+import android.database.sqlite.SQLiteDatabase
 import android.widget.ImageView
-import com.google.gson.Gson
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.util.ImageUtil
-import net.slashOmega.juktaway.settings.BasicSettings.UserIconSize.*
-import twitter4j.ResponseList
+import org.jetbrains.anko.db.*
 import twitter4j.TwitterException
 import twitter4j.User
-import java.util.HashMap
 
 /**
- * Created on 2018/10/18.
+ * Created on 2018/11/01.
  */
 object UserIconManager {
-    class LookUpUsersTask: AsyncTask<Long, Void, ResponseList<User>>() {
-        override fun doInBackground(vararg params: Long?): ResponseList<User>? {
-            val ge = mutableListOf<Long>()
-            for (e in params) { e?.let { ge.add(it) } ?: return null }
+    class UserInfoDatabaseOpenHelper(c: Context): ManagedSQLiteOpenHelper(c, "justaway.db", null, 1) {
+        companion object {
+            const val tableName = "userIcon"
+            private var instance :UserInfoDatabaseOpenHelper? = null
 
-            return try {
-                TwitterManager.getTwitter().lookupUsers(*ge.toLongArray())
-            } catch (e: TwitterException) {
-                e.printStackTrace()
-                null
-            }
+            fun getInstance() = instance ?: UserInfoDatabaseOpenHelper(JuktawayApplication.app)
         }
 
-        override fun onPostExecute(result: ResponseList<User>?) {
-            if (result == null) return
-            sUserIconMap.clear()
-            sUserNameMap.clear()
-            for (user in result) {
-                sUserIconMap[user.id] = user.biggerProfileImageURL
-                sUserNameMap[user.id] = user.name
-            }
-            val gson = Gson()
-            sharedPreferences.edit().apply {
-                clear()
-                putString(PREF_KEY_USER_ICON_MAP, gson.toJson(sUserIconMap))
-                putString(PREF_KEY_USER_NAME_MAP, gson.toJson(sUserNameMap))
-            }.apply()
+        override fun onCreate(db: SQLiteDatabase?) {
+            db?.createTable(tableName, true,
+                    "userId" to INTEGER + PRIMARY_KEY + UNIQUE,
+                    "iconUrl" to TEXT + NOT_NULL,
+                    "name" to TEXT + NOT_NULL)
         }
-    }
 
-    private const val PREF_NAME_USER_ICON_MAP = "user_icon_map"
-    private const val PREF_KEY_USER_ICON_MAP = "data/v2"
-    private var sUserIconMap = HashMap<Long, String>()
-
-    private const val PREF_KEY_USER_NAME_MAP = "data/name"
-    private var sUserNameMap = HashMap<Long, String>()
-
-    private val sharedPreferences by lazy {
-        JuktawayApplication.app.getSharedPreferences(PREF_NAME_USER_ICON_MAP, Context.MODE_PRIVATE)
+        override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}
     }
 
     fun displayUserIcon(user: User, view: ImageView) {
         val url = user.run { when (BasicSettings.userIconSize) {
-            LARGE -> biggerProfileImageURL
-            NORMAL -> profileImageURL
-            SMALL -> miniProfileImageURL
+            BasicSettings.UserIconSize.LARGE -> biggerProfileImageURL
+            BasicSettings.UserIconSize.NORMAL -> profileImageURL
+            BasicSettings.UserIconSize.SMALL -> miniProfileImageURL
             else -> return
         }}
         ImageUtil.displayImage(url, view, BasicSettings.userIconRoundedOn)
     }
 
-    fun getName(userId: Long) = sUserNameMap[userId] ?: ""
+    fun getName(userId: Long): String = UserInfoDatabaseOpenHelper.run { getInstance().use {
+        select(tableName, "name")
+                .whereArgs("(userId = {id})", "id" to userId)
+                .parseSingle(StringParser)
+    }}
 
     fun displayUserIcon(userId: Long, view: ImageView) {
-        sUserIconMap[userId]?.let { ImageUtil.displayRoundedImage(it, view) }
-                ?: view.setImageDrawable(null)
+        val url = UserInfoDatabaseOpenHelper.run { getInstance().use {
+                select(tableName, "iconUrl")
+                        .whereArgs("(userId) = {id}", "id" to userId)
+                        .parseSingle(StringParser)
+            }}
+        ImageUtil.displayRoundedImage(url, view)
     }
 
     fun addUserIconMap(user: User) {
-        val gson = Gson()
-        sharedPreferences.getString(PREF_KEY_USER_ICON_MAP, null)?.let {
-            sUserIconMap = gson.fromJson(it, sUserIconMap.javaClass)
-        }
-        sharedPreferences.getString(PREF_KEY_USER_NAME_MAP, null)?.let {
-            sUserNameMap = gson.fromJson(it, sUserNameMap.javaClass)
-        }
-        sUserIconMap[user.id] = user.biggerProfileImageURL
-        sUserNameMap[user.id] = user.name
-        sharedPreferences.edit().apply {
-            clear()
-            putString(PREF_KEY_USER_ICON_MAP, gson.toJson(sUserIconMap))
-            putString(PREF_KEY_USER_NAME_MAP, gson.toJson(sUserNameMap))
-        }.apply()
+        UserInfoDatabaseOpenHelper.run { getInstance().use {
+            insert(tableName, "userId" to user.id, "iconUrl" to user.biggerProfileImageURL, "name" to user.name)
+        }}
     }
 
     fun warmUpUserIconMap() {
-        val accessTokens = AccessTokenManager.getAccessTokens()
-        if (accessTokens.isEmpty()) return
-        val gson = Gson()
-        sharedPreferences.getString(PREF_KEY_USER_ICON_MAP, null)?.let {
-            Log.d("nyo", it)
-            sUserIconMap = gson.fromJson(it, sUserIconMap.javaClass)
+        GlobalScope.launch {
+            UserInfoDatabaseOpenHelper.run { getInstance().use {
+                val data = select(tableName, "userId").parseList(LongParser)
+                if (data.isNotEmpty()) try {
+                    val users = TwitterManager.getTwitter().lookupUsers(*data.toLongArray())
+                    for (u in users) {
+                        update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
+                                .whereArgs("(userId = {userId})", "userId" to u.id)
+                                .exec()
+                    }
+                } catch (e: TwitterException) {
+                    e.printStackTrace()
+                }
+            }}
         }
-        sharedPreferences.getString(PREF_KEY_USER_NAME_MAP, null)?.let {
-            sUserNameMap = gson.fromJson(it, sUserNameMap.javaClass)
-        }
-        LookUpUsersTask().execute(*(accessTokens.map { it.userId }).toTypedArray())
     }
 }
