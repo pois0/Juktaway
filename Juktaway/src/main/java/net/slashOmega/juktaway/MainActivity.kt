@@ -318,7 +318,7 @@ class MainActivity: FragmentActivity() {
         }, 1000)
 
         if (mSwitchAccessToken != null) {
-            TwitterManager.switchAccessToken(mSwitchAccessToken)
+            TwitterManager.switchAccessToken(mSwitchAccessToken!!)
             mSwitchAccessToken = null
         }
         TwitterManager.resumeStreaming()

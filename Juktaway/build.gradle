@@ -1,6 +1,5 @@
 apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
-//apply plugin: 'kotlin-kapt'
 apply plugin: 'kotlin-android-extensions'
 
 dependencies {
@@ -20,7 +19,7 @@ dependencies {
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "com.google.guava:guava:25.0-android"
     implementation "de.greenrobot:eventbus:2.2.0"
-    kapt "com.android.databinding:compiler:3.1.4"
+
 
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"

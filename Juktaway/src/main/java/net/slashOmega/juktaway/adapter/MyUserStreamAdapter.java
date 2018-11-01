@@ -80,7 +80,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
         if (mStopped) {
             return;
         }
-        if (!Relationship.isVisible(status)) {
+        if (!Relationship.INSTANCE.isVisible(status)) {
             return;
         }
         Row row = Row.Companion.newStatus(status);
