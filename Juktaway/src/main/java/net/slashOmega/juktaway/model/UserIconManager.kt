@@ -59,18 +59,20 @@ object UserIconManager {
     }
 
     fun warmUpUserIconMap() {
-        GlobalScope.launch {
-            dbUse {
-                val data = select(tableName, "userId").parseList(LongParser)
-                if (data.isNotEmpty()) try {
-                    val users = TwitterManager.getTwitter().lookupUsers(*data.toLongArray())
-                    for (u in users) {
-                        update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
-                                .whereArgs("(userId = {userId})", "userId" to u.id)
-                                .exec()
+        if (AccessTokenManager.getAccessToken() != null) {
+            GlobalScope.launch {
+                dbUse {
+                    val data = select(tableName, "userId").parseList(LongParser)
+                    if (data.isNotEmpty()) try {
+                        val users = TwitterManager.getTwitter().lookupUsers(*data.toLongArray())
+                        for (u in users) {
+                            update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
+                                    .whereArgs("(userId = {userId})", "userId" to u.id)
+                                    .exec()
+                        }
+                    } catch (e: TwitterException) {
+                        e.printStackTrace()
                     }
-                } catch (e: TwitterException) {
-                    e.printStackTrace()
                 }
             }
         }

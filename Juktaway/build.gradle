@@ -48,7 +48,7 @@ android {
         //noinspection OldTargetApi
         targetSdkVersion 24
 
-        multiDexEnabled false
+        multiDexEnabled true
         
         versionCode 102
         versionName '1.0.102'
