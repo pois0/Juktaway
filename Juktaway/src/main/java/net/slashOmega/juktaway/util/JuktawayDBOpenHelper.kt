@@ -17,9 +17,7 @@ class JuktawayDBOpenHelper(c: Context): ManagedSQLiteOpenHelper(c, "justaway.db"
         }
     }
 
-    override fun onCreate(db: SQLiteDatabase?) {
-        UserIconManager.dbInit(db)
-    }
+    override fun onCreate(db: SQLiteDatabase?) {}
 
     override fun onUpgrade(db: SQLiteDatabase?, oldVersion: Int, newVersion: Int) {}
 }

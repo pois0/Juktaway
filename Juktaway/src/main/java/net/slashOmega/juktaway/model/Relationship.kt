@@ -9,11 +9,6 @@ import twitter4j.Twitter
 import twitter4j.TwitterException
 
 object Relationship {
-    private val mIsBlockMap = LongSparseArray<Boolean>()
-    private val mIsOfficialMuteMap = LongSparseArray<Boolean>()
-    private val mIsNoRetweetMap = LongSparseArray<Boolean>()
-    private val mMyIDMap = LongSparseArray<Boolean>()
-
     private val blockList = mutableListOf<Long>()
     private val officialMuteList = mutableListOf<Long>()
     private val noRetweetList = mutableListOf<Long>()
