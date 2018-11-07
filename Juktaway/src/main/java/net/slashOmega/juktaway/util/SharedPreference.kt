@@ -8,12 +8,34 @@ import kotlin.reflect.KProperty
 /**
  * Created on 2018/11/02.
  */
-class StringSharedPreference(key: String) {
-    private val sharedPreferences by lazy {
-        JuktawayApplication.app.getSharedPreferences(key, Context.MODE_PRIVATE)
+class SharedPreference<T>(prefName: String, private val key: String, private val default: T) {
+    private val pref by lazy {
+        JuktawayApplication.app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
     }
 
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): String {
-        
+    @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T
+            = pref.run {
+        when (default) {
+            is Int -> getInt(key, default)
+            is Long -> getLong(key, default)
+            is Float -> getFloat(key, default)
+            is String -> getString(key, default)
+            is Boolean -> getBoolean(key, default)
+            else -> throw IllegalArgumentException()
+        } as T
+    }
+
+    operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
+        pref.edit().run {
+            when (default) {
+                is Int -> putInt(key, value as Int)
+                is Long -> putLong(key, value as Long)
+                is Float -> putFloat(key, value as Float)
+                is String -> putString(key, value as String)
+                is Boolean -> putBoolean(key, value as Boolean)
+                else -> throw IllegalArgumentException()
+            }
+        }.apply()
     }
 }
