@@ -26,6 +26,9 @@ import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.MuteSettings
+import net.slashOmega.juktaway.settings.mute.SourceMute
+import net.slashOmega.juktaway.settings.mute.UserMute
+import net.slashOmega.juktaway.settings.mute.WordMute
 import net.slashOmega.juktaway.util.ActionUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
@@ -389,8 +392,7 @@ class StatusMenuFragment: DialogFragment() {
             AlertDialog.Builder(activity)
                     .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.source)))
                     .setPositiveButton(R.string.button_ok) { _, _->
-                        MuteSettings.addSource(StatusUtil.getClientName(source.source))
-                        MuteSettings.saveMuteSettings()
+                        SourceMute += StatusUtil.getClientName(source.source)
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }
@@ -406,8 +408,7 @@ class StatusMenuFragment: DialogFragment() {
                 AlertDialog.Builder(activity)
                         .setMessage(String.format(getString(R.string.context_create_mute), "#" + hashtag.text))
                         .setPositiveButton(R.string.button_ok) { _, _ ->
-                            MuteSettings.addWord("#" + hashtag.text)
-                            MuteSettings.saveMuteSettings()
+                            WordMute += "#" + hashtag.text
                             MessageUtil.showToast(R.string.toast_create_mute)
                             dismiss()
                         }
@@ -423,6 +424,7 @@ class StatusMenuFragment: DialogFragment() {
             AlertDialog.Builder(activity)
                     .setMessage(String.format(getString(R.string.context_create_mute), "@" + source.user.screenName))
                     .setPositiveButton(R.string.button_ok) { _, _ ->
+                        UserMute
                         MuteSettings.addUser(source.user.id, source.user.screenName)
                         MuteSettings.saveMuteSettings()
                         MessageUtil.showToast(R.string.toast_create_mute)

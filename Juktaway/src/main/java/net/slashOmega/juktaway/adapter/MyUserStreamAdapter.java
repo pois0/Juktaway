@@ -17,7 +17,7 @@ import net.slashOmega.juktaway.model.FavRetweetManager;
 import net.slashOmega.juktaway.model.Relationship;
 import net.slashOmega.juktaway.model.Row;
 import net.slashOmega.juktaway.model.TwitterManager;
-import net.slashOmega.juktaway.settings.MuteSettings;
+import net.slashOmega.juktaway.settings.mute.MuteSettings;
 import twitter4j.DirectMessage;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;

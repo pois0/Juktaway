@@ -10,6 +10,7 @@ import android.widget.EditText
 import android.widget.TextView
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.settings.MuteSettings
+import net.slashOmega.juktaway.settings.mute.WordMute
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 
@@ -18,14 +19,13 @@ import net.slashOmega.juktaway.util.MessageUtil
  */
 internal class WordFragment: MuteFragmentBase<String>() {
     override val listId: Int = R.id.list
-    override val currentMuteTargets: List<String> = MuteSettings.getWords()
+    override val currentMuteTargets: List<String> = WordMute.getAllItems()
     override fun getAdapter() = object: MuteTargetAdapter<String>(activity!!, R.layout.row_word) {
         override fun String.getDisplayText(): String = this
 
         override val onPositiveButtonClicked: (String) -> (DialogInterface, Int) -> Unit = { { _, _ ->
             remove(it)
-            MuteSettings.removeWord(it)
-            MuteSettings.saveMuteSettings()
+            WordMute -= it
         }}
         override val onNegativeButtonClicked: (String) -> (DialogInterface, Int) -> Unit = {{_,_->}}
     }
@@ -43,8 +43,7 @@ internal class WordFragment: MuteFragmentBase<String>() {
                         .setPositiveButton(R.string.button_save) { _, _ ->
                             editText.text.toString().takeIf { it.isEmpty() }?.let { word ->
                                 mAdapter.add(word)
-                                MuteSettings.addWord(word)
-                                MuteSettings.saveMuteSettings()
+                                WordMute += word
                                 MessageUtil.showToast(R.string.toast_create_mute)
                             }
                         }

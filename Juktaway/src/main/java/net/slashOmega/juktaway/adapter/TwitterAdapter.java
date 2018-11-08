@@ -35,7 +35,7 @@ import net.slashOmega.juktaway.model.FavRetweetManager;
 import net.slashOmega.juktaway.model.Row;
 import net.slashOmega.juktaway.model.UserIconManager;
 import net.slashOmega.juktaway.settings.BasicSettings;
-import net.slashOmega.juktaway.settings.MuteSettings;
+import net.slashOmega.juktaway.settings.mute.MuteSettings;
 import net.slashOmega.juktaway.util.ActionUtil;
 import net.slashOmega.juktaway.util.ImageUtil;
 import net.slashOmega.juktaway.util.MessageUtil;

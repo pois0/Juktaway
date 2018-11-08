@@ -34,7 +34,6 @@ class JuktawayApplication: MultiDexApplication() {
         ImageUtil.init()
 
         // load setting files
-        MuteSettings.init()
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
         Relationship.init()

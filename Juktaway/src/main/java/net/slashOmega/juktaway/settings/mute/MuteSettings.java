@@ -1,4 +1,4 @@
-package net.slashOmega.juktaway.settings;
+package net.slashOmega.juktaway.settings.mute;
 
 import android.annotation.SuppressLint;
 import android.content.Context;
