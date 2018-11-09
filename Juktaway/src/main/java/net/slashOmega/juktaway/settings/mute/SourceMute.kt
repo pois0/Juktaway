@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.settings.mute
 
+import android.util.Log
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
 import org.jetbrains.anko.db.createTable
@@ -10,7 +11,7 @@ import org.jetbrains.anko.db.createTable
 
 object SourceMute: Mute<String>() {
     private const val dbSource = "source"
-    private const val tableName = "tableName"
+    private const val tableName = "sourceTable"
 
     init { dbUse {
         createTable(tableName, true,

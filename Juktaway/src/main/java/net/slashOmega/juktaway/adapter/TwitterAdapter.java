@@ -35,7 +35,7 @@ import net.slashOmega.juktaway.model.FavRetweetManager;
 import net.slashOmega.juktaway.model.Row;
 import net.slashOmega.juktaway.model.UserIconManager;
 import net.slashOmega.juktaway.settings.BasicSettings;
-import net.slashOmega.juktaway.settings.mute.MuteSettings;
+import net.slashOmega.juktaway.settings.mute.Mute;
 import net.slashOmega.juktaway.util.ActionUtil;
 import net.slashOmega.juktaway.util.ImageUtil;
 import net.slashOmega.juktaway.util.MessageUtil;
@@ -106,7 +106,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
     }
 
     public void extensionAdd(Row row) {
-        if (MuteSettings.isMute(row)) {
+        if (Mute.Companion.contains(row)) {
             return;
         }
         if (exists(row)) {
@@ -122,7 +122,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
 
     @Override
     public void add(Row row) {
-        if (MuteSettings.isMute(row)) {
+        if (Mute.Companion.contains(row)) {
             return;
         }
         if (exists(row)) {
@@ -138,7 +138,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
 
     @Override
     public void insert(Row row, int index) {
-        if (MuteSettings.isMute(row)) {
+        if (Mute.Companion.contains(row)) {
             return;
         }
         if (exists(row)) {

@@ -2,7 +2,6 @@ package net.slashOmega.juktaway.fragment.mute
 
 import android.content.DialogInterface
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.settings.MuteSettings
 import net.slashOmega.juktaway.settings.mute.SourceMute
 
 /**

@@ -9,7 +9,6 @@ import android.view.ViewGroup
 import android.widget.EditText
 import android.widget.TextView
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.settings.MuteSettings
 import net.slashOmega.juktaway.settings.mute.WordMute
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
@@ -41,7 +40,7 @@ internal class WordFragment: MuteFragmentBase<String>() {
                         .setTitle(R.string.title_create_mute_word)
                         .setView(editText)
                         .setPositiveButton(R.string.button_save) { _, _ ->
-                            editText.text.toString().takeIf { it.isEmpty() }?.let { word ->
+                            editText.text.toString().takeUnless { it.isEmpty() }?.let { word ->
                                 mAdapter.add(word)
                                 WordMute += word
                                 MessageUtil.showToast(R.string.toast_create_mute)

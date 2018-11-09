@@ -25,7 +25,6 @@ import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.plugin.TwiccaPlugin
-import net.slashOmega.juktaway.settings.MuteSettings
 import net.slashOmega.juktaway.settings.mute.SourceMute
 import net.slashOmega.juktaway.settings.mute.UserMute
 import net.slashOmega.juktaway.settings.mute.WordMute
@@ -424,9 +423,7 @@ class StatusMenuFragment: DialogFragment() {
             AlertDialog.Builder(activity)
                     .setMessage(String.format(getString(R.string.context_create_mute), "@" + source.user.screenName))
                     .setPositiveButton(R.string.button_ok) { _, _ ->
-                        UserMute
-                        MuteSettings.addUser(source.user.id, source.user.screenName)
-                        MuteSettings.saveMuteSettings()
+                        UserMute += source.user
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }

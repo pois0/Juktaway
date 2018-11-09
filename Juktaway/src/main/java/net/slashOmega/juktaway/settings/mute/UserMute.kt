@@ -8,27 +8,44 @@ import twitter4j.User
 /**
  * Created on 2018/11/09.
  */
-object UserMute: Mute<Long>() {
-    private const val tableName = "tableName"
-    private const val dbUser = "user"
+object UserMute: Mute<Pair<Long, String>>() {
+    private const val tableName = "userTable"
+    private const val dbUserId = "userId"
+    private const val dbScreenName = "screenName"
+
+    private val parser by lazy {
+        rowParser { id: Long, screenName: String -> Pair(id, screenName) }
+    }
 
     init { dbUse {
         createTable(tableName, true,
                 dbId to INTEGER + PRIMARY_KEY,
-                dbUser to INTEGER + NOT_NULL)
+                dbUserId to INTEGER + NOT_NULL,
+                dbScreenName to TEXT + NOT_NULL)
     }}
 
-    override fun plusAssign(t: Long) {
-        addUniqueRecord(tableName, dbUser, t)
+    override fun plusAssign(t: Pair<Long, String>) {
+        dbUse {
+            if (select(tableName, dbId)
+                            .whereArgs("$dbUserId = {data}", "data" to t.first)
+                            .parseList(LongParser)
+                            .isNullOrEmpty()) {
+                insert(tableName, dbUserId to t.first, dbScreenName to t.second)
+            }
+        }
     }
 
     operator fun plusAssign(u: User) {
-        plusAssign(u.id)
+        plusAssign(Pair(u.id, u.screenName))
     }
 
-    override fun minusAssign(t: Long) {
+    override fun minusAssign(t: Pair<Long, String>) {
+        minusAssign(t.first)
+    }
+
+    operator fun minusAssign(id: Long) {
         dbUse {
-            delete(tableName, "$dbUser = {id}", "id" to t)
+            delete(tableName, "$dbUserId = {id}", "id" to id)
         }
     }
 
@@ -36,11 +53,24 @@ object UserMute: Mute<Long>() {
         minusAssign(u.id)
     }
 
-    override fun getIds(t: Long): List<Long> = dbUse {
+    override fun getIds(t: Pair<Long, String>): List<Long> = getIds(t.first)
+
+    private fun getIds(id: Long): List<Long> = dbUse {
         select(tableName, dbId)
-                .whereArgs("$dbUser = {id}", "id" to t)
+                .whereArgs("$dbUserId = {id}", "id" to id)
                 .parseList(LongParser)
     }
 
     operator fun contains(u: User) = contains(u.id)
+
+    operator fun contains(id: Long) = dbUse {
+        select(tableName, dbUserId)
+                .whereArgs("$dbUserId = {id}", "id" to id)
+                .parseList(LongParser)
+    }.isNullOrEmpty().not()
+
+    override fun getAllItems(): List<Pair<Long, String>> = dbUse {
+        select(tableName, dbUserId, dbScreenName)
+                .parseList(parser)
+    }
 }

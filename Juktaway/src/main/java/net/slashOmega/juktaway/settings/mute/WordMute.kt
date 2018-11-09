@@ -10,7 +10,7 @@ import org.jetbrains.anko.db.createTable
  */
 
 object WordMute: Mute<String>() {
-    private const val tableName = "tableName"
+    private const val tableName = "wordTable"
     private const val dbWord = "word"
 
     init { dbUse {
@@ -31,7 +31,7 @@ object WordMute: Mute<String>() {
     }
 
     override fun plusAssign(t: String) {
-        addUniqueRecord(tableName, dbWord, dbWord to t)
+        addUniqueRecord(tableName, dbWord, t)
     }
 
     override fun minusAssign(t: String) {

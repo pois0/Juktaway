@@ -17,7 +17,7 @@ import net.slashOmega.juktaway.model.FavRetweetManager;
 import net.slashOmega.juktaway.model.Relationship;
 import net.slashOmega.juktaway.model.Row;
 import net.slashOmega.juktaway.model.TwitterManager;
-import net.slashOmega.juktaway.settings.mute.MuteSettings;
+import net.slashOmega.juktaway.settings.mute.Mute;
 import twitter4j.DirectMessage;
 import twitter4j.Status;
 import twitter4j.StatusDeletionNotice;
@@ -84,7 +84,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             return;
         }
         Row row = Row.Companion.newStatus(status);
-        if (MuteSettings.isMute(row)) {
+        if (Mute.Companion.contains(row)) {
             return;
         }
         long userId = AccessTokenManager.INSTANCE.getUserId();
@@ -173,7 +173,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             return;
         }
         Row row = Row.Companion.newDirectMessage(directMessage);
-        if (MuteSettings.isMute(row)) {
+        if (Mute.Companion.contains(row)) {
             return;
         }
         EventBus.getDefault().post(new NotificationEvent(row));
