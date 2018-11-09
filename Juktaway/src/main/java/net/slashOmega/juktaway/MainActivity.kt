@@ -18,7 +18,6 @@ import android.support.v4.view.ViewPager
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
@@ -205,15 +204,15 @@ class MainActivity: FragmentActivity() {
             }
         }
 
-        post_button.setOnClickListener { _ ->
-            startActivity(getIntent(PostActivity::class.java).also {
+        post_button.setOnClickListener {
+            startActivity(getIntent(PostActivity::class.java).also { intent ->
                 if (quick_tweet_layout.visibility == View.VISIBLE) {
                     with (quick_tweet_edit) {
                         if (!string.isEmpty()) {
-                            it.putExtra("status", string)
-                            it.putExtra("selection", string.length)
+                            intent.putExtra("status", string)
+                            intent.putExtra("selection", string.length)
                             mInReplyToStatus?.run {
-                                it.putExtra("inReplyToStatus", this)
+                                intent.putExtra("inReplyToStatus", this)
                             }
                             setText("")
                             clearFocus()
@@ -223,7 +222,7 @@ class MainActivity: FragmentActivity() {
             })
         }
 
-        post_button.setOnLongClickListener { _ ->
+        post_button.setOnLongClickListener {
             if (quick_tweet_layout.visibility == View.VISIBLE)
                 hideQuickPanel()
             else
@@ -402,9 +401,10 @@ class MainActivity: FragmentActivity() {
         savedInstanceState?.let {
             action_bar_streaming_button.setTextColor(it.getInt("signalButtonColor"))
             with (tab_menus) {
-                val tabColors = it.getIntArray("tabColors")
-                for (i in 0 until Math.min(childCount, tabColors.size)) {
-                    (getChildAt(i) as Button?)?.setTextColor(tabColors[i])
+                it.getIntArray("tabColors")?.let { colors ->
+                    for (i in 0 until Math.min(childCount, colors.size)) {
+                        (getChildAt(i) as Button?)?.setTextColor(colors[i])
+                    }
                 }
             }
         }

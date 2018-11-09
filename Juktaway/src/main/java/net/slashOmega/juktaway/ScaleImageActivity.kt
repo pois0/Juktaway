@@ -64,7 +64,7 @@ class ScaleImageActivity: FragmentActivity() {
                                 Date().time.toString() + ".jpg")
                         val output = FileOutputStream(file)
                         val data = ByteArray(1024)
-                        var count: Int = 0
+                        var count: Int
                         while (input.read(data).let {res ->
                                     count = res
                                     res != -1

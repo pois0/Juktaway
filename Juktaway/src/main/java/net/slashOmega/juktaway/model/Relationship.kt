@@ -1,6 +1,5 @@
 package net.slashOmega.juktaway.model
 
-import android.support.v4.util.LongSparseArray
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 

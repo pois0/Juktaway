@@ -39,7 +39,7 @@ class VideoActivity: FragmentActivity() {
 
             override fun onPostExecute(result: twitter4j.Status?) {
                 result?.run {
-                    StatusUtil.getVideoUrl(this)?.takeIf { it.isNotEmpty() }?.let {
+                    StatusUtil.getVideoUrl(this).takeIf { it.isNotEmpty() }?.let {
                         ref.get()?.run { setVideoURI(it) }
                     }
                 }
@@ -47,7 +47,7 @@ class VideoActivity: FragmentActivity() {
         }
     }
 
-    var musicWasPlaying = false
+    private var musicWasPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -62,7 +62,7 @@ class VideoActivity: FragmentActivity() {
             return
         }
 
-        val statusUrl = intent.extras.getString("statusUrl")
+        val statusUrl = intent?.extras?.getString("statusUrl")
         if (statusUrl != null && statusUrl.isNotEmpty()) {
             pattern.matcher(statusUrl)?.let {
                 if (it.find())
@@ -71,11 +71,9 @@ class VideoActivity: FragmentActivity() {
             }
         }
 
-        val videoUrl = intent.extras.getString("videoUrl")
-
-        if (videoUrl != null) {
-            setVideoURI(videoUrl)
-        } else {
+        intent?.extras?.getString("videoUrl")?.let {
+            setVideoURI(it)
+        } ?: run {
             MessageUtil.showToast("Missing videoUrl in Bundle")
             finish()
         }
