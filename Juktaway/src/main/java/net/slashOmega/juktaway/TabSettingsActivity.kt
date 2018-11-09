@@ -176,8 +176,8 @@ class TabSettingsActivity: FragmentActivity() {
         override fun getView(position: Int, view: View?, parent: ViewGroup?): View? {
             return (view ?: mInflater.inflate(this.mLayout, null))?.apply {
                 val tab = tabs[position]
-                tab_icon.setText(tab.icon)
-                name.text = tab.getName()
+                tab_icon.setText(tab.getIcon())
+                name.text = tab.name
 
                 handle.apply {
                     if (mRemoveMode) {

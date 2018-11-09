@@ -473,7 +473,7 @@ class MainActivity: FragmentActivity() {
                             (60 * resources.displayMetrics.density + 0.5f).toInt(),
                             LinearLayout.LayoutParams.WRAP_CONTENT
                     )
-                    setText(tab.icon)
+                    setText(tab.getIcon())
                     textSize = 22f
                     setTextColor(outValueTextColor.data)
                     setBackgroundResource(outValueBackground.resourceId)
@@ -483,21 +483,21 @@ class MainActivity: FragmentActivity() {
                 })
                 when (tab.id) {
                     TabManager.TIMELINE_TAB_ID ->
-                        mMainPagerAdapter.addTab(TimelineFragment::class, null, tab.getName(), tab.id)
+                        mMainPagerAdapter.addTab(TimelineFragment::class, null, tab.name, tab.id)
                     TabManager.INTERACTIONS_TAB_ID ->
-                        mMainPagerAdapter.addTab(InteractionsFragment::class, null, tab.getName(), tab.id)
+                        mMainPagerAdapter.addTab(InteractionsFragment::class, null, tab.name, tab.id)
                     TabManager.DIRECT_MESSAGES_TAB_ID ->
-                        mMainPagerAdapter.addTab(DirectMessagesFragment::class, null, tab.getName(), tab.id)
+                        mMainPagerAdapter.addTab(DirectMessagesFragment::class, null, tab.name, tab.id)
                     TabManager.FAVORITES_TAB_ID ->
-                        mMainPagerAdapter.addTab(FavoritesFragment::class, null, tab.getName(), tab.id)
+                        mMainPagerAdapter.addTab(FavoritesFragment::class, null, tab.name, tab.id)
                     in Long.MIN_VALUE..TabManager.SEARCH_TAB_ID ->
                         mMainPagerAdapter.addTab(SearchFragment::class,
                                 Bundle().apply { putString("searchWord", tab.name) },
-                                tab.getName(), tab.id, tab.name)
+                                tab.name, tab.id, tab.name)
                     else ->
                         mMainPagerAdapter.addTab(UserListFragment::class,
                                 Bundle().apply { putLong("userListId", tab.id) },
-                                tab.getName(), tab.id)
+                                tab.name, tab.id)
                 }
                 mMainPagerAdapter.notifyDataSetChanged()
 
