@@ -12,6 +12,7 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
 import android.support.v4.view.ViewPager
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -39,14 +40,6 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         private const val OPTION_MENU_CREATE_NO_RETWEET = 3
         private const val OPTION_MENU_DESTROY_OFFICIAL_MUTE = 5
         private const val OPTION_MENU_DESTROY_NO_RETWEET = 6
-
-        private fun ProfileActivity.restart() {
-            startActivity(Intent().apply {
-                setClass(this@restart, ProfileActivity::class.java)
-                putExtra("userId", mUser.id)
-            })
-            finish()
-        }
 
         private class CreateBlockTask(context: ProfileActivity) : AsyncTask<Long, Void, Boolean>() {
             private val ref = WeakReference(context)
@@ -257,9 +250,8 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         val args = Bundle(1)
         with (intent) {
             if (Intent.ACTION_VIEW == action && data != null
-                    && data?.lastPathSegment != null
-                    && data?.lastPathSegment?.isNotEmpty() == true) {
-                args.putString("screenName", data.lastPathSegment)
+                    && data?.lastPathSegment.isNullOrEmpty().not()) {
+                args.putString("screenName", data!!.lastPathSegment)
             } else {
                 val screenName = getStringExtra("screenName")
                 if (screenName != null) {
@@ -522,11 +514,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         }.notifyDataSetChanged()
         list_pager.offscreenPageLimit = 5
 
-        val tabs = arrayOf<TextView>(statuses_count, friends_count, followers_count, listed_count, favourites_count)
+        val tabs = listOf<TextView>(statuses_count, friends_count, followers_count, listed_count, favourites_count)
 
         val colorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue)
         val colorWhite = ThemeUtil.getThemeTextColor(R.attr.text_color)
 
+        tabs.forEach { it.setTextColor(colorWhite) }
         tabs[0].setTextColor(colorBlue)
 
         list_pager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
@@ -546,4 +539,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
     }
 
     override fun onLoaderReset(loader: Loader<Profile>) {}
+
+    private fun restart() {
+        startActivity(Intent().apply {
+            setClass(this@ProfileActivity, ProfileActivity::class.java)
+            putExtra("userId", mUser.id)
+        })
+        finish()
+    }
 }

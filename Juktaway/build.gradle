@@ -23,7 +23,7 @@ dependencies {
 
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
-    implementation "org.twitter4j:twitter4j-media-support:${twitter4jVersion}"
+    //implementation "org.twitter4j:twitter4j-media-support:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
     implementation "com.nostra13.universalimageloader:universal-image-loader:1.9.1"
     implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
