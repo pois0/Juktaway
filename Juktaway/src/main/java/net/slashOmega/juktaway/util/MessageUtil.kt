@@ -4,6 +4,7 @@ import android.app.ProgressDialog
 import android.content.Context
 import android.widget.Toast
 import net.slashOmega.juktaway.JuktawayApplication
+import org.jetbrains.anko.toast
 
 object MessageUtil {
     private var sProgressDialog: ProgressDialog? = null
@@ -14,9 +15,7 @@ object MessageUtil {
     }
 
     fun showToast(id: Int) {
-        val application = JuktawayApplication.app
-        val text = application.getString(id)
-        Toast.makeText(application, text, Toast.LENGTH_SHORT).show()
+        JuktawayApplication.app.toast(id)
     }
 
     fun showToast(id: Int, description: String) {
