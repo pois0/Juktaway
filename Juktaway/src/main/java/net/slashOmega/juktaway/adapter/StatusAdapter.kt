@@ -1,21 +1,34 @@
 package net.slashOmega.juktaway.adapter
 
 import android.annotation.SuppressLint
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Typeface
-import android.support.v4.util.LongSparseArray
+import android.os.Bundle
+import android.support.v4.app.DialogFragment
+import android.support.v4.content.ContextCompat
+import android.text.TextUtils
+import android.util.EventLog
+import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
+import android.widget.LinearLayout
+import de.greenrobot.event.EventBus
+import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.event.AlertDialogEvent
+import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.UserIconManager
+import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
-import net.slashOmega.juktaway.util.ImageUtil
-import net.slashOmega.juktaway.widget.FontelloTextView
+import net.slashOmega.juktaway.util.*
+import net.slashOmega.juktaway.util.TwitterUtil.omitCount
 import org.jetbrains.anko.*
 import twitter4j.Status
 
@@ -24,6 +37,40 @@ import twitter4j.Status
  */
 
 class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdapter<Row>(mContext, mLayout) {
+    companion object {
+        class DestroyRetweetDialogFragment: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
+                AlertDialog.Builder(activity)
+                        .setTitle(R.string.confirm_destroy_retweet)
+                        .setMessage(it.text)
+                        .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
+                            ActionUtil.doDestroyRetweet(it)
+                            dismiss()
+                        }
+                        .setNegativeButton(getString(R.string.button_cancel)) { _, _ -> dismiss() }
+                        .create()
+            } ?: throw IllegalStateException()
+        }
+
+        class RetweetDialogFragment: DialogFragment() {
+            override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
+                AlertDialog.Builder(activity)
+                        .setTitle(R.string.confirm_retweet)
+                        .setMessage(it.text)
+                        .setNeutralButton(R.string.button_quote) { _, _ ->
+                            ActionUtil.doQuote(it, activity!!)
+                            dismiss()
+                        }
+                        .setPositiveButton(R.string.button_retweet) { _, _ ->
+                            ActionUtil.doRetweet(it.id)
+                            dismiss()
+                        }
+                        .setNegativeButton(R.string.button_cancel) { dialog, which -> dismiss() }
+                        .create()
+            } ?: throw IllegalStateException()
+        }
+    }
+
     private var mColorBlue = 0
     private val limit = 100
     private var mLimit = limit
@@ -138,324 +185,399 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
 
     @SuppressLint("SetTextI18n")
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = parent.context.run {
-        val row = getItem(position)!!
-        val user = row.status?.user ?: row.message!!.sender
-
-        relativeLayout {
-            lparams(matchParent, android.R.attr.listPreferredItemHeight)
-
-            relativeLayout {
-                bottomPadding = dip(3)
-                leftPadding = dip(6)
-                rightPadding = dip(7)
-                topPadding = dip(4)
-                //tools:layout_height = wrap_content //not support attribute
-
+        getItem(position)!!.takeIf { it.isStatus }?.let { row ->
+            row.status?.let { status ->
+                val s = status.retweetedStatus ?: status
                 relativeLayout {
-                    id = R.id.action_container
-                    fontelloTextView {
-                        id = R.id.action_icon
-                        gravity = Gravity.RIGHT
-                        textSize = 12f //sp
-                        //tools:text = �� //not support attribute
-                    }.lparams(width = dip(48)) {
+                    bottomPadding = dip(3)
+                    leftPadding = dip(6)
+                    rightPadding = dip(7)
+                    topPadding = dip(4)
+                    lparams(matchParent, android.R.attr.listPreferredItemHeight)
+
+                    relativeLayout {
+                        id = R.id.action_container
+
+                        fontelloTextView {
+                            id = R.id.action_icon
+                            gravity = Gravity.RIGHT
+                            textSize = 12f //sp
+                            //tools:text = �� //not support attribute
+                        }.lparams(width = dip(48)) {
+                            rightMargin = dip(6)
+                            bottomMargin = dip(2)
+                        }
+
+                        textView {
+                            id = R.id.action_by_display_name
+                            textSize = 12f //sp
+                            setTypeface(typeface, Typeface.BOLD)
+                            //tools:text = Justaway Factory //not support attribute
+                        }.lparams {
+                            rightOf(R.id.action_icon)
+                        }
+
+                        textView {
+                            id = R.id.action_by_screen_name
+                            textColor = Color.parseColor("#666666")
+                            textSize = 10f //sp
+                            //tools:ignore = SmallSp //not support attribute
+                            //tools:text = \@justawayfactory //not support attribute
+                        }.lparams {
+                            rightOf(R.id.action_by_display_name)
+                            leftMargin = dip(4)
+                        }
+                    }.lparams(width = matchParent)
+
+                    imageView {
+                        id = R.id.icon
+                        topPadding = dip(2)
+                        contentDescription = resources.getString(R.string.description_icon)
+                        setOnClickListener {
+                            startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
+                        }
+                        //tools:src = @drawable/ic_launcher //not support attribute
+                    }.lparams(width = dip(48), height = dip(48)) {
+                        below(R.id.action_container)
+                        bottomMargin = dip(6)
                         rightMargin = dip(6)
-                        bottomMargin = dip(2)
+                        topMargin = dip(1)
                     }
 
                     textView {
-                        id = R.id.action_by_display_name
+                        id = R.id.display_name
                         textSize = 12f //sp
                         setTypeface(typeface, Typeface.BOLD)
+                        text = s.user.name
                         //tools:text = Justaway Factory //not support attribute
                     }.lparams {
-                        rightOf(R.id.action_icon)
-                    }
-
-                    textView {
-                        id = R.id.action_by_screen_name
-                        textColor = Color.parseColor("#666666")
-                        textSize = 10f //sp
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = \@justawayfactory //not support attribute
-                    }.lparams {
-                        rightOf(R.id.action_by_display_name)
-                        leftMargin = dip(4)
-                    }
-                }.lparams(width = matchParent)
-
-                imageView {
-                    id = R.id.icon
-                    topPadding = dip(2)
-                    contentDescription = resources.getString(R.string.description_icon)
-                    //tools:src = @drawable/ic_launcher //not support attribute
-                }.lparams(width = dip(48), height = dip(48)) {
-                    below(R.id.action_container)
-                    bottomMargin = dip(6)
-                    rightMargin = dip(6)
-                    topMargin = dip(1)
-                }
-
-                textView {
-                    id = R.id.display_name
-                    textSize = 12f //sp
-                    setTypeface(typeface, Typeface.BOLD)
-                    //tools:text = Justaway Factory //not support attribute
-                }.lparams {
-                    below(R.id.action_container)
-                    rightOf(R.id.icon)
-                    bottomMargin = dip(6)
-                }
-
-                textView {
-                    id = R.id.screen_name
-                    textColor = Color.parseColor("#666666")
-                    textSize = 10f //sp
-                    //android:lines = 1 //not support attribute
-                    //android:ellipsize = end //not support attribute
-                    //tools:ignore = SmallSp //not support attribute
-                    //tools:text = \@justawayfactory //not support attribute
-                }.lparams {
-                    leftMargin = dip(4)
-                    rightOf(R.id.display_name)
-                    baselineOf(R.id.display_name)
-                }
-
-                fontelloTextView {
-                    id = R.id.lock
-                    text = resources.getString(R.string.fontello_lock)
-                    textColor = Color.parseColor("#666666")
-                    textSize = 10f //sp
-                    //tools:ignore = SmallSp //not support attribute
-                }.lparams {
-                    rightOf(R.id.screen_name)
-                    baselineOf(R.id.display_name)
-                    leftMargin = dip(4)
-                }
-
-                textView {
-                    id = R.id.datetime_relative
-                    textColor = Color.parseColor("#666666")
-                    textSize = 10f //sp
-                    //tools:ignore = SmallSp //not support attribute
-                    //tools:text = 2H //not support attribute
-                }.lparams {
-                    alignParentRight()
-                    baselineOf(R.id.display_name)
-                }
-
-                textView {
-                    id = R.id.status
-                    textSize = 12f //sp
-                    //tools:text = Hello World. //not support attribute
-                }.lparams {
-                    rightOf(R.id.icon)
-                    below(R.id.display_name)
-                }
-
-                relativeLayout {
-                    id = R.id.quoted_tweet
-                    padding = dip(10)
-                    backgroundResource = R.drawable.quoted_tweet_frame
-
-                    textView {
-                        id = R.id.quoted_display_name
-                        textSize = 12f //sp
-                        setTypeface(typeface, Typeface.BOLD)
-                        //tools:text = Justaway Factory //not support attribute
-                    }.lparams {
+                        below(R.id.action_container)
+                        rightOf(R.id.icon)
                         bottomMargin = dip(6)
                     }
 
                     textView {
-                        id = R.id.quoted_screen_name
+                        id = R.id.screen_name
                         textColor = Color.parseColor("#666666")
                         textSize = 10f //sp
+                        text = "@" + s.user.screenName
                         //android:lines = 1 //not support attribute
                         //android:ellipsize = end //not support attribute
                         //tools:ignore = SmallSp //not support attribute
                         //tools:text = \@justawayfactory //not support attribute
                     }.lparams {
                         leftMargin = dip(4)
-                        rightOf(R.id.quoted_display_name)
-                        baselineOf(R.id.quoted_display_name)
+                        rightOf(R.id.display_name)
+                        baselineOf(R.id.display_name)
+                    }
+                    if (s.user.isProtected) {
+                        fontelloTextView {
+                            id = R.id.lock
+                            text = resources.getString(R.string.fontello_lock)
+                            textColor = Color.parseColor("#666666")
+                            textSize = 10f //sp
+                            //tools:ignore = SmallSp //not support attribute
+                        }.lparams {
+                            rightOf(R.id.screen_name)
+                            baselineOf(R.id.display_name)
+                            leftMargin = dip(4)
+                        }
                     }
 
                     textView {
-                        id = R.id.quoted_status
-                        textSize = 12f //sp
-                        //tools:text = Hello World. //not support attribute
+                        id = R.id.datetime_relative
+                        textColor = Color.parseColor("#666666")
+                        textSize = 10f //sp
+                        text = TimeUtil.getRelativeTime(s.createdAt)
+                        //tools:ignore = SmallSp //not support attribute
+                        //tools:text = 2H //not support attribute
                     }.lparams {
-                        below(R.id.quoted_display_name)
+                        alignParentRight()
+                        baselineOf(R.id.display_name)
                     }
 
-                    frameLayout {
-                        id = R.id.quoted_images_container_wrapper
+                    textView {
+                        id = R.id.status
+                        textSize = 12f //sp
+                        text = StatusUtil.generateUnderline(StatusUtil.getExpandedText(s))
+                        //tools:text = Hello World. //not support attribute
+                    }.lparams {
+                        rightOf(R.id.icon)
+                        below(R.id.display_name)
+                    }
 
-                        linearLayout {
-                            id = R.id.quoted_images_container
-                            orientation = LinearLayout.VERTICAL
+                    s.quotedStatus?.let { qs ->
+                        relativeLayout {
+                            id = R.id.quoted_tweet
+                            padding = dip(10)
+                            backgroundResource = R.drawable.quoted_tweet_frame
+
+                            textView {
+                                id = R.id.quoted_display_name
+                                textSize = 12f //sp
+                                setTypeface(typeface, Typeface.BOLD)
+                                text = qs.user.name
+                                //tools:text = Justaway Factory //not support attribute
+                            }.lparams {
+                                bottomMargin = dip(6)
+                            }
+
+                            textView {
+                                id = R.id.quoted_screen_name
+                                textColor = Color.parseColor("#666666")
+                                textSize = 10f //sp
+                                text = "@" + qs.user.screenName
+                                lines = 1
+                                ellipsize = TextUtils.TruncateAt.END
+                                //tools:ignore = SmallSp //not support attribute
+                                //tools:text = \@justawayfactory //not support attribute
+                            }.lparams {
+                                leftMargin = dip(4)
+                                rightOf(R.id.quoted_display_name)
+                                baselineOf(R.id.quoted_display_name)
+                            }
+
+                            textView {
+                                id = R.id.quoted_status
+                                textSize = 12f //sp
+                                text = qs.text
+                                //tools:text = Hello World. //not support attribute
+                            }.lparams {
+                                below(R.id.quoted_display_name)
+                            }
+
+                            if (BasicSettings.displayThumbnailOn) {
+                                frameLayout {
+                                    id = R.id.quoted_images_container_wrapper
+
+                                    val container = linearLayout {
+                                        id = R.id.quoted_images_container
+                                        orientation = LinearLayout.VERTICAL
+                                    }
+
+                                    val play = fontelloTextView {
+                                        id = R.id.quoted_play
+                                        text = resources.getString(R.string.fontello_play)
+                                        textColor = Color.parseColor("#ffffff")
+                                        textSize = 24f //sp
+                                    }.lparams {
+                                        gravity = Gravity.CENTER
+                                    }
+
+                                    ImageUtil.displayThumbnailImages(mContext, container, this, play, qs)
+                                }.lparams {
+                                    below(R.id.quoted_status)
+                                    bottomMargin = dip(4)
+                                    topMargin = dip(10)
+                                }
+                            }
+
+                        }.lparams(width = matchParent) {
+                            below(R.id.status)
+                            rightOf(R.id.icon)
+                            topMargin = dip(10)
+                            bottomMargin = dip(4)
+                        }
+                    }
+
+                    if (BasicSettings.displayThumbnailOn) {
+                        frameLayout {
+                            id = R.id.images_container_wrapper
+
+                            val container = linearLayout {
+                                id = R.id.images_container
+                                orientation = LinearLayout.VERTICAL
+                            }
+
+                            val play = fontelloTextView {
+                                id = R.id.play
+                                text = resources.getString(R.string.fontello_play)
+                                textColor = Color.parseColor("#ffffff")
+                                textSize = 24f //sp
+                            }.lparams {
+                                gravity = Gravity.CENTER
+                            }
+
+                            ImageUtil.displayThumbnailImages(mContext, container, this, play, s)
+                        }.lparams {
+                            below(R.id.quoted_tweet)
+                            rightOf(R.id.icon)
+                            bottomMargin = dip(4)
+                            topMargin = dip(10)
+                        }
+                    }
+
+                    relativeLayout {
+                        id = R.id.menu_and_via_container
+
+                        fontelloTextView {
+                            id = R.id.do_reply
+                            padding = dip(6)
+                            text = resources.getString(R.string.fontello_reply)
+                            textColor = Color.parseColor("#666666")
+                            textSize = dip(14).toFloat()
+                            setOnClickListener {
+                                ActionUtil.doReplyAll(s, mContext)
+                            }
+                            //tools:ignore = SpUsage //not support attribute
                         }
 
                         fontelloTextView {
-                            id = R.id.quoted_play
-                            text = resources.getString(R.string.fontello_play)
-                            textColor = Color.parseColor("#ffffff")
-                            textSize = 24f //sp
+                            id = R.id.do_retweet
+                            topPadding = dip(6)
+                            rightPadding = dip(4)
+                            bottomPadding = dip(6)
+                            leftPadding = dip(6)
+                            text = resources.getString(R.string.fontello_retweet)
+                            textColor = if (FavRetweetManager.getRtId(s) != null)
+                                ContextCompat.getColor(mContext, R.color.holo_green_light)
+                            else Color.parseColor("#666666")
+                            textSize = dip(14).toFloat()
+                            setOnClickListener {
+                                if (s.user.isProtected) {
+                                    MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share)
+                                    return@setOnClickListener
+                                }
+
+                                FavRetweetManager.getRtId(s)?.let { id ->
+                                    if (id == 0L) {
+                                        toast(R.string.toast_destroy_retweet_progress)
+                                    } else {
+                                        val dialog = DestroyRetweetDialogFragment().apply {
+                                            arguments = Bundle(1).apply { putSerializable("status", s) }
+                                        }
+                                        EventBus.getDefault().post(AlertDialogEvent(dialog))
+                                    }
+                                } ?: run {
+                                    val dialog = RetweetDialogFragment().apply {
+                                        arguments = Bundle(1).apply {
+                                            putSerializable("status", s)
+                                        }
+                                    }
+                                    EventBus.getDefault().post(AlertDialogEvent(dialog))
+                                }
+                            }
+                            //tools:ignore = SpUsage //not support attribute
                         }.lparams {
-                            gravity = Gravity.CENTER
+                            rightOf(R.id.do_reply)
+                            leftMargin = dip(22)
+                        }
+
+                        textView {
+                            id = R.id.retweet_count
+                            bottomPadding = dip(6)
+                            topPadding = dip(6)
+                            textColor = Color.parseColor("#999999")
+                            textSize = dip(10).toFloat()
+                            text = s.retweetCount.omitCount()
+                            //tools:ignore = SmallSp,SpUsage //not support attribute
+                            //tools:text = 12345 //not support attribute
+                        }.lparams(width = dip(32)) {
+                            rightOf(R.id.do_retweet)
+                        }
+
+                        fontelloTextView {
+                            id = R.id.do_fav
+                            topPadding = dip(6)
+                            rightPadding = dip(4)
+                            bottomPadding = dip(6)
+                            leftPadding = dip(2)
+                            text = resources.getString(R.string.fontello_star)
+                            if (FavRetweetManager.isFav(s)) {
+                                tag = "is_fav"
+                                textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
+                            } else {
+                                tag = "no_fav"
+                                textColor = Color.parseColor("#666666")
+                            }
+                            textSize = dip(14).toFloat()
+                            setOnClickListener {
+                                if (tag == "is_fav") {
+                                    tag = "no_fav"
+                                    textColor = Color.parseColor("#666666")
+                                    ActionUtil.doDestroyFavorite(s.id)
+                                } else {
+                                    tag = "is_fav"
+                                    textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
+                                    ActionUtil.doFavorite(s.id)
+                                }
+                            }
+                            //tools:ignore = SpUsage //not support attribute
+                        }.lparams {
+                            rightOf(R.id.retweet_count)
+                        }
+
+                        if (s.favoriteCount > 0) {
+                            textView {
+                                id = R.id.fav_count
+                                bottomPadding = dip(6)
+                                topPadding = dip(6)
+                                textColor = Color.parseColor("#999999")
+                                textSize = dip(10).toFloat()
+                                text = s.favoriteCount.omitCount()
+                                //tools:ignore = SpUsage //not support attribute
+                                //tools:text = 12345 //not support attribute
+                            }.lparams {
+                                rightOf(R.id.do_fav)
+                            }
+                        }
+
+                        textView {
+                            id = R.id.via
+                            bottomPadding = dip(2)
+                            textColor = Color.parseColor("#666666")
+                            textSize = 8f //sp
+                            text = "via ${StatusUtil.getClientName(s.source)}"
+                            //tools:ignore = SmallSp //not support attribute
+                        }.lparams {
+                            alignParentRight()
+                        }
+
+                        textView {
+                            id = R.id.datetime
+                            textColor = Color.parseColor("#666666")
+                            textSize = 10f //sp
+                            //tools:ignore = SmallSp //not support attribute
+                            //tools:text = 2014/01/23 15:14:30 //not support attribute
+                        }.lparams {
+                            below(R.id.via)
+                            alignParentRight()
                         }
                     }.lparams {
-                        below(R.id.quoted_status)
-                        bottomMargin = dip(4)
-                        topMargin = dip(10)
-                    }
-                }.lparams(width = matchParent) {
-                    below(R.id.status)
-                    rightOf(R.id.icon)
-                    topMargin = dip(10)
-                    bottomMargin = dip(4)
-                }
-
-                frameLayout {
-                    id = R.id.images_container_wrapper
-
-                    linearLayout {
-                        id = R.id.images_container
-                        orientation = LinearLayout.VERTICAL
+                        below(R.id.images_container_wrapper)
+                        rightOf(R.id.icon)
                     }
 
-                    fontelloTextView {
-                        id = R.id.play
-                        text = resources.getString(R.string.fontello_play)
-                        textColor = Color.parseColor("#ffffff")
-                        textSize = 24f //sp
+                    relativeLayout {
+                        id = R.id.retweet_container
+                        imageView {
+                            id = R.id.retweet_icon
+                            contentDescription = resources.getString(R.string.description_icon)
+                            //tools:src = @drawable/ic_launcher //not support attribute
+                        }.lparams(width = dip(18), height = dip(18)) {
+                            rightMargin = dip(4)
+                        }
+
+                        textView {
+                            id = R.id.retweet_by
+                            textSize = 10f //sp
+                            //tools:ignore = SmallSp //not support attribute
+                            //tools:text = \@su_aska //not support attribute
+                        }.lparams {
+                            rightOf(R.id.retweet_icon)
+                            topMargin = dip(2)
+                        }
                     }.lparams {
-                        gravity = Gravity.CENTER
+                        rightOf(R.id.icon)
+                        below(R.id.menu_and_via_container)
+                        bottomMargin = dip(2)
                     }
-                }.lparams {
-                    below(R.id.quoted_tweet)
-                    rightOf(R.id.icon)
-                    bottomMargin = dip(4)
-                    topMargin = dip(10)
-                }
-
-                relativeLayout {
-                    id = R.id.menu_and_via_container
-
-                    fontelloTextView {
-                        id = R.id.do_reply
-                        padding = dip(6)
-                        text = resources.getString(R.string.fontello_reply)
-                        textColor = Color.parseColor("#666666")
-                        textSize = dip(14).toFloat()
-                        //tools:ignore = SpUsage //not support attribute
-                    }
-
-                    fontelloTextView {
-                        id = R.id.do_retweet
-                        topPadding = dip(6)
-                        rightPadding = dip(4)
-                        bottomPadding = dip(6)
-                        leftPadding = dip(6)
-                        text = resources.getString(R.string.fontello_retweet)
-                        textColor = Color.parseColor("#666666")
-                        textSize = dip(14).toFloat()
-                        //tools:ignore = SpUsage //not support attribute
-                    }.lparams {
-                        rightOf(R.id.do_reply)
-                        leftMargin = dip(22)
-                    }
-
-                    textView {
-                        id = R.id.retweet_count
-                        bottomPadding = dip(6)
-                        topPadding = dip(6)
-                        textColor = Color.parseColor("#999999")
-                        textSize = dip(10).toFloat()
-                        //tools:ignore = SmallSp,SpUsage //not support attribute
-                        //tools:text = 12345 //not support attribute
-                    }.lparams(width = dip(32)) {
-                        rightOf(R.id.do_retweet)
-                    }
-
-                    fontelloTextView {
-                        id = R.id.do_fav
-                        topPadding = dip(6)
-                        rightPadding = dip(4)
-                        bottomPadding = dip(6)
-                        leftPadding = dip(2)
-                        text = resources.getString(R.string.fontello_star)
-                        textColor = Color.parseColor("#666666")
-                        textSize = dip(14).toFloat()
-                        //tools:ignore = SpUsage //not support attribute
-                    }.lparams {
-                        rightOf(R.id.retweet_count)
-                    }
-
-                    textView {
-                        id = R.id.fav_count
-                        bottomPadding = dip(6)
-                        topPadding = dip(6)
-                        textColor = Color.parseColor("#999999")
-                        textSize = dip(10).toFloat()
-                        //tools:ignore = SpUsage //not support attribute
-                        //tools:text = 12345 //not support attribute
-                    }.lparams {
-                        rightOf(R.id.do_fav)
-                    }
-
-                    textView {
-                        id = R.id.via
-                        bottomPadding = dip(2)
-                        textColor = Color.parseColor("#666666")
-                        textSize = 8f //sp
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = via Justaway for Android //not support attribute
-                    }.lparams {
-                        alignParentRight()
-                    }
-
-                    textView {
-                        id = R.id.datetime
-                        textColor = Color.parseColor("#666666")
-                        textSize = 10f //sp
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = 2014/01/23 15:14:30 //not support attribute
-                    }.lparams {
-                        below(R.id.via)
-                        alignParentRight()
-                    }
-                }.lparams {
-                    below(R.id.images_container_wrapper)
-                    rightOf(R.id.icon)
-                }
-
-                relativeLayout {
-                    id = R.id.retweet_container
-                    imageView {
-                        id = R.id.retweet_icon
-                        contentDescription = resources.getString(R.string.description_icon)
-                        //tools:src = @drawable/ic_launcher //not support attribute
-                    }.lparams(width = dip(18), height = dip(18)) {
-                        rightMargin = dip(4)
-                    }
-                    
-                    textView {
-                        id = R.id.retweet_by
-                        textSize = 10f //sp
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = \@su_aska //not support attribute
-                    }.lparams {
-                        rightOf(R.id.retweet_icon)
-                        topMargin = dip(2)
-                    }
-                }.lparams {
-                    rightOf(R.id.icon)
-                    below(R.id.menu_and_via_container)
-                    bottomMargin = dip(2)
                 }
             }
-        }
+        } ?: relativeLayout()
+    }
+
+    private inner class RowData(val textId: Int, val textColor: Int, val displayName: String, screenNameParam: String) {
+        val screenName: String = "@$screenNameParam"
     }
 }

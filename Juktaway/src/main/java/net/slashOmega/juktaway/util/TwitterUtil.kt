@@ -108,4 +108,10 @@ object TwitterUtil {
             else -> if (level <= BATTERY_ROW_LEVEL) "% (◞‸◟)"  else "% (・◡・♥​​)"
         }
     }
+
+    fun Int.omitCount() = when {
+        this >= 1000000 -> "${this / 1000000}M"
+        this >= 1000 -> "${this / 1000}k"
+        else -> this.toString()
+    }
 }
