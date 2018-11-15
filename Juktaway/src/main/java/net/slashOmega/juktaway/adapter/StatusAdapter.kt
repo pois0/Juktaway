@@ -35,7 +35,7 @@ import twitter4j.Status
  * Created on 2018/11/13.
  */
 
-class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdapter<Row>(mContext, mLayout) {
+class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<Row>(mContext, mLayout) {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
@@ -64,13 +64,12 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             ActionUtil.doRetweet(it.id)
                             dismiss()
                         }
-                        .setNegativeButton(R.string.button_cancel) { dialog, which -> dismiss() }
+                        .setNegativeButton(R.string.button_cancel) { _, _ -> dismiss() }
                         .create()
             } ?: throw IllegalStateException()
         }
     }
 
-    private var mColorBlue = 0
     private val limit = 100
     private var mLimit = limit
     private val mIdSet = mutableSetOf<Long>()
@@ -125,6 +124,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
         }
     }
 
+    @Suppress("Unused")
     fun replaceStatus(status: Status) {
         for (i in 0 until count) {
             val row = getItem(i)
@@ -201,12 +201,13 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
 
                     } ?: RowData(R.string.fontello_at, ContextCompat.getColor(mContext, R.color.holo_red_light),
                             s.user.name, s.user.screenName)
-                    relativeLayout {
+
+                    val actionContainer = relativeLayout {
                         id = R.id.action_container
 
                         fontelloTextView {
                             id = R.id.action_icon
-                            gravity = Gravity.RIGHT
+                            gravity = Gravity.END
                             textSize = 12f //sp
                             setText(data.textId)
                             textColor = data.textColor
@@ -237,9 +238,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             rightOf(R.id.action_by_display_name)
                             leftMargin = dip(4)
                         }
-                    }.lparams(width = matchParent) {
-                        if (StatusUtil.isMentionForMe(s) || s.retweetedStatus != null) visibility = View.GONE
-                    }
+                    }.lparams(width = matchParent)
 
                     imageView {
                         id = R.id.icon
@@ -321,73 +320,75 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                     }
 
                     val qs = s.quotedStatus
+
                     relativeLayout {
                         id = R.id.quoted_tweet
-                        padding = dip(10)
-                        backgroundResource = R.drawable.quoted_tweet_frame
+                        if (qs != null) {
+                            padding = dip(10)
+                            backgroundResource = R.drawable.quoted_tweet_frame
 
-                        textView {
-                            id = R.id.quoted_display_name
-                            textSize = 12f //sp
-                            setTypeface(typeface, Typeface.BOLD)
-                            text = qs?.user?.name ?: ""
-                            //tools:text = Justaway Factory //not support attribute
-                        }.lparams {
-                            bottomMargin = dip(6)
-                        }
-
-                        textView {
-                            id = R.id.quoted_screen_name
-                            textColor = Color.parseColor("#666666")
-                            textSize = 10f //sp
-                            text = "@" + (qs?.user?.screenName ?: "")
-                            lines = 1
-                            ellipsize = TextUtils.TruncateAt.END
-                            //tools:ignore = SmallSp //not support attribute
-                            //tools:text = \@justawayfactory //not support attribute
-                        }.lparams {
-                            leftMargin = dip(4)
-                            rightOf(R.id.quoted_display_name)
-                            baselineOf(R.id.quoted_display_name)
-                        }
-
-                        textView {
-                            id = R.id.quoted_status
-                            textSize = 12f //sp
-                            text = qs?.text ?: ""
-                            //tools:text = Hello World. //not support attribute
-                        }.lparams {
-                            below(R.id.quoted_display_name)
-                        }
-
-                        if (BasicSettings.displayThumbnailOn) {
-                            frameLayout {
-                                id = R.id.quoted_images_container_wrapper
-
-                                val container = linearLayout {
-                                    id = R.id.quoted_images_container
-                                    orientation = LinearLayout.VERTICAL
-                                }
-
-                                val play = fontelloTextView {
-                                    id = R.id.quoted_play
-                                    text = resources.getString(R.string.fontello_play)
-                                    textColor = Color.parseColor("#ffffff")
-                                    textSize = 24f //sp
-                                }.lparams {
-                                    gravity = Gravity.CENTER
-                                }
-
-                                qs?.let {
-                                    ImageUtil.displayThumbnailImages(mContext, container, this, play, it)
-                                }
+                            textView {
+                                id = R.id.quoted_display_name
+                                textSize = 12f //sp
+                                setTypeface(typeface, Typeface.BOLD)
+                                text = qs.user.name
+                                //tools:text = Justaway Factory //not support attribute
                             }.lparams {
-                                below(R.id.quoted_status)
-                                bottomMargin = dip(4)
-                                topMargin = dip(10)
+                                bottomMargin = dip(6)
+                            }
+
+                            textView {
+                                id = R.id.quoted_screen_name
+                                textColor = Color.parseColor("#666666")
+                                textSize = 10f //sp
+                                text = "@" + qs.user.screenName
+                                lines = 1
+                                ellipsize = TextUtils.TruncateAt.END
+                                //tools:ignore = SmallSp //not support attribute
+                                //tools:text = \@justawayfactory //not support attribute
+                            }.lparams {
+                                leftMargin = dip(4)
+                                rightOf(R.id.quoted_display_name)
+                                baselineOf(R.id.quoted_display_name)
+                            }
+
+                            textView {
+                                id = R.id.quoted_status
+                                textSize = 12f //sp
+                                text = qs.text
+                                //tools:text = Hello World. //not support attribute
+                            }.lparams {
+                                below(R.id.quoted_display_name)
+                            }
+
+                            if (BasicSettings.displayThumbnailOn) {
+                                frameLayout {
+                                    id = R.id.quoted_images_container_wrapper
+
+                                    val container = linearLayout {
+                                        id = R.id.quoted_images_container
+                                        orientation = LinearLayout.VERTICAL
+                                    }
+
+                                    val play = fontelloTextView {
+                                        id = R.id.quoted_play
+                                        text = resources.getString(R.string.fontello_play)
+                                        textColor = Color.parseColor("#ffffff")
+                                        textSize = 24f //sp
+                                    }.lparams {
+                                        gravity = Gravity.CENTER
+                                    }
+
+                                    qs.let {
+                                        ImageUtil.displayThumbnailImages(mContext, container, this, play, it)
+                                    }
+                                }.lparams {
+                                    below(R.id.quoted_status)
+                                    bottomMargin = dip(4)
+                                    topMargin = dip(10)
+                                }
                             }
                         }
-
                     }.lparams(width = matchParent) {
                         below(R.id.status)
                         rightOf(R.id.icon)
@@ -399,27 +400,28 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                     frameLayout {
                         id = R.id.images_container_wrapper
 
-                        val container = linearLayout {
-                            id = R.id.images_container
-                            orientation = LinearLayout.VERTICAL
-                        }
+                        if (BasicSettings.displayThumbnailOn) {
+                            val container = linearLayout {
+                                id = R.id.images_container
+                                orientation = LinearLayout.VERTICAL
+                            }
 
-                        val play = fontelloTextView {
-                            id = R.id.play
-                            text = resources.getString(R.string.fontello_play)
-                            textColor = Color.parseColor("#ffffff")
-                            textSize = 24f //sp
-                        }.lparams {
-                            gravity = Gravity.CENTER
-                        }
+                            val play = fontelloTextView {
+                                id = R.id.play
+                                text = resources.getString(R.string.fontello_play)
+                                textColor = Color.parseColor("#ffffff")
+                                textSize = 24f //sp
+                            }.lparams {
+                                gravity = Gravity.CENTER
+                            }
 
-                        ImageUtil.displayThumbnailImages(mContext, container, this, play, s)
+                            ImageUtil.displayThumbnailImages(mContext, container, this, play, s)
+                        }
                     }.lparams {
                         below(R.id.quoted_tweet)
                         rightOf(R.id.icon)
                         bottomMargin = dip(4)
                         topMargin = dip(10)
-                        if (BasicSettings.displayThumbnailOn) visibility = View.GONE
                     }
 
                     relativeLayout {
@@ -430,7 +432,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             padding = dip(6)
                             text = resources.getString(R.string.fontello_reply)
                             textColor = Color.parseColor("#666666")
-                            textSize = dip(14).toFloat()
+                            textSize = 14f
                             setOnClickListener {
                                 ActionUtil.doReplyAll(s, mContext)
                             }
@@ -447,7 +449,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             textColor = if (FavRetweetManager.getRtId(s) != null)
                                 ContextCompat.getColor(mContext, R.color.holo_green_light)
                             else Color.parseColor("#666666")
-                            textSize = dip(14).toFloat()
+                            textSize = 14f
                             setOnClickListener {
                                 if (s.user.isProtected) {
                                     MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share)
@@ -480,13 +482,15 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
 
                         textView {
                             id = R.id.retweet_count
-                            bottomPadding = dip(6)
-                            topPadding = dip(6)
-                            textColor = Color.parseColor("#999999")
-                            textSize = dip(10).toFloat()
-                            text = s.retweetCount.omitCount()
-                            //tools:ignore = SmallSp,SpUsage //not support attribute
-                            //tools:text = 12345 //not support attribute
+                            textSize = 10f
+                            if (s.retweetCount > 0) {
+                                bottomPadding = dip(6)
+                                topPadding = dip(6)
+                                textColor = Color.parseColor("#999999")
+                                text = s.retweetCount.omitCount()
+                                //tools:ignore = SmallSp,SpUsage //not support attribute
+                                //tools:text = 12345 //not support attribute
+                            }
                         }.lparams(width = dip(32)) {
                             rightOf(R.id.do_retweet)
                         }
@@ -505,7 +509,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                                 tag = "no_fav"
                                 textColor = Color.parseColor("#666666")
                             }
-                            textSize = dip(14).toFloat()
+                            textSize = 14f
                             setOnClickListener {
                                 if (tag == "is_fav") {
                                     tag = "no_fav"
@@ -522,19 +526,19 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             rightOf(R.id.retweet_count)
                         }
 
-                        if (s.favoriteCount > 0) {
-                            textView {
-                                id = R.id.fav_count
+                        textView {
+                            id = R.id.fav_count
+                            textSize = 10f
+                            if (s.favoriteCount > 0) {
                                 bottomPadding = dip(6)
                                 topPadding = dip(6)
                                 textColor = Color.parseColor("#999999")
-                                textSize = dip(10).toFloat()
                                 text = s.favoriteCount.omitCount()
                                 //tools:ignore = SpUsage //not support attribute
                                 //tools:text = 12345 //not support attribute
-                            }.lparams {
-                                rightOf(R.id.do_fav)
                             }
+                        }.lparams {
+                            rightOf(R.id.do_fav)
                         }
 
                         textView {
@@ -552,8 +556,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            //tools:ignore = SmallSp //not support attribute
-                            //tools:text = 2014/01/23 15:14:30 //not support attribute
+                            text = TimeUtil.getAbsoluteTime(s.createdAt)
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()
@@ -563,32 +566,37 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                         rightOf(R.id.icon)
                     }
 
-                    relativeLayout {
-                        id = R.id.retweet_container
-                        imageView {
-                            id = R.id.retweet_icon
-                            contentDescription = resources.getString(R.string.description_icon)
-                            //tools:src = @drawable/ic_launcher //not support attribute
-                        }.lparams(width = dip(18), height = dip(18)) {
-                            rightMargin = dip(4)
-                        }
+                    s.retweetedStatus?.let { rts ->
+                        relativeLayout {
+                            id = R.id.retweet_container
 
-                        textView {
-                            id = R.id.retweet_by
-                            textSize = 10f //sp
-                            //tools:ignore = SmallSp //not support attribute
-                            //tools:text = \@su_aska //not support attribute
+                            imageView {
+                                id = R.id.retweet_icon
+                                contentDescription = resources.getString(R.string.description_icon)
+                                //tools:src = @drawable/ic_launcher //not support attribute
+                            }.lparams(width = dip(18), height = dip(18)) {
+                                rightMargin = dip(4)
+                            }
+
+                            textView {
+                                id = R.id.retweet_by
+                                textSize = 10f //sp
+                                text = "RT by ${rts.user.name} @ ${rts.user.screenName}"
+                                //tools:ignore = SmallSp //not support attribute
+                                //tools:text = \@su_aska //not support attribute
+                            }.lparams {
+                                rightOf(R.id.retweet_icon)
+                                topMargin = dip(2)
+                            }
+
                         }.lparams {
-                            rightOf(R.id.retweet_icon)
-                            topMargin = dip(2)
+                            rightOf(R.id.icon)
+                            below(R.id.menu_and_via_container)
+                            bottomMargin = dip(2)
                         }
-                    }.lparams {
-                        rightOf(R.id.icon)
-                        below(R.id.menu_and_via_container)
-                        bottomMargin = dip(2)
                     }
-                }.apply {
-                    //layoutParams = ViewGroup.LayoutParams(matchParent, android.R.attr.listPreferredItemHeight)
+
+                    if (StatusUtil.isMentionForMe(s).not() && s.retweetedStatus == null) actionContainer.visibility = View.GONE
                 }
             }
         } ?: relativeLayout()
