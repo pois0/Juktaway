@@ -86,7 +86,7 @@ class AroundFragment: DialogFragment() {
 
     private lateinit var mProgressBarTop: ProgressBar
     private lateinit var mProgressBarBottom: ProgressBar
-    private val mAdapter by lazy { StatusAdapter(activity!!, R.layout.row_tweet) }
+    private val mAdapter by lazy { StatusAdapter(activity!!) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
         window?.requestFeature(WindowManager.LayoutParams.FLAG_FULLSCREEN)

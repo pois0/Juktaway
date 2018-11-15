@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -16,6 +17,9 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.AlertDialogEvent
@@ -35,7 +39,7 @@ import twitter4j.Status
  * Created on 2018/11/13.
  */
 
-class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<Row>(mContext, mLayout) {
+class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext, 0) {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
@@ -73,6 +77,9 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
     private val limit = 100
     private var mLimit = limit
     private val mIdSet = mutableSetOf<Long>()
+    private val mLayout by lazy {
+
+    }
 
     fun extensionAdd(row: Row) {
         if (Mute.contains(row)) {
@@ -90,13 +97,15 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
     }
 
     override fun add(row: Row) {
-        if (row in Mute || exists(row)) {
-            return
+        GlobalScope.launch(Dispatchers.Default) {
+            if (row in Mute || exists(row)) {
+                return@launch
+            }
+            super.add(row)
+            if (row.isStatus) mIdSet.add(row.status!!.id)
+            filter(row)
+            limitation()
         }
-        super.add(row)
-        if (row.isStatus) mIdSet.add(row.status!!.id)
-        filter(row)
-        limitation()
     }
 
     override fun insert(row: Row, index: Int) {
@@ -188,6 +197,7 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
             row.status?.let { status ->
                 val s = status.retweetedStatus ?: status
                 val fontSize = BasicSettings.fontSize.toFloat()
+                Log.d("status", "getView:${toString()}")
                 relativeLayout {
                     bottomPadding = dip(3)
                     leftPadding = dip(6)

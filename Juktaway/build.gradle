@@ -10,26 +10,17 @@ dependencies {
 
     implementation "org.jetbrains.anko:anko:$anko_version"
 
-    //noinspection GradleCompatible,GradleDynamicVersion
-    implementation "com.android.support:appcompat-v7:$android_support_version"
-    implementation "com.android.support:support-annotations:$android_support_version"
-    implementation "com.android.support:support-compat:$android_support_version"
-    implementation "com.android.support:support-core-ui:$android_support_version"
-
     implementation "com.google.code.gson:gson:2.8.5"
     implementation "com.google.guava:guava:25.0-android"
     implementation "de.greenrobot:eventbus:2.2.0"
-
 
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
     //implementation "org.twitter4j:twitter4j-media-support:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
     implementation "com.nostra13.universalimageloader:universal-image-loader:1.9.1"
-    implementation "com.jakewharton:butterknife:${butterKnifeVersion}"
     implementation "com.viewpagerindicator:library:${viewpagerIndicatorVersion}"
     implementation "com.romandanylyk:pageindicatorview:1.0.1@aar"
-    annotationProcessor "com.jakewharton:butterknife:${butterKnifeVersion}"
 
     implementation "com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9"
     implementation fileTree(include: '*.jar', dir: 'libs')
@@ -127,6 +118,7 @@ allprojects {
         }
     }
 }
+
 repositories {
     mavenCentral()
 }

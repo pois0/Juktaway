@@ -87,7 +87,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
             setDisplayHomeAsUpEnabled(true)
         }
 
-        mAdapter = StatusAdapter(this, R.layout.row_tweet)
+        mAdapter = StatusAdapter(this)
         search_list.let {l ->
             l.adapter = mAdapter
             l.onItemClickListener = StatusClickListener(this)

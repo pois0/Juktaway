@@ -124,7 +124,7 @@ class TalkFragment: DialogFragment() {
     }
 
     private val mTwitter by lazy { TwitterManager.getTwitter() }
-    private val mAdapter by lazy { StatusAdapter(activity!!, R.layout.row_tweet) }
+    private val mAdapter by lazy { StatusAdapter(activity!!) }
     private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }
     private val mFooterView by lazy { View(activity) }

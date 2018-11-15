@@ -108,7 +108,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
          */
         if (mAdapter == null) {
             // Status(ツイート)をViewに描写するアダプター
-            mAdapter = StatusAdapter(activity!!, R.layout.row_tweet)
+            mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
             taskExecute()
         }

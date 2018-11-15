@@ -11,6 +11,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ListView
 import de.greenrobot.event.EventBus
+import kotlinx.android.synthetic.main.activity_status.*
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -20,6 +21,7 @@ import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.util.MessageUtil
+import org.jetbrains.anko.intentFor
 import twitter4j.Status
 import java.lang.ref.WeakReference
 
@@ -81,17 +83,15 @@ class StatusActivity: FragmentActivity() {
                 return
             }
             when {
-                uri.path.contains("photo") -> {
-                    startActivity(Intent(this@StatusActivity, ScaleImageActivity::class.java).apply {
+                uri.path!!.contains("photo") -> {
+                    startActivity(Intent(this, ScaleImageActivity::class.java).apply {
                         putExtra("url", uri.toString())
                     })
                     finish()
                     return
                 }
-                uri.path.contains("video") -> {
-                    startActivity(Intent(this@StatusActivity, VideoActivity::class.java).apply {
-                        putExtra("statusUrl", uri.toString())
-                    })
+                uri.path!!.contains("video") -> {
+                    startActivity(intentFor<VideoActivity>("statusUrl" to uri.toString()))
                     finish()
                     return
                 }
@@ -103,15 +103,12 @@ class StatusActivity: FragmentActivity() {
 
         setContentView(R.layout.activity_status)
 
-        //TODO
-        val listView = findViewById<ListView>(R.id.list)
-
         // コンテキストメニューを使える様にする為の指定、但しデフォルトではロングタップで開く
-        registerForContextMenu(listView)
+        registerForContextMenu(list)
 
         // Status(ツイート)をViewに描写するアダプター
-        mAdapter = StatusAdapter(this, R.layout.row_tweet)
-        with (listView) {
+        mAdapter = StatusAdapter(this)
+        with (list) {
             adapter = mAdapter
             onItemClickListener = StatusClickListener(this@StatusActivity)
             onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
@@ -120,7 +117,7 @@ class StatusActivity: FragmentActivity() {
             showProgressDialog(getString(R.string.progress_loading))
             LoadTask(this).execute(statusId)
         } else {
-            (intent.getSerializableExtra("status") as Status?)?.let {
+            (intent.getSerializableExtra("status") as? Status)?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
                 if (inReplyToStatusId > 0) {

@@ -14,7 +14,7 @@ import twitter4j.auth.AccessToken
  */
 class AccessTokenAdapter(context: Context?, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<AccessToken>(context, resourceId) {
     init {
-        AccessTokenManager.getAccessTokens()?.forEach { add(it) }
+        AccessTokenManager.getAccessTokens().forEach { add(it) }
     }
 
     override val View.mView: (Int, ViewGroup?) -> Unit

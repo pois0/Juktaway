@@ -71,7 +71,7 @@ class UserListStatusesFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.list_guruguru, container, false)?.apply {
         arguments?.getLong("listId")?.let { mListId = it }
-        mAdapter = StatusAdapter(activity!!, R.layout.row_tweet)
+        mAdapter = StatusAdapter(activity!!)
 
         // リストビューの設定
         mListView = list_view.apply {

@@ -67,7 +67,7 @@ public class UserTimelineFragment extends Fragment implements OnRefreshListener 
         mFooter = (ProgressBar) v.findViewById(R.id.guruguru);
 
         // Status(ツイート)をViewに描写するアダプター
-        mAdapter = new StatusAdapter(getActivity(), R.layout.row_tweet);
+        mAdapter = new StatusAdapter(getActivity());
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new StatusClickListener(getActivity()));
