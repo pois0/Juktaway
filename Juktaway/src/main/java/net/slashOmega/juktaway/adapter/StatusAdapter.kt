@@ -319,11 +319,9 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
                         below(R.id.display_name)
                     }
 
-                    val qs = s.quotedStatus
-
                     relativeLayout {
                         id = R.id.quoted_tweet
-                        if (qs != null) {
+                        s.quotedStatus?.let { qs ->
                             padding = dip(10)
                             backgroundResource = R.drawable.quoted_tweet_frame
 
@@ -392,8 +390,10 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
                     }.lparams(width = matchParent) {
                         below(R.id.status)
                         rightOf(R.id.icon)
-                        topMargin = dip(10)
-                        bottomMargin = dip(4)
+                        if (s.quotedStatus != null) {
+                            topMargin = dip(10)
+                            bottomMargin = dip(4)
+                        }
                     }
 
 
@@ -566,13 +566,14 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
                         rightOf(R.id.icon)
                     }
 
-                    s.retweetedStatus?.let { rts ->
+                    if (status.retweetedStatus != null) {
                         relativeLayout {
                             id = R.id.retweet_container
 
                             imageView {
                                 id = R.id.retweet_icon
                                 contentDescription = resources.getString(R.string.description_icon)
+                                UserIconManager.displayUserIcon(status.user, this)
                                 //tools:src = @drawable/ic_launcher //not support attribute
                             }.lparams(width = dip(18), height = dip(18)) {
                                 rightMargin = dip(4)
@@ -581,7 +582,7 @@ class StatusAdapter(private val mContext: Context, mLayout: Int) : ArrayAdapter<
                             textView {
                                 id = R.id.retweet_by
                                 textSize = 10f //sp
-                                text = "RT by ${rts.user.name} @ ${rts.user.screenName}"
+                                text = "RT by ${status.user.name} @ ${status.user.screenName}"
                                 //tools:ignore = SmallSp //not support attribute
                                 //tools:text = \@su_aska //not support attribute
                             }.lparams {
