@@ -9,7 +9,7 @@ import android.view.WindowManager
 import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.fragment_around.*
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.Row
@@ -86,7 +86,7 @@ class AroundFragment: DialogFragment() {
 
     private lateinit var mProgressBarTop: ProgressBar
     private lateinit var mProgressBarBottom: ProgressBar
-    private val mAdapter by lazy { TwitterAdapter(activity, R.layout.row_tweet) }
+    private val mAdapter by lazy { StatusAdapter(activity!!, R.layout.row_tweet) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
         window?.requestFeature(WindowManager.LayoutParams.FLAG_FULLSCREEN)

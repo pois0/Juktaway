@@ -11,7 +11,7 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ListView
 import de.greenrobot.event.EventBus
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
@@ -62,7 +62,7 @@ class StatusActivity: FragmentActivity() {
     }
 
     private var mProgressDialog: ProgressDialog? = null
-    private lateinit var mAdapter: TwitterAdapter
+    private lateinit var mAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -110,7 +110,7 @@ class StatusActivity: FragmentActivity() {
         registerForContextMenu(listView)
 
         // Status(ツイート)をViewに描写するアダプター
-        mAdapter = TwitterAdapter(this, R.layout.row_tweet)
+        mAdapter = StatusAdapter(this, R.layout.row_tweet)
         with (listView) {
             adapter = mAdapter
             onItemClickListener = StatusClickListener(this@StatusActivity)

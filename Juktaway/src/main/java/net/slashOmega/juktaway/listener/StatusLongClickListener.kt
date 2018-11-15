@@ -6,7 +6,7 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.widget.AdapterView
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.fragment.AroundFragment
 import net.slashOmega.juktaway.fragment.TalkFragment
 import net.slashOmega.juktaway.settings.BasicSettings
@@ -57,7 +57,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
         } ?: false
     }
 
-    open fun getAdapter(adapterView: AdapterView<*>): TwitterAdapter {
-        return adapterView.adapter as TwitterAdapter
+    open fun getAdapter(adapterView: AdapterView<*>): StatusAdapter {
+        return adapterView.adapter as StatusAdapter
     }
 }

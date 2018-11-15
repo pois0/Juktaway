@@ -4,16 +4,16 @@ import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.widget.AdapterView
 import android.widget.HeaderViewListAdapter
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 
 /**
  * Created on 2018/08/27.
  */
 class HeaderStatusClickListener(fActivity: FragmentActivity): StatusClickListener(fActivity) {
 
-    override fun getAdapter(adapterView: AdapterView<*>): TwitterAdapter {
+    override fun getAdapter(adapterView: AdapterView<*>): StatusAdapter {
         val headerViewListAdapter = adapterView.adapter as HeaderViewListAdapter
-        return headerViewListAdapter.wrappedAdapter as TwitterAdapter
+        return headerViewListAdapter.wrappedAdapter as StatusAdapter
     }
 
     override fun onItemClick(adapterView: AdapterView<*>, view: View, i: Int, l: Long) {

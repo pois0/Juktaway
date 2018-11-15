@@ -11,7 +11,7 @@ import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.NewRecordEvent
 import net.slashOmega.juktaway.event.action.GoToTopEvent
 import net.slashOmega.juktaway.event.action.PostAccountChangeEvent
@@ -30,7 +30,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 import kotlin.collections.ArrayList
 
 abstract class BaseFragment: Fragment(), OnRefreshListener {
-    protected var mAdapter: TwitterAdapter? = null
+    protected var mAdapter: StatusAdapter? = null
 
     protected var mAutoLoader = false
     protected var mReloading = false
@@ -108,7 +108,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
          */
         if (mAdapter == null) {
             // Status(ツイート)をViewに描写するアダプター
-            mAdapter = TwitterAdapter(activity, R.layout.row_tweet)
+            mAdapter = StatusAdapter(activity!!, R.layout.row_tweet)
             mListView.visibility = View.GONE
             taskExecute()
         }

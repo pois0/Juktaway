@@ -2,16 +2,14 @@ package net.slashOmega.juktaway.adapter
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.app.Dialog
 import android.content.Context
-import android.content.DialogInterface
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.EventLog
+import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
 import android.view.ViewGroup
@@ -25,6 +23,7 @@ import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
+import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
 import net.slashOmega.juktaway.util.*
@@ -188,6 +187,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
         getItem(position)!!.takeIf { it.isStatus }?.let { row ->
             row.status?.let { status ->
                 val s = status.retweetedStatus ?: status
+                val fontSize = BasicSettings.fontSize.toFloat()
                 relativeLayout {
                     bottomPadding = dip(3)
                     leftPadding = dip(6)
@@ -195,39 +195,51 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                     topPadding = dip(4)
                     lparams(matchParent, android.R.attr.listPreferredItemHeight)
 
-                    relativeLayout {
-                        id = R.id.action_container
+                    if (StatusUtil.isMentionForMe(s) || s.retweetedStatus != null) {
+                        val data = s.retweetedStatus?.run {
+                            RowData(R.string.fontello_retweet, ContextCompat.getColor(mContext, R.color.holo_green_light),
+                                    user.name, user.screenName)
 
-                        fontelloTextView {
-                            id = R.id.action_icon
-                            gravity = Gravity.RIGHT
-                            textSize = 12f //sp
-                            //tools:text = �� //not support attribute
-                        }.lparams(width = dip(48)) {
-                            rightMargin = dip(6)
-                            bottomMargin = dip(2)
-                        }
+                        } ?: RowData(R.string.fontello_at, ContextCompat.getColor(mContext, R.color.holo_red_light),
+                                s.user.name, s.user.screenName)
+                        relativeLayout {
+                            id = R.id.action_container
 
-                        textView {
-                            id = R.id.action_by_display_name
-                            textSize = 12f //sp
-                            setTypeface(typeface, Typeface.BOLD)
-                            //tools:text = Justaway Factory //not support attribute
-                        }.lparams {
-                            rightOf(R.id.action_icon)
-                        }
+                            fontelloTextView {
+                                id = R.id.action_icon
+                                gravity = Gravity.RIGHT
+                                textSize = 12f //sp
+                                setText(data.textId)
+                                textColor = data.textColor
+                                //tools:text = �� //not support attribute
+                            }.lparams(width = dip(48)) {
+                                rightMargin = dip(6)
+                                bottomMargin = dip(2)
+                            }
 
-                        textView {
-                            id = R.id.action_by_screen_name
-                            textColor = Color.parseColor("#666666")
-                            textSize = 10f //sp
-                            //tools:ignore = SmallSp //not support attribute
-                            //tools:text = \@justawayfactory //not support attribute
-                        }.lparams {
-                            rightOf(R.id.action_by_display_name)
-                            leftMargin = dip(4)
-                        }
-                    }.lparams(width = matchParent)
+                            textView {
+                                id = R.id.action_by_display_name
+                                textSize = 12f //sp
+                                setTypeface(typeface, Typeface.BOLD)
+                                text = data.displayName
+                                //tools:text = Justaway Factory //not support attribute
+                            }.lparams {
+                                rightOf(R.id.action_icon)
+                            }
+
+                            textView {
+                                id = R.id.action_by_screen_name
+                                textColor = Color.parseColor("#666666")
+                                textSize = 10f //sp
+                                text = data.screenName
+                                //tools:ignore = SmallSp //not support attribute
+                                //tools:text = \@justawayfactory //not support attribute
+                            }.lparams {
+                                rightOf(R.id.action_by_display_name)
+                                leftMargin = dip(4)
+                            }
+                        }.lparams(width = matchParent)
+                    }
 
                     imageView {
                         id = R.id.icon
@@ -236,6 +248,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                         setOnClickListener {
                             startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
                         }
+                        UserIconManager.displayUserIcon(s.user, this)
                         //tools:src = @drawable/ic_launcher //not support attribute
                     }.lparams(width = dip(48), height = dip(48)) {
                         below(R.id.action_container)
@@ -246,7 +259,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
 
                     textView {
                         id = R.id.display_name
-                        textSize = 12f //sp
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                         setTypeface(typeface, Typeface.BOLD)
                         text = s.user.name
                         //tools:text = Justaway Factory //not support attribute
@@ -259,7 +272,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                     textView {
                         id = R.id.screen_name
                         textColor = Color.parseColor("#666666")
-                        textSize = 10f //sp
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize - 2)
                         text = "@" + s.user.screenName
                         //android:lines = 1 //not support attribute
                         //android:ellipsize = end //not support attribute
@@ -287,7 +300,7 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
                     textView {
                         id = R.id.datetime_relative
                         textColor = Color.parseColor("#666666")
-                        textSize = 10f //sp
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize - 2)
                         text = TimeUtil.getRelativeTime(s.createdAt)
                         //tools:ignore = SmallSp //not support attribute
                         //tools:text = 2H //not support attribute
@@ -298,7 +311,8 @@ class StatusAdapter(val mContext: Context, private val mLayout: Int) : ArrayAdap
 
                     textView {
                         id = R.id.status
-                        textSize = 12f //sp
+                        tag = fontSize
+                        setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                         text = StatusUtil.generateUnderline(StatusUtil.getExpandedText(s))
                         //tools:text = Hello World. //not support attribute
                     }.lparams {

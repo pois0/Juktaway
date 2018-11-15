@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 
 import de.greenrobot.event.EventBus;
 import net.slashOmega.juktaway.R;
-import net.slashOmega.juktaway.adapter.TwitterAdapter;
+import net.slashOmega.juktaway.adapter.StatusAdapter;
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent;
 import net.slashOmega.juktaway.event.action.StatusActionEvent;
 import net.slashOmega.juktaway.listener.StatusClickListener;
@@ -34,7 +34,7 @@ import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener;
  */
 public class UserTimelineFragment extends Fragment implements OnRefreshListener {
 
-    private TwitterAdapter mAdapter;
+    private StatusAdapter mAdapter;
     private ListView mListView;
     private ProgressBar mFooter;
     private User mUser;
@@ -67,7 +67,7 @@ public class UserTimelineFragment extends Fragment implements OnRefreshListener 
         mFooter = (ProgressBar) v.findViewById(R.id.guruguru);
 
         // Status(ツイート)をViewに描写するアダプター
-        mAdapter = new TwitterAdapter(getActivity(), R.layout.row_tweet);
+        mAdapter = new StatusAdapter(getActivity(), R.layout.row_tweet);
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new StatusClickListener(getActivity()));

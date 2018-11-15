@@ -12,7 +12,7 @@ import android.widget.ProgressBar;
 
 import de.greenrobot.event.EventBus;
 import net.slashOmega.juktaway.R;
-import net.slashOmega.juktaway.adapter.TwitterAdapter;
+import net.slashOmega.juktaway.adapter.StatusAdapter;
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent;
 import net.slashOmega.juktaway.event.action.StatusActionEvent;
 import net.slashOmega.juktaway.listener.StatusClickListener;
@@ -27,7 +27,7 @@ import twitter4j.User;
 
 public class FavoritesListFragment extends Fragment {
 
-    private TwitterAdapter mAdapter;
+    private StatusAdapter mAdapter;
     private ListView mListView;
     private ProgressBar mFooter;
     private boolean mAutoLoader = false;
@@ -50,7 +50,7 @@ public class FavoritesListFragment extends Fragment {
         mFooter = (ProgressBar) v.findViewById(R.id.guruguru);
 
         // Status(ツイート)をViewに描写するアダプター
-        mAdapter = new TwitterAdapter(getActivity(), R.layout.row_tweet);
+        mAdapter = new StatusAdapter(getActivity(), R.layout.row_tweet);
         mListView.setAdapter(mAdapter);
 
         mListView.setOnItemClickListener(new StatusClickListener(getActivity()));

@@ -46,7 +46,7 @@ import twitter4j.DirectMessage;
 import twitter4j.Status;
 import twitter4j.User;
 
-public class TwitterAdapter extends ArrayAdapter<Row> {
+public class StatusAdapter extends ArrayAdapter<Row> {
 
     static class ViewHolder {
         @Bind(R.id.action_container) ViewGroup mActionContainer;
@@ -94,7 +94,7 @@ public class TwitterAdapter extends ArrayAdapter<Row> {
     private int mLimit = LIMIT;
     private final LongSparseArray<Boolean> mIdMap = new LongSparseArray<>();
 
-    public TwitterAdapter(Context context, int textViewResourceId) {
+    public StatusAdapter(Context context, int textViewResourceId) {
         super(context, textViewResourceId);
         mInflater = (LayoutInflater) context.getSystemService(Context.LAYOUT_INFLATER_SERVICE);
         mContext = context;

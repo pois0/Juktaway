@@ -15,7 +15,7 @@ import com.google.common.primitives.Longs
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.list_talk.*
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.HeaderStatusClickListener
@@ -124,7 +124,7 @@ class TalkFragment: DialogFragment() {
     }
 
     private val mTwitter by lazy { TwitterManager.getTwitter() }
-    private val mAdapter by lazy { TwitterAdapter(activity, R.layout.row_tweet) }
+    private val mAdapter by lazy { StatusAdapter(activity!!, R.layout.row_tweet) }
     private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }
     private val mFooterView by lazy { View(activity) }

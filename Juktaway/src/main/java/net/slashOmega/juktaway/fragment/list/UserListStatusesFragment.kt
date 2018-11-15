@@ -13,7 +13,7 @@ import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.list_guruguru.view.*
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
@@ -62,7 +62,7 @@ class UserListStatusesFragment : Fragment() {
         }
     }
 
-    private lateinit var mAdapter: TwitterAdapter
+    private lateinit var mAdapter: StatusAdapter
     private lateinit var mListView: ListView
     private var mListId: Long = 0
     private lateinit var mFooter: ProgressBar
@@ -71,7 +71,7 @@ class UserListStatusesFragment : Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = inflater.inflate(R.layout.list_guruguru, container, false)?.apply {
         arguments?.getLong("listId")?.let { mListId = it }
-        mAdapter = TwitterAdapter(activity, R.layout.row_tweet)
+        mAdapter = StatusAdapter(activity!!, R.layout.row_tweet)
 
         // リストビューの設定
         mListView = list_view.apply {

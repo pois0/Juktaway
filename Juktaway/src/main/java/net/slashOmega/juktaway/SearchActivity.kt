@@ -14,7 +14,7 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import de.greenrobot.event.EventBus
-import net.slashOmega.juktaway.adapter.TwitterAdapter
+import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
@@ -74,7 +74,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
         }
     }
 
-    private lateinit var mAdapter: TwitterAdapter
+    private lateinit var mAdapter: StatusAdapter
     private var mNextQuery: Query? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -87,7 +87,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
             setDisplayHomeAsUpEnabled(true)
         }
 
-        mAdapter = TwitterAdapter(this, R.layout.row_tweet)
+        mAdapter = StatusAdapter(this, R.layout.row_tweet)
         search_list.let {l ->
             l.adapter = mAdapter
             l.onItemClickListener = StatusClickListener(this)
