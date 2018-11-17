@@ -13,3 +13,5 @@ inline fun <R> tryAndTrace (block: () -> R): Boolean = runCatching { block() }.r
     exceptionOrNull()?.printStackTrace()
     isSuccess
 }
+
+inline fun String?.nullToEmpty() = this ?: ""

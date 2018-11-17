@@ -3,8 +3,10 @@ package net.slashOmega.juktaway.adapter
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
+import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
+import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
@@ -19,6 +21,7 @@ import de.greenrobot.event.EventBus
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.StatusActivity
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.AccessTokenManager
@@ -122,9 +125,11 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     private fun exists(row: Row) = row.isStatus && row.status!!.id in mIdSet
 
     private fun filter(row: Row) {
-        row.status?.takeIf { it.isRetweeted }?.let { status ->
-            status.retweetedStatus?.takeIf { status.user.id == AccessTokenManager.getUserId() }?.let { retweet ->
-                FavRetweetManager.setRtId(retweet.id, status.id)
+        GlobalScope.launch(Dispatchers.Default) {
+            row.status?.takeIf { it.isRetweeted }?.let { status ->
+                status.retweetedStatus?.takeIf { status.user.id == AccessTokenManager.getUserId() }?.let { retweet ->
+                    FavRetweetManager.setRtId(retweet.id, status.id)
+                }
             }
         }
     }

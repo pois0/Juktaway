@@ -9,6 +9,10 @@ import android.view.Window
 import android.view.WindowManager
 import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.fragment_retweeters.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.UserAdapter
 import net.slashOmega.juktaway.model.TwitterManager
@@ -18,29 +22,6 @@ import twitter4j.Status
 import java.lang.ref.WeakReference
 
 class RetweetersFragment: DialogFragment() {
-    companion object {
-        private class RetweetsTask(f: RetweetersFragment): AsyncTask<Long, Void, ResponseList<Status>>() {
-            private val ref = WeakReference(f)
-
-            override fun doInBackground(vararg p: Long?): ResponseList<twitter4j.Status>? = p[0]?.let {
-                try {
-                    TwitterManager.getTwitter().getRetweets(it)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-
-            override fun onPostExecute(result: ResponseList<twitter4j.Status>?) { ref.get()?.run {
-                mProgressBar.visibility = View.GONE
-                result?.let { statuses ->
-                    statuses.forEach { mAdapter.add(it.user) }
-                    mAdapter.notifyDataSetChanged()
-                } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
-            }}
-        }
-    }
-
     private lateinit var mProgressBar: ProgressBar
     private val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
 
@@ -52,6 +33,23 @@ class RetweetersFragment: DialogFragment() {
         list.adapter = mAdapter
         mProgressBar = guruguru
 
-        arguments?.getLong("statusId")?.takeIf { it > 0 }?.let { RetweetsTask(this@RetweetersFragment).execute(it) }
+        arguments?.getLong("statusId")?.takeIf { it > 0 }?.let {
+            GlobalScope.launch(Dispatchers.Main) {
+                val retweetJob = async(Dispatchers.Default) {
+                    try {
+                        TwitterManager.getTwitter().getRetweets(it)
+                    } catch (e: Exception) {
+                        e.printStackTrace()
+                        null
+                    }
+                }
+                mProgressBar.visibility = View.GONE
+
+                retweetJob.await()?.let { statuses ->
+                    statuses.forEach { mAdapter.add(it.user) }
+                    mAdapter.notifyDataSetChanged()
+                } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
+            }
+        }
     }
 }

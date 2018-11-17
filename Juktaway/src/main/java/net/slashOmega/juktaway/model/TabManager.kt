@@ -74,7 +74,7 @@ object TabManager {
                 id == INTERACTIONS_TAB_ID -> JuktawayApplication.app.getString(R.string.title_interactions)
                 id == DIRECT_MESSAGES_TAB_ID -> JuktawayApplication.app.getString(R.string.title_direct_messages)
                 id == FAVORITES_TAB_ID -> JuktawayApplication.app.getString(R.string.title_favorites)
-                id <= SEARCH_TAB_ID -> JuktawayApplication.app.getString(R.string.title_search) + ":" + name
+                id <= SEARCH_TAB_ID -> JuktawayApplication.app.getString(R.string.title_search) + ":" + field
                 else -> field
             }
 

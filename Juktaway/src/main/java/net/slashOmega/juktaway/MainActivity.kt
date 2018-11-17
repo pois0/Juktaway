@@ -606,7 +606,7 @@ class MainActivity: FragmentActivity() {
         val searchWord = action_bar_search_text.string
         KeyboardUtil.hideKeyboard(action_bar_search_text)
         mSearchAdapter?.let {
-            if (it.isSavedMode) {
+            if (it.savedMode) {
                 startActivityForResult(getIntent(SearchActivity::class.java).apply{
                     putExtra("query", searchWord)
                 }, REQUEST_SEARCH)
