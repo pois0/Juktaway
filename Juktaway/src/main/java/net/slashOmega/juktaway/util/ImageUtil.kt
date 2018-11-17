@@ -36,6 +36,7 @@ object ImageUtil {
                 .cacheOnDisc(true)
                 .resetViewBeforeLoading(true)
                 .build()
+
         ImageLoader.getInstance().init(
                 ImageLoaderConfiguration.Builder(JuktawayApplication.app)
                         .defaultDisplayImageOptions(defaultOptions)

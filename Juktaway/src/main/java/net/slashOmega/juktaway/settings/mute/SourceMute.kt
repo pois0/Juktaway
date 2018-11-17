@@ -26,7 +26,7 @@ object SourceMute: Mute<String>() {
     }
 
     override fun plusAssign(t: String) {
-        addUniqueRecord(tableName, dbSource, dbSource to t)
+        addUniqueRecord(tableName, dbSource, t)
     }
 
     override fun getIds(t: String): List<Long> = dbUse {

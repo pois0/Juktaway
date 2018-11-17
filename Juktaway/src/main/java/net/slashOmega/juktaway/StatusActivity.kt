@@ -12,6 +12,7 @@ import android.view.WindowManager
 import android.widget.ListView
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_status.*
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -24,45 +25,12 @@ import net.slashOmega.juktaway.util.MessageUtil
 import org.jetbrains.anko.intentFor
 import twitter4j.Status
 import java.lang.ref.WeakReference
+import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created on 2018/08/29.
  */
 class StatusActivity: FragmentActivity() {
-    companion object {
-
-
-        private class LoadTask(activity: StatusActivity) : AsyncTask<Long, Void, Status>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg params: Long?): twitter4j.Status? {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.getTwitter().showStatus(it)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                }
-
-            }
-
-            override fun onPostExecute(status: twitter4j.Status?) {
-                ref.get()?.run {
-                    dismissProgressDialog()
-                    status?.let {
-                        mAdapter.add(Row.newStatus(it))
-                        mAdapter.notifyDataSetChanged()
-                        val inReplyToStatusId = it.inReplyToStatusId
-                        if (inReplyToStatusId > 0) {
-                            LoadTask(this).execute(inReplyToStatusId)
-                        }
-                    } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
-                }
-            }
-        }
-    }
-
     private var mProgressDialog: ProgressDialog? = null
     private lateinit var mAdapter: StatusAdapter
 
@@ -115,14 +83,15 @@ class StatusActivity: FragmentActivity() {
         }
         if (statusId > 0) {
             showProgressDialog(getString(R.string.progress_loading))
-            LoadTask(this).execute(statusId)
+            load(statusId)
         } else {
             (intent.getSerializableExtra("status") as? Status)?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
                 if (inReplyToStatusId > 0) {
                     showProgressDialog(getString(R.string.progress_loading))
-                    LoadTask(this).execute(inReplyToStatusId)
+                    load(inReplyToStatusId)
+                    // LoadTask(this).execute(inReplyToStatusId)
                 }
             }
         }
@@ -160,4 +129,21 @@ class StatusActivity: FragmentActivity() {
         mAdapter.removeStatus(event.statusId!!)
     }
 
+    private fun load(idParam: Long) {
+        var statusId = idParam
+        GlobalScope.launch(Dispatchers.Main) {
+            while (statusId > 0) {
+                val status = async(Dispatchers.Default) {
+                    TwitterManager.getTwitter().showStatus(statusId)
+                }.await() ?: run {
+                    MessageUtil.showToast(R.string.toast_load_data_failure)
+                    return@launch
+                }
+
+                mAdapter.add(Row.newStatus(status))
+                mAdapter.notifyDataSetChanged()
+                statusId = status.inReplyToStatusId
+            }
+        }
+    }
 }

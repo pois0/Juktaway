@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -17,9 +16,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.AlertDialogEvent
@@ -34,6 +31,7 @@ import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount
 import org.jetbrains.anko.*
 import twitter4j.Status
+import java.util.*
 
 /**
  * Created on 2018/11/13.
@@ -76,31 +74,27 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     private val limit = 100
     private var mLimit = limit
-    private val mIdSet = mutableSetOf<Long>()
-    private val mLayout by lazy {
-
-    }
+    private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
     fun extensionAdd(row: Row) {
-        if (Mute.contains(row)) {
-            return
+        GlobalScope.launch(Dispatchers.Main) {
+            if (GlobalScope.async (Dispatchers.Default) {
+                        row in Mute || exists(row)
+                    }.await()) return@launch
+            super.add(row)
+            if (row.isStatus) {
+                mIdSet.add(row.status!!.id)
+            }
+            filter(row)
+            mLimit++
         }
-        if (exists(row)) {
-            return
-        }
-        super.add(row)
-        if (row.isStatus) {
-            mIdSet.add(row.status!!.id)
-        }
-        filter(row)
-        mLimit++
     }
 
     override fun add(row: Row) {
-        GlobalScope.launch(Dispatchers.Default) {
-            if (row in Mute || exists(row)) {
-                return@launch
-            }
+        GlobalScope.launch(Dispatchers.Main) {
+            if (GlobalScope.async (Dispatchers.Default) {
+                        row in Mute || exists(row)
+                    }.await()) return@launch
             super.add(row)
             if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
@@ -109,13 +103,15 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     override fun insert(row: Row, index: Int) {
-        if (row in Mute || exists(row)) {
-            return
+        GlobalScope.launch(Dispatchers.Main) {
+            if (GlobalScope.async(Dispatchers.Default) {
+                        row in Mute || exists(row)
+                    }.await()) return@launch
+            super.insert(row, index)
+            if (row.isStatus) mIdSet.add(row.status!!.id)
+            filter(row)
+            limitation()
         }
-        super.insert(row, index)
-        if (row.isStatus) mIdSet.add(row.status!!.id)
-        filter(row)
-        limitation()
     }
 
     override fun remove(row: Row) {
@@ -150,18 +146,20 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         val positions = mutableListOf<Int>()
         val rows = mutableListOf<Row>()
 
-        for(i in 0 until count) {
-            val row = getItem(i)?.takeUnless { it.isDirectMessage } ?: continue
-            val status = row.status
-            val retweet = status!!.retweetedStatus
-            if (status.id == id || (retweet != null && retweet.id == id)) {
-                rows.add(row)
-                positions.add(pos)
+        GlobalScope.launch(Dispatchers.Default) {
+            for (i in 0 until count) {
+                val row = getItem(i)?.takeUnless { it.isDirectMessage } ?: continue
+                val status = row.status
+                val retweet = status!!.retweetedStatus
+                if (status.id == id || (retweet != null && retweet.id == id)) {
+                    rows.add(row)
+                    positions.add(pos)
+                }
+                pos++
             }
-            pos++
-        }
-        for (row in rows) {
-            remove(row)
+            for (row in rows) {
+                remove(row)
+            }
         }
         return positions
     }
@@ -197,7 +195,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
             row.status?.let { status ->
                 val s = status.retweetedStatus ?: status
                 val fontSize = BasicSettings.fontSize.toFloat()
-                Log.d("status", "getView:${toString()}")
                 relativeLayout {
                     bottomPadding = dip(3)
                     leftPadding = dip(6)

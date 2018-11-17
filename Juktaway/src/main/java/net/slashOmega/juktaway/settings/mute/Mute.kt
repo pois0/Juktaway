@@ -1,5 +1,8 @@
 package net.slashOmega.juktaway.settings.mute
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import net.slashOmega.juktaway.util.StatusUtil
@@ -16,12 +19,14 @@ abstract class Mute<T> {
         const val dbId = "id"
 
         fun addUniqueRecord(tableName: String, column: String, value: Any) {
-            dbUse {
-                if (select(tableName, dbId)
-                                .whereArgs("$column = {data}", "data" to value)
-                                .parseList(LongParser)
-                                .isNullOrEmpty()) {
-                    insert(tableName, column to value)
+            GlobalScope.launch(Dispatchers.Default) {
+                dbUse {
+                    if (select(tableName, dbId)
+                                    .whereArgs("$column = {data}", "data" to value)
+                                    .parseList(LongParser)
+                                    .isNullOrEmpty()) {
+                        insert(tableName, column to value)
+                    }
                 }
             }
         }

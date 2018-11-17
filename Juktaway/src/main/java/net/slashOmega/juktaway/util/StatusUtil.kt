@@ -11,16 +11,6 @@ import net.slashOmega.juktaway.model.AccessTokenManager
 import twitter4j.Status
 
 object StatusUtil {
-    private val TWITPIC_PATTERN = Pattern.compile("^http://twitpic\\.com/(\\w+)$")
-    private val TWIPPLE_PATTERN = Pattern.compile("^http://p\\.twipple\\.jp/(\\w+)$")
-    private val INSTAGRAM_PATTERN = Pattern.compile("^https?://(?:www\\.)?instagram\\.com/p/([^/]+)/$")
-    private val PHOTOZOU_PATTERN = Pattern.compile("^http://photozou\\.jp/photo/show/\\d+/(\\d+)$")
-    private val IMAGES_PATTERN = Pattern.compile("^https?://.*\\.(png|gif|jpeg|jpg)$")
-    private val YOUTUBE_PATTERN = Pattern.compile("^https?://(?:www\\.youtube\\.com/watch\\?.*v=|youtu\\.be/)([\\w-]+)")
-    private val NICONICO_PATTERN = Pattern.compile("^http://(?:www\\.nicovideo\\.jp/watch|nico\\.ms)/sm(\\d+)$")
-    private val PIXIV_PATTERN = Pattern.compile("^http://www\\.pixiv\\.net/member_illust\\.php.*illust_id=(\\d+)")
-    private val GYAZO_PATTERN = Pattern.compile("^https?://gyazo\\.com/(\\w+)")
-
     private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w\\.\\-/:#\\?=&;%~\\+]+")
     private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
     private val HASHTAG_PATTERN = Pattern.compile("#\\S+")

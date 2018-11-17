@@ -1,7 +1,12 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.AsyncTask
+import android.util.Log
 import android.view.View
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
@@ -13,11 +18,14 @@ import twitter4j.Status
 import java.lang.ref.WeakReference
 
 class TimelineFragment: BaseFragment() {
-    companion object {
-        private class HomeTimelineTask(f: TimelineFragment): AsyncTask<Void, Void, ResponseList<Status>>() {
-            val ref = WeakReference(f)
+    override var tabId = TabManager.TIMELINE_TAB_ID
 
-            override fun doInBackground(vararg p0: Void?): ResponseList<twitter4j.Status>? = ref.get()?.run {
+    override fun isSkip(row: Row): Boolean = !row.isStatus
+            || row.status?.retweetedStatus?.user?.id == AccessTokenManager.getUserId()
+
+    override fun taskExecute() {
+        GlobalScope.launch(Dispatchers.Main) {
+            val statuses = async(Dispatchers.Default) {
                 try {
                     TwitterManager.getTwitter().getHomeTimeline(Paging().also {
                         if (mMaxId > 0 && !mReloading) {
@@ -31,44 +39,37 @@ class TimelineFragment: BaseFragment() {
                     e.printStackTrace()
                     null
                 }
+            }.await()
+
+            mFooter.visibility = View.GONE
+
+            if (statuses.isNullOrEmpty()){
+                mReloading = false
+                mPullToRefreshLayout.setRefreshComplete()
+                mListView.visibility = View.VISIBLE
+                return@launch
             }
 
-            override fun onPostExecute(statuses: ResponseList<twitter4j.Status>?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
-                if (statuses == null || statuses.isEmpty()) {
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                    mListView.visibility = View.VISIBLE
-                    return
-                }
-                if (mReloading) {
-                    clear()
-                    for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter!!.add(Row.newStatus(status))
+            if (mReloading) {
+                clear()
+                for (status in statuses) {
+                    if (mMaxId <= 0L || mMaxId > status.id) {
+                        mMaxId = status.id
                     }
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                } else {
-                    for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter!!.extensionAdd(Row.newStatus(status))
-                    }
-                    mAutoLoader = true
-                    mListView.visibility = View.VISIBLE
+                    mAdapter!!.add(Row.newStatus(status))
                 }
-            }}
+                mReloading = false
+                mPullToRefreshLayout.setRefreshComplete()
+            } else {
+                for (status in statuses) {
+                    if (mMaxId <= 0L || mMaxId > status.id) {
+                        mMaxId = status.id
+                    }
+                    mAdapter!!.extensionAdd(Row.newStatus(status))
+                }
+                mAutoLoader = true
+                mListView.visibility = View.VISIBLE
+            }
         }
     }
-
-    override var tabId = TabManager.TIMELINE_TAB_ID
-
-    override fun isSkip(row: Row): Boolean = !row.isStatus
-            || row.status?.retweetedStatus?.user?.id == AccessTokenManager.getUserId()
-
-    override fun taskExecute() { HomeTimelineTask(this).execute() }
 }
