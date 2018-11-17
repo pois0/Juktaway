@@ -398,6 +398,10 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                     topMargin = dip(10)
                                 }
                             }
+                            setOnClickListener {
+                                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(
+                                        "https://twitter.com/" + qs.user.screenName + "/status/" + qs.id.toString())))
+                            }
                         }
                     }.lparams(width = matchParent) {
                         below(R.id.status)
