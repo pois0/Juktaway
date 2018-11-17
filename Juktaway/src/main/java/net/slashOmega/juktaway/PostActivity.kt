@@ -146,10 +146,10 @@ class PostActivity: FragmentActivity() {
 
         actionBar?.run {
             if ((displayOptions and ActionBar.DISPLAY_SHOW_CUSTOM) == ActionBar.DISPLAY_SHOW_CUSTOM) {
-                actionBar.setDisplayShowCustomEnabled(false)
+                setDisplayShowCustomEnabled(false)
             } else {
-                actionBar.setDisplayShowCustomEnabled(true)
-                if (actionBar.customView == null) actionBar.setCustomView(R.layout.action_bar_post)
+                setDisplayShowCustomEnabled(true)
+                if (customView == null) setCustomView(R.layout.action_bar_post)
             }
         }
 
@@ -159,7 +159,7 @@ class PostActivity: FragmentActivity() {
         // アカウント切り替え
         switch_account_spinner.adapter = AccessTokenAdapter(this, R.layout.spinner_switch_account).apply {
             setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
-            AccessTokenManager.getAccessTokens()?.forEachIndexed { i, token ->
+            AccessTokenManager.getAccessTokens().forEachIndexed { i, token ->
                 add(token)
                 if (AccessTokenManager.getUserId() == token.userId) switch_account_spinner.setSelection(i)
             }
