@@ -32,6 +32,7 @@ import net.slashOmega.juktaway.util.ActionUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
 import net.slashOmega.juktaway.util.ThemeUtil
+import net.slashOmega.juktaway.util.TwitterUtil.uri
 import twitter4j.DirectMessage
 import twitter4j.Status
 import twitter4j.URLEntity
@@ -367,8 +368,7 @@ class StatusMenuFragment: DialogFragment() {
                 mActivity.startActivity(Intent().apply {
                     action = Intent.ACTION_SEND
                     type = "text/plain"
-                    putExtra(Intent.EXTRA_TEXT, "https://twitter.com/" + source.user.screenName
-                            + "/status/" + source.id.toString())
+                    putExtra(Intent.EXTRA_TEXT, source.uri)
                 })
             }))
         }

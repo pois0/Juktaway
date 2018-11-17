@@ -4,8 +4,10 @@ import android.content.Context
 import android.content.Intent
 import android.content.IntentFilter
 import android.graphics.Paint
+import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
+import twitter4j.Status
 
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -114,4 +116,7 @@ object TwitterUtil {
         this >= 1000 -> "${this / 1000}k"
         else -> this.toString()
     }
+
+    val Status.uri: Uri
+       get() =  Uri.parse("https://twitter.com/" + user.screenName + "/status/" + id.toString())
 }

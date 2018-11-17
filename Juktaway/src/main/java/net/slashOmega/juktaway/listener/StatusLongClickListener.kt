@@ -11,6 +11,7 @@ import net.slashOmega.juktaway.fragment.AroundFragment
 import net.slashOmega.juktaway.fragment.TalkFragment
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.util.ActionUtil
+import net.slashOmega.juktaway.util.TwitterUtil.uri
 
 /**
  * Created on 2018/08/27.
@@ -43,8 +44,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                     activity.startActivity(Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
-                        putExtra(Intent.EXTRA_TEXT, "https://twitter.com/" + status.user.screenName
-                                + "/status/" + status.id.toString())
+                        putExtra(Intent.EXTRA_TEXT, status.uri)
                     })
                     true
                 }

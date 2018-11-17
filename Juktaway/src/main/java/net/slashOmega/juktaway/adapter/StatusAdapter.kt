@@ -6,7 +6,6 @@ import android.content.Context
 import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
-import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
@@ -21,7 +20,6 @@ import de.greenrobot.event.EventBus
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.StatusActivity
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.AccessTokenManager
@@ -32,6 +30,7 @@ import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
 import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount
+import net.slashOmega.juktaway.util.TwitterUtil.uri
 import org.jetbrains.anko.*
 import twitter4j.Status
 import java.util.*
@@ -156,7 +155,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                 val row = getItem(i)?.takeUnless { it.isDirectMessage } ?: continue
                 val status = row.status
                 val retweet = status!!.retweetedStatus
-                if (status.id == id || (retweet != null && retweet.id == id)) {
+                if (status.id == id || retweet?.id == id) {
                     rows.add(row)
                     positions.add(pos)
                 }
@@ -223,7 +222,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textSize = 12f //sp
                             setText(data.textId)
                             textColor = data.textColor
-                            //tools:text = �� //not support attribute
                         }.lparams(width = dip(48), height = wrapContent) {
                             rightMargin = dip(6)
                             bottomMargin = dip(2)
@@ -234,7 +232,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textSize = 12f //sp
                             setTypeface(typeface, Typeface.BOLD)
                             text = data.displayName
-                            //tools:text = Justaway Factory //not support attribute
                         }.lparams(width = wrapContent, height = wrapContent) {
                             rightOf(R.id.action_icon)
                         }
@@ -244,8 +241,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
                             text = data.screenName
-                            //tools:ignore = SmallSp //not support attribute
-                            //tools:text = \@justawayfactory //not support attribute
                         }.lparams(width = wrapContent, height = wrapContent) {
                             rightOf(R.id.action_by_display_name)
                             leftMargin = dip(4)
@@ -260,7 +255,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
                         }
                         UserIconManager.displayUserIcon(s.user, this)
-                        //tools:src = @drawable/ic_launcher //not support attribute
                     }.lparams(width = dip(48), height = dip(48)) {
                         below(R.id.action_container)
                         bottomMargin = dip(6)
@@ -287,8 +281,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         text = "@" + s.user.screenName
                         lines = 1
                         ellipsize = TextUtils.TruncateAt.END
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = \@justawayfactory //not support attribute
                     }.lparams {
                         leftMargin = dip(4)
                         rightOf(R.id.display_name)
@@ -313,8 +305,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         textColor = Color.parseColor("#666666")
                         setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize - 2)
                         text = TimeUtil.getRelativeTime(s.createdAt)
-                        //tools:ignore = SmallSp //not support attribute
-                        //tools:text = 2H //not support attribute
                     }.lparams {
                         alignParentRight()
                         baselineOf(R.id.display_name)
@@ -325,7 +315,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         tag = fontSize
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                         text = StatusUtil.generateUnderline(StatusUtil.getExpandedText(s))
-                        //tools:text = Hello World. //not support attribute
                     }.lparams {
                         rightOf(R.id.icon)
                         below(R.id.display_name)
@@ -342,7 +331,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 textSize = 12f //sp
                                 setTypeface(typeface, Typeface.BOLD)
                                 text = qs.user.name
-                                //tools:text = Justaway Factory //not support attribute
                             }.lparams {
                                 bottomMargin = dip(6)
                             }
@@ -354,8 +342,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 text = "@" + qs.user.screenName
                                 lines = 1
                                 ellipsize = TextUtils.TruncateAt.END
-                                //tools:ignore = SmallSp //not support attribute
-                                //tools:text = \@justawayfactory //not support attribute
                             }.lparams {
                                 leftMargin = dip(4)
                                 rightOf(R.id.quoted_display_name)
@@ -399,8 +385,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 }
                             }
                             setOnClickListener {
-                                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(
-                                        "https://twitter.com/" + qs.user.screenName + "/status/" + qs.id.toString())))
+                                startActivity(Intent(Intent.ACTION_VIEW, qs.uri))
                             }
                         }
                     }.lparams(width = matchParent) {
