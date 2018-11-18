@@ -28,6 +28,8 @@ internal class FollowingListFragment: ProfileListFragmentBase() {
                 if (hasNext()) mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
+
+            finishLoading()
         }
     }
 }

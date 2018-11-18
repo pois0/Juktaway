@@ -31,6 +31,7 @@ internal class FollowersListFragment: ProfileListFragmentBase() {
                 if(hasNext()) mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
+            finishLoading()
         }
     }
 }

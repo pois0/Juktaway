@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.fragment.profile
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
@@ -20,7 +21,11 @@ internal abstract class ProfileListFragmentBase: Fragment() {
     protected var mAutoLoader = false
     protected lateinit var mFooter: ProgressBar
     protected var cursor = -1L
-    private var isReaing = false
+    private var isLoading = false
+
+    protected fun finishLoading() {
+        Handler().postDelayed({ isLoading = false }, 200)
+    }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(layout, container, false)?.apply {
@@ -30,10 +35,8 @@ internal abstract class ProfileListFragmentBase: Fragment() {
                 setOnScrollListener(object: AbsListView.OnScrollListener {
                     override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
                         // 最後までスクロールされたかどうかの判定
-                        if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isReaing) {
-                            isReaing = true
+                        if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
                             additionalReading()
-                            isReaing = false
                         }
                     }
                     override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
@@ -49,6 +52,7 @@ internal abstract class ProfileListFragmentBase: Fragment() {
         if (!mAutoLoader) return
         mFooter.visibility = View.VISIBLE
         mAutoLoader = false
+        isLoading = true
         showList()
     }
 

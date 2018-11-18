@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.fragment.profile
 
+import android.util.Log
 import android.view.View
 import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
@@ -42,6 +43,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
             mFooter.visibility = View.GONE
 
             job.await()?.takeIf { it.isNotEmpty() }?.run {
+                Log.d("aw;eofi", "hioef")
                 if (mReload) {
                     mAdapter.clear()
                     forEach {
@@ -59,6 +61,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                     mListView.visibility = View.VISIBLE
                 }
             }
+            finishLoading()
         }
     }
 

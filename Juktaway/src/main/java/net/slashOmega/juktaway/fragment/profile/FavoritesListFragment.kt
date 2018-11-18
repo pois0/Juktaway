@@ -51,6 +51,8 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
+
+            finishLoading()
         }
     }
 
