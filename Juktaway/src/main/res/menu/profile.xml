@@ -12,6 +12,11 @@
         android:showAsAction="never"
         android:title="@string/menu_send_direct_messages"/>
     <item
+        android:id="@+id/send_kusoripu"
+        android:orderInCategory="100"
+        android:showAsAction="never"
+        android:title="@string/menu_send_kusoripu" />
+    <item
         android:id="@+id/add_to_list"
         android:orderInCategory="100"
         android:showAsAction="never"

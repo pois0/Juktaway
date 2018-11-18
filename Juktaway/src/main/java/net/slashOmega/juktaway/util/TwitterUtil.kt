@@ -112,8 +112,9 @@ object TwitterUtil {
     }
 
     fun Int.omitCount() = when {
-        this >= 1000000 -> "${this / 1000000}M"
-        this >= 1000 -> "${this / 1000}k"
+        this >= 100000000 -> "${String.format("%1$.1f", this.toFloat() / 1000000)}M"
+        this >= 1000000 -> "${String.format("%1$.2f", this.toFloat() / 1000000)}M"
+        this >= 100000 -> "${String.format("%1$.1f", this.toFloat() / 1000)}k"
         else -> this.toString()
     }
 

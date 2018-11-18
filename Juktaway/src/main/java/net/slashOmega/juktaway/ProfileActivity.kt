@@ -18,6 +18,10 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.fragment.profile.*
@@ -25,8 +29,10 @@ import net.slashOmega.juktaway.model.Profile
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.task.ShowUserLoader
 import net.slashOmega.juktaway.util.ImageUtil
+import net.slashOmega.juktaway.util.KusoripuUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
+import org.jetbrains.anko.startActivity
 import twitter4j.Relationship
 import twitter4j.User
 import java.lang.ref.WeakReference
@@ -374,6 +380,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                             putExtra("status", text)
                             putExtra("selection", text.length)
                         })
+                    }
+                    R.id.send_kusoripu -> {
+                        GlobalScope.launch(Dispatchers.Main) {
+                            val content = async(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }.await()
+                            startActivity<PostActivity>("status" to content, "selection" to content.length)
+                        }
                     }
                     R.id.add_to_list ->
                         startActivity(Intent(this, RegisterUserListActivity::class.java).apply {

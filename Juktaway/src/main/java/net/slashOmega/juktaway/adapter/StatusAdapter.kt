@@ -267,7 +267,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                         setTypeface(typeface, Typeface.BOLD)
                         text = s.user.name
-                        //tools:text = Justaway Factory //not support attribute
                     }.lparams {
                         below(R.id.action_container)
                         rightOf(R.id.icon)
@@ -475,7 +474,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                     EventBus.getDefault().post(AlertDialogEvent(dialog))
                                 }
                             }
-                            //tools:ignore = SpUsage //not support attribute
                         }.lparams {
                             rightOf(R.id.do_reply)
                             leftMargin = dip(22)
@@ -489,8 +487,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 topPadding = dip(6)
                                 textColor = Color.parseColor("#999999")
                                 text = s.retweetCount.omitCount()
-                                //tools:ignore = SmallSp,SpUsage //not support attribute
-                                //tools:text = 12345 //not support attribute
                             }
                         }.lparams(width = dip(32)) {
                             rightOf(R.id.do_retweet)
@@ -522,7 +518,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                     ActionUtil.doFavorite(s.id)
                                 }
                             }
-                            //tools:ignore = SpUsage //not support attribute
                         }.lparams {
                             rightOf(R.id.retweet_count)
                         }
@@ -535,8 +530,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 topPadding = dip(6)
                                 textColor = Color.parseColor("#999999")
                                 text = s.favoriteCount.omitCount()
-                                //tools:ignore = SpUsage //not support attribute
-                                //tools:text = 12345 //not support attribute
                             }
                         }.lparams {
                             rightOf(R.id.do_fav)
@@ -548,7 +541,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textColor = Color.parseColor("#666666")
                             textSize = 8f //sp
                             text = "via ${StatusUtil.getClientName(s.source)}"
-                            //tools:ignore = SmallSp //not support attribute
                         }.lparams {
                             alignParentRight()
                         }
@@ -575,7 +567,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 id = R.id.retweet_icon
                                 contentDescription = resources.getString(R.string.description_icon)
                                 UserIconManager.displayUserIcon(status.user, this)
-                                //tools:src = @drawable/ic_launcher //not support attribute
                             }.lparams(width = dip(18), height = dip(18)) {
                                 rightMargin = dip(4)
                             }
@@ -584,8 +575,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 id = R.id.retweet_by
                                 textSize = 10f //sp
                                 text = "RT by ${status.user.name} @ ${status.user.screenName}"
-                                //tools:ignore = SmallSp //not support attribute
-                                //tools:text = \@su_aska //not support attribute
                             }.lparams {
                                 rightOf(R.id.retweet_icon)
                                 topMargin = dip(2)

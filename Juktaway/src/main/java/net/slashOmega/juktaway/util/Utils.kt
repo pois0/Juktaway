@@ -14,4 +14,14 @@ inline fun <R> tryAndTrace (block: () -> R): Boolean = runCatching { block() }.r
     isSuccess
 }
 
+inline fun <R> tryAndTraceGet (block: () -> R): R?  = runCatching { block() }.run {
+    exceptionOrNull()?.printStackTrace()
+    getOrNull()
+}
+
+inline fun <T, R> T.tryAndTraceGet (block: T.() -> R): R? = runCatching { block() }.run {
+    exceptionOrNull()?.printStackTrace()
+    getOrNull()
+}
+
 inline fun String?.nullToEmpty() = this ?: ""
