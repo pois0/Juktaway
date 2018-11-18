@@ -42,6 +42,7 @@ class UserListFragment: BaseFragment() {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
+                    finishLoad()
                     return
                 }
                 if (mReloading) {
@@ -68,6 +69,7 @@ class UserListFragment: BaseFragment() {
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
+                finishLoad()
             }}
         }
     }

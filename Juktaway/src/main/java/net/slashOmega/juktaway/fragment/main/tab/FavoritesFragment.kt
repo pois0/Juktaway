@@ -36,6 +36,7 @@ class FavoritesFragment: BaseFragment() {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
+                    finishLoad()
                     return
                 }
                 if (mReloading) {
@@ -60,6 +61,7 @@ class FavoritesFragment: BaseFragment() {
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
+                finishLoad()
             }}
         }
     }

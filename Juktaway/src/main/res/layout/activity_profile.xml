@@ -33,7 +33,7 @@
             app:piv_animationType="slide"
             app:piv_dynamicCount="true"
             app:piv_interactiveAnimation="true"
-            attrs:piv_radius="4dp"/>
+            app:piv_radius="6dp"/>
     </FrameLayout>
 
     <LinearLayout

@@ -57,6 +57,7 @@ class SearchFragment: BaseFragment() {
                         mListView.visibility = View.VISIBLE
                     }
                 }
+                finishLoad()
             }}
         }
     }

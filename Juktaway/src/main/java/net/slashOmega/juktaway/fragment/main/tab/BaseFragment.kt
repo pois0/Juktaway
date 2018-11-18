@@ -1,7 +1,9 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.Bundle
+import android.os.Handler
 import android.support.v4.app.Fragment
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -34,11 +36,17 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
 
     protected var mAutoLoader = false
     protected var mReloading = false
+    protected var isLoading = false
     private var mScrolling = false
     internal var mMaxId = 0L // 読み込んだ最新のツイートID
     protected var mDirectMessagesMaxId = 0L // 読み込んだ最新の受信メッセージID
     protected var mSentDirectMessagesMaxId = 0L // 読み込んだ最新の送信メッセージID
     private val mStackRows = ArrayList<Row>()
+    private var isloading = false
+
+    protected fun finishLoad() {
+        Handler().postDelayed({ isLoading = false }, 200)
+    }
 
     protected lateinit var mListView: ListView
     protected lateinit var mFooter: ProgressBar
@@ -70,7 +78,8 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
 
         override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
             // 最後までスクロールされたかどうかの判定
-            if (totalItemCount > 0 && totalItemCount == firstVisibleItem + visibleItemCount) {
+            if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
+                isLoading = true
                 additionalReading()
             }
         }

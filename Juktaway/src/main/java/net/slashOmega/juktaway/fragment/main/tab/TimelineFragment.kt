@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.AsyncTask
+import android.os.Handler
 import android.util.Log
 import android.view.View
 import kotlinx.coroutines.Dispatchers
@@ -47,6 +48,7 @@ class TimelineFragment: BaseFragment() {
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
                 mListView.visibility = View.VISIBLE
+                finishLoad()
                 return@launch
             }
 
@@ -70,6 +72,8 @@ class TimelineFragment: BaseFragment() {
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
+
+            finishLoad()
         }
     }
 }

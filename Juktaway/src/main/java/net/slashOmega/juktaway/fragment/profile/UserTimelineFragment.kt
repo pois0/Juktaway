@@ -1,10 +1,7 @@
 package net.slashOmega.juktaway.fragment.profile
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
-import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
+import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -16,6 +13,10 @@ import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import twitter4j.Paging
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
+import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
+import net.slashOmega.juktaway.event.action.StatusActionEvent
+
+
 
 /**
  * Created on 2018/11/18.
@@ -52,13 +53,37 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                 } else {
                     forEach {
                         if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                        mAdapter.add(Row.newStatus(it))
+                        mAdapter.extensionAdd(Row.newStatus(it))
                     }
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
             }
         }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        EventBus.getDefault().register(this)
+    }
+
+    override fun onPause() {
+        EventBus.getDefault().unregister(this)
+        super.onPause()
+    }
+
+    fun onEventMainThread(event: StatusActionEvent) {
+        mAdapter.notifyDataSetChanged()
+    }
+
+    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
+        mAdapter.removeStatus(event.statusId!!)
+    }
+
+    fun onRefreshStarted(view: View) {
+        mReload = true
+        mMaxId = 0
+        showList()
     }
 
     override fun View.init() {

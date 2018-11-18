@@ -20,6 +20,7 @@ internal abstract class ProfileListFragmentBase: Fragment() {
     protected var mAutoLoader = false
     protected lateinit var mFooter: ProgressBar
     protected var cursor = -1L
+    private var isReaing = false
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return inflater.inflate(layout, container, false)?.apply {
@@ -29,7 +30,11 @@ internal abstract class ProfileListFragmentBase: Fragment() {
                 setOnScrollListener(object: AbsListView.OnScrollListener {
                     override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
                         // 最後までスクロールされたかどうかの判定
-                        if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5) additionalReading()
+                        if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isReaing) {
+                            isReaing = true
+                            additionalReading()
+                            isReaing = false
+                        }
                     }
                     override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
                 })
