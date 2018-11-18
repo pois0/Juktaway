@@ -19,8 +19,7 @@ dependencies {
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.1'
-    implementation "com.viewpagerindicator:library:${viewpagerIndicatorVersion}"
-    implementation 'com.romandanylyk:pageindicatorview:1.0.1@aar'
+    implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation 'com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9'
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation 'com.android.support:multidex:1.0.3'
@@ -132,6 +131,7 @@ allprojects {
 }
 
 repositories {
+    jcenter()
     mavenCentral()
     maven { url "https://kotlin.bintray.com/kotlinx" }
     maven { url "https://dl.bintray.com/kotlin/ktor" }

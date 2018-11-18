@@ -2,7 +2,7 @@
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
               xmlns:tools="http://schemas.android.com/tools"
               xmlns:attrs="http://schemas.android.com/tools"
-              android:layout_height="match_parent"
+              android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
               android:orientation="vertical"
               android:layout_width="match_parent">
 
@@ -30,6 +30,9 @@
             android:layout_gravity="bottom|center"
             android:layout_height="wrap_content"
             android:padding="10dp"
+            app:piv_animationType="slide"
+            app:piv_dynamicCount="true"
+            app:piv_interactiveAnimation="true"
             attrs:piv_radius="4dp"/>
     </FrameLayout>
 
