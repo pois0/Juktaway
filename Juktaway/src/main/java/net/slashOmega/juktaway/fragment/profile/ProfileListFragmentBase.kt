@@ -29,13 +29,14 @@ internal abstract class ProfileListFragmentBase: Fragment() {
                 setOnScrollListener(object: AbsListView.OnScrollListener {
                     override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
                         // 最後までスクロールされたかどうかの判定
-                        if (totalItemCount == firstVisibleItem + visibleItemCount) additionalReading()
+                        if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5) additionalReading()
                     }
                     override fun onScrollStateChanged(p0: AbsListView?, p1: Int) {}
                 })
             }
-            showList()
+            init()
             mFooter = findViewById(R.id.guruguru)
+            showList()
         }
     }
 
@@ -47,4 +48,6 @@ internal abstract class ProfileListFragmentBase: Fragment() {
     }
 
     protected abstract fun showList()
+
+    protected open fun View.init() {}
 }
