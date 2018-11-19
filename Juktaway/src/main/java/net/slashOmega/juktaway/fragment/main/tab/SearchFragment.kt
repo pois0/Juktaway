@@ -29,7 +29,6 @@ class SearchFragment: BaseFragment() {
             }
 
             override fun onPostExecute(queryResult: QueryResult?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
                 when {
                     queryResult == null -> {
                         mReloading = false
@@ -39,7 +38,7 @@ class SearchFragment: BaseFragment() {
                     }
                     mReloading -> {
                         clear()
-                        for (status in queryResult.tweets) { mAdapter?.add(Row.newStatus(status)) }
+                        mAdapter?.addAllFromStatuses(queryResult.tweets)
                         mReloading = false
                         if (queryResult.hasNext()) {
                             mQuery = queryResult.nextQuery()
@@ -51,7 +50,7 @@ class SearchFragment: BaseFragment() {
                         mPullToRefreshLayout.setRefreshComplete()
                     }
                     else -> {
-                        for (status in queryResult.tweets) { mAdapter?.extensionAdd(Row.newStatus(status)) }
+                        mAdapter?.extensionAddAllFromStatuses(queryResult.tweets)
                         mAutoLoader = true
                         mQuery = queryResult.nextQuery()
                         mListView.visibility = View.VISIBLE

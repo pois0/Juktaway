@@ -29,8 +29,6 @@ class JuktawayApplication: MultiDexApplication() {
         if (!BuildConfig.DEBUG)
             StrictMode.setThreadPolicy(StrictMode.ThreadPolicy.Builder().permitAll().build())
 
-        // 画像のキャッシュ,角丸の設定
-        ImageUtil.init()
 
         // load setting files
         BasicSettings.init()

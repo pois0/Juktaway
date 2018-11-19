@@ -42,14 +42,14 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     protected var mDirectMessagesMaxId = 0L // 読み込んだ最新の受信メッセージID
     protected var mSentDirectMessagesMaxId = 0L // 読み込んだ最新の送信メッセージID
     private val mStackRows = ArrayList<Row>()
-    private var isloading = false
 
     protected fun finishLoad() {
+        mFooter.visibility = View.GONE
         Handler().postDelayed({ isLoading = false }, 200)
     }
 
     protected lateinit var mListView: ListView
-    protected lateinit var mFooter: ProgressBar
+    private lateinit var mFooter: ProgressBar
     protected lateinit var mPullToRefreshLayout: PullToRefreshLayout
 
     abstract var tabId: Long
@@ -143,7 +143,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         taskExecute()
     }
 
-    fun clear() {
+    protected fun clear() {
         mMaxId = 0L
         mDirectMessagesMaxId = 0L
         mSentDirectMessagesMaxId = 0L
@@ -157,7 +157,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         taskExecute()
     }
 
-    fun goToTop(): Boolean {
+    internal fun goToTop(): Boolean {
         mListView.setSelection(0)
         return if (mStackRows.size > 0) {
             showStack()

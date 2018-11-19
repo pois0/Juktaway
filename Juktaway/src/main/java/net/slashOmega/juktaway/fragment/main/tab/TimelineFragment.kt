@@ -42,8 +42,6 @@ class TimelineFragment: BaseFragment() {
                 }
             }.await()
 
-            mFooter.visibility = View.GONE
-
             if (statuses.isNullOrEmpty()){
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
@@ -55,11 +53,9 @@ class TimelineFragment: BaseFragment() {
             if (mReloading) {
                 clear()
                 for (status in statuses) {
-                    if (mMaxId <= 0L || mMaxId > status.id) {
-                        mMaxId = status.id
-                    }
-                    mAdapter!!.add(Row.newStatus(status))
+                    if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
                 }
+                mAdapter!!.addAllFromStatuses(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
             } else {
@@ -67,8 +63,8 @@ class TimelineFragment: BaseFragment() {
                     if (mMaxId <= 0L || mMaxId > status.id) {
                         mMaxId = status.id
                     }
-                    mAdapter!!.extensionAdd(Row.newStatus(status))
                 }
+                mAdapter!!.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }

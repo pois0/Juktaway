@@ -37,35 +37,30 @@ class UserListFragment: BaseFragment() {
             }
 
             override fun onPostExecute(statuses: ResponseList<twitter4j.Status>?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
-                if (statuses == null || statuses.size == 0) {
+                if (statuses.isNullOrEmpty()) {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
                     finishLoad()
                     return
                 }
+
                 if (mReloading) {
                     clear()
                     for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter!!.add(Row.newStatus(status))
+                        if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
                     }
+                    mAdapter!!.addAllFromStatuses(statuses)
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
+                        if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
 
                         // 最初のツイートに登場ユーザーをStreaming APIからの取り込み対象にすることでAPI節約!!!
                         mMembers.append(status.user.id, true)
-
-                        mAdapter!!.extensionAdd(Row.newStatus(status))
                     }
+                    mAdapter!!.extensionAddAllFromStatuses(statuses)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }

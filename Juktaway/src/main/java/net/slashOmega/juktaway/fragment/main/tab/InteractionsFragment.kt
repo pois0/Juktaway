@@ -37,33 +37,25 @@ class InteractionsFragment: BaseFragment() {
             }
 
             override fun onPostExecute(statuses: ResponseList<twitter4j.Status>?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
-                if (statuses == null || statuses.isEmpty()) {
+                if (statuses.isNullOrEmpty()) {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
+                    finishLoad()
                     return
                 }
+                statuses.forEach { if (mMaxId <= 0L || mMaxId > it.id) mMaxId = it.id }
                 if (mReloading) {
                     clear()
-                    for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter?.add(Row.newStatus(status))
-                    }
+                    mAdapter?.addAllFromStatuses(statuses)
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
-                    for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter?.extensionAdd(Row.newStatus(status))
-                    }
+                    mAdapter?.extensionAddAllFromStatuses(statuses)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
+                finishLoad()
             }}
         }
     }

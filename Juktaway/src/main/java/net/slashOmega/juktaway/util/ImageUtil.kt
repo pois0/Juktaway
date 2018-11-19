@@ -30,7 +30,7 @@ object ImageUtil {
                 .build()
     }
 
-    fun init() {
+    init {
         val defaultOptions = DisplayImageOptions.Builder()
                 .cacheInMemory(true)
                 .cacheOnDisc(true)

@@ -10,6 +10,7 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -84,10 +85,40 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         row in Mute || exists(row)
                     }.await()) return@launch
             super.add(row)
-            if (row.isStatus) {
-                mIdSet.add(row.status!!.id)
-            }
+            if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
+            mLimit++
+        }
+    }
+
+    fun extensionAddAll(rows: List<Row>) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val statuses =  async(Dispatchers.Default) {
+                rows.filter { it !in Mute && !exists(it) }
+            }.await()
+            launch(Dispatchers.Default) {
+                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+            }
+            statuses.forEach {
+                super.add(it)
+                filter(it)
+            }
+            mLimit++
+        }
+    }
+
+    fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val statuses =  async(Dispatchers.Default) {
+                statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
+            }.await()
+            launch(Dispatchers.Default) {
+                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+            }
+            statuses.forEach {
+                super.add(it)
+                filter(it)
+            }
             mLimit++
         }
     }
@@ -100,6 +131,38 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
             super.add(row)
             if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
+            limitation()
+        }
+    }
+
+    fun addAll(rows: List<Row>) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val statuses =  async(Dispatchers.Default) {
+                rows.filter { it !in Mute && !exists(it) }
+            }.await()
+            launch(Dispatchers.Default) {
+                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+            }
+            statuses.forEach {
+                super.add(it)
+                filter(it)
+            }
+            limitation()
+        }
+    }
+
+    fun addAllFromStatuses(statusesParam: List<Status>) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val statuses =  async(Dispatchers.Default) {
+                statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
+            }.await()
+            launch(Dispatchers.Default) {
+                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+            }
+            statuses.forEach {
+                super.add(it)
+                filter(it)
+            }
             limitation()
         }
     }

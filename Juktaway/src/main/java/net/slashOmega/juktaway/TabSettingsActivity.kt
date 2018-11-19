@@ -185,7 +185,6 @@ class TabSettingsActivity: FragmentActivity() {
                         setOnTouchListener(null)
                         setOnClickListener { mAdapter.remove(tab) }
                     } else {
-
                         setText(R.string.fontello_menu)
                         setOnClickListener(null)
                         setOnTouchListener { _, event ->
@@ -197,8 +196,7 @@ class TabSettingsActivity: FragmentActivity() {
                     }
                 }
 
-                mCurrentTab?.takeIf { it == tab }?.let { setBackgroundColor(HIGH_LIGHT_COLOR) }
-                        ?: setBackgroundColor(DEFAULT_COLOR)
+                setBackgroundColor(if (mCurrentTab == tab) HIGH_LIGHT_COLOR else DEFAULT_COLOR)
             }
         }
     }

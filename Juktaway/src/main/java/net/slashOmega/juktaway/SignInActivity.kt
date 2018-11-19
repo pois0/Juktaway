@@ -137,7 +137,7 @@ class SignInActivity: Activity() {
                 || !intent.data!!.toString().startsWith(getString(R.string.twitter_callback_url))) return
 
         val oauthVerifier = intent.data!!.getQueryParameter("oauth_verifier")
-        if (oauthVerifier == null || oauthVerifier.isEmpty()) return
+        if (oauthVerifier.isNullOrEmpty()) return
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
         VerifyOAuthTask(this).execute(oauthVerifier)
     }

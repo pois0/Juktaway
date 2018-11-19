@@ -43,20 +43,19 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
             mFooter.visibility = View.GONE
 
             job.await()?.takeIf { it.isNotEmpty() }?.run {
-                Log.d("aw;eofi", "hioef")
                 if (mReload) {
                     mAdapter.clear()
                     forEach {
                         if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                        mAdapter.add(Row.newStatus(it))
                     }
+                    mAdapter.addAllFromStatuses(this)
                     mReload = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     forEach {
                         if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                        mAdapter.extensionAdd(Row.newStatus(it))
                     }
+                    mAdapter.extensionAddAllFromStatuses(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }

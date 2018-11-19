@@ -31,8 +31,7 @@ class FavoritesFragment: BaseFragment() {
             }
 
             override fun onPostExecute(statuses: ResponseList<twitter4j.Status>?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
-                if (statuses == null || statuses.isEmpty()) {
+                if (statuses.isNullOrEmpty()) {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
@@ -43,21 +42,17 @@ class FavoritesFragment: BaseFragment() {
                     clear()
                     for (status in statuses) {
                         FavRetweetManager.setFav(status.id)
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter?.add(Row.newStatus(status))
+                        if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
                     }
+                    mAdapter?.addAllFromStatuses(statuses)
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     for (status in statuses) {
                         FavRetweetManager.setFav(status.id)
-                        if (mMaxId <= 0L || mMaxId > status.id) {
-                            mMaxId = status.id
-                        }
-                        mAdapter?.extensionAdd(Row.newStatus(status))
+                        if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
                     }
+                    mAdapter?.extensionAddAllFromStatuses(statuses)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
