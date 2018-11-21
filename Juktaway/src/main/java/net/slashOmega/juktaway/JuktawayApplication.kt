@@ -5,10 +5,8 @@ import android.graphics.Typeface
 import android.os.StrictMode
 import android.support.multidex.MultiDex
 import android.support.multidex.MultiDexApplication
-import net.slashOmega.juktaway.model.Relationship
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
-import net.slashOmega.juktaway.util.ImageUtil
 
 class JuktawayApplication: MultiDexApplication() {
     companion object {

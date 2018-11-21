@@ -1,6 +1,5 @@
 package net.slashOmega.juktaway.fragment.profile
 
-import android.util.Log
 import android.view.View
 import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
@@ -9,7 +8,6 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
-import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import twitter4j.Paging
