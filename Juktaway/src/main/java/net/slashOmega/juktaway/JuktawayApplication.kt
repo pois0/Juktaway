@@ -33,7 +33,6 @@ class JuktawayApplication: MultiDexApplication() {
         // load setting files
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
-        Relationship.init()
 
 
         font = Typeface.createFromAsset(assets, "fontello.ttf")

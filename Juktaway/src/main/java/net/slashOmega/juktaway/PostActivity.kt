@@ -33,10 +33,9 @@ import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.PostStockSettings
 import net.slashOmega.juktaway.task.SendDirectMessageTask
 import net.slashOmega.juktaway.util.*
+import net.slashOmega.juktaway.util.toString
 import kotlinx.android.synthetic.main.activity_post.*
 import kotlinx.android.synthetic.main.action_bar_post.*
-import kotlinx.android.synthetic.main.list.*
-import kotlinx.android.synthetic.main.list.view.*
 import kotlinx.android.synthetic.main.row_word.view.*
 import kotlinx.android.synthetic.main.spinner_switch_account.view.*
 import twitter4j.Status

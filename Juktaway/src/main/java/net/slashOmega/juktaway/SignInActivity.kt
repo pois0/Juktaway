@@ -80,7 +80,6 @@ class SignInActivity: Activity() {
             override fun onPostExecute(user: User?) {
                 MessageUtil.dismissProgressDialog()
                 user?.let {
-                    Log.d("OAuth", "Success Logging in")
                     UserIconManager.addUserIconMap(it)
                     ref.get()?.successOAuth()
                 }

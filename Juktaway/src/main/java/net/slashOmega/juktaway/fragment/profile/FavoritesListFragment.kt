@@ -1,9 +1,6 @@
 package net.slashOmega.juktaway.fragment.profile
 
-import android.os.Bundle
-import android.view.LayoutInflater
 import android.view.View
-import android.view.ViewGroup
 import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -56,13 +53,6 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         }
     }
 
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
-        return super.onCreateView(inflater, container, savedInstanceState)?.apply {
-            mListView.onItemClickListener = StatusClickListener(activity!!)
-            mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
-        }
-    }
-
     override fun onResume() {
         super.onResume()
         EventBus.getDefault().register(this)
@@ -86,5 +76,10 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         mFooter.visibility = View.VISIBLE
         mAutoLoader = false
         showList()
+    }
+
+    override fun View.init() {
+        mListView.onItemClickListener = StatusClickListener(activity!!)
+        mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
     }
 }

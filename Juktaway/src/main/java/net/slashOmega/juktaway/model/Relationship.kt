@@ -13,16 +13,17 @@ object Relationship {
     private val noRetweetList = mutableListOf<Long>()
     private val myIdList = mutableListOf<Long>()
 
-    fun init() {
+    init {
         val accessTokens = AccessTokenManager.getAccessTokens()
-        if (accessTokens.isEmpty()) return
-        for (accessToken in accessTokens) {
-            val twitter = TwitterManager.getTwitterInstance()
-            twitter.oAuthAccessToken = accessToken
-            myIdList.add(accessToken.userId)
-            loadBlock(twitter)
-            loadOfficialMute(twitter)
-            loadNoRetweet(twitter)
+        if (accessTokens.isNotEmpty()) {
+            for (accessToken in accessTokens) {
+                val twitter = TwitterManager.getTwitterInstance()
+                twitter.oAuthAccessToken = accessToken
+                myIdList.add(accessToken.userId)
+                loadBlock(twitter)
+                loadOfficialMute(twitter)
+                loadNoRetweet(twitter)
+            }
         }
     }
 

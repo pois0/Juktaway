@@ -11,9 +11,14 @@ import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
 
-class ScaleImageView: AppCompatImageView, View.OnTouchListener {
-    constructor(c: Context, attr: AttributeSet): super(c, attr) { mContext = c }
-    constructor(c: Context): super(c) { mContext = c }
+class ScaleImageView : AppCompatImageView, View.OnTouchListener {
+    constructor(c: Context, attr: AttributeSet) : super(c, attr) {
+        mContext = c
+    }
+
+    constructor(c: Context) : super(c) {
+        mContext = c
+    }
 
     companion object {
         var sBounds = false
@@ -68,7 +73,6 @@ class ScaleImageView: AppCompatImageView, View.OnTouchListener {
         mMatrix.reset()
         val rNorm = r - l
         var scale = rNorm.toFloat() / mIntrinsicWidth.toFloat()
-        // Log.d("justaway", "[setFrame] l:" + l + " t:" + t + " r:" + r + " b:" + b + " width:" + mWidth + " height:" + mHeight + " intrinsicWidth:" + mIntrinsicWidth + " scale:" + scale);
 
         val paddingHeight: Int
         val paddingWidth: Int
@@ -91,7 +95,6 @@ class ScaleImageView: AppCompatImageView, View.OnTouchListener {
         if (!mIsInitializedScaling) {
             mIsInitializedScaling = true
             // zoomTo(scale, mWidth / 2, mHeight / 2);
-            // Log.d("justaway", "[setFrame] mIsInitializedScaling scale:" + scale);
         }
 
         cutting()
@@ -104,7 +107,7 @@ class ScaleImageView: AppCompatImageView, View.OnTouchListener {
     }
 
     private fun initialize() {
-        mDetector = GestureDetector(mContext, object: GestureDetector.SimpleOnGestureListener() {
+        mDetector = GestureDetector(mContext, object : GestureDetector.SimpleOnGestureListener() {
             override fun onDoubleTap(e: MotionEvent?): Boolean {
                 e?.let { _ ->
                     maxZoomTo(e.x.toInt(), e.y.toInt())
@@ -161,7 +164,7 @@ class ScaleImageView: AppCompatImageView, View.OnTouchListener {
 
     private fun zoomTo(scale: Float, x: Int, y: Int) {
         if (getScale() * scale < mMinScale
-            || (scale >= 1 && getScale() * scale > MAX_SCALE)) return
+                || (scale >= 1 && getScale() * scale > MAX_SCALE)) return
         mMatrix.postScale(scale, scale)
         // move to center
         mMatrix.postTranslate(-(mWidth * scale - mWidth) / 2, -(mHeight * scale - mHeight) / 2)

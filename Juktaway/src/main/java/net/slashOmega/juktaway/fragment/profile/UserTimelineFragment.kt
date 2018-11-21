@@ -16,7 +16,8 @@ import twitter4j.Paging
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
-
+import net.slashOmega.juktaway.listener.StatusClickListener
+import net.slashOmega.juktaway.listener.StatusLongClickListener
 
 
 /**
@@ -89,6 +90,8 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     }
 
     override fun View.init() {
+        mListView.onItemClickListener = StatusClickListener(activity!!)
+        mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
         mPullToRefreshLayout = findViewById(R.id.ptr_layout)
     }
 }

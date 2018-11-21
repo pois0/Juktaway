@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway.util
 
 import io.ktor.client.HttpClient
-import io.ktor.client.engine.apache.Apache
 import io.ktor.client.request.get
 import jp.nephy.jsonkt.JsonObject
 import jp.nephy.jsonkt.delegation.JsonModel
@@ -14,7 +13,7 @@ import jp.nephy.jsonkt.parse
  * Created on 2018/11/18.
  */
 object KusoripuUtil {
-    private val client = HttpClient(Apache)
+    private val client = HttpClient()
     suspend fun getKusoripu(screenName: String): String {
         val response = client.get<String>(scheme = "https", host = "api.nephy.jp", path = "/v1/kusoripu/random?screen_name=$screenName")
         return response.parse<RepooplyModel>().text.raw
