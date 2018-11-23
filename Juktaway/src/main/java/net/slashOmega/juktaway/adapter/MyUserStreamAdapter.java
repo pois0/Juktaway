@@ -2,27 +2,14 @@ package net.slashOmega.juktaway.adapter;
 
 import android.os.AsyncTask;
 import android.os.Handler;
+import de.greenrobot.event.EventBus;
+import net.slashOmega.juktaway.event.model.*;
+import net.slashOmega.juktaway.model.*;
+import net.slashOmega.juktaway.model.Relationship;
+import net.slashOmega.juktaway.settings.mute.Mute;
+import twitter4j.*;
 
 import java.util.ArrayList;
-
-import de.greenrobot.event.EventBus;
-import net.slashOmega.juktaway.event.model.NotificationEvent;
-import net.slashOmega.juktaway.event.model.StreamingCreateFavoriteEvent;
-import net.slashOmega.juktaway.event.model.StreamingCreateStatusEvent;
-import net.slashOmega.juktaway.event.model.StreamingDestroyMessageEvent;
-import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent;
-import net.slashOmega.juktaway.event.model.StreamingUnFavoriteEvent;
-import net.slashOmega.juktaway.model.AccessTokenManager;
-import net.slashOmega.juktaway.model.FavRetweetManager;
-import net.slashOmega.juktaway.model.Relationship;
-import net.slashOmega.juktaway.model.Row;
-import net.slashOmega.juktaway.model.TwitterManager;
-import net.slashOmega.juktaway.settings.mute.Mute;
-import twitter4j.DirectMessage;
-import twitter4j.Status;
-import twitter4j.StatusDeletionNotice;
-import twitter4j.User;
-import twitter4j.UserStreamAdapter;
 
 public class MyUserStreamAdapter extends UserStreamAdapter {
 
@@ -84,7 +71,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             return;
         }
         Row row = Row.Companion.newStatus(status);
-        if (Mute.Companion.contains(row)) {
+        if (Mute.INSTANCE.contains(row)) {
             return;
         }
         long userId = AccessTokenManager.INSTANCE.getUserId();
@@ -173,7 +160,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             return;
         }
         Row row = Row.Companion.newDirectMessage(directMessage);
-        if (Mute.Companion.contains(row)) {
+        if (Mute.INSTANCE.contains(row)) {
             return;
         }
         EventBus.getDefault().post(new NotificationEvent(row));

@@ -44,8 +44,11 @@
                 <category android:name="android.intent.category.BROWSABLE"/>
 
                 <data
-                    android:host="justaway.super"
-                    android:scheme="http"/>
+                    android:host="auth.juktaway.slash-omega.net"
+                    android:scheme="https"/>
+                <data
+                    android:host="auth.juktaway.slash-omega.net"
+                    android:scheme="http" />
             </intent-filter>
         </activity>
         <activity

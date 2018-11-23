@@ -2,13 +2,12 @@ package net.slashOmega.juktaway.settings.mute
 
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
-import org.jetbrains.anko.db.createTable
 import twitter4j.User
 
 /**
  * Created on 2018/11/09.
  */
-object UserMute: Mute<Pair<Long, String>>() {
+object UserMute: MuteBase<Pair<Long, String>>() {
     private const val tableName = "userTable"
     private const val dbUserId = "userId"
     private const val dbScreenName = "screenName"

@@ -35,6 +35,8 @@ import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.PostStockSettings
+import net.slashOmega.juktaway.settings.PostStockSettings.drafts
+import net.slashOmega.juktaway.settings.PostStockSettings.hashtags
 import net.slashOmega.juktaway.task.SendDirectMessageTask
 import net.slashOmega.juktaway.util.*
 import twitter4j.Status
@@ -103,7 +105,6 @@ class PostActivity: FragmentActivity() {
     private lateinit var mContext: Activity
     private var mInReplyToStatusId: Long = 0
     private var mWidgetMode: Boolean = false
-    private lateinit var mPostStockSettings: PostStockSettings
     private val mTextHistory = mutableListOf<String>()
     private var mHashtagDialog: AlertDialog? = null
     private var mDraftDialog: AlertDialog? = null
@@ -219,11 +220,9 @@ class PostActivity: FragmentActivity() {
         status_text.text?.let { updateCount(it.toString()) }
 
         // 下書きとハッシュタグがあるかチェック
-        mPostStockSettings = PostStockSettings()
-        with (mPostStockSettings) {
-            draft_button.isEnabled = drafts.isNotEmpty()
-            hashtag_button.isEnabled = hashtags.isNotEmpty()
-        }
+        draft_button.isEnabled = drafts.isNotEmpty()
+        hashtag_button.isEnabled = hashtags.isNotEmpty()
+
 
         // 文字数をカウントしてボタンを制御する
         status_text.addTextChangedListener(object: TextWatcher{
@@ -255,7 +254,7 @@ class PostActivity: FragmentActivity() {
         hashtag_button.setOnClickListener {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = HashtagAdapter(this, R.layout.row_word)
-            PostStockSettings().hashtags?.forEach { tag -> adapter.add(tag) }
+            hashtags.forEach { tag -> adapter.add(tag) }
             view.findViewById<ListView>(R.id.list_list).apply {
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
@@ -275,7 +274,7 @@ class PostActivity: FragmentActivity() {
         draft_button.setOnClickListener {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = DraftAdapter(this, R.layout.row_word)
-            PostStockSettings().drafts?.forEach { tag -> adapter.add(tag) }
+            drafts.forEach { tag -> adapter.add(tag) }
             //TODO
             view.findViewById<ListView>(R.id.list_list).apply {
                 this.adapter = adapter
@@ -285,7 +284,7 @@ class PostActivity: FragmentActivity() {
                         setText(draft)
                         mDraftDialog?.dismiss()
                         adapter.remove(draft)
-                        mPostStockSettings.removeDraft(draft)
+                        PostStockSettings.removeDraft(draft)
                     }
                 }
             }
@@ -448,7 +447,7 @@ class PostActivity: FragmentActivity() {
                     .setMessage(R.string.confirm_save_draft)
                     .setPositiveButton(R.string.button_save) { _, _ ->
                         // 下書きとして保存する
-                        mPostStockSettings.addDraft(txt.toString())
+                        PostStockSettings.addDraft(txt.toString())
                         finish()
                     }
                     .setNegativeButton(R.string.button_destroy) { _, _ ->
@@ -525,7 +524,7 @@ class PostActivity: FragmentActivity() {
                 word.text = draft
                 trash.setOnClickListener {
                     remove(draft)
-                    ref.get()?.mPostStockSettings?.removeDraft(draft)
+                    PostStockSettings.removeDraft(draft)
                 }
             }
         }
@@ -544,13 +543,12 @@ class PostActivity: FragmentActivity() {
                 word.text = hashtag
                 trash.setOnClickListener {
                     remove(hashtag)
-                    ref.get()?.mPostStockSettings?.removeDraft(hashtag)
+                    PostStockSettings.removeDraft(hashtag)
                 }
             }
         }
     }
 
-    //TODO databind?
     private class AccessTokenAdapter(context: Context, val mLayout: Int)
             : ArrayAdapter<AccessToken>(context, mLayout) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater

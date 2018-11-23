@@ -1,15 +1,13 @@
 package net.slashOmega.juktaway.settings.mute
 
-import kotlinx.coroutines.selects.select
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
-import org.jetbrains.anko.db.createTable
 
 /**
  * Created on 2018/11/09.
  */
 
-object WordMute: Mute<String>() {
+object WordMute: MuteBase<String>() {
     private const val tableName = "wordTable"
     private const val dbWord = "word"
 

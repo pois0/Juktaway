@@ -29,9 +29,8 @@ open class UpdateStatusTask(private val mAccessToken: AccessToken?, private val 
                     }
                     twitter.updateStatus(sUpdate)
                 } ?: TwitterManager.getTwitter().updateStatus(sUpdate)
-                PostStockSettings().apply {
-                    status.hashtagEntities.forEach { addHashtag("#${it.text}") }
-                }
+
+                status.hashtagEntities.forEach { PostStockSettings.addHashtag("#${it.text}") }
                 null
             } catch (e: TwitterException) {
                 e.printStackTrace()

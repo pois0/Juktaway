@@ -213,7 +213,7 @@
     <string name="toast_update_profile_success">Saved.</string>
     <string name="toast_update_status_already">You have been tweet already.</string>
     <string name="toast_update_status_failure">Failed.</string>
-    <string name="twitter_callback_url">http://justaway.super</string>
+    <string name="twitter_callback_url">http://auth.juktaway.slash-omega.net</string>
     <string name="widget_title_post_mode">Post Only Mode</string>
     <string name="label_search_tweet">" Tweet Search"</string>
     <string name="label_search_user">" User Search"</string>

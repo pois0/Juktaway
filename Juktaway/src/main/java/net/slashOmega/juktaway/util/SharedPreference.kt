@@ -2,7 +2,6 @@ package net.slashOmega.juktaway.util
 
 import android.content.Context
 import net.slashOmega.juktaway.JuktawayApplication
-import net.slashOmega.juktaway.model.AccessTokenManager
 import kotlin.reflect.KProperty
 
 /**
@@ -13,16 +12,20 @@ class SharedPreference<T>(prefName: String, private val key: String, private val
         JuktawayApplication.app.getSharedPreferences(prefName, Context.MODE_PRIVATE)
     }
 
+    init {
+        if (default !is Int && default !is Long && default !is Float && default !is String && default !is Boolean)
+            throw IllegalTypeException()
+    }
+
     @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
-    operator fun getValue(thisRef: Any?, property: KProperty<*>): T
-            = pref.run {
+    operator fun getValue(thisRef: Any?, property: KProperty<*>): T = pref.run {
         when (default) {
             is Int -> getInt(key, default)
             is Long -> getLong(key, default)
             is Float -> getFloat(key, default)
             is String -> getString(key, default)
             is Boolean -> getBoolean(key, default)
-            else -> throw IllegalArgumentException()
+            else -> throw IllegalTypeException()
         } as T
     }
 
@@ -34,8 +37,10 @@ class SharedPreference<T>(prefName: String, private val key: String, private val
                 is Float -> putFloat(key, value as Float)
                 is String -> putString(key, value as String)
                 is Boolean -> putBoolean(key, value as Boolean)
-                else -> throw IllegalArgumentException()
+                else -> throw IllegalTypeException()
             }
         }.apply()
     }
+
+    class IllegalTypeException: IllegalStateException()
 }

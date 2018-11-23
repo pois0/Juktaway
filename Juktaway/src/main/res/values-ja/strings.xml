@@ -112,6 +112,7 @@
     <string name="menu_search">検索</string>
     <string name="menu_send_direct_messages">DMを送る</string>
     <string name="menu_send_reply">リプを送る</string>
+    <string name="menu_send_kusoripu">クソリプを送る</string>
     <string name="menu_settings">設定</string>
     <string name="menu_sign_out">サインアウト</string>
     <string name="menu_store">Google Play</string>

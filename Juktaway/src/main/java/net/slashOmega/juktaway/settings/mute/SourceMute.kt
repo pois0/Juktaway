@@ -1,15 +1,13 @@
 package net.slashOmega.juktaway.settings.mute
 
-import android.util.Log
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
-import org.jetbrains.anko.db.createTable
 
 /**
  * Created on 2018/11/09.
  */
 
-object SourceMute: Mute<String>() {
+object SourceMute: MuteBase<String>() {
     private const val dbSource = "source"
     private const val tableName = "sourceTable"
 
