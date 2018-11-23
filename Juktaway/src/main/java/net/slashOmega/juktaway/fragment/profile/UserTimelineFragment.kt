@@ -8,14 +8,14 @@ import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
+import net.slashOmega.juktaway.event.action.StatusActionEvent
+import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
+import net.slashOmega.juktaway.listener.StatusClickListener
+import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import twitter4j.Paging
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
-import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
-import net.slashOmega.juktaway.event.action.StatusActionEvent
-import net.slashOmega.juktaway.listener.StatusClickListener
-import net.slashOmega.juktaway.listener.StatusLongClickListener
 
 
 /**
@@ -41,7 +41,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
 
             mFooter.visibility = View.GONE
 
-            job.await()?.takeIf { it.isNotEmpty() }?.run {
+            job.await().takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
                     forEach {

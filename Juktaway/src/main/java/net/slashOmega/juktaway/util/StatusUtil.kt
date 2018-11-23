@@ -3,12 +3,40 @@ package net.slashOmega.juktaway.util
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
-
-import java.util.ArrayList
-import java.util.regex.Pattern
-
 import net.slashOmega.juktaway.model.AccessTokenManager
 import twitter4j.Status
+import java.util.*
+import java.util.regex.Pattern
+
+val Status.videoUrl: String
+    get() {
+        for (extendedMediaEntity in mediaEntities) {
+            for (videoVariant in extendedMediaEntity.videoVariants) {
+                if (videoVariant.url.lastIndexOf("mp4") != -1) {
+                    return videoVariant.url
+                }
+            }
+        }
+        return ""
+    }
+
+val Status.imageUrls: List<String>
+    get() {
+        val imageUrls = ArrayList<String>()
+        urlEntities.map { it.expandedURL }.forEach { url ->
+            for (set in ImageUrlTransformer.list) {
+                val matcher = set.pattern.matcher(url)
+                if (matcher.find()) {
+                    imageUrls.add(set.urlGenerator(url, matcher))
+                    continue
+                }
+            }
+        }
+
+        mediaEntities.takeNotEmpty()?.map { it.mediaURL }?.forEach { imageUrls.add(it) }
+
+        return imageUrls
+    }
 
 object StatusUtil {
     private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w\\.\\-/:#\\?=&;%~\\+]+")
@@ -88,17 +116,6 @@ object StatusUtil {
         }
 
         return imageUrls
-    }
-
-    fun getVideoUrl(status: Status): String {
-        for (extendedMediaEntity in status.mediaEntities) {
-            for (videoVariant in extendedMediaEntity.videoVariants) {
-                if (videoVariant.url.lastIndexOf("mp4") != -1) {
-                    return videoVariant.url
-                }
-            }
-        }
-        return ""
     }
 
     fun generateUnderline(str: String): SpannableStringBuilder {

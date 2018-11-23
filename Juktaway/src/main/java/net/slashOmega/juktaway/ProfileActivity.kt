@@ -6,18 +6,16 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.AsyncTask
 import android.os.Bundle
-import kotlinx.android.synthetic.main.activity_profile.*
-
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.support.v4.content.Loader
 import android.support.v4.view.ViewPager
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
+import kotlinx.android.synthetic.main.activity_profile.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
@@ -28,10 +26,10 @@ import net.slashOmega.juktaway.fragment.profile.*
 import net.slashOmega.juktaway.model.Profile
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.task.ShowUserLoader
-import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.KusoripuUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
+import net.slashOmega.juktaway.util.displayImage
 import org.jetbrains.anko.startActivity
 import twitter4j.Relationship
 import twitter4j.User
@@ -445,7 +443,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         listed_count.text = getString(R.string.label_listed, String.format("%1$,3d", mUser.listedCount))
 
         mUser.profileBannerMobileRetinaURL?.let {
-            ImageUtil.displayImage(it, banner)
+            banner.displayImage(it)
         }
 
         with (menu) {

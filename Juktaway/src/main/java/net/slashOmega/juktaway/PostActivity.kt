@@ -27,17 +27,16 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
+import kotlinx.android.synthetic.main.action_bar_post.*
+import kotlinx.android.synthetic.main.activity_post.*
+import kotlinx.android.synthetic.main.row_word.view.*
+import kotlinx.android.synthetic.main.spinner_switch_account.view.*
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.PostStockSettings
 import net.slashOmega.juktaway.task.SendDirectMessageTask
 import net.slashOmega.juktaway.util.*
-import net.slashOmega.juktaway.util.toString
-import kotlinx.android.synthetic.main.activity_post.*
-import kotlinx.android.synthetic.main.action_bar_post.*
-import kotlinx.android.synthetic.main.row_word.view.*
-import kotlinx.android.synthetic.main.spinner_switch_account.view.*
 import twitter4j.Status
 import twitter4j.StatusUpdate
 import twitter4j.TwitterException
@@ -45,7 +44,6 @@ import twitter4j.auth.AccessToken
 import java.io.File
 import java.io.FileNotFoundException
 import java.lang.ref.WeakReference
-import kotlin.collections.ArrayList
 
 @SuppressLint("SetTextI18n", "InflateParams")
 class PostActivity: FragmentActivity() {
@@ -199,7 +197,7 @@ class PostActivity: FragmentActivity() {
         }
 
         intent.data?.run {
-            getQueryParameter("in_reply_to")?.takeIf{it.isNotEmpty()}?.let {
+            getQueryParameter("in_reply_to").takeNotEmpty()?.let {
                 mInReplyToStatusId = it.toLong()
             }
             val text = (getQueryParameter("text") ?: "").apply {
@@ -445,7 +443,7 @@ class PostActivity: FragmentActivity() {
     }
 
     override fun onBackPressed() {
-        status_text.text?.takeIf{it.isNotEmpty()}?.let { txt ->
+        status_text.text.takeNotEmpty()?.let { txt ->
             AlertDialog.Builder(this@PostActivity)
                     .setMessage(R.string.confirm_save_draft)
                     .setPositiveButton(R.string.button_save) { _, _ ->

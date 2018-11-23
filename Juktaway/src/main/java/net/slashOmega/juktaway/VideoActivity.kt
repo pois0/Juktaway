@@ -4,17 +4,20 @@ import android.content.Context
 import android.content.Intent
 import android.media.AudioManager
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.view.Window
+import kotlinx.android.synthetic.main.activity_video.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.StatusUtil
-import kotlinx.android.synthetic.main.activity_video.*
-import twitter4j.Status
-import java.lang.ref.WeakReference
+import net.slashOmega.juktaway.util.takeNotEmpty
+import net.slashOmega.juktaway.util.tryAndTraceGet
+import net.slashOmega.juktaway.util.videoUrl
 import java.util.regex.Pattern
 
 /**
@@ -23,28 +26,6 @@ import java.util.regex.Pattern
 class VideoActivity: FragmentActivity() {
     companion object {
         val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/video/(\\d+)/?.*")!!
-
-        private class ShowStatus(context: VideoActivity): AsyncTask<Long, Void, Status>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): twitter4j.Status? {
-                return params[0]?.let { try {
-                    TwitterManager.getTwitter().showStatus(it)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                }
-            }
-
-            override fun onPostExecute(result: twitter4j.Status?) {
-                result?.run {
-                    StatusUtil.getVideoUrl(this).takeIf { it.isNotEmpty() }?.let {
-                        ref.get()?.run { setVideoURI(it) }
-                    }
-                }
-            }
-        }
     }
 
     private var musicWasPlaying = false
@@ -63,10 +44,21 @@ class VideoActivity: FragmentActivity() {
         }
 
         val statusUrl = intent?.extras?.getString("statusUrl")
-        if (statusUrl != null && statusUrl.isNotEmpty()) {
-            pattern.matcher(statusUrl)?.let {
-                if (it.find())
-                    ShowStatus(this).execute(it.group(1).toLong())
+        if (statusUrl.isNullOrEmpty().not()) {
+            pattern.matcher(statusUrl)?.let { m ->
+                if (m.find()) {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        async(Dispatchers.Default) {
+                            tryAndTraceGet {
+                                TwitterManager.getTwitter().showStatus(m.group(1).toLong())
+                            }
+                        }.await()?.run {
+                            videoUrl.takeNotEmpty()?.let {
+                                setVideoURI(it)
+                            }
+                        }
+                    }
+                }
                 return
             }
         }

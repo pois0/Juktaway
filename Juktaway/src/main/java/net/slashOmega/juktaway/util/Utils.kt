@@ -24,6 +24,14 @@ inline fun <T, R> T.tryAndTraceGet (block: T.() -> R): R? = runCatching { block(
     getOrNull()
 }
 
-inline fun String?.nullToEmpty() = this ?: ""
+fun String?.nullToEmpty() = this ?: ""
 
-inline fun CharSequence?.toString() = this?.toString() ?: ""
+fun CharSequence?.toString() = this?.toString() ?: ""
+
+fun CharSequence?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
+
+fun String?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
+
+fun <T> Array<out T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
+
+fun <T> Collection<T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }

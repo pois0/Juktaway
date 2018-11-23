@@ -2,6 +2,7 @@ package net.slashOmega.juktaway.util
 
 import android.content.Context
 import android.content.Intent
+import android.net.Uri
 import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
@@ -20,6 +21,17 @@ import twitter4j.Status
 /**
  * Created on 2018/10/25.
  */
+
+fun ImageView.displayImage(url: String) {
+    if ((tag as String) == url) return
+    tag = url
+    ImageLoader.getInstance().displayImage(url, this)
+}
+
+fun ImageView.displayImage(url: Uri) {
+    displayImage(url.toString())
+}
+
 object ImageUtil {
     private val sRoundedDisplayImageOptions by lazy {
         DisplayImageOptions.Builder()
@@ -51,7 +63,7 @@ object ImageUtil {
         }
     }
 
-    fun displayImage(url: String, view: ImageView) {
+    private fun displayImage(url: String, view: ImageView) {
         val tag = view.tag as? String
         if (tag != null && tag == url) return
         view.tag = url
@@ -70,8 +82,7 @@ object ImageUtil {
     }
 
     fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: TextView, status: Status) {
-        val videoUrl = StatusUtil.getVideoUrl(status)
-        StatusUtil.getImageUrls(status).takeIf { it.isNotEmpty() }?.let {imageUrls ->
+        StatusUtil.getImageUrls(status).takeNotEmpty()?.let {imageUrls ->
             group.removeAllViews()
             imageUrls.forEachIndexed { i, url ->
                 val image = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
@@ -80,17 +91,15 @@ object ImageUtil {
                 })
                 displayRoundedImage(url, image)
 
-                if (videoUrl.isEmpty()) {
-                    image.setOnClickListener {
+                image.setOnClickListener {
+                    if (status.videoUrl.isEmpty()) {
                         context.startActivity(Intent(it.context, ScaleImageActivity::class.java).apply {
                             putExtra("status", status)
                             putExtra("index", i)
                         })
-                    }
-                } else {
-                    image.setOnClickListener {
+                    } else {
                         context.startActivity(Intent(it.context, VideoActivity::class.java). apply {
-                            putExtra("videoUrl", videoUrl)
+                            putExtra("videoUrl", status.videoUrl)
                         })
                     }
                 }
@@ -101,6 +110,6 @@ object ImageUtil {
             group.visibility = View.GONE
             wrapperGroup.visibility = View.GONE
         }
-        play.visibility = if (videoUrl.isEmpty()) View.GONE else View.VISIBLE
+        play.visibility = if (status.videoUrl.isEmpty()) View.GONE else View.VISIBLE
     }
 }
