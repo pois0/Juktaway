@@ -12,6 +12,7 @@ import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
+import org.jetbrains.anko.toast
 import twitter4j.TwitterException
 import twitter4j.User
 import twitter4j.auth.RequestToken
@@ -50,6 +51,8 @@ class SignInActivity: Activity() {
                 }
                 ref.get()?.run {
                     mRequestToken = token
+                    consumer_key.visibility = View.GONE
+                    consumer_secret.visibility = View.GONE
                     start_oauth_button.visibility = View.GONE
                     connect_with_twitter.visibility = View.GONE
                     val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
@@ -96,6 +99,8 @@ class SignInActivity: Activity() {
         setContentView(R.layout.activity_signin)
 
         if(intent.getBooleanExtra("add_account", false)) {
+            consumer_key.visibility = View.GONE
+            consumer_secret.visibility = View.GONE
             start_oauth_button.visibility = View.GONE
             connect_with_twitter.visibility = View.GONE
             startOAuth()
@@ -149,6 +154,12 @@ class SignInActivity: Activity() {
     }
 
     private fun startOAuth() {
+        if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
+            toast(R.string.signin_csck_blank)
+            return
+        }
+        TwitterManager.consumerKey = consumer_key.text.toString()
+        TwitterManager.consumerSecret = consumer_secret.text.toString()
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
         AddUserOAuthTask(this).execute()
     }

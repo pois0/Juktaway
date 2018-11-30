@@ -10,6 +10,18 @@
               android:orientation="vertical"
               tools:context=".MainActivity">
 
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/consumer_key" android:hint="Consumer Key"/>
+    <EditText
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:inputType="textPersonName"
+            android:ems="10"
+            android:id="@+id/consumer_secret" android:hint="Consumer Secret"/>
     <net.slashOmega.juktaway.widget.FontelloButton
         android:id="@+id/start_oauth_button"
         android:layout_width="128dp"
