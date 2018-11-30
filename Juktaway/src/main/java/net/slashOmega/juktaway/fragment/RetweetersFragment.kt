@@ -16,6 +16,7 @@ import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.UserAdapter
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.util.MessageUtil
+import net.slashOmega.juktaway.util.tryAndTraceGet
 
 class RetweetersFragment: DialogFragment() {
     private lateinit var mProgressBar: ProgressBar
@@ -32,12 +33,7 @@ class RetweetersFragment: DialogFragment() {
         arguments?.getLong("statusId")?.takeIf { it > 0 }?.let { id ->
             GlobalScope.launch(Dispatchers.Main) {
                 val retweetJob = async(Dispatchers.Default) {
-                    try {
-                        TwitterManager.twitter.getRetweets(id)
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
+                    tryAndTraceGet { TwitterManager.twitter.getRetweets(id) }
                 }
                 mProgressBar.visibility = View.GONE
 

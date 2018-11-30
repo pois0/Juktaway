@@ -247,7 +247,6 @@ class PostActivity: FragmentActivity() {
                     }
                 }
             }
-
         })
 
         in_reply_to_cancel.setOnClickListener { in_reply_to_layout.visibility = View.GONE }

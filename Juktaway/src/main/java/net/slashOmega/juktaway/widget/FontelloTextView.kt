@@ -10,12 +10,12 @@ class FontelloTextView : TextView {
     constructor(context: Context) : super(context) { init() }
 
     constructor(context: Context, attrs: AttributeSet) : super(context, attrs) {
-        if (isInEditMode) { return }
+        if (isInEditMode) return
         init()
     }
 
     constructor(context: Context, attrs: AttributeSet, defStyle: Int) : super(context, attrs, defStyle) {
-        if (isInEditMode) { return }
+        if (isInEditMode) return
         init()
     }
 

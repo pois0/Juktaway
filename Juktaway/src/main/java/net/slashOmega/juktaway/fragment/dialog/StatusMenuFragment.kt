@@ -69,15 +69,16 @@ class StatusMenuFragment: DialogFragment() {
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)
                 .setView(ListView(mActivity).apply {
-                    setAdapter(adapter)
-                    setOnItemClickListener { _, _, i, _ ->
-                        adapter.getItem(i)?.callback?.run()
+                        setAdapter(adapter)
+                        setOnItemClickListener { _, _, i, _ ->
+                            adapter.getItem(i)?.callback?.run()
+                        }
+                    }).let {
+                        val message = arguments?.getSerializable("directMessage") as? DirectMessage
+                        if (message != null) onDirectMessage(message, adapter, it)
+                        else onStatus(arguments!!.getSerializable("status") as Status, adapter, it)
                     }
-                }).let {
-                    val message = arguments?.getSerializable("directMessage") as? DirectMessage
-                    if (message != null) onDirectMessage(message, adapter, it)
-                    else onStatus(arguments!!.getSerializable("status") as Status, adapter, it)
-                }.create()
+                .create()
     }
 
 
