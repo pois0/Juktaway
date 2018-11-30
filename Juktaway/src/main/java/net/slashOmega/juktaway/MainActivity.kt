@@ -1,8 +1,5 @@
 package net.slashOmega.juktaway
 
-import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.android.synthetic.main.action_bar_main.*
-
 import android.annotation.SuppressLint
 import android.app.ActionBar
 import android.app.Activity
@@ -11,10 +8,10 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
+import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
@@ -24,6 +21,8 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
+import kotlinx.android.synthetic.main.action_bar_main.*
+import kotlinx.android.synthetic.main.activity_main.*
 import net.slashOmega.juktaway.adapter.SearchAdapter
 import net.slashOmega.juktaway.adapter.main.AccessTokenAdapter
 import net.slashOmega.juktaway.adapter.main.MainPagerAdapter
@@ -323,7 +322,7 @@ class MainActivity: FragmentActivity() {
         TwitterManager.resumeStreaming()
         with (action_bar_streaming_button) {
             when {
-                TwitterManager.getTwitterStreamConnected() ->
+                TwitterManager.twitterStreamConnected ->
                     ThemeUtil.setThemeTextColor(this, R.attr.holo_green)
                 BasicSettings.streamingMode ->
                     ThemeUtil.setThemeTextColor(this, R.attr.holo_red)

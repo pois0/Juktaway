@@ -31,7 +31,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
             val job = async(Dispatchers.Default) {
-                TwitterManager.getTwitter().getUserTimeline(user.id, Paging().apply {
+                TwitterManager.twitter.getUserTimeline(user.id, Paging().apply {
                     if (mMaxId > 0) {
                         maxId = mMaxId
                         count = BasicSettings.pageCount

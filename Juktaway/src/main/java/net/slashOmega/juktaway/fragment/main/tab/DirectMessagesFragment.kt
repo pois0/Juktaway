@@ -17,7 +17,7 @@ class DirectMessagesFragment: BaseFragment() {
 
         override fun doInBackground(vararg p0: Void?) = ref.get()?.run {
             try {
-                val twitter = TwitterManager.getTwitter()
+                val twitter = TwitterManager.twitter
                 val sentMessages = twitter.getSentDirectMessages(Paging().apply {
                     if (mSentDirectMessagesMaxId > 0 && !mReloading) {
                         maxId = mSentDirectMessagesMaxId - 1

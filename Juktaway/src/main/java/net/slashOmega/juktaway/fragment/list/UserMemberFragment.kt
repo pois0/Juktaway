@@ -26,7 +26,7 @@ class UserMemberFragment : Fragment() {
 
             override fun doInBackground(vararg params: Long?): PagableResponseList<User>? = ref.get()?.run { params[0]?.let {
                 try {
-                    val userListsMembers = TwitterManager.getTwitter().getUserListMembers(it, mCursor)
+                    val userListsMembers = TwitterManager.twitter.getUserListMembers(it, mCursor)
                     mCursor = userListsMembers.nextCursor
                     userListsMembers
                 } catch (e: Exception) {

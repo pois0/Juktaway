@@ -22,7 +22,7 @@ class InteractionsFragment: BaseFragment() {
 
             override fun doInBackground(vararg params: Void): ResponseList<twitter4j.Status>? = ref.get()?.run {
                 try {
-                    TwitterManager.getTwitter().getMentionsTimeline(Paging().also {
+                    TwitterManager.twitter.getMentionsTimeline(Paging().also {
                         if (mMaxId > 0 && !mReloading) {
                             it.maxId = mMaxId - 1
                             it.count = BasicSettings.pageCount

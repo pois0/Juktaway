@@ -17,7 +17,7 @@ object Relationship {
         val accessTokens = AccessTokenManager.getAccessTokens()
         if (accessTokens.isNotEmpty()) {
             for (accessToken in accessTokens) {
-                val twitter = TwitterManager.getTwitterInstance()
+                val twitter = TwitterManager.twitterInstance
                 twitter.oAuthAccessToken = accessToken
                 myIdList.add(accessToken.userId)
                 loadBlock(twitter)

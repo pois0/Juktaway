@@ -52,7 +52,7 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                                 GlobalScope.launch(Dispatchers.Main) {
                                     if (async(Dispatchers.Default) {
                                                 try {
-                                                    TwitterManager.getTwitter().destroySavedSearch(search.id)
+                                                    TwitterManager.twitter.destroySavedSearch(search.id)
                                                     true
                                                 } catch (e: Exception) {
                                                     e.printStackTrace()
@@ -112,7 +112,7 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
         GlobalScope.launch(Dispatchers.Main) {
             async(Dispatchers.Default) {
                 try {
-                    TwitterManager.getTwitter().savedSearches
+                    TwitterManager.twitter.savedSearches
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null

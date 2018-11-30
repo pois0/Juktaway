@@ -14,7 +14,7 @@ import twitter4j.UserList
 class LoadUserListsTask : AsyncTask<Void, Void, ResponseList<UserList>>() {
     override fun doInBackground(vararg params: Void): ResponseList<UserList>? {
         return try {
-            TwitterManager.getTwitter().getUserLists(AccessTokenManager.getUserId())
+            TwitterManager.twitter.getUserLists(AccessTokenManager.getUserId())
         } catch (e: Exception) {
             e.printStackTrace()
             null

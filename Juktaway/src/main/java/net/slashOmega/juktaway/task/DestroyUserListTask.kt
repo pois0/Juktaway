@@ -14,7 +14,7 @@ class DestroyUserListTask(private var mUserList: UserList) : AsyncTask<Void, Voi
 
     override fun doInBackground(vararg params: Void): Boolean? {
         return try {
-            TwitterManager.getTwitter().destroyUserList(mUserList.id)
+            TwitterManager.twitter.destroyUserList(mUserList.id)
             true
         } catch (e: Exception) {
             e.printStackTrace()

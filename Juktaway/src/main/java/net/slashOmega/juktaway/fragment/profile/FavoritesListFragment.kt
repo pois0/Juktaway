@@ -30,7 +30,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val job = async(Dispatchers.Default) {
                 tryAndTraceGet {
-                    TwitterManager.getTwitter().getFavorites(user.id, Paging().apply {
+                    TwitterManager.twitter.getFavorites(user.id, Paging().apply {
                         if (mMaxId > 0) {
                             maxId = mMaxId - 1
                             count = BasicSettings.pageCount

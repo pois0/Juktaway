@@ -12,7 +12,7 @@ class UserListsLoader(context: Context) : AbstractAsyncTaskLoader<ResponseList<U
 
     override fun loadInBackground(): ResponseList<UserList>? {
         return try {
-            TwitterManager.getTwitter().getUserLists(AccessTokenManager.getUserId())
+            TwitterManager.twitter.getUserLists(AccessTokenManager.getUserId())
         } catch (e: TwitterException) {
             e.printStackTrace()
             null

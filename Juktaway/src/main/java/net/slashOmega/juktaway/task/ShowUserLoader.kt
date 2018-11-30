@@ -25,7 +25,7 @@ class ShowUserLoader : AbstractAsyncTaskLoader<Profile> {
     override fun loadInBackground(): Profile {
         var args = ""
         return try {
-            val twitter = TwitterManager.getTwitter()
+            val twitter = TwitterManager.twitter
             val mUser: User
             val mRelationship: Relationship
             if (mScreenName != null) {

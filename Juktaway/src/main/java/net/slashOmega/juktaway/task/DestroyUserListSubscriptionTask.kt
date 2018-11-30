@@ -14,7 +14,7 @@ class DestroyUserListSubscriptionTask(private var mUserList: UserList) : AsyncTa
 
     override fun doInBackground(vararg params: Void): Boolean? {
         return try {
-            TwitterManager.getTwitter().destroyUserListSubscription(mUserList.id)
+            TwitterManager.twitter.destroyUserListSubscription(mUserList.id)
             true
         } catch (e: Exception) {
             e.printStackTrace()

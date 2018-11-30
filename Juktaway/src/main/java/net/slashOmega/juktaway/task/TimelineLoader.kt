@@ -11,7 +11,7 @@ class TimelineLoader(context: Context) : AbstractAsyncTaskLoader<ResponseList<St
 
     override fun loadInBackground(): ResponseList<Status>? {
         return try {
-            TwitterManager.getTwitter().homeTimeline
+            TwitterManager.twitter.homeTimeline
         } catch (e: TwitterException) {
             e.printStackTrace()
             null

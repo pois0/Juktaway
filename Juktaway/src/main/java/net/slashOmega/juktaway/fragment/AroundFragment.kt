@@ -27,7 +27,7 @@ class AroundFragment: DialogFragment() {
 
             override fun doInBackground(vararg p: twitter4j.Status?): ResponseList<twitter4j.Status>? = p[0]?.let {
                 try {
-                    TwitterManager.getTwitter().getUserTimeline(it.user.screenName, Paging().apply {
+                    TwitterManager.twitter.getUserTimeline(it.user.screenName, Paging().apply {
                         count = 3
                         maxId = it.id - 1
                     })
@@ -62,7 +62,7 @@ class AroundFragment: DialogFragment() {
                     }
                     for (i in 1..5) {
                         paging.page = i
-                        val statuses = TwitterManager.getTwitter().getUserTimeline(s.user.screenName)
+                        val statuses = TwitterManager.twitter.getUserTimeline(s.user.screenName)
                         for ((j, row) in statuses.withIndex()) {
                             if (row.id == s.id && j > 0) return statuses.subList(Math.max(0, j - 4), j - 1)
                         }

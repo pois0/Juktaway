@@ -14,7 +14,7 @@ class DestroyDirectMessageTask : AsyncTask<Long, Void, DirectMessage>() {
     override fun doInBackground(vararg params: Long?): DirectMessage? {
         return params[0]?.let {
             try {
-                TwitterManager.getTwitter().destroyDirectMessage(it)
+                TwitterManager.twitter.destroyDirectMessage(it)
             } catch (e: Exception) {
                 e.printStackTrace()
                 null

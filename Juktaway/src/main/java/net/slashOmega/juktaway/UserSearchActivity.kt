@@ -27,7 +27,7 @@ class UserSearchActivity: FragmentActivity() {
 
             override fun doInBackground(vararg params: String): ResponseList<User>? {
                 return try {
-                    ref.get()?.run { TwitterManager.getTwitter().searchUsers(params[0], mPage) }
+                    ref.get()?.run { TwitterManager.twitter.searchUsers(params[0], mPage) }
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null

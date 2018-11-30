@@ -34,7 +34,7 @@ class UserListActivity: FragmentActivity() {
             override fun doInBackground(vararg p0: Void?): Boolean {
                 return ref.get()?.run {
                     try {
-                        TwitterManager.getTwitter().createUserListSubscription(mUserList.id)
+                        TwitterManager.twitter.createUserListSubscription(mUserList.id)
                         true
                     } catch (e: Exception) {
                         e.printStackTrace()
@@ -64,7 +64,7 @@ class UserListActivity: FragmentActivity() {
             override fun doInBackground(vararg p0: Void?): Boolean {
                 return ref.get()?.run {
                     try {
-                        TwitterManager.getTwitter().destroyUserListSubscription(mUserList.id)
+                        TwitterManager.twitter.destroyUserListSubscription(mUserList.id)
                         true
                     } catch (e: Exception) {
                         e.printStackTrace()

@@ -30,7 +30,7 @@ import java.lang.ref.WeakReference
 import java.util.*
 
 class TalkFragment: DialogFragment() {
-    private val mTwitter by lazy { TwitterManager.getTwitter() }
+    private val mTwitter by lazy { TwitterManager.twitter }
     private val mAdapter by lazy { StatusAdapter(activity!!) }
     private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }

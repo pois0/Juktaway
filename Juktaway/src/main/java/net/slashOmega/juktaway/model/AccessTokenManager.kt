@@ -36,7 +36,7 @@ object AccessTokenManager {
     fun setAccessToken(accessToken: AccessToken) {
         sAccessToken = accessToken
 
-        TwitterManager.getTwitter().oAuthAccessToken = sAccessToken
+        TwitterManager.twitter.oAuthAccessToken = sAccessToken
         val gson = Gson()
         val accountSettings = sharedPreferences.getString(TOKENS, null)?.let { json ->
             gson.fromJson(json, AccountSettings::class.java).apply {

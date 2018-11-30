@@ -61,7 +61,7 @@ object UserIconManager {
                 dbUse {
                     val data = select(tableName, "userId").parseList(LongParser)
                     if (data.isNotEmpty()) try {
-                        val users = TwitterManager.getTwitter().lookupUsers(*data.toLongArray())
+                        val users = TwitterManager.twitter.lookupUsers(*data.toLongArray())
                         for (u in users) {
                             update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
                                     .whereArgs("(userId = {userId})", "userId" to u.id)

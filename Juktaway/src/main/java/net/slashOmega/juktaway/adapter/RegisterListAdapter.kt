@@ -36,7 +36,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                         if (isChecked) {
                             GlobalScope.async {
                                 tryAndTrace {
-                                    TwitterManager.getTwitter().createUserListMembers(registered.userList!!.id, *mUserId)
+                                    TwitterManager.twitter.createUserListMembers(registered.userList!!.id, *mUserId)
                                 }
                             }.await().let {
                                 MessageUtil.dismissProgressDialog()
@@ -52,7 +52,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                         } else {
                             GlobalScope.async {
                                 tryAndTrace {
-                                    TwitterManager.getTwitter().destroyUserListMembers(registered.userList!!.id, mUserId)
+                                    TwitterManager.twitter.destroyUserListMembers(registered.userList!!.id, mUserId)
                                 }
                             }.await().let {
                                 MessageUtil.dismissProgressDialog()

@@ -17,7 +17,7 @@ class SearchFragment: BaseFragment() {
 
             override fun doInBackground(vararg p0: Void?): QueryResult? = ref.get()?.run {
                 try {
-                    TwitterManager.getTwitter().search(
+                    TwitterManager.twitter.search(
                             mQuery?.takeUnless { mReloading }?: Query("$mSearchWord exclude:retweets"))
 
                 } catch (e: OutOfMemoryError) {

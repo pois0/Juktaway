@@ -28,7 +28,7 @@ class TimelineFragment: BaseFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = async(Dispatchers.Default) {
                 try {
-                    TwitterManager.getTwitter().getHomeTimeline(Paging().also {
+                    TwitterManager.twitter.getHomeTimeline(Paging().also {
                         if (mMaxId > 0 && !mReloading) {
                             it.maxId = mMaxId - 1
                             it.count = BasicSettings.pageCount

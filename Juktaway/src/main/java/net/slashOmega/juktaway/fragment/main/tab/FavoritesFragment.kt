@@ -16,7 +16,7 @@ class FavoritesFragment: BaseFragment() {
 
             override fun doInBackground(vararg p0: Void?): ResponseList<twitter4j.Status>? = ref.get()?.run {
                 try {
-                    TwitterManager.getTwitter().getFavorites(Paging().also {
+                    TwitterManager.twitter.getFavorites(Paging().also {
                         if (mMaxId > 0 && !mReloading) {
                             it.maxId = mMaxId - 1
                             it.count = BasicSettings.pageCount

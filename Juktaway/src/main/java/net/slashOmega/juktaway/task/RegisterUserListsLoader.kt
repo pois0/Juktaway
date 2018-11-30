@@ -14,8 +14,8 @@ class RegisterUserListsLoader(context: Context, private val mUserId: Long) : Abs
 
     override fun loadInBackground(): ArrayList<ResponseList<UserList>>? {
         return try {
-            arrayListOf(TwitterManager.getTwitter().getUserListsOwnerships(AccessTokenManager.getUserId(), 200, -1),
-                    TwitterManager.getTwitter().getUserListMemberships(mUserId, -1, true))
+            arrayListOf(TwitterManager.twitter.getUserListsOwnerships(AccessTokenManager.getUserId(), 200, -1),
+                    TwitterManager.twitter.getUserListMemberships(mUserId, -1, true))
         } catch (e: TwitterException) {
             e.printStackTrace()
             null

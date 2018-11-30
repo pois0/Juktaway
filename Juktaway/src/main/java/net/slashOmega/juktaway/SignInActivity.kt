@@ -27,7 +27,7 @@ class SignInActivity: Activity() {
 
             override fun doInBackground(vararg params: Void): RequestToken? {
                 return try {
-                    val twitter = TwitterManager.getTwitterInstance()
+                    val twitter = TwitterManager.twitterInstance
                     ref.get()?.run {
                         twitter.getOAuthRequestToken(getString(R.string.twitter_callback_url))
                     }
@@ -64,7 +64,7 @@ class SignInActivity: Activity() {
             override fun doInBackground(vararg params: String): User? {
                 return ref.get()?.run {
                     try {
-                        val twitter = TwitterManager.getTwitterInstance()
+                        val twitter = TwitterManager.twitterInstance
                         val accessToken = twitter.getOAuthAccessToken(mRequestToken, params[0])
                         AccessTokenManager.setAccessToken(accessToken)
                         twitter.oAuthAccessToken = accessToken

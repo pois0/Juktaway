@@ -37,7 +37,7 @@ class RetweetersFragment: DialogFragment() {
             GlobalScope.launch(Dispatchers.Main) {
                 val retweetJob = async(Dispatchers.Default) {
                     try {
-                        TwitterManager.getTwitter().getRetweets(it)
+                        TwitterManager.twitter.getRetweets(it)
                     } catch (e: Exception) {
                         e.printStackTrace()
                         null

@@ -21,7 +21,7 @@ class CreateUserListActivity: Activity() {
 
             override fun doInBackground(vararg p0: Void?): TwitterException? {
                 return try {
-                    TwitterManager.getTwitter().createUserList(listName, privacy, listDescription)
+                    TwitterManager.twitter.createUserList(listName, privacy, listDescription)
                     null
                 } catch (e: TwitterException) {
                     e.printStackTrace()

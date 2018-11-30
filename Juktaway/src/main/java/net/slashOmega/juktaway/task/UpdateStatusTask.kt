@@ -21,14 +21,14 @@ open class UpdateStatusTask(private val mAccessToken: AccessToken?, private val 
         return params[0]?.let { sUpdate ->
             try {
                 val status = mAccessToken?.let { token ->
-                    val twitter = TwitterManager.getTwitterInstance().apply { oAuthAccessToken = token }
+                    val twitter = TwitterManager.twitterInstance.apply { oAuthAccessToken = token }
                     if (mImagePathList.isNotEmpty()) {
                         sUpdate.setMediaIds(*mImagePathList.map {
                             twitter.uploadMedia(ImageResizer.compress(it, maxFileSize)).mediaId
                         }.toLongArray())
                     }
                     twitter.updateStatus(sUpdate)
-                } ?: TwitterManager.getTwitter().updateStatus(sUpdate)
+                } ?: TwitterManager.twitter.updateStatus(sUpdate)
 
                 status.hashtagEntities.forEach { PostStockSettings.addHashtag("#${it.text}") }
                 null

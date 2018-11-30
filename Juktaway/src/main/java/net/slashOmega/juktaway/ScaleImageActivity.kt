@@ -40,7 +40,7 @@ class ScaleImageActivity: FragmentActivity() {
 
             override fun doInBackground(vararg p: Long?): twitter4j.Status? {
                 return try {
-                    TwitterManager.getTwitter().showStatus(p[0]!!)
+                    TwitterManager.twitter.showStatus(p[0]!!)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null

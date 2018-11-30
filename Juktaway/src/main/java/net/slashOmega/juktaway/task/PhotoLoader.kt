@@ -11,7 +11,7 @@ class PhotoLoader(context: Context, private val mStatusId: Long, private val mIn
 
     override fun loadInBackground(): String? {
         return try {
-            val status = TwitterManager.getTwitter().showStatus(mStatusId)
+            val status = TwitterManager.twitter.showStatus(mStatusId)
             val mediaEntities = status.mediaEntities
             if (mediaEntities.size < mIndex) {
                 null

@@ -46,7 +46,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
 
             override fun doInBackground(vararg params: String): SavedSearch? {
                 return try {
-                    TwitterManager.getTwitter().createSavedSearch(params[0])
+                    TwitterManager.twitter.createSavedSearch(params[0])
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null
@@ -65,7 +65,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
         private class SearchLoader(context: Context, val query: Query): AbstractAsyncTaskLoader<QueryResult>(context) {
             override fun loadInBackground(): QueryResult? {
                 return try {
-                    TwitterManager.getTwitter().search(query)
+                    TwitterManager.twitter.search(query)
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null

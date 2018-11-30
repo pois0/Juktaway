@@ -17,7 +17,7 @@ internal class FollowingListFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val job = async(Dispatchers.Default) {
                 tryAndTraceGet {
-                    TwitterManager.getTwitter().getFriendsList(user.id, cursor).apply {
+                    TwitterManager.twitter.getFriendsList(user.id, cursor).apply {
                         cursor = nextCursor
                     }
                 }

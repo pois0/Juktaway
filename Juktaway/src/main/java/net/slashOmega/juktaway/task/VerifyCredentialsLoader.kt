@@ -10,7 +10,7 @@ class VerifyCredentialsLoader(context: Context) : AbstractAsyncTaskLoader<User>(
 
     override fun loadInBackground(): User? {
         return try {
-            TwitterManager.getTwitter().verifyCredentials()
+            TwitterManager.twitter.verifyCredentials()
         } catch (e: TwitterException) {
             e.printStackTrace()
             null

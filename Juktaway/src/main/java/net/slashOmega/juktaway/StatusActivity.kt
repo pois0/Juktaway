@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.Window
 import android.view.WindowManager
-import android.widget.ListView
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_status.*
 import kotlinx.coroutines.*
@@ -24,8 +23,6 @@ import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.util.MessageUtil
 import org.jetbrains.anko.intentFor
 import twitter4j.Status
-import java.lang.ref.WeakReference
-import kotlin.coroutines.suspendCoroutine
 
 /**
  * Created on 2018/08/29.
@@ -134,7 +131,7 @@ class StatusActivity: FragmentActivity() {
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
                 val status = async(Dispatchers.Default) {
-                    TwitterManager.getTwitter().showStatus(statusId)
+                    TwitterManager.twitter.showStatus(statusId)
                 }.await() ?: run {
                     MessageUtil.showToast(R.string.toast_load_data_failure)
                     return@launch

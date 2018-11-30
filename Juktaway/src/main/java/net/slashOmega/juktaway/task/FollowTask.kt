@@ -11,7 +11,7 @@ open class FollowTask : AsyncTask<Long, Void, Boolean>() {
     override fun doInBackground(vararg params: Long?): Boolean? {
         return params[0]?.let {
             try {
-                TwitterManager.getTwitter().createFriendship(it)
+                TwitterManager.twitter.createFriendship(it)
                 true
             } catch (e: Exception) {
                 e.printStackTrace()

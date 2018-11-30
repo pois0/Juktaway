@@ -51,7 +51,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean? {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().createBlock(it)
+                        TwitterManager.twitter.createBlock(it)
                         net.slashOmega.juktaway.model.Relationship.setBlock(it)
                         true
                     } catch (e: Exception) {
@@ -79,7 +79,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean? {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().destroyBlock(it)
+                        TwitterManager.twitter.destroyBlock(it)
                         net.slashOmega.juktaway.model.Relationship.removeBlock(it)
                         true
                     } catch (e: Exception) {
@@ -107,7 +107,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().updateFriendship(it, notification, false)
+                        TwitterManager.twitter.updateFriendship(it, notification, false)
                         net.slashOmega.juktaway.model.Relationship.setNoRetweet(it)
                         true
                     } catch (e: Exception) {
@@ -134,7 +134,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().updateFriendship(it, notification, true)
+                        TwitterManager.twitter.updateFriendship(it, notification, true)
                         net.slashOmega.juktaway.model.Relationship.removeNoRetweet(it)
                         true
                     } catch (e: Exception) {
@@ -161,7 +161,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().destroyMute(it)
+                        TwitterManager.twitter.destroyMute(it)
                         net.slashOmega.juktaway.model.Relationship.removeOfficialMute(it)
                         true
                     } catch (e: Exception) {
@@ -188,7 +188,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             override fun doInBackground(vararg params: Long?): Boolean {
                 return params[0]?.let {
                     try {
-                        TwitterManager.getTwitter().destroyMute(it)
+                        TwitterManager.twitter.destroyMute(it)
                         net.slashOmega.juktaway.model.Relationship.removeOfficialMute(it)
                         true
                     } catch (e: Exception) {
@@ -214,7 +214,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
 
             override fun doInBackground(vararg params: Long?): Boolean? {
                 return params[0]?.let { try {
-                        TwitterManager.getTwitter().reportSpam(it)
+                        TwitterManager.twitter.reportSpam(it)
                         net.slashOmega.juktaway.model.Relationship.setBlock(it)
                         true
                     } catch (e: Exception) {

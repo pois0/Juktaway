@@ -26,7 +26,7 @@ class UnRetweetTask(private val mRetweetedStatusId: Long, private val mStatusId:
 
     override fun doInBackground(vararg params: Void): TwitterException? {
         return try {
-            TwitterManager.getTwitter().destroyStatus(mStatusId)
+            TwitterManager.twitter.destroyStatus(mStatusId)
             null
         } catch (e: TwitterException) {
             e.printStackTrace()

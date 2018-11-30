@@ -28,7 +28,7 @@ class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Use
             override fun doInBackground(vararg params: Void): User? {
                 return ref.get()?.run{
                     try {
-                    TwitterManager.getTwitter().updateProfile(
+                    TwitterManager.twitter.updateProfile(
                             name.text.toString(),
                             url.text.toString(),
                             location.text.toString(),

@@ -33,7 +33,7 @@ class UserListStatusesFragment : Fragment() {
 
             override fun doInBackground(vararg params: Long?): ResponseList<twitter4j.Status>? = ref.get()?.run { params[0]?.let {
                 try {
-                    TwitterManager.getTwitter().getUserListStatuses(it, Paging().apply {
+                    TwitterManager.twitter.getUserListStatuses(it, Paging().apply {
                         if (mMaxId > 0) {
                             maxId = mMaxId - 1
                             count = BasicSettings.pageCount

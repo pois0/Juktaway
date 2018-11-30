@@ -23,7 +23,7 @@ class FavoriteTask(private val mStatusId: Long) : AsyncTask<Void, Void, TwitterE
 
     override fun doInBackground(vararg params: Void): TwitterException? {
         return try {
-            TwitterManager.getTwitter().createFavorite(mStatusId)
+            TwitterManager.twitter.createFavorite(mStatusId)
             null
         } catch (e: TwitterException) {
             e

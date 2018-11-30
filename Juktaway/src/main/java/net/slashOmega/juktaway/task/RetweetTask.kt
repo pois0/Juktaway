@@ -23,7 +23,7 @@ class RetweetTask(private val mStatusId: Long) : AsyncTask<Void, Void, TwitterEx
 
     override fun doInBackground(vararg params: Void): TwitterException? {
         return try {
-            val status = TwitterManager.getTwitter().retweetStatus(mStatusId)
+            val status = TwitterManager.twitter.retweetStatus(mStatusId)
             FavRetweetManager.setRtId(status.retweetedStatus.id, status.id)
             null
         } catch (e: TwitterException) {

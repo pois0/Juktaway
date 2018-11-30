@@ -117,7 +117,7 @@ public class MyUserStreamAdapter extends UserStreamAdapter {
             protected twitter4j.Status doInBackground(Row... params) {
                 mRow = params[0];
                 try {
-                    return TwitterManager.getTwitter().showStatus(mRow.getStatus().getId());
+                    return TwitterManager.INSTANCE.getTwitter().showStatus(mRow.getStatus().getId());
                 } catch (Exception e) {
                     e.printStackTrace();
                     return null;

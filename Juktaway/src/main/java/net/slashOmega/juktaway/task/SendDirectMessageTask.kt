@@ -13,10 +13,10 @@ open class SendDirectMessageTask(private val mAccessToken: AccessToken?) : Async
         return try {
             val s = params[0].split(" ".toRegex(), 3).toTypedArray()
             if (mAccessToken == null) {
-                TwitterManager.getTwitter().sendDirectMessage(getOrEmpty(s, 1), getOrEmpty(s, 2))
+                TwitterManager.twitter.sendDirectMessage(getOrEmpty(s, 1), getOrEmpty(s, 2))
             } else {
                 // ツイート画面から来たとき
-                TwitterManager.getTwitterInstance().apply { oAuthAccessToken = mAccessToken }
+                TwitterManager.twitterInstance.apply { oAuthAccessToken = mAccessToken }
                         .sendDirectMessage(getOrEmpty(s, 1), getOrEmpty(s, 2))
             }
             null

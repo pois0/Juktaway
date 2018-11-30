@@ -11,7 +11,7 @@ class LoadFavoritesTask : AsyncTask<Long, Void, Boolean>() {
 
     override fun doInBackground(vararg params: Long?): Boolean? {
         return try {
-            val favorites = TwitterManager.getTwitter().getFavorites(AccessTokenManager.getUserId())
+            val favorites = TwitterManager.twitter.getFavorites(AccessTokenManager.getUserId())
             for (status in favorites) {
                 FavRetweetManager.setFav(status.id)
             }

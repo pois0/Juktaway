@@ -23,7 +23,7 @@ internal class UserListMembershipsFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val job = async(Dispatchers.Default) {
                 tryAndTraceGet {
-                    TwitterManager.getTwitter().getUserListMemberships(user.id, cursor).apply {
+                    TwitterManager.twitter.getUserListMemberships(user.id, cursor).apply {
                         cursor = nextCursor
                     }
                 }

@@ -50,7 +50,7 @@ class VideoActivity: FragmentActivity() {
                     GlobalScope.launch(Dispatchers.Main) {
                         async(Dispatchers.Default) {
                             tryAndTraceGet {
-                                TwitterManager.getTwitter().showStatus(m.group(1).toLong())
+                                TwitterManager.twitter.showStatus(m.group(1).toLong())
                             }
                         }.await()?.run {
                             videoUrl.takeNotEmpty()?.let {

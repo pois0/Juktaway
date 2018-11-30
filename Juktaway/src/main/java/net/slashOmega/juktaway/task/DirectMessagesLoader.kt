@@ -15,7 +15,7 @@ class DirectMessagesLoader(context: Context) : AbstractAsyncTaskLoader<ResponseL
 
     override fun loadInBackground(): ResponseList<DirectMessage>? {
         return try {
-            TwitterManager.getTwitter()?.let{ it.directMessages.apply {
+            TwitterManager.twitter?.let{ it.directMessages.apply {
                 // 送信したDM
                 addAll(it.sentDirectMessages)
                 sortWith(Comparator { arg0, arg1 -> arg1.createdAt.compareTo(arg0.createdAt) })

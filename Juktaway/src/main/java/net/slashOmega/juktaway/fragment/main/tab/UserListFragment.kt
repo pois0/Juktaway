@@ -19,7 +19,7 @@ class UserListFragment: BaseFragment() {
 
             override fun doInBackground(vararg params: Void): ResponseList<twitter4j.Status>? = ref.get()?.run {
                 try {
-                    val twitter = TwitterManager.getTwitter()
+                    val twitter = TwitterManager.twitter
                     twitter.getUserListStatuses(tabId, Paging().also {
                         if (mMaxId > 0 && !mReloading) {
                             it.maxId = mMaxId - 1

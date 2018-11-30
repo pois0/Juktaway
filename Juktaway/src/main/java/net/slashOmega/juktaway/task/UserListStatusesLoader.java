@@ -23,7 +23,7 @@ public class UserListStatusesLoader extends AbstractAsyncTaskLoader<UserListStat
     @Override
     public UserListStatusesWithMembers loadInBackground() {
         try {
-            Twitter twitter = TwitterManager.getTwitter();
+            Twitter twitter = TwitterManager.INSTANCE.getTwitter();
             ResponseList<Status> statuses = twitter.getUserListStatuses(mUserListId,
                     new Paging(1, 40));
             ResponseList<User> members = twitter.getUserListMembers(mUserListId, 0);

@@ -12,7 +12,7 @@ class DestroyStatusTask(private val mStatusId: Long) : AsyncTask<Long, Void, Boo
 
     override fun doInBackground(vararg params: Long?): Boolean? {
         return try {
-            TwitterManager.getTwitter().destroyStatus(mStatusId)
+            TwitterManager.twitter.destroyStatus(mStatusId)
             true
         } catch (e: Exception) {
             e.printStackTrace()

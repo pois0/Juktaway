@@ -11,7 +11,7 @@ class InteractionsLoader(context: Context) : AbstractAsyncTaskLoader<ResponseLis
 
     override fun loadInBackground(): ResponseList<Status>? {
         return try {
-            TwitterManager.getTwitter().mentionsTimeline
+            TwitterManager.twitter.mentionsTimeline
         } catch (e: TwitterException) {
             e.printStackTrace()
             null

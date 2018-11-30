@@ -27,7 +27,7 @@ class UnFavoriteTask(private val mStatusId: Long) : AsyncTask<Void, Void, Twitte
 
     override fun doInBackground(vararg params: Void): TwitterException? {
         return try {
-            TwitterManager.getTwitter().destroyFavorite(mStatusId)
+            TwitterManager.twitter.destroyFavorite(mStatusId)
             null
         } catch (e: TwitterException) { e }
     }

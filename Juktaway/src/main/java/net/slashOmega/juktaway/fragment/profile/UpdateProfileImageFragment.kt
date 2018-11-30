@@ -53,7 +53,7 @@ class UpdateProfileImageFragment: DialogFragment() {
                 GlobalScope.launch(Dispatchers.Main) {
                     async(Dispatchers.Default) {
                         runCatching {
-                            TwitterManager.getTwitter().updateProfileImage(arguments!!.get(uriArg) as File)
+                            TwitterManager.twitter.updateProfileImage(arguments!!.get(uriArg) as File)
                         }
                     }.await().run {
                         MessageUtil.dismissProgressDialog()
