@@ -3,7 +3,6 @@ package net.slashOmega.juktaway
 import android.app.Activity
 import android.content.Intent
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.View
 import net.slashOmega.juktaway.model.AccessTokenManager
@@ -16,57 +15,16 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.util.takeNotEmpty
+import net.slashOmega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
-import twitter4j.TwitterException
-import twitter4j.User
 import twitter4j.auth.RequestToken
-import java.lang.ref.WeakReference
 
 /**
  * Created on 2018/08/29.
  */
 class SignInActivity: Activity() {
-    companion object {
-        private class AddUserOAuthTask(activity: SignInActivity): AsyncTask<Void, Void, RequestToken>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg params: Void): RequestToken? {
-                return try {
-                    val twitter = TwitterManager.twitterInstance
-                    ref.get()?.run {
-                        twitter.getOAuthRequestToken(getString(R.string.twitter_callback_url))
-                    }
-                } catch (e: TwitterException) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-
-            override fun onPostExecute(token: RequestToken?) {
-                MessageUtil.dismissProgressDialog()
-                if (token == null) {
-                    MessageUtil.showToast(R.string.toast_connection_failure)
-                    return
-                }
-                val url = token.authorizationURL
-                if (url == null) {
-                    MessageUtil.showToast(R.string.toast_get_authorization_url_failure)
-                    return
-                }
-                ref.get()?.run {
-                    mRequestToken = token
-                    consumer_key.visibility = View.GONE
-                    consumer_secret.visibility = View.GONE
-                    start_oauth_button.visibility = View.GONE
-                    connect_with_twitter.visibility = View.GONE
-                    val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-                    startActivity(intent)
-                }
-            }
-        }
-    }
-
-    private val STATE_REQUEST_TOKEN = "request_token"
+    private val stateRequestToken = "request_token"
     private var mRequestToken: RequestToken? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -83,15 +41,13 @@ class SignInActivity: Activity() {
             return
         }
 
-        savedInstanceState?.let { state ->
-            state.get(STATE_REQUEST_TOKEN)?.let { _ -> intent.data?.let { data ->
-                data.getQueryParameter("oauth_verifier")?.takeUnless { it.isEmpty() }?.let {
-                    start_oauth_button.visibility = View.GONE
-                    connect_with_twitter.visibility = View.GONE
-                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                    verifyOAuth(it)
-                }
-            }}
+        if (savedInstanceState?.get(stateRequestToken) != null) {
+            intent.data?.getQueryParameter("oauth_verifier").takeNotEmpty()?.let {
+                start_oauth_button.visibility = View.GONE
+                connect_with_twitter.visibility = View.GONE
+                MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
+                verifyOAuth(it)
+            }
         }
 
         start_oauth_button.setOnClickListener { startOAuth() }
@@ -101,14 +57,14 @@ class SignInActivity: Activity() {
         super.onSaveInstanceState(outState)
 
         mRequestToken?.let {
-            outState.putSerializable(STATE_REQUEST_TOKEN, it)
+            outState.putSerializable(stateRequestToken, it)
         }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        mRequestToken = savedInstanceState.getSerializable(STATE_REQUEST_TOKEN) as RequestToken
+        mRequestToken = savedInstanceState.getSerializable(stateRequestToken) as RequestToken
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -130,14 +86,16 @@ class SignInActivity: Activity() {
     }
 
     private fun startOAuth(addUser: Boolean = false) {
-        if (!addUser && (consumer_key.text.isBlank() || consumer_secret.text.isBlank())) {
-            toast(R.string.signin_csck_blank)
-            return
+        if (!addUser) {
+            if ((consumer_key.text.isBlank() || consumer_secret.text.isBlank())) {
+                toast(R.string.signin_csck_blank)
+                return
+            }
+            TwitterManager.consumerKey = consumer_key.text.toString()
+            TwitterManager.consumerSecret = consumer_secret.text.toString()
         }
-        TwitterManager.consumerKey = consumer_key.text.toString()
-        TwitterManager.consumerSecret = consumer_secret.text.toString()
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-        AddUserOAuthTask(this).execute()
+        addUserOAuth()
     }
 
     private fun verifyOAuth(param: String) {
@@ -160,6 +118,34 @@ class SignInActivity: Activity() {
                 UserIconManager.addUserIconMap(it)
                 successOAuth()
             }
+        }
+    }
+
+    private fun addUserOAuth() {
+        GlobalScope.launch(Dispatchers.Main) {
+            val token = async(Dispatchers.Default) {
+                tryAndTraceGet {
+                    TwitterManager.twitterInstance.getOAuthRequestToken(getString(R.string.twitter_callback_url))
+                }
+            }.await()
+            MessageUtil.dismissProgressDialog()
+            if (token == null) {
+                MessageUtil.showToast(R.string.toast_connection_failure)
+                return@launch
+            }
+            val url = token.authorizationURL
+            if (url == null) {
+                MessageUtil.showToast(R.string.toast_get_authorization_url_failure)
+                return@launch
+            }
+
+            mRequestToken = token
+            consumer_key.visibility = View.GONE
+            consumer_secret.visibility = View.GONE
+            start_oauth_button.visibility = View.GONE
+            connect_with_twitter.visibility = View.GONE
+            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
+            startActivity(intent)
         }
     }
 }

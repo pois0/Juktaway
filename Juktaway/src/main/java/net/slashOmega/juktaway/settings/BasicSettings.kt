@@ -88,7 +88,7 @@ object BasicSettings {
         userIconSize = UserIconSize.fromString(preferences.getString("user_icon_size", "large"))
         displayThumbnailOn = preferences.getBoolean("display_thumbnail_on", true)
         pageCount = preferences.getString("page_count", "200").toInt()
-        mStreamingMode = sharedPreferences.getBoolean(STREAMING_MODE, true)
+        mStreamingMode = sharedPreferences.getBoolean(STREAMING_MODE, false)
         fastScrollOn = preferences.getBoolean("fast_scroll_on", true)
         talkOrderNewest = preferences.getBoolean("talk_order_newest", false)
         displayAccountName = DisplayAccountName.valueOf(preferences.getString("display_account_name", "screen_name")!!.toUpperCase())

@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.model
 
 import android.os.Handler
+import android.util.Log
 import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -34,37 +35,30 @@ object TwitterManager {
 
     // アクセストークンまである時だけキャッシュしておく
     val twitter: Twitter
-        get() {
-            if (mTwitter != null) {
-                return mTwitter!!
-            }
-            val twitter = twitterInstance
-
+        get() = mTwitter ?: twitterInstance.apply {
             val token = AccessTokenManager.getAccessToken()
             if (token != null) {
-                twitter.oAuthAccessToken = token
-                mTwitter = twitter
+                oAuthAccessToken = token
+                mTwitter = this
             }
-            return twitter
         }
 
     val twitterInstance: Twitter
         get() {
-            val configurationBuilder = ConfigurationBuilder()
-            val conf = configurationBuilder.setOAuthConsumerKey(consumerKey)
+            Log.d("twitterinstance", "$consumerKey & $consumerSecret")
+            val conf = ConfigurationBuilder()
+                    .setOAuthConsumerKey(consumerKey)
                     .setOAuthConsumerSecret(consumerSecret)
                     .setTweetModeExtended(true)
                     .build()
-            val factory = TwitterFactory(conf)
-
-            return factory.instance
+            return TwitterFactory(conf).instance
         }
 
     private val twitterStream: TwitterStream
         get() {
             val token = AccessTokenManager.getAccessToken()
-            val configurationBuilder = ConfigurationBuilder()
-            val conf = configurationBuilder.setOAuthConsumerKey(consumerKey)
+            val conf = ConfigurationBuilder()
+                    .setOAuthConsumerKey(consumerKey)
                     .setOAuthConsumerSecret(consumerSecret)
                     .setOAuthAccessToken(token!!.token)
                     .setOAuthAccessTokenSecret(token.tokenSecret)
