@@ -13,6 +13,7 @@ import net.slashOmega.juktaway.listener.RemoveAccountListener
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
+import org.jetbrains.anko.startActivity
 import twitter4j.auth.AccessToken
 
 /**
@@ -62,12 +63,8 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
         when (item?.itemId) {
-            R.id.add_account ->
-                startActivity(Intent(this, SignInActivity::class.java).apply {
-                    putExtra("add_account", true)
-                })
-            android.R.id.home ->
-                finish()
+            R.id.add_account -> startActivity<SignInActivity>("add_account" to true)
+            android.R.id.home -> finish()
         }
         return true
     }

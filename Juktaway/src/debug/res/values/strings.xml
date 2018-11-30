@@ -2,6 +2,6 @@
 <resources>
 
     <string name="android_package_name" translatable="false">net.slashOmega.juktaway.debug</string>
-    <string name="app_name" translatable="false">Juktaway Debug</string>
+    <string name="app_name" translatable="false">Juktaway</string>
 
 </resources>

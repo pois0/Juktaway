@@ -12,6 +12,10 @@ import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
 import org.jetbrains.anko.toast
 import twitter4j.TwitterException
 import twitter4j.User
@@ -60,34 +64,6 @@ class SignInActivity: Activity() {
                 }
             }
         }
-
-        private class VerifyOAuthTask(activity: SignInActivity): AsyncTask<String, Void, User>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg params: String): User? {
-                return ref.get()?.run {
-                    try {
-                        val twitter = TwitterManager.twitterInstance
-                        val accessToken = twitter.getOAuthAccessToken(mRequestToken, params[0])
-                        AccessTokenManager.setAccessToken(accessToken)
-                        twitter.oAuthAccessToken = accessToken
-                        twitter.verifyCredentials()
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                }
-            }
-
-            override fun onPostExecute(user: User?) {
-                MessageUtil.dismissProgressDialog()
-                user?.let {
-                    UserIconManager.addUserIconMap(it)
-                    ref.get()?.successOAuth()
-                }
-            }
-        }
-
     }
 
     private val STATE_REQUEST_TOKEN = "request_token"
@@ -113,7 +89,7 @@ class SignInActivity: Activity() {
                     start_oauth_button.visibility = View.GONE
                     connect_with_twitter.visibility = View.GONE
                     MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                    VerifyOAuthTask(this).execute(it)
+                    verifyOAuth(it)
                 }
             }}
         }
@@ -142,7 +118,7 @@ class SignInActivity: Activity() {
         val oauthVerifier = intent.data!!.getQueryParameter("oauth_verifier")
         if (oauthVerifier.isNullOrEmpty()) return
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-        VerifyOAuthTask(this).execute(oauthVerifier)
+        verifyOAuth(oauthVerifier)
     }
 
     private fun successOAuth() {
@@ -162,5 +138,28 @@ class SignInActivity: Activity() {
         TwitterManager.consumerSecret = consumer_secret.text.toString()
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
         AddUserOAuthTask(this).execute()
+    }
+
+    private fun verifyOAuth(param: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val user = async(Dispatchers.Default) {
+                try {
+                    TwitterManager.twitterInstance.apply {
+                        val token = getOAuthAccessToken(mRequestToken, param)
+                        AccessTokenManager.setAccessToken(token)
+                        oAuthAccessToken = token
+                    }.verifyCredentials()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    null
+                }
+            }.await()
+
+            MessageUtil.dismissProgressDialog()
+            user?.let {
+                UserIconManager.addUserIconMap(it)
+                successOAuth()
+            }
+        }
     }
 }

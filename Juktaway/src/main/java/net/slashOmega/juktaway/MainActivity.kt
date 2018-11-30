@@ -373,7 +373,7 @@ class MainActivity: FragmentActivity() {
             R.id.official_website ->
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.official_website))))
             R.id.feedback ->
-                EventBus.getDefault().post(OpenEditorEvent("#justaway", null, null, null))
+                EventBus.getDefault().post(OpenEditorEvent("#juktaway", null, null, null))
         }
         return true
     }

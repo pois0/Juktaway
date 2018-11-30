@@ -2,7 +2,7 @@
 <resources xmlns:tools="http://schemas.android.com/tools">
 
     <string name="android_package_name" translatable="false">net.slashOmega.juktaway</string>
-    <string name="app_name" translatable="false">Justaway</string>
+    <string name="app_name" translatable="false">Juktaway</string>
     <string name="button_add">Add</string>
     <string name="button_apply">Apply</string>
     <string name="button_blocking">Blocked</string>
@@ -253,8 +253,6 @@
     <string name="toast_destroy_no_retweet_success">Success turn on retweets.</string>
     <string name="pref_title_talk_order_newest">The latest order of conversation</string>
     <string name="pref_description_talk_order_newest">Display the conversation from newest to oldest.</string>
-    <string name="twitter_consumer_key">aH2KHMKj2kJ6jQOVthoKZRvf7</string>
-    <string name="twitter_consumer_secret">oDo7HAgEuiQacBOj0myeySa0Ij0k5T1hMc6Smz5OwUtu9X8bEK</string>
     <string name="menu_send_kusoripu">Send repooply</string>
     <string name="signin_csck_blank">Concumer Key Or Consumer Secret is blank.</string>
 </resources>

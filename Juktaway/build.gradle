@@ -39,7 +39,7 @@ android {
         multiDexEnabled true
         
         versionCode 102
-        versionName '1.0.102'
+        versionName '2.0-beta1'
         applicationId "net.slashOmega.juktaway"
     }
 
