@@ -1,6 +1,5 @@
 package net.slashOmega.juktaway
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.KeyEvent
@@ -13,48 +12,17 @@ import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_search.*
-import twitter4j.ResponseList
-import twitter4j.User
-import java.lang.ref.WeakReference
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.async
+import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.util.tryAndTraceGet
 
 /**
  * Created on 2018/08/29.
  */
 class UserSearchActivity: FragmentActivity() {
-    companion object {
-        private class UserSearchTask(activity: UserSearchActivity) : AsyncTask<String, Void, ResponseList<User>>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg params: String): ResponseList<User>? {
-                return try {
-                    ref.get()?.run { TwitterManager.twitter.searchUsers(params[0], mPage) }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-
-            override fun onPostExecute(users: ResponseList<User>?) {
-                ref.get()?.run {
-                    guruguru.visibility = View.GONE
-                    if (users == null) {
-                        MessageUtil.showToast(R.string.toast_load_data_failure)
-                        return
-                    }
-                    for (user in users) {
-                        mAdapter.add(user)
-                    }
-                    if (users.size == 20) {
-                        mAutoLoading = true
-                        mPage++
-                    }
-                    list_view.visibility = View.VISIBLE
-                }
-            }
-        }
-    }
-
-    private var mSearchWord: String? = null
+    private lateinit var mSearchWord: String
     private var mPage = 1
     private lateinit var mAdapter: UserAdapter
     private var mAutoLoading = false
@@ -113,7 +81,7 @@ class UserSearchActivity: FragmentActivity() {
         list_view.visibility = View.GONE
         guruguru.visibility = View.VISIBLE
         mSearchWord = search_text.text.toString()
-        UserSearchTask(this).execute(mSearchWord)
+        userSearch(mSearchWord)
     }
 
     private fun additionalReading() {
@@ -122,6 +90,25 @@ class UserSearchActivity: FragmentActivity() {
         }
         guruguru.visibility = View.VISIBLE
         mAutoLoading = false
-        UserSearchTask(this).execute(mSearchWord)
+        userSearch(mSearchWord)
+    }
+
+    private fun userSearch(word: String) {
+        GlobalScope.launch(Dispatchers.Default) {
+            val res = async(Dispatchers.Main) {
+                tryAndTraceGet { TwitterManager.twitter.searchUsers(word, mPage) }
+            }.await()
+            guruguru.visibility = View.GONE
+            if (res == null) {
+                MessageUtil.showToast(R.string.toast_load_data_failure)
+                return@launch
+            }
+            res.forEach { mAdapter.add(it) }
+            if (res.size == 20) {
+                mAutoLoading = true
+                mPage++
+            }
+            list_view.visibility = View.VISIBLE
+        }
     }
 }

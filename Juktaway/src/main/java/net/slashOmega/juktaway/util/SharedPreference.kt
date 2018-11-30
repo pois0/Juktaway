@@ -1,6 +1,9 @@
 package net.slashOmega.juktaway.util
 
 import android.content.Context
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.JuktawayApplication
 import kotlin.reflect.KProperty
 
@@ -35,16 +38,18 @@ open class SharedPreference<T>(prefName: String, private val key: String, privat
 
     operator fun setValue(thisRef: Any?, property: KProperty<*>, value: T) {
         raw = value
-        pref.edit().run {
-            when (default) {
-                is Int -> putInt(key, value as Int)
-                is Long -> putLong(key, value as Long)
-                is Float -> putFloat(key, value as Float)
-                is String -> putString(key, value as String)
-                is Boolean -> putBoolean(key, value as Boolean)
-                else -> throw IllegalTypeException()
-            }
-        }.apply()
+        GlobalScope.launch(Dispatchers.Default) {
+            pref.edit().run {
+                when (default) {
+                    is Int -> putInt(key, value as Int)
+                    is Long -> putLong(key, value as Long)
+                    is Float -> putFloat(key, value as Float)
+                    is String -> putString(key, value as String)
+                    is Boolean -> putBoolean(key, value as Boolean)
+                    else -> throw IllegalTypeException()
+                }
+            }.apply()
+        }
     }
 
     class IllegalTypeException: IllegalStateException()

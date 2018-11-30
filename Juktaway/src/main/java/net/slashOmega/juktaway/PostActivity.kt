@@ -232,7 +232,8 @@ class PostActivity: FragmentActivity() {
                 // 直近のと一緒なら保存しない
                 with (mTextHistory) {
                     s?.let { if (isEmpty() || it.toString() != mTextHistory[size-1]) add(it.toString()) }
-                    undo.isEnabled = isNotEmpty()                }
+                    undo.isEnabled = isNotEmpty()
+                }
             }
 
             override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
@@ -403,9 +404,7 @@ class PostActivity: FragmentActivity() {
                 }
                 imageView.setImageURI(uri)
                 addView(imageView)
-                if (status_text.text != null) {
-                    updateCount(status_text.text.toString())
-                }
+                if (status_text.text != null) updateCount(status_text.text.toString())
 
                 if (childCount >= MAX_IMAGE) {
                     img_button.isEnabled = false
@@ -423,12 +422,9 @@ class PostActivity: FragmentActivity() {
         val textColor: Int
 
         var length = TwitterUtil.count(str)
-        if (image_preview_container.childCount > 0) {
-            length -= 24
-        }
+        if (image_preview_container.childCount > 0) length -= 24
         // 文字数をオーバーした時は文字数を赤色に
-        textColor = if (length < 0) Color.RED
-                else ThemeUtil.getThemeTextColor(R.attr.menu_text_color)
+        textColor = if (length < 0) Color.RED else ThemeUtil.getThemeTextColor(R.attr.menu_text_color)
         count.setTextColor(textColor)
         count.text = length.toString()
 
@@ -446,13 +442,11 @@ class PostActivity: FragmentActivity() {
             AlertDialog.Builder(this@PostActivity)
                     .setMessage(R.string.confirm_save_draft)
                     .setPositiveButton(R.string.button_save) { _, _ ->
-                        // 下書きとして保存する
-                        PostStockSettings.addDraft(txt.toString())
-                        finish()
-                    }
-                    .setNegativeButton(R.string.button_destroy) { _, _ ->
-                        finish()
-                    }
+                            // 下書きとして保存する
+                            PostStockSettings.addDraft(txt.toString())
+                            finish()
+                        }
+                    .setNegativeButton(R.string.button_destroy) { _, _ -> finish() }
                     .show()
         } ?: finish()
     }

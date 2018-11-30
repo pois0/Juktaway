@@ -30,7 +30,7 @@ object TwitterManager {
 
     internal var consumerKey by SharedPreference("twitter_csck", "cs", "")
 
-    internal var consumerSecret by SharedPreference("twitter_csck", "cs", "")
+    internal var consumerSecret by SharedPreference("twitter_csck", "ck", "")
 
     // アクセストークンまである時だけキャッシュしておく
     val twitter: Twitter

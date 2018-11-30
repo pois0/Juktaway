@@ -422,10 +422,8 @@ class MainActivity: FragmentActivity() {
                      "@" + AccessTokenManager.getScreenName()
                 BasicSettings.DisplayAccountName.DISPLAY_NAME ->
                     UserIconManager.getName(AccessTokenManager.getUserId())
-                else ->
-                    ""
+                else -> ""
             }
-
         }
     }
 
@@ -705,5 +703,4 @@ class MainActivity: FragmentActivity() {
     private fun <T> getIntent(cls: Class<T>): Intent {
         return Intent(this, cls)
     }
-
 }

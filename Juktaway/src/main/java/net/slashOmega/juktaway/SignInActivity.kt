@@ -79,7 +79,7 @@ class SignInActivity: Activity() {
             consumer_secret.visibility = View.GONE
             start_oauth_button.visibility = View.GONE
             connect_with_twitter.visibility = View.GONE
-            startOAuth()
+            startOAuth(true)
             return
         }
 
@@ -129,8 +129,8 @@ class SignInActivity: Activity() {
         finish()
     }
 
-    private fun startOAuth() {
-        if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
+    private fun startOAuth(addUser: Boolean = false) {
+        if (!addUser && (consumer_key.text.isBlank() || consumer_secret.text.isBlank())) {
             toast(R.string.signin_csck_blank)
             return
         }
