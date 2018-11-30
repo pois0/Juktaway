@@ -363,9 +363,9 @@ class MainActivity: FragmentActivity() {
                 startActivity(getIntent(ProfileActivity::class.java).run {
                     putExtra("screenName", AccessTokenManager.getScreenName())
                 })
-            R.id.tab_settings -> {
+            R.id.tab_settings ->
                 startActivityForResult(getIntent(TabSettingsActivity::class.java), REQUEST_TAB_SETTINGS)
-            }
+
             R.id.action_bar_search_button ->
                 startActivity(getIntent(SearchActivity::class.java))
             R.id.settings ->

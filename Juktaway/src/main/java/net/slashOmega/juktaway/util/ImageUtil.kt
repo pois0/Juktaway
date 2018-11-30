@@ -23,7 +23,7 @@ import twitter4j.Status
  */
 
 fun ImageView.displayImage(url: String) {
-    if ((tag as String) == url) return
+    if ((tag as? String) == url) return
     tag = url
     ImageLoader.getInstance().displayImage(url, this)
 }

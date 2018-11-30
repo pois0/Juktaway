@@ -5,6 +5,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.AsyncTask
+import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
@@ -31,6 +32,7 @@ import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import net.slashOmega.juktaway.util.displayImage
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.toast
 import twitter4j.Relationship
 import twitter4j.User
 import java.lang.ref.WeakReference
@@ -381,8 +383,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                     }
                     R.id.send_kusoripu -> {
                         GlobalScope.launch(Dispatchers.Main) {
-                            val content = async(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }.await()
-                            startActivity<PostActivity>("status" to content, "selection" to content.length)
+                            if (Build.VERSION.SDK_INT > 20) {
+                                val content = async(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }.await()
+                                startActivity<PostActivity>("status" to content, "selection" to content.length)
+                            } else {
+                                toast(R.string.repooply_version)
+                            }
                         }
                     }
                     R.id.add_to_list ->
