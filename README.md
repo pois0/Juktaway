@@ -1,3 +1,5 @@
+Forked from [s-aska/Justaway-for-Android-Original](https://github.com/s-aska/Justaway-for-Android-Original)
+
 偉大なるJustaway: TwitterClientはUserStreamingの廃止によって公開停止となってしまいました。
 ぼくが夏休みで暇(偽)なので,JustawayをMastodon用のクライアントに書き換えようと思ってforkしたのですが,Tweetstormなるものができてしまったので結局Twitterクライアントののまま,次の改修をすることにしました
 * 動かす (Clear?)
