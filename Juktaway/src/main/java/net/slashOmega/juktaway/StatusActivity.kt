@@ -43,9 +43,7 @@ class StatusActivity: FragmentActivity() {
         val statusId: Long
         if (Intent.ACTION_VIEW == intent.action) {
             val uri = intent.data
-            if (uri == null || uri.path == null) {
-                return
-            }
+            if (uri == null || uri.path == null) return
             when {
                 uri.path!!.contains("photo") -> {
                     startActivity(Intent(this, ScaleImageActivity::class.java).apply {

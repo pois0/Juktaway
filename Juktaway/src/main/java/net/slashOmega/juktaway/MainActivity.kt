@@ -47,6 +47,7 @@ import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import net.slashOmega.juktaway.util.TwitterUtil
 import net.slashOmega.juktaway.widget.FontelloButton
+import org.jetbrains.anko.startActivity
 import twitter4j.Status
 import twitter4j.StatusUpdate
 import twitter4j.TwitterException
@@ -123,7 +124,7 @@ class MainActivity: FragmentActivity() {
 
         //認証用のアクティビティの起動
         if (AccessTokenManager.getAccessToken() == null) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            startActivity<SignInActivity>()
             finish()
             return
         }
@@ -150,12 +151,9 @@ class MainActivity: FragmentActivity() {
         action_bar_streaming_button.setOnClickListener {
             StreamingSwitchDialogFragment.newInstance(!BasicSettings.streamingMode).show(supportFragmentManager, "dialog")
         }
-        action_bar_search_button.setOnClickListener {
-            startSearch()
-        }
-        action_bar_search_cancel.setOnClickListener {
-            cancelSearch()
-        }
+        action_bar_search_button.setOnClickListener { startSearch() }
+
+        action_bar_search_cancel.setOnClickListener { cancelSearch() }
 
         setContentView(R.layout.activity_main)
 
@@ -188,7 +186,7 @@ class MainActivity: FragmentActivity() {
 
         send_button.setOnClickListener {
             val msg = quick_tweet_edit.string
-            if (!msg.isEmpty()) {
+            if (msg.isNotEmpty()) {
                 MessageUtil.showProgressDialog(this, getString(R.string.progress_sending))
                 if (msg.startsWith("D ")) {
                     SendQuickDMTask(this).execute(msg)
@@ -271,7 +269,7 @@ class MainActivity: FragmentActivity() {
                 if (resultCode == Activity.RESULT_OK) {
                     BasicSettings.init()
                     finish()
-                    startActivity(getIntent(this::class.java))
+                    startActivity<MainActivity>()
                 }
             }
             REQUEST_SEARCH -> {
@@ -360,14 +358,11 @@ class MainActivity: FragmentActivity() {
             android.R.id.home ->
                 cancelSearch()
             R.id.profile ->
-                startActivity(getIntent(ProfileActivity::class.java).run {
-                    putExtra("screenName", AccessTokenManager.getScreenName())
-                })
+                startActivity<ProfileActivity>("screenName" to AccessTokenManager.getScreenName())
             R.id.tab_settings ->
                 startActivityForResult(getIntent(TabSettingsActivity::class.java), REQUEST_TAB_SETTINGS)
-
             R.id.action_bar_search_button ->
-                startActivity(getIntent(SearchActivity::class.java))
+                startActivity<SearchActivity>()
             R.id.settings ->
                 startActivityForResult(getIntent(SettingsActivity::class.java), REQUEST_SETTINGS)
             R.id.official_website ->
@@ -386,7 +381,7 @@ class MainActivity: FragmentActivity() {
         tab_menus.run {
             val tabColors = IntArray(childCount)
             for (i in 0 until childCount) {
-                (getChildAt(i) as Button?)?.run {
+                (getChildAt(i) as? Button)?.run {
                     tabColors[i] = currentTextColor
                 }
             }
@@ -402,7 +397,7 @@ class MainActivity: FragmentActivity() {
             with (tab_menus) {
                 it.getIntArray("tabColors")?.let { colors ->
                     for (i in 0 until Math.min(childCount, colors.size)) {
-                        (getChildAt(i) as Button?)?.setTextColor(colors[i])
+                        (getChildAt(i) as? Button)?.setTextColor(colors[i])
                     }
                 }
             }
@@ -464,7 +459,7 @@ class MainActivity: FragmentActivity() {
             mMainPagerAdapter.clearTab()
 
             var pos = 0
-            for (tab: TabManager.Tab in tabs) {
+            for (tab in tabs) {
                 tab_menus.addView(FontelloButton(this).apply {
                     layoutParams = LinearLayout.LayoutParams(
                             (60 * resources.displayMetrics.density + 0.5f).toInt(),

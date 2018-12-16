@@ -98,9 +98,8 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
     fun onEventMainThread(event: AlertDialogEvent) { event.dialogFragment.show(supportFragmentManager, "dialog") }
 
     fun onEventMainThread(event: DestroyUserListEvent) {
-        val userListWithRegistered = mAdapter.findByUserListId(event.userListId)
-        if (userListWithRegistered != null) {
-            mAdapter.remove(userListWithRegistered)
+        mAdapter.findByUserListId(event.userListId)?.let {
+            mAdapter.remove(it)
         }
     }
 

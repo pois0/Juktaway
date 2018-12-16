@@ -17,10 +17,7 @@ import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.fragment.profile.*
@@ -384,7 +381,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                     R.id.send_kusoripu -> {
                         GlobalScope.launch(Dispatchers.Main) {
                             if (Build.VERSION.SDK_INT > 20) {
-                                val content = async(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }.await()
+                                val content = withContext(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }
                                 startActivity<PostActivity>("status" to content, "selection" to content.length)
                             } else {
                                 toast(R.string.repooply_version)

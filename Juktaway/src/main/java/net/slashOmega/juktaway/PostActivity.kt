@@ -186,7 +186,7 @@ class PostActivity: FragmentActivity() {
             } ?: status_text.setSelection(start)
         }
 
-        (intent.getSerializableExtra("inReplyToStatus") as Status?)?.run {retweetedStatus?:this}?.run {
+        (intent.getSerializableExtra("inReplyToStatus") as? Status)?.run {retweetedStatus?:this}?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageURL, in_reply_to_user_icon)
             in_reply_to_status.text = text

@@ -81,13 +81,13 @@ object BasicSettings {
 
     fun init() {
         val preferences = sharedPreferences
-        fontSize = preferences.getString("font_size", "12").toInt()
-        longTapAction = preferences.getString("long_tap", "nothing")
-        themeName = preferences.getString("themeName", "black")
+        fontSize = preferences.getString("font_size", "12")?.toInt() ?: 13
+        longTapAction = preferences.getString("long_tap", "nothing") ?: "nothing"
+        themeName = preferences.getString("themeName", "black") ?: "black"
         userIconRoundedOn = preferences.getBoolean("user_icon_rounded_on", true)
-        userIconSize = UserIconSize.fromString(preferences.getString("user_icon_size", "large"))
+        userIconSize = UserIconSize.fromString(preferences.getString("user_icon_size", "large") ?: "large")
         displayThumbnailOn = preferences.getBoolean("display_thumbnail_on", true)
-        pageCount = preferences.getString("page_count", "200").toInt()
+        pageCount = preferences.getString("page_count", "200")?.toInt() ?: 0
         mStreamingMode = sharedPreferences.getBoolean(STREAMING_MODE, false)
         fastScrollOn = preferences.getBoolean("fast_scroll_on", true)
         talkOrderNewest = preferences.getBoolean("talk_order_newest", false)

@@ -2,10 +2,7 @@ package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
 import de.greenrobot.event.EventBus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -31,7 +28,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
 
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val job = async(Dispatchers.Default) {
+            val v = withContext(Dispatchers.Default) {
                 tryAndTraceGet {
                     TwitterManager.twitter.getUserTimeline(user.id, Paging().apply {
                         if (mMaxId > 0) {
@@ -44,19 +41,15 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
 
             mFooter.visibility = View.GONE
 
-            job.await()?.takeIf { it.isNotEmpty() }?.run {
+            v?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
-                    forEach {
-                        if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                    }
+                    lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                     mAdapter.addAllFromStatuses(this)
                     mReload = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
-                    forEach {
-                        if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                    }
+                    lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                     mAdapter.extensionAddAllFromStatuses(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
