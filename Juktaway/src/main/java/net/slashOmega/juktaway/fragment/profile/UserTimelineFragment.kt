@@ -14,6 +14,7 @@ import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.util.tryAndTraceGet
 import twitter4j.Paging
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
 
@@ -31,17 +32,19 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
             val job = async(Dispatchers.Default) {
-                TwitterManager.twitter.getUserTimeline(user.id, Paging().apply {
-                    if (mMaxId > 0) {
-                        maxId = mMaxId
-                        count = BasicSettings.pageCount
-                    }
-                })
+                tryAndTraceGet {
+                    TwitterManager.twitter.getUserTimeline(user.id, Paging().apply {
+                        if (mMaxId > 0) {
+                            maxId = mMaxId
+                            count = BasicSettings.pageCount
+                        }
+                    })
+                }
             }
 
             mFooter.visibility = View.GONE
 
-            job.await().takeIf { it.isNotEmpty() }?.run {
+            job.await()?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
                     forEach {

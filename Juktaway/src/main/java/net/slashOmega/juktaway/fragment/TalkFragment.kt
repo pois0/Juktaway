@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway.fragment
 
 import android.app.Dialog
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.util.LongSparseArray
@@ -24,9 +23,9 @@ import net.slashOmega.juktaway.listener.HeaderStatusLongClickListener
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.util.tryAndTraceGet
 import twitter4j.Query
 import twitter4j.Status
-import java.lang.ref.WeakReference
 import java.util.*
 
 class TalkFragment: DialogFragment() {
@@ -106,7 +105,7 @@ class TalkFragment: DialogFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
                 val status = async(Dispatchers.Default) {
-                    mTwitter.showStatus(statusId)
+                    tryAndTraceGet { mTwitter.showStatus(statusId) }
                 }.await() ?: break
 
                 if (BasicSettings.talkOrderNewest) {
