@@ -12,10 +12,7 @@ import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_search.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.util.tryAndTraceGet
 
 /**
@@ -85,19 +82,17 @@ class UserSearchActivity: FragmentActivity() {
     }
 
     private fun additionalReading() {
-        if (!mAutoLoading) {
-            return
-        }
+        if (!mAutoLoading) return
         guruguru.visibility = View.VISIBLE
         mAutoLoading = false
         userSearch(mSearchWord)
     }
 
     private fun userSearch(word: String) {
-        GlobalScope.launch(Dispatchers.Default) {
-            val res = async(Dispatchers.Main) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val res = withContext(Dispatchers.Default) {
                 tryAndTraceGet { TwitterManager.twitter.searchUsers(word, mPage) }
-            }.await()
+            }
             guruguru.visibility = View.GONE
             if (res == null) {
                 MessageUtil.showToast(R.string.toast_load_data_failure)
