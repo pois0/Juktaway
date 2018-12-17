@@ -238,8 +238,8 @@ class PostActivity: FragmentActivity() {
 
             override fun onTextChanged(s: CharSequence?, p1: Int, p2: Int, p3: Int) {
                 s?.let {
-                    updateCount(s.toString())
-                    if (s.toString().startsWith("D ")) {
+                    updateCount(it.toString())
+                    if (it.toString().startsWith("D ")) {
                         image_preview_container.removeAllViews()
                         img_button.isEnabled = false
                     } else {
@@ -507,7 +507,6 @@ class PostActivity: FragmentActivity() {
     }
 
     private class DraftAdapter(context: PostActivity, val mLayout: Int): ArrayAdapter<String>(context, mLayout) {
-        private val ref = WeakReference(context)
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -524,9 +523,7 @@ class PostActivity: FragmentActivity() {
     }
 
 
-
     private class HashtagAdapter(context: PostActivity, val mLayout: Int): ArrayAdapter<String>(context, mLayout) {
-        private val ref = WeakReference(context)
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {

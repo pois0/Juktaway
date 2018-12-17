@@ -38,3 +38,6 @@ proguard/
 secret.xml
 manifest-merger-release-report.txt
 app/
+keystore/
+Juktaway/release/output.json
+Juktaway/debug/output.json

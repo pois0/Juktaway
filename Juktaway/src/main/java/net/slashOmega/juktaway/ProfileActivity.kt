@@ -17,7 +17,10 @@ import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.fragment.profile.*
@@ -43,34 +46,6 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         private const val OPTION_MENU_CREATE_NO_RETWEET = 3
         private const val OPTION_MENU_DESTROY_OFFICIAL_MUTE = 5
         private const val OPTION_MENU_DESTROY_NO_RETWEET = 6
-
-        private class CreateBlockTask(context: ProfileActivity) : AsyncTask<Long, Void, Boolean>() {
-            private val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean? {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.createBlock(it)
-                        net.slashOmega.juktaway.model.Relationship.setBlock(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(success: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (success!!) {
-                    MessageUtil.showToast(R.string.toast_create_block_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_create_block_failure)
-                }
-
-            }
-        }
 
         private class DestroyBlockTask(context: ProfileActivity) : AsyncTask<Long, Void, Boolean>() {
             private val ref = WeakReference(context)
@@ -309,7 +284,19 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                                 .setMessage(R.string.confirm_create_block)
                                 .setPositiveButton(R.string.button_create_block) { _, _ ->
                                     MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    CreateBlockTask(this).execute(mUser.id)
+                                    GlobalScope.launch {
+                                        val res = withContext(Dispatchers.Default) { runCatching {
+                                            TwitterManager.twitter.createBlock(mUser.id)
+                                            net.slashOmega.juktaway.model.Relationship.setBlock(mUser.id)
+                                        }.isSuccess }
+                                        MessageUtil.dismissProgressDialog()
+                                        if (res) {
+                                            MessageUtil.showToast(R.string.toast_create_block_success)
+                                            restart()
+                                        } else {
+                                            MessageUtil.showToast(R.string.toast_create_block_failure)
+                                        }
+                                    }
                                 }
                                 .setNegativeButton(R.string.button_cancel) { _, _ -> }
                                 .show()
@@ -366,17 +353,11 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                         finish()
                     R.id.send_reply -> {
                         val text = "@" + mUser.screenName
-                        startActivity(Intent(this, PostActivity::class.java).apply {
-                            putExtra("status", text)
-                            putExtra("selection", text.length)
-                        })
+                        startActivity<PostActivity>("status" to text, "selection" to text.length)
                     }
                     R.id.send_direct_messages -> {
                         val text = "D " + mUser.screenName
-                        startActivity(Intent(this, PostActivity::class.java).apply {
-                            putExtra("status", text)
-                            putExtra("selection", text.length)
-                        })
+                        startActivity<PostActivity>("status" to text, "selection" to text.length)
                     }
                     R.id.send_kusoripu -> {
                         GlobalScope.launch(Dispatchers.Main) {
@@ -389,9 +370,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                         }
                     }
                     R.id.add_to_list ->
-                        startActivity(Intent(this, RegisterUserListActivity::class.java).apply {
-                            putExtra("userId", mUser.id)
-                        })
+                        startActivity<RegisterUserListActivity>("userId" to mUser.id)
                     R.id.open_twitter ->
                         startActivity(Intent(Intent.ACTION_VIEW,
                                 Uri.parse("https://twitter.com/" + mUser.screenName)))

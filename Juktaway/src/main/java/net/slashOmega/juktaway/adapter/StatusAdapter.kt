@@ -10,7 +10,6 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.Log
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -18,7 +17,10 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.AlertDialogEvent
@@ -81,9 +83,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun extensionAdd(row: Row) {
         GlobalScope.launch(Dispatchers.Main) {
-            if (GlobalScope.async (Dispatchers.Default) {
-                        row in Mute || exists(row)
-                    }.await()) return@launch
+            if (withContext (Dispatchers.Default) { row in Mute || exists(row) }) return@launch
             super.add(row)
             if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
@@ -93,9 +93,9 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun extensionAddAll(rows: List<Row>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses =  async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 rows.filter { it !in Mute && !exists(it) }
-            }.await()
+            }
             launch(Dispatchers.Default) {
                 mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
             }
@@ -109,9 +109,9 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses =  async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
-            }.await()
+            }
             launch(Dispatchers.Default) {
                 mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
             }
@@ -125,9 +125,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     override fun add(row: Row) {
         GlobalScope.launch(Dispatchers.Main) {
-            if (GlobalScope.async (Dispatchers.Default) {
-                        row in Mute || exists(row)
-                    }.await()) return@launch
+            if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return@launch
             super.add(row)
             if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
@@ -135,11 +133,19 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         }
     }
 
+    suspend fun addSuspend(row:Row) {
+        if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return
+        super.add(row)
+        if (row.isStatus) mIdSet.add(row.status!!.id)
+        filter(row)
+        limitation()
+    }
+
     fun addAll(rows: List<Row>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses =  async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 rows.filter { it !in Mute && !exists(it) }
-            }.await()
+            }
             launch(Dispatchers.Default) {
                 mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
             }
@@ -153,9 +159,9 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun addAllFromStatuses(statusesParam: List<Status>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses =  async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
-            }.await()
+            }
             launch(Dispatchers.Default) {
                 mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
             }
@@ -169,9 +175,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     override fun insert(row: Row, index: Int) {
         GlobalScope.launch(Dispatchers.Main) {
-            if (GlobalScope.async(Dispatchers.Default) {
-                        row in Mute || exists(row)
-                    }.await()) return@launch
+            if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return@launch
             super.insert(row, index)
             if (row.isStatus) mIdSet.add(row.status!!.id)
             filter(row)
@@ -199,11 +203,10 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     @Suppress("Unused")
     fun replaceStatus(status: Status) {
         for (i in 0 until count) {
-            val row = getItem(i)
-            if (!row!!.isDirectMessage && row.status!!.id == status.id) {
-                row.status = status
+            getItem(i)?.takeIf { it.isDirectMessage && it.status?.id == status.id }?.let {
+                it.status = status
                 notifyDataSetChanged()
-                break
+                return
             }
         }
     }
@@ -220,13 +223,10 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                 val retweet = status!!.retweetedStatus
                 if (status.id == id || retweet?.id == id) {
                     rows.add(row)
-                    positions.add(pos)
+                    positions.add(pos++)
                 }
-                pos++
             }
-            for (row in rows) {
-                remove(row)
-            }
+            for (row in rows) remove(row)
         }
         return positions
     }

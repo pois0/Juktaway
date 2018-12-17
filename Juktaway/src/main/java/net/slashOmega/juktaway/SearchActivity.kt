@@ -3,7 +3,6 @@ package net.slashOmega.juktaway
 import android.app.Activity
 import android.content.Context
 import android.content.Intent
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
@@ -14,6 +13,11 @@ import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import de.greenrobot.event.EventBus
+import kotlinx.android.synthetic.main.activity_search.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -28,11 +32,8 @@ import net.slashOmega.juktaway.task.AbstractAsyncTaskLoader
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
-import kotlinx.android.synthetic.main.activity_search.*
 import twitter4j.Query
 import twitter4j.QueryResult
-import twitter4j.SavedSearch
-import java.lang.ref.WeakReference
 
 /**
  * Created on 2018/08/24.
@@ -40,27 +41,6 @@ import java.lang.ref.WeakReference
 class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryResult> {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
-
-        private class CreateSavedSearchTask(context: SearchActivity): AsyncTask<String, Void, SavedSearch>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: String): SavedSearch? {
-                return try {
-                    TwitterManager.twitter.createSavedSearch(params[0])
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-
-            override fun onPostExecute(savedSearch: SavedSearch?) {
-                if (savedSearch == null) return
-                ref.get()?.run {
-                    setResult(RESULT_CREATE_SAVED_SEARCH)
-                    MessageUtil.showToast(getString(R.string.toast_save_success))
-                }
-            }
-        }
 
         private class SearchLoader(context: Context, val query: Query): AbstractAsyncTaskLoader<QueryResult>(context) {
             override fun loadInBackground(): QueryResult? {
@@ -115,10 +95,10 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
         })
 
         search_button.setOnClickListener { search() }
-        tweet_button.setOnClickListener {
-            searchWords.text?.let { _ ->
+        tweet_button.setOnClickListener { v ->
+            searchWords.text?.let {
                 startActivity(Intent(this, PostActivity::class.java).apply {
-                    putExtra("status", " " + it.toString())
+                    putExtra("status", " " + v.toString())
                 })
             }
         }
@@ -156,7 +136,7 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
             android.R.id.home -> finish()
             R.id.save_search ->
                 searchWords.text?.let {
-                    CreateSavedSearchTask(this).execute(it.toString())
+                    createSavedSearch(it.toString())
                 }
             R.id.search_to_tab -> {
                 TabManager.saveTabs(TabManager.loadTabs().apply {
@@ -219,4 +199,17 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
     }
 
     override fun onLoaderReset(loader: android.support.v4.content.Loader<QueryResult>) {}
+
+    private fun createSavedSearch(word: String) {
+        GlobalScope.launch(Dispatchers.Main) {
+            val res = withContext(Dispatchers.Default) {
+                runCatching { TwitterManager.twitter.createSavedSearch(word) }.isSuccess
+            }
+
+            if (res) {
+                setResult(RESULT_CREATE_SAVED_SEARCH)
+                MessageUtil.showToast(getString(R.string.toast_save_success))
+            }
+        }
+    }
 }

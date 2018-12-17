@@ -13,16 +13,16 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
-import net.slashOmega.juktaway.adapter.SimplePagerAdapter
-import net.slashOmega.juktaway.fragment.ScaleImageFragment
-import net.slashOmega.juktaway.model.TwitterManager
-import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.StatusUtil
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.slashOmega.juktaway.adapter.SimplePagerAdapter
+import net.slashOmega.juktaway.fragment.ScaleImageFragment
+import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.util.MessageUtil
+import net.slashOmega.juktaway.util.StatusUtil
 import net.slashOmega.juktaway.util.tryAndTrace
 import net.slashOmega.juktaway.util.tryAndTraceGet
 import twitter4j.Status
@@ -51,7 +51,6 @@ class ScaleImageActivity: FragmentActivity() {
         setContentView(R.layout.activity_scale_image)
         simplePagerAdapter = SimplePagerAdapter(this, pager)
 
-        symbol.setViewPager(pager)
         pager.offscreenPageLimit = 4
 
         val firstUrl = if (Intent.ACTION_VIEW == intent.action) {

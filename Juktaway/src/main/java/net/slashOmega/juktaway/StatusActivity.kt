@@ -10,7 +10,10 @@ import android.view.Window
 import android.view.WindowManager
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.activity_status.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -127,9 +130,9 @@ class StatusActivity: FragmentActivity() {
         var statusId = idParam
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
-                val status = async(Dispatchers.Default) {
+                val status = withContext(Dispatchers.Default) {
                     TwitterManager.twitter.showStatus(statusId)
-                }.await() ?: run {
+                } ?: run {
                     MessageUtil.showToast(R.string.toast_load_data_failure)
                     return@launch
                 }
