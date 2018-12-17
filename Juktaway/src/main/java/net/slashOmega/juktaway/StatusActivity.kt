@@ -137,7 +137,7 @@ class StatusActivity: FragmentActivity() {
                     return@launch
                 }
 
-                mAdapter.add(Row.newStatus(status))
+                mAdapter.addSuspend(Row.newStatus(status))
                 mAdapter.notifyDataSetChanged()
                 statusId = status.inReplyToStatusId
             }

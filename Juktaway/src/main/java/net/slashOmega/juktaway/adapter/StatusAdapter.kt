@@ -109,28 +109,26 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
-            }
-            launch(Dispatchers.Default) {
-                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
-            }
-            statuses.forEach {
-                super.add(it)
-                filter(it)
-            }
-            mLimit++
+            extensionAddAllFromStatusesSuspend(statusesParam)
         }
     }
 
-    override fun add(row: Row) {
-        GlobalScope.launch(Dispatchers.Main) {
-            if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return@launch
-            super.add(row)
-            if (row.isStatus) mIdSet.add(row.status!!.id)
-            filter(row)
-            limitation()
+    suspend fun extensionAddAllFromStatusesSuspend(statusesParam: List<Status>) {
+        val statuses = withContext(Dispatchers.Default) {
+            statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
         }
+        GlobalScope.launch(Dispatchers.Default) {
+            mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+        }
+        statuses.forEach {
+            super.add(it)
+            filter(it)
+        }
+        mLimit++
+    }
+
+    override fun add(row: Row) {
+        GlobalScope.launch(Dispatchers.Main) { addSuspend(row) }
     }
 
     suspend fun addSuspend(row:Row) {
@@ -159,28 +157,36 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     fun addAllFromStatuses(statusesParam: List<Status>) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
-            }
-            launch(Dispatchers.Default) {
-                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
-            }
-            statuses.forEach {
-                super.add(it)
-                filter(it)
-            }
-            limitation()
+            addAllFromStatusesSuspend(statusesParam)
         }
+    }
+
+    suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {
+        val statuses = withContext(Dispatchers.Default) {
+            statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
+        }
+        GlobalScope.launch(Dispatchers.Default) {
+            mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+        }
+        statuses.forEach {
+            super.add(it)
+            filter(it)
+        }
+        limitation()
     }
 
     override fun insert(row: Row, index: Int) {
         GlobalScope.launch(Dispatchers.Main) {
-            if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return@launch
-            super.insert(row, index)
-            if (row.isStatus) mIdSet.add(row.status!!.id)
-            filter(row)
-            limitation()
+            insertSuspend(row, index)
         }
+    }
+
+    suspend fun insertSuspend(row: Row, index: Int) {
+        if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return
+        super.insert(row, index)
+        if (row.isStatus) mIdSet.add(row.status!!.id)
+        filter(row)
+        limitation()
     }
 
     override fun remove(row: Row) {

@@ -2,7 +2,10 @@ package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
 import de.greenrobot.event.EventBus
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -45,12 +48,12 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                 if (mReload) {
                     mAdapter.clear()
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                    mAdapter.addAllFromStatuses(this)
+                    mAdapter.addAllFromStatusesSuspend(this)
                     mReload = false
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                    mAdapter.extensionAddAllFromStatuses(this)
+                    mAdapter.extensionAddAllFromStatusesSuspend(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
