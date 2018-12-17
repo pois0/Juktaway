@@ -12,8 +12,7 @@ class PerformanceActivity : Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
-        fragmentManager.beginTransaction().replace(android.R.id.content,
-                SettingsFragment()).commit()
+        fragmentManager.beginTransaction().replace(android.R.id.content, SettingsFragment()).commit()
 
         actionBar?.run {
             setHomeButtonEnabled(true)
@@ -37,12 +36,12 @@ class PerformanceActivity : Activity() {
 
             addPreferencesFromResource(R.xml.pref_performance)
 
-            (findPreference("user_icon_size") as ListPreference?)?.run {
+            (findPreference("user_icon_size") as? ListPreference)?.run {
                 summary = entry
                 SettingsActivity.SettingsFragment.changedPreference(this)
             }
 
-            (findPreference("page_count") as ListPreference?)?.run {
+            (findPreference("page_count") as? ListPreference)?.run {
                 summary = entry
                 SettingsActivity.SettingsFragment.changedPreference(this)
             }

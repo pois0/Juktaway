@@ -26,7 +26,7 @@ class DirectMessagesFragment: BaseFragment() {
                         count = 10
                     }
                 }).apply {
-                    forEach { if (mSentDirectMessagesMaxId <= 0L || mSentDirectMessagesMaxId > it.id) mSentDirectMessagesMaxId = it.id }
+                    lastOrNull { mDirectMessagesMaxId <= 0L || mDirectMessagesMaxId > it.id }?.let { mDirectMessagesMaxId = it.id }
                 }
                 twitter.getDirectMessages(Paging().apply {
                     if (mDirectMessagesMaxId > 0 && !mReloading) {
@@ -36,7 +36,7 @@ class DirectMessagesFragment: BaseFragment() {
                         count = 10
                     }
                 }).apply {
-                    forEach { if (mDirectMessagesMaxId <= 0L || mDirectMessagesMaxId > it.id) mDirectMessagesMaxId = it.id }
+                    lastOrNull { mDirectMessagesMaxId <= 0L || mDirectMessagesMaxId > it.id }?.let { mDirectMessagesMaxId = it.id }
                     addAll(sentMessages)
                 }
             } catch (e: OutOfMemoryError) {

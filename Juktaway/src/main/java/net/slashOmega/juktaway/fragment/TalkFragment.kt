@@ -13,7 +13,10 @@ import android.widget.ListView
 import com.google.common.primitives.Longs
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.list_talk.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -104,15 +107,15 @@ class TalkFragment: DialogFragment() {
         var statusId = idParam
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
-                val status = async(Dispatchers.Default) {
+                val status = withContext(Dispatchers.Default) {
                     tryAndTraceGet { mTwitter.showStatus(statusId) }
-                }.await() ?: break
+                } ?: break
 
                 if (BasicSettings.talkOrderNewest) {
-                    mAdapter.add(Row.newStatus(status))
+                    mAdapter.addSuspend(Row.newStatus(status))
                 } else {
                     val pos = mListView.lastVisiblePosition
-                    mAdapter.insert(Row.newStatus(status), 0)
+                    mAdapter.insertSuspend(Row.newStatus(status), 0)
                     mListView.setSelectionFromTop(pos + 1, mListView.getChildAt(pos)?.top ?: 0)
                     if (mListView.firstVisiblePosition > 0) {
                         mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
@@ -127,7 +130,7 @@ class TalkFragment: DialogFragment() {
 
     private fun loadTalkReply(source: Status) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statusesJob = async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 try {
                     val toQuery = Query("to:" + source.user.screenName + " AND filter:replies").apply {
                         count = 200
@@ -181,30 +184,26 @@ class TalkFragment: DialogFragment() {
                     e.printStackTrace()
                     null
                 }
-            }
+            } ?: return@launch
 
             if (dialog == null) return@launch
             dialog.run {
                 if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
             }.visibility = View.GONE
 
-            val statuses = statusesJob.await() ?: return@launch
-
             if (BasicSettings.talkOrderNewest) {
                 val lastPos = mListView.lastVisiblePosition
 
                 val y = mListView.getChildAt(lastPos)?.top ?: 0
 
-                statuses.forEach {
-                    mAdapter.insert(Row.newStatus(it), 0)
-                }
+                statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
                 mListView.setSelectionFromTop(lastPos + statuses.size, y)
 
                 if (mListView.firstVisiblePosition > 0) {
                     mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
                 }
             } else {
-                statuses.forEach { mAdapter.add(Row.newStatus(it)) }
+                statuses.forEach { mAdapter.addSuspend(Row.newStatus(it)) }
             }
         }
     }

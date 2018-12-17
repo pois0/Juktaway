@@ -1,22 +1,16 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
-import android.os.AsyncTask
-import android.os.Handler
-import android.util.Log
 import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import twitter4j.Paging
-import twitter4j.ResponseList
-import twitter4j.Status
-import java.lang.ref.WeakReference
 
 class TimelineFragment: BaseFragment() {
     override var tabId = TabManager.TIMELINE_TAB_ID
@@ -26,7 +20,7 @@ class TimelineFragment: BaseFragment() {
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses = async(Dispatchers.Default) {
+            val statuses = withContext(Dispatchers.Default) {
                 try {
                     TwitterManager.twitter.getHomeTimeline(Paging().also {
                         if (mMaxId > 0 && !mReloading) {
@@ -40,33 +34,27 @@ class TimelineFragment: BaseFragment() {
                     e.printStackTrace()
                     null
                 }
-            }.await()
-
-            if (statuses.isNullOrEmpty()){
-                mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
-                mListView.visibility = View.VISIBLE
-                finishLoad()
-                return@launch
             }
 
-            if (mReloading) {
-                clear()
-                for (status in statuses) {
-                    if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
+            when {
+                statuses.isNullOrEmpty() -> {
+                    mReloading = false
+                    mPullToRefreshLayout.setRefreshComplete()
+                    mListView.visibility = View.VISIBLE
                 }
-                mAdapter!!.addAllFromStatuses(statuses)
-                mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
-            } else {
-                for (status in statuses) {
-                    if (mMaxId <= 0L || mMaxId > status.id) {
-                        mMaxId = status.id
-                    }
+                mReloading -> {
+                    clear()
+                    statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                    mAdapter?.addAllFromStatusesSuspend(statuses)
+                    mReloading = false
+                    mPullToRefreshLayout.setRefreshComplete()
                 }
-                mAdapter!!.extensionAddAllFromStatuses(statuses)
-                mAutoLoader = true
-                mListView.visibility = View.VISIBLE
+                else -> {
+                    statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                    mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                    mAutoLoader = true
+                    mListView.visibility = View.VISIBLE
+                }
             }
 
             finishLoad()

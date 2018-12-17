@@ -15,6 +15,7 @@ import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_edit_profile.*
+import org.jetbrains.anko.startActivity
 import twitter4j.User
 import java.lang.ref.WeakReference
 
@@ -87,7 +88,7 @@ class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Use
 
     override fun onLoadFinished(loader: android.support.v4.content.Loader<User>, user: User?) {
         if (user == null) {
-            startActivity(Intent(this, SignInActivity::class.java))
+            startActivity<SignInActivity>()
             finish()
         } else {
             name.setText(user.name)

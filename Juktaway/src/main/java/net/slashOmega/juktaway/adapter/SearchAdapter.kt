@@ -7,10 +7,7 @@ import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
 import kotlinx.android.synthetic.main.row_auto_complete.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.MainActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.model.TwitterManager
@@ -50,15 +47,14 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                             .setMessage(String.format(mContext.getString(R.string.confirm_destroy_saved_search), item))
                             .setPositiveButton(R.string.button_yes) { _, _ ->
                                 GlobalScope.launch(Dispatchers.Main) {
-                                    if (async(Dispatchers.Default) {
-                                                try {
+                                    if (withContext(Dispatchers.Default) {
+                                                runCatching {
                                                     TwitterManager.twitter.destroySavedSearch(search.id)
-                                                    true
-                                                } catch (e: Exception) {
-                                                    e.printStackTrace()
-                                                    false
+                                                }.run {
+                                                    exceptionOrNull()?.printStackTrace()
+                                                    isSuccess
                                                 }
-                                            }.await()) MessageUtil.showToast(R.string.toast_destroy_success)
+                                            }) MessageUtil.showToast(R.string.toast_destroy_success)
                                 }
                             }
                             .setNegativeButton(R.string.button_no) { _, _ -> }
@@ -72,8 +68,7 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
     override fun getFilter(): Filter = object: Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
             val filterResults = Filter.FilterResults()
-            val mSavedMode = constraint.isNullOrEmpty()
-            if (mSavedMode) {
+            if (constraint.isNullOrEmpty()) {
                 mStrings.clear()
                 for (savedSearch in mSavedSearches) {
                     mStrings.add(savedSearch.query)
@@ -87,9 +82,10 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                     add("@" + mSearchWord + mContext?.getString(R.string.label_display_profile).nullToEmpty())
                 }
             }
-            filterResults.values = mStrings
-            filterResults.count = mStrings.size
-            return filterResults
+            return filterResults.apply {
+                values = mStrings
+                count = mStrings.size
+            }
         }
 
         override fun publishResults(constraint: CharSequence?, results: FilterResults?) {
@@ -104,20 +100,18 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
             if (savedMode) resultValue as String else mSearchWord
     }
 
-    fun reload() {
-        getSavedSearches()
-    }
+    fun reload() { getSavedSearches() }
 
     private fun getSavedSearches() {
         GlobalScope.launch(Dispatchers.Main) {
-            async(Dispatchers.Default) {
+            withContext(Dispatchers.Default) {
                 try {
                     TwitterManager.twitter.savedSearches
                 } catch (e: Exception) {
                     e.printStackTrace()
                     null
                 }
-            }.await()?.let {
+            }?.let {
                 mSavedSearches.clear()
                 for (search in it) {
                     mSavedSearches.add(0, search)

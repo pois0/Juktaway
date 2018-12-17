@@ -11,12 +11,10 @@ import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.util.takeNotEmpty
 import net.slashOmega.juktaway.util.tryAndTraceGet
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.toast
 import twitter4j.auth.RequestToken
 
@@ -79,7 +77,7 @@ class SignInActivity: Activity() {
 
     private fun successOAuth() {
         MessageUtil.showToast(R.string.toast_sign_in_success)
-        startActivity(Intent(this, MainActivity::class.java).apply {
+        startActivity(intentFor<MainActivity>().apply {
             flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
         })
         finish()
@@ -87,7 +85,7 @@ class SignInActivity: Activity() {
 
     private fun startOAuth(addUser: Boolean = false) {
         if (!addUser) {
-            if ((consumer_key.text.isBlank() || consumer_secret.text.isBlank())) {
+            if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
                 toast(R.string.signin_csck_blank)
                 return
             }
@@ -100,18 +98,15 @@ class SignInActivity: Activity() {
 
     private fun verifyOAuth(param: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val user = async(Dispatchers.Default) {
-                try {
+            val user = withContext(Dispatchers.Default) {
+                tryAndTraceGet {
                     TwitterManager.twitterInstance.apply {
                         val token = getOAuthAccessToken(mRequestToken, param)
                         AccessTokenManager.setAccessToken(token)
                         oAuthAccessToken = token
                     }.verifyCredentials()
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
                 }
-            }.await()
+            }
 
             MessageUtil.dismissProgressDialog()
             user?.let {
@@ -123,18 +118,17 @@ class SignInActivity: Activity() {
 
     private fun addUserOAuth() {
         GlobalScope.launch(Dispatchers.Main) {
-            val token = async(Dispatchers.Default) {
+            val token = withContext(Dispatchers.Default) {
                 tryAndTraceGet {
                     TwitterManager.twitterInstance.getOAuthRequestToken(getString(R.string.twitter_callback_url))
                 }
-            }.await()
+            }
             MessageUtil.dismissProgressDialog()
             if (token == null) {
                 MessageUtil.showToast(R.string.toast_connection_failure)
                 return@launch
             }
-            val url = token.authorizationURL
-            if (url == null) {
+            val url = token.authorizationURL ?: run {
                 MessageUtil.showToast(R.string.toast_get_authorization_url_failure)
                 return@launch
             }
@@ -144,8 +138,7 @@ class SignInActivity: Activity() {
             consumer_secret.visibility = View.GONE
             start_oauth_button.visibility = View.GONE
             connect_with_twitter.visibility = View.GONE
-            val intent = Intent(Intent.ACTION_VIEW, Uri.parse(url))
-            startActivity(intent)
+            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }
 }

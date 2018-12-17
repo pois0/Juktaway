@@ -13,6 +13,7 @@ import net.slashOmega.juktaway.model.UserListWithRegistered
 import net.slashOmega.juktaway.task.RegisterUserListsLoader
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.list.*
+import org.jetbrains.anko.startActivity
 import twitter4j.ResponseList
 import twitter4j.UserList
 import java.util.*
@@ -50,8 +51,7 @@ class RegisterUserListActivity : FragmentActivity(), LoaderManager.LoaderCallbac
     override fun onOptionsItemSelected(item: MenuItem): Boolean {
         when (item.itemId) {
             android.R.id.home -> finish()
-            R.id.create_user_list ->
-                startActivity(Intent(this, CreateUserListActivity::class.java))
+            R.id.create_user_list -> startActivity<CreateUserListActivity>()
         }
         return true
     }

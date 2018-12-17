@@ -35,7 +35,6 @@ class JuktawayApplication: MultiDexApplication() {
 
         font = Typeface.createFromAsset(assets, "fontello.ttf")
 
-        if (BuildConfig.DEBUG)
-            Thread.setDefaultUncaughtExceptionHandler(MyUncaughtExceptionHandler(app))
+        if (BuildConfig.DEBUG) Thread.setDefaultUncaughtExceptionHandler(MyUncaughtExceptionHandler(app))
     }
 }

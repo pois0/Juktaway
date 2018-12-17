@@ -37,7 +37,7 @@ class SettingsActivity: Activity() {
 
             addPreferencesFromResource(R.xml.pref_general)
 
-            (findPreference("display_account_name") as ListPreference?)?.apply {
+            (findPreference("display_account_name") as? ListPreference)?.apply {
                 summary = entry
                 setOnPreferenceChangeListener { pref, newValue ->
                     (pref as ListPreference).apply {

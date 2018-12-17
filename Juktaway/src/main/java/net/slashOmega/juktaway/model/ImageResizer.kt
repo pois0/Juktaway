@@ -4,6 +4,7 @@ import android.graphics.Bitmap
 import android.graphics.BitmapFactory
 import android.graphics.Matrix
 import android.media.ExifInterface
+import net.slashOmega.juktaway.util.tryAndTraceGet
 
 import java.io.File
 import java.io.FileOutputStream
@@ -44,8 +45,8 @@ object ImageResizer {
             file
         }
 
-    private fun getExifMatrix(file: File) =
-        try {
+    private fun getExifMatrix(file: File): Matrix? =
+        tryAndTraceGet {
             Matrix().apply {
                 when (ExifInterface(file.absolutePath)
                         .getAttributeInt(ExifInterface.TAG_ORIENTATION, ExifInterface.ORIENTATION_UNDEFINED)) {
@@ -66,9 +67,6 @@ object ImageResizer {
                     ExifInterface.ORIENTATION_ROTATE_270 -> postRotate(-90f)
                 }
             }
-        } catch (e: IOException) {
-            e.printStackTrace()
-            null
         }
 
     /**
