@@ -10,13 +10,11 @@ buildscript {
         maven { url "https://dl.bintray.com/kotlin/ktor" }
         maven { url "https://maven.google.com" }
         maven { url "https://kotlin.bintray.com/kotlinx" }
-        google()
     }
     dependencies {
         classpath 'com.android.tools.build:gradle:3.2.1'
         classpath "org.jetbrains.kotlin:kotlin-gradle-plugin:$kotlin_version"
         classpath "org.jetbrains.kotlin:kotlin-serialization:$kotlin_version"
-        classpath 'com.cookpad.android.licensetools:license-tools-plugin:1.5.0'
 
     }
 }
