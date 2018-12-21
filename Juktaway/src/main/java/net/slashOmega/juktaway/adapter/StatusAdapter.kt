@@ -232,8 +232,8 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                     positions.add(pos++)
                 }
             }
-            for (row in rows) remove(row)
         }
+        for (row in rows) remove(row)
         return positions
     }
 

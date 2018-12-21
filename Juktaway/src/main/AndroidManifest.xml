@@ -166,6 +166,9 @@
         <activity
             android:name=".MuteActivity"
             android:label="@string/title_mute" />
+        <activity
+            android:name=".LicenseActivity"
+            android:label="@string/title_license" />
     </application>
 
 </manifest>

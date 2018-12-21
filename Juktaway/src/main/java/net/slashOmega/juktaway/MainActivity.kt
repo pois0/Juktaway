@@ -369,6 +369,8 @@ class MainActivity: FragmentActivity() {
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.official_website))))
             R.id.feedback ->
                 EventBus.getDefault().post(OpenEditorEvent("#juktaway", null, null, null))
+            R.id.license_view ->
+                startActivity<LicenseActivity>()
         }
         return true
     }
