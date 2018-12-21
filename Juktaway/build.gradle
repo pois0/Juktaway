@@ -2,6 +2,8 @@ apply plugin: 'com.android.application'
 apply plugin: 'kotlin-android'
 apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
+apply plugin: 'com.cookpad.android.licensetools'
+apply plugin: 'com.cookpad.android.licensetools'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -14,7 +16,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.guava:guava:25.0-android'
     implementation 'de.greenrobot:eventbus:2.2.0'
-    implementation "jp.nephy:jsonkt:${jsonkt_version}"
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
@@ -23,6 +24,7 @@ dependencies {
     implementation 'com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9'
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation 'com.android.support:multidex:1.0.3'
+    implementation "jp.nephy:jsonkt:${jsonkt_version}"
 }
 
 android {
@@ -79,10 +81,6 @@ android {
     compileOptions {
         sourceCompatibility JavaVersion.VERSION_1_8
         targetCompatibility JavaVersion.VERSION_1_8
-    }
-
-    dataBinding {
-        enabled = true
     }
 
     lintOptions {
