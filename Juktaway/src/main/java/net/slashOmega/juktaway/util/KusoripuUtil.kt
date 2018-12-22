@@ -19,7 +19,7 @@ object KusoripuUtil {
         return response.parse<RepooplyModel>().text.raw
     }
 
-    private class RepooplyModel(override val json: JsonObject): JsonModel {
+    class RepooplyModel(override val json: JsonObject): JsonModel {
         val count by int
         class UserModel(override val json: JsonObject): JsonModel {
             val count by int
