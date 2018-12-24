@@ -13,11 +13,11 @@ import jp.nephy.jsonkt.parse
  * Created on 2018/11/18.
  */
 object KusoripuUtil {
-    private val client = HttpClient()
-    suspend fun getKusoripu(screenName: String): String {
-        val response = client.get<String>(scheme = "https", host = "api.nephy.jp", path = "/v1/kusoripu/random?screen_name=$screenName")
-        return response.parse<RepooplyModel>().text.raw
-    }
+    suspend fun getKusoripu(screenName: String) =
+        HttpClient().use { client ->
+            val response = client.get<String>(scheme = "https", host = "api.nephy.jp", path = "/v1/kusoripu/random?screen_name=$screenName")
+            response.parse<RepooplyModel>().text.raw
+        }
 
     class RepooplyModel(override val json: JsonObject): JsonModel {
         val count by int
