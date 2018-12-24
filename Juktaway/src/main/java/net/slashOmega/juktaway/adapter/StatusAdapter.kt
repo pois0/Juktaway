@@ -323,7 +323,8 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         setOnClickListener {
                             startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
                         }
-                        UserIconManager.displayUserIcon(s.user, this)
+                        //TODO
+                        //UserIconManager.displayUserIcon(s.user, this)
                     }.lparams(width = dip(48), height = dip(48)) {
                         below(R.id.action_container)
                         bottomMargin = dip(6)
@@ -635,7 +636,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             imageView {
                                 id = R.id.retweet_icon
                                 contentDescription = resources.getString(R.string.description_icon)
-                                UserIconManager.displayUserIcon(status.user, this)
+                                //UserIconManager.displayUserIcon(status.user, this)
                             }.lparams(width = dip(18), height = dip(18)) {
                                 rightMargin = dip(4)
                             }

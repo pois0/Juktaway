@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway
 
 import android.app.Activity
-import android.os.AsyncTask
 import android.os.Bundle
 import android.view.MenuItem
 import net.slashOmega.juktaway.model.TwitterManager
@@ -13,7 +12,6 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import twitter4j.TwitterException
-import java.lang.ref.WeakReference
 
 class CreateUserListActivity: Activity() {
     companion object {

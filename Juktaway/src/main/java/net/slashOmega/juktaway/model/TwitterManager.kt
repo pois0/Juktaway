@@ -3,10 +3,7 @@ package net.slashOmega.juktaway.model
 import android.os.Handler
 import android.util.Log
 import de.greenrobot.event.EventBus
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.MyUserStreamAdapter
@@ -73,10 +70,10 @@ object TwitterManager {
             MessageUtil.showToast(R.string.toast_destroy_streaming)
             sUserStreamAdapter!!.stop()
             GlobalScope.launch(Dispatchers.Main) {
-                async(Dispatchers.Default) {
+                withContext(Dispatchers.Default) {
                     sTwitterStream!!.cleanUp()
                     sTwitterStream!!.shutdown()
-                }.await()
+                }
                 sTwitterStream!!.oAuthAccessToken = accessToken
                 Handler().postDelayed({
                     MessageUtil.showToast(R.string.toast_create_streaming)

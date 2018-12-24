@@ -4,7 +4,7 @@ apply plugin: 'kotlin-android-extensions'
 apply plugin: 'kotlinx-serialization'
 
 dependencies {
-    implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
+    implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
     implementation "org.jetbrains.kotlin:kotlin-reflect:$kotlin_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
@@ -17,7 +17,7 @@ dependencies {
     implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
     implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
-    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.1'
+    implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation 'com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9'
     implementation fileTree(include: '*.jar', dir: 'libs')

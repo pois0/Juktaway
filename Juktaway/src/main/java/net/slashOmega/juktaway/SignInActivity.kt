@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import jp.nephy.penicillin.PenicillinClient
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.model.UserIconManager
@@ -12,6 +14,7 @@ import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
 import kotlinx.coroutines.*
+import net.slashOmega.juktaway.twitter.*
 import net.slashOmega.juktaway.util.takeNotEmpty
 import net.slashOmega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.intentFor
@@ -67,73 +70,73 @@ class SignInActivity: Activity() {
 
     override fun onNewIntent(intent: Intent?) {
         if (intent == null || intent.data == null
-                || !intent.data!!.toString().startsWith(getString(R.string.twitter_callback_url))) return
-
+                || !intent.data!!.toString().startsWith(getString(R.string.twitter_callback_url))) {
+            finish()
+            return
+        }
         val oauthVerifier = intent.data!!.getQueryParameter("oauth_verifier")
         if (oauthVerifier.isNullOrEmpty()) return
         MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
         verifyOAuth(oauthVerifier)
     }
 
-    private fun successOAuth() {
-        MessageUtil.showToast(R.string.toast_sign_in_success)
-        startActivity(intentFor<MainActivity>().apply {
-            flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-        })
-        finish()
-    }
-
     private fun startOAuth(addUser: Boolean = false) {
-        if (!addUser) {
-            if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
-                toast(R.string.signin_csck_blank)
-                return
+        GlobalScope.launch(Dispatchers.Main) {
+            launch(Dispatchers.Default) { AuthTemp.clearTemps() }
+            if (!addUser) {
+                if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
+                    toast(R.string.signin_csck_blank)
+                    return@launch
+                }
             }
-            TwitterManager.consumerKey = consumer_key.text.toString()
-            TwitterManager.consumerSecret = consumer_secret.text.toString()
+            MessageUtil.showProgressDialog(this@SignInActivity, getString(R.string.progress_process))
+            addUserOAuth(consumer_key.text.toString(), consumer_secret.text.toString())
         }
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-        addUserOAuth()
     }
 
     private fun verifyOAuth(param: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val user = withContext(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitterInstance.apply {
-                        val token = getOAuthAccessToken(mRequestToken, param)
-                        AccessTokenManager.setAccessToken(token)
-                        oAuthAccessToken = token
-                    }.verifyCredentials()
+            val (at, ats, id, sn) = runCatching {
+                withContext(Dispatchers.Default) {
+                    PenicillinClient {
+                        account {
+                            application(ckTemp, csTemp)
+                        }
+                    }.use { client ->
+                        client.oauth.accessToken(rtTemp, rtsTemp, param)
+                    }
                 }
-            }
+            }.getOrNull() ?: return@launch
+            Core.addToken(Core.TokensSet(ckTemp, csTemp, at, ats, id, sn))
 
             MessageUtil.dismissProgressDialog()
-            user?.let {
-                UserIconManager.addUserIconMap(it)
-                successOAuth()
-            }
+            toast(R.string.toast_sign_in_success)
+            withClient { UserIconManager.addUserIconMap(account.verifyCredentials().await().result) }
+            startActivity(intentFor<MainActivity>().apply {
+                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+            })
+            finish()
         }
     }
 
-    private fun addUserOAuth() {
+    private fun addUserOAuth(cs: String, ck: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val token = withContext(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitterInstance.getOAuthRequestToken(getString(R.string.twitter_callback_url))
+            csTemp = cs
+            ckTemp = ck
+            val url = withContext(Dispatchers.Default) {
+                PenicillinClient {
+                    account {
+                        application(cs, ck)
+                    }
+                }.use { client ->
+                    val (rt, rts) = client.oauth.requestToken(getString(R.string.twitter_callback_url))
+                    rtTemp = rt
+                    rtsTemp = rts
+                    client.oauth.authorizeUrl(rt)
                 }
             }
             MessageUtil.dismissProgressDialog()
-            if (token == null) {
-                MessageUtil.showToast(R.string.toast_connection_failure)
-                return@launch
-            }
-            val url = token.authorizationURL ?: run {
-                MessageUtil.showToast(R.string.toast_get_authorization_url_failure)
-                return@launch
-            }
 
-            mRequestToken = token
             consumer_key.visibility = View.GONE
             consumer_secret.visibility = View.GONE
             start_oauth_button.visibility = View.GONE
