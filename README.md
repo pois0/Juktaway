@@ -1,8 +1,7 @@
 Forked from [s-aska/Justaway-for-Android-Original](https://github.com/s-aska/Justaway-for-Android-Original)
 
-偉大なるJustaway: TwitterClientはUserStreamingの廃止によって公開停止となってしまいました。
-ぼくが夏休みで暇(偽)なので,JustawayをMastodon用のクライアントに書き換えようと思ってforkしたのですが,Tweetstormなるものができてしまったので結局Twitterクライアントののまま,次の改修をすることにしました
-* 動かす (Clear?)
-* Kotlinに書き換える
-* twitter4j -> Penicillin
-* ストレージバカ食い太郎を直す(Cacheの整理)
+[Google Play](https://play.google.com/store/apps/details?id=net.slashOmega.juktaway)
+
+Justawayを踏襲したTwitterクライアントです。
+シンプルさと多機能性を併せ持ったクライアントを目指しています。
+機能上なにか問題がありましたらIssueにてお知らせください。
