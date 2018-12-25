@@ -17,13 +17,6 @@ object AccessTokenManager {
     private val sharedPreferences = JuktawayApplication.app
                 .getSharedPreferences(PREF_NAME, Context.MODE_PRIVATE)
 
-    fun getAccessTokens(): ArrayList<AccessToken> {
-        val json = sharedPreferences.getString(TOKENS, null) ?: return arrayListOf()
-
-        val accountSettings = Gson().fromJson<AccountSettings>(json, AccountSettings::class.java)
-        return accountSettings.accessTokens
-    }
-
     fun getAccessToken(): AccessToken? = sAccessToken ?: run {
         val json = sharedPreferences.getString(TOKENS, null)
 
@@ -91,9 +84,8 @@ object AccessTokenManager {
         }.apply()
     }
 
+    //Done
     fun getUserId() = sAccessToken?.userId ?: -1L
-
-    fun getScreenName() = sAccessToken?.screenName?: ""
 
     class AccountSettings {
         internal var index: Int = 0

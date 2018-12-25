@@ -6,9 +6,9 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentPagerAdapter
 import android.support.v4.view.ViewPager
 import net.slashOmega.juktaway.fragment.main.tab.BaseFragment
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.UserListCache
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -42,7 +42,7 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
     override fun getPageTitle(position: Int) = mTabs[position].apply {
         if (tabTitle == "-" && args != null) {
             UserListCache.getUserList(args.getInt("userListId").toLong())?.let {
-                tabTitle = if (it.user.id == AccessTokenManager.getUserId()) it.name else it.fullName
+                tabTitle = if (it.user.id == currentIdentifier.userId) it.name else it.fullName
             }
         }
     }.tabTitle

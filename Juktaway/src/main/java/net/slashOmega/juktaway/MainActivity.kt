@@ -23,6 +23,9 @@ import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.adapter.SearchAdapter
 import net.slashOmega.juktaway.adapter.main.AccessTokenAdapter
 import net.slashOmega.juktaway.adapter.main.MainPagerAdapter
@@ -35,13 +38,16 @@ import net.slashOmega.juktaway.event.connection.StreamingConnectionEvent
 import net.slashOmega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slashOmega.juktaway.fragment.main.StreamingSwitchDialogFragment
 import net.slashOmega.juktaway.fragment.main.tab.*
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.task.SendDirectMessageTask
 import net.slashOmega.juktaway.task.UpdateStatusTask
+import net.slashOmega.juktaway.twitter.Core
+import net.slashOmega.juktaway.twitter.currentIdentifier
+import net.slashOmega.juktaway.twitter.isIdentifierSet
+import net.slashOmega.juktaway.twitter.identifierList
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
@@ -123,7 +129,7 @@ class MainActivity: FragmentActivity() {
         mDisabledTextColor = ThemeUtil.getThemeTextColor(R.attr.menu_text_color_disabled)
 
         //認証用のアクティビティの起動
-        if (AccessTokenManager.getAccessToken() == null) {
+        if (!isIdentifierSet) {
             startActivity<SignInActivity>()
             finish()
             return
@@ -177,9 +183,11 @@ class MainActivity: FragmentActivity() {
                 startActivityForResult(Intent(this, AccountSettingActivity::class.java), REQUEST_ACCOUNT_SETTING)
                 return@setOnItemClickListener
             }
-            mAccessTokenAdapter.getItem(position)?.takeIf { AccessTokenManager.getUserId() != it.userId }?.let {
-                TwitterManager.switchAccessToken(it)
-                mAccessTokenAdapter.notifyDataSetChanged()
+            mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }.let {
+                GlobalScope.launch(Dispatchers.Main) {
+                    Core.switchToken(it)
+                    mAccessTokenAdapter.notifyDataSetChanged()
+                }
             }
             drawer_layout.closeDrawer(left_drawer)
         }
@@ -261,7 +269,7 @@ class MainActivity: FragmentActivity() {
                 if (resultCode == Activity.RESULT_OK)
                     mSwitchAccessToken = data?.getSerializableExtra("accessToken") as AccessToken
                 mAccessTokenAdapter.clear()
-                AccessTokenManager.getAccessTokens().forEach {
+                identifierList.forEach {
                     mAccessTokenAdapter.add(it)
                 }
             }
@@ -358,7 +366,7 @@ class MainActivity: FragmentActivity() {
             android.R.id.home ->
                 cancelSearch()
             R.id.profile ->
-                startActivity<ProfileActivity>("screenName" to AccessTokenManager.getScreenName())
+                startActivity<ProfileActivity>("screenName" to currentIdentifier.screenName)
             R.id.tab_settings ->
                 startActivityForResult(getIntent(TabSettingsActivity::class.java), REQUEST_TAB_SETTINGS)
             R.id.action_bar_search_button ->
@@ -416,9 +424,9 @@ class MainActivity: FragmentActivity() {
             action_bar_title.text = title
             action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
                 BasicSettings.DisplayAccountName.SCREEN_NAME ->
-                     "@" + AccessTokenManager.getScreenName()
+                     "@" + currentIdentifier.screenName
                 BasicSettings.DisplayAccountName.DISPLAY_NAME ->
-                    UserIconManager.getName(AccessTokenManager.getUserId())
+                    UserIconManager.getName(currentIdentifier.userId)
                 else -> ""
             }
         }

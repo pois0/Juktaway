@@ -14,6 +14,7 @@ import com.nostra13.universalimageloader.core.ImageLoader
 import de.greenrobot.event.EventBus
 import net.slashOmega.juktaway.event.model.NotificationEvent
 import net.slashOmega.juktaway.model.AccessTokenManager
+import net.slashOmega.juktaway.twitter.currentIdentifier
 
 /**
  * Created on 2018/08/29.
@@ -62,7 +63,7 @@ class NotificationService: Service() {
         val preferences = getSharedPreferences("settings", Context.MODE_PRIVATE)
         val application = JuktawayApplication.app
 
-        val userId = AccessTokenManager.getUserId()
+        val userId = currentIdentifier.userId
 
         val row = event.row
         val status = row.status

@@ -13,6 +13,8 @@ import net.slashOmega.juktaway.listener.RemoveAccountListener
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
+import net.slashOmega.juktaway.twitter.currentIdentifier
+import net.slashOmega.juktaway.twitter.identifierList
 import org.jetbrains.anko.startActivity
 import twitter4j.auth.AccessToken
 
@@ -33,7 +35,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
         }
 
         mAccountAdapter = AccessTokenAdapter(this, R.layout.row_account) .apply {
-            AccessTokenManager.getAccessTokens().forEach { add(it) }
+            identifierList.forEach { add(it) }
             mOnTrashListener = object: OnTrashListener {
                 override fun onTrash(position: Int) { getItem(position)?.let {
                     AccountSwitchDialogFragment.newInstance(it).show(supportFragmentManager, "dialog")
@@ -45,7 +47,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
             adapter = mAccountAdapter
             setOnItemClickListener { _, _, i, _ ->
                 mAccountAdapter.getItem(i).also {
-                    if (it?.userId != AccessTokenManager.getUserId()) {
+                    if (it?.userId != currentIdentifier.userId) {
                         setResult(Activity.RESULT_OK, Intent().apply {
                             putExtra("accessToken", it)
                         })

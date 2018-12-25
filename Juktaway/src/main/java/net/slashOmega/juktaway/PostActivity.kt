@@ -31,13 +31,16 @@ import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
 import kotlinx.android.synthetic.main.row_word.view.*
 import kotlinx.android.synthetic.main.spinner_switch_account.view.*
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.UserIconManager
+import net.slashOmega.juktaway.model.UserIconManager.displayUserIcon
 import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.PostStockSettings
 import net.slashOmega.juktaway.settings.PostStockSettings.drafts
 import net.slashOmega.juktaway.settings.PostStockSettings.hashtags
 import net.slashOmega.juktaway.task.SendDirectMessageTask
+import net.slashOmega.juktaway.twitter.Identifier
+import net.slashOmega.juktaway.twitter.currentIdentifier
+import net.slashOmega.juktaway.twitter.identifierList
 import net.slashOmega.juktaway.util.*
 import twitter4j.Status
 import twitter4j.StatusUpdate
@@ -157,9 +160,9 @@ class PostActivity: FragmentActivity() {
         // アカウント切り替え
         switch_account_spinner.adapter = AccessTokenAdapter(this, R.layout.spinner_switch_account).apply {
             setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
-            AccessTokenManager.getAccessTokens().forEachIndexed { i, token ->
+            identifierList.forEachIndexed { i, token ->
                 add(token)
-                if (AccessTokenManager.getUserId() == token.userId) switch_account_spinner.setSelection(i)
+                if (currentIdentifier == token) switch_account_spinner.setSelection(i)
             }
         }
 
@@ -510,7 +513,7 @@ class PostActivity: FragmentActivity() {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val draft = getItem(position)
+            val draft = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
                 word.text = draft
@@ -527,7 +530,7 @@ class PostActivity: FragmentActivity() {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val hashtag = getItem(position)
+            val hashtag = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
                 word.text = hashtag
@@ -540,25 +543,25 @@ class PostActivity: FragmentActivity() {
     }
 
     private class AccessTokenAdapter(context: Context, val mLayout: Int)
-            : ArrayAdapter<AccessToken>(context, mLayout) {
+            : ArrayAdapter<Identifier>(context, mLayout) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val token = getItem(position)
+            val token = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
                 setPadding(16, 0, 0, 0)
 
-                UserIconManager.displayUserIcon(token.userId, spinner_switch_account_icon)
+                spinner_switch_account_icon.displayUserIcon(token.userId)
                 spinner_switch_account_screen_name.text = token.screenName
             }
         }
 
         override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val token = getItem(position)
+            val token = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
-                UserIconManager.displayUserIcon(token.userId, spinner_switch_account_icon)
+                spinner_switch_account_icon?.displayUserIcon(token.userId)
                 spinner_switch_account_screen_name.text = token.screenName
             }
         }

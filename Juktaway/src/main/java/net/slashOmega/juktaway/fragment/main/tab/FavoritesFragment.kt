@@ -7,12 +7,13 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.model.*
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.Paging
 
 class FavoritesFragment: BaseFragment() {
     override var tabId = TabManager.FAVORITES_TAB_ID
 
-    override fun isSkip(row: Row): Boolean = !row.isFavorite || row.source?.id != AccessTokenManager.getUserId()
+    override fun isSkip(row: Row): Boolean = !row.isFavorite || row.source?.id != currentIdentifier.userId
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {

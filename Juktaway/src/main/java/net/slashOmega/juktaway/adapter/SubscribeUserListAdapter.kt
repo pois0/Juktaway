@@ -15,6 +15,7 @@ import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.UserListWithRegistered
 import net.slashOmega.juktaway.task.DestroyUserListSubscriptionTask
 import net.slashOmega.juktaway.task.DestroyUserListTask
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.UserList
 
 /**
@@ -26,7 +27,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
             val list = getItem(pos)
             val userList = list?.userList
             trash.setOnClickListener {
-                val dialog = if (AccessTokenManager.getUserId() == userList?.user?.id) DestroyUserListDialogFragment()
+                val dialog = if (currentIdentifier.userId == userList?.user?.id) DestroyUserListDialogFragment()
                 else DestroyUserListSubscriptionDialogFragment()
                 dialog.arguments = Bundle(1).apply {
                     putSerializable("userList", userList)
@@ -35,7 +36,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
 
             }
             checkbox.apply {
-                text = if (AccessTokenManager.getUserId() == userList?.user?.id) userList.name else userList?.fullName
+                text = if (currentIdentifier.userId == userList?.user?.id) userList.name else userList?.fullName
                 setOnCheckedChangeListener(null)
                 isChecked = list?.isRegistered ?: false
                 setOnCheckedChangeListener { _, b -> list?.isRegistered = b }

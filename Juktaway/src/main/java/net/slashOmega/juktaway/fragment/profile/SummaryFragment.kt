@@ -16,6 +16,7 @@ import net.slashOmega.juktaway.task.DestroyFriendshipTask
 import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import kotlinx.android.synthetic.main.fragment_profile_summary.*
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.Relationship
 import twitter4j.User
 import java.lang.ref.WeakReference
@@ -86,7 +87,7 @@ class SummaryFragment: Fragment() {
             val v = inflater.inflate(R.layout.fragment_profile_summary, container, false) ?: return null
             user = (arg.getSerializable("user") as User?) ?: return null
             relationship = (arg.getSerializable("relationship") as Relationship?) ?: return null
-            isMyProfile = user.id == AccessTokenManager.getUserId()
+            isMyProfile = user.id == currentIdentifier.userId
 
             mFollowFlg = relationship.isSourceFollowingTarget
             mBlocking = relationship.isSourceBlockingTarget

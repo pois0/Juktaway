@@ -17,6 +17,7 @@ import net.slashOmega.juktaway.model.UserListWithRegistered
 import net.slashOmega.juktaway.task.UserListsLoader
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_choose_user_lists.*
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.ResponseList
 import twitter4j.UserList
 import java.util.*
@@ -71,7 +72,7 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
             for (userList in checkList) {
                 if (tabMap[userList.id] != null) continue
                 val tab = TabManager.Tab(userList.id).apply {
-                    name = if (userList.user.id == AccessTokenManager.getUserId()) userList.name
+                    name = if (userList.user.id == currentIdentifier.userId) userList.name
                             else userList.fullName
                 }
                 tabs.add(tab)

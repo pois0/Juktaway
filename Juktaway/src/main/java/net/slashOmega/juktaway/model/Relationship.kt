@@ -2,6 +2,7 @@ package net.slashOmega.juktaway.model
 
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.twitter.identifierList
 
 import twitter4j.Status
 import twitter4j.Twitter
@@ -14,7 +15,7 @@ object Relationship {
     private val myIdList = mutableListOf<Long>()
 
     init {
-        val accessTokens = AccessTokenManager.getAccessTokens()
+        val accessTokens = identifierList
         if (accessTokens.isNotEmpty()) {
             for (accessToken in accessTokens) {
                 val twitter = TwitterManager.twitterInstance

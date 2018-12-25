@@ -31,6 +31,7 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount
 import net.slashOmega.juktaway.util.TwitterUtil.uri
@@ -199,7 +200,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     private fun filter(row: Row) {
         GlobalScope.launch(Dispatchers.Default) {
             row.status?.takeIf { it.isRetweeted }?.let { status ->
-                status.retweetedStatus?.takeIf { status.user.id == AccessTokenManager.getUserId() }?.let { retweet ->
+                status.retweetedStatus?.takeIf { status.user.id == currentIdentifier.userId }?.let { retweet ->
                     FavRetweetManager.setRtId(retweet.id, status.id)
                 }
             }

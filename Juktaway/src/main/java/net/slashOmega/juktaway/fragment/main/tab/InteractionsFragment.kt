@@ -9,6 +9,7 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.StatusUtil
 import twitter4j.Paging
 import twitter4j.ResponseList
@@ -63,7 +64,7 @@ class InteractionsFragment: BaseFragment() {
     override var tabId = TabManager.INTERACTIONS_TAB_ID
 
     override fun isSkip(row: Row): Boolean = when {
-        row.isFavorite -> row.source?.id == AccessTokenManager.getUserId()
+        row.isFavorite -> row.source?.id == currentIdentifier.userId
         row.isStatus -> {
             val status = row.status
             val retweet = status!!.retweetedStatus
@@ -71,7 +72,7 @@ class InteractionsFragment: BaseFragment() {
             /**
              * 自分のツイートがRTされた時
              */
-            if (retweet != null && retweet.user.id == AccessTokenManager.getUserId()) false
+            if (retweet != null && retweet.user.id == currentIdentifier.userId) false
 
             /**
              * 自分宛のメンション（但し「自分をメンションに含むツイートがRTされた時」はうざいので除く）

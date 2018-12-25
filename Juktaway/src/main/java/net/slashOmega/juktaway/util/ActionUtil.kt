@@ -16,6 +16,7 @@ import net.slashOmega.juktaway.task.FavoriteTask
 import net.slashOmega.juktaway.task.RetweetTask
 import net.slashOmega.juktaway.task.UnFavoriteTask
 import net.slashOmega.juktaway.task.UnRetweetTask
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.DirectMessage
 
 object ActionUtil {
@@ -29,7 +30,7 @@ object ActionUtil {
 
     fun doDestroyRetweet(status: twitter4j.Status) {
         val retweet = status.retweetedStatus
-        if (status.user.id == AccessTokenManager.getUserId() && retweet != null) {
+        if (status.user.id == currentIdentifier.userId && retweet != null) {
             // 自分がRTしたStatus
             UnRetweetTask(retweet.id, status.id).execute()
         } else {
@@ -64,7 +65,7 @@ object ActionUtil {
 
     fun doReply(status: twitter4j.Status, context: Context) {
         val mentions = status.userMentionEntities
-        val text = "@" + (if (status.user.id == AccessTokenManager.getUserId() && mentions.size == 1) mentions[0].screenName
+        val text = "@" + (if (status.user.id == currentIdentifier.userId && mentions.size == 1) mentions[0].screenName
                 else status.user.screenName) + " "
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, status, text.length, null))
@@ -78,7 +79,7 @@ object ActionUtil {
     }
 
     fun doReplyAll(status: twitter4j.Status, context: Context) {
-        val userId = AccessTokenManager.getUserId()
+        val userId = currentIdentifier.userId
         var text = ""
         var selectionStart = 0
         if (status.user.id != userId) {
@@ -103,7 +104,7 @@ object ActionUtil {
     }
 
     fun doReplyDirectMessage(directMessage: DirectMessage, context: Context) {
-        val text = "D " + (if (AccessTokenManager.getUserId() == directMessage.sender.id) directMessage.recipient.screenName
+        val text = "D " + (if (currentIdentifier.userId == directMessage.sender.id) directMessage.recipient.screenName
                 else directMessage.sender.screenName) + " "
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, null, text.length, null))

@@ -4,6 +4,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
 import net.slashOmega.juktaway.model.AccessTokenManager
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.Status
 import java.util.*
 import java.util.regex.Pattern
@@ -60,7 +61,7 @@ object StatusUtil {
      * @return true ... 自分宛てのメンション
      */
     fun isMentionForMe(status: Status): Boolean {
-        val userId = AccessTokenManager.getUserId()
+        val userId = currentIdentifier.userId
         if (status.inReplyToUserId == userId) {
             return true
         }

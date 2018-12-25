@@ -28,6 +28,7 @@ import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.mute.SourceMute
 import net.slashOmega.juktaway.settings.mute.UserMute
 import net.slashOmega.juktaway.settings.mute.WordMute
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.ActionUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
@@ -138,7 +139,7 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * 全員にリプ
          */
-        if (mentions.size > 1 || mentions.size == 1 && mentions[0].screenName != AccessTokenManager.getScreenName()) {
+        if (mentions.size > 1 || mentions.size == 1 && mentions[0].screenName != currentIdentifier.screenName) {
             adapter.add(Menu(R.string.context_menu_reply_all, Runnable {
                 ActionUtil.doReplyAll(source, mActivity)
                 dismiss()
@@ -173,7 +174,7 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * 自分のツイートまたはRT
          */
-        if (status.user.id == AccessTokenManager.getUserId()) {
+        if (status.user.id == currentIdentifier.userId) {
 
             /*
              * ツイ消し

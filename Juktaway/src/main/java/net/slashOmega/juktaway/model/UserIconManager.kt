@@ -6,6 +6,7 @@ import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.isIdentifierSet
 import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
@@ -26,7 +27,14 @@ object UserIconManager {
 
     fun ImageView.displayUserIcon(user: CommonUser) {displayUserIcon(user, this)}
 
-    fun ImageView.displayUserIcon(userId: Long) { displayUserIcon(userId, this)}
+    fun ImageView.displayUserIcon(userId: Long) {
+        val url = dbUse {
+        select(tableName, "iconUrl")
+                .whereArgs("(userId) = {id}", "id" to userId)
+                .parseSingle(StringParser)
+        }
+        ImageUtil.displayRoundedImage(url, this)
+    }
 
     fun displayUserIcon(user: CommonUser, view: ImageView) {
         val url = user.profileImageUrlWithVariantSize(  when (BasicSettings.userIconSize) {
@@ -36,15 +44,6 @@ object UserIconManager {
             else -> return
         } )
         ImageUtil.displayImage(url, view, BasicSettings.userIconRoundedOn)
-    }
-
-    fun displayUserIcon(userId: Long, view: ImageView) {
-        val url = dbUse {
-            select(tableName, "iconUrl")
-                    .whereArgs("(userId) = {id}", "id" to userId)
-                    .parseSingle(StringParser)
-        }
-        ImageUtil.displayRoundedImage(url, view)
     }
 
     fun getName(userId: Long): String = dbUse {
@@ -60,20 +59,19 @@ object UserIconManager {
     }
 
     fun warmUpUserIconMap() {
-        if (AccessTokenManager.getAccessToken() != null) {
-            GlobalScope.launch {
-                dbUse {
-                    val data = select(tableName, "userId").parseList(LongParser)
-                    if (data.isNotEmpty()) try {
-                        val users = TwitterManager.twitter.lookupUsers(*data.toLongArray())
-                        for (u in users) {
-                            update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
-                                    .whereArgs("(userId = {userId})", "userId" to u.id)
-                                    .exec()
-                        }
-                    } catch (e: TwitterException) {
-                        e.printStackTrace()
+        if (!isIdentifierSet) return
+        GlobalScope.launch {
+            dbUse {
+                val data = select(tableName, "userId").parseList(LongParser)
+                if (data.isNotEmpty()) try {
+                    val users = TwitterManager.twitter.lookupUsers(*data.toLongArray())
+                    for (u in users) {
+                        update(tableName, "iconUrl" to u.biggerProfileImageURL, "name" to u.name)
+                                .whereArgs("(userId = {userId})", "userId" to u.id)
+                                .exec()
                     }
+                } catch (e: TwitterException) {
+                    e.printStackTrace()
                 }
             }
         }

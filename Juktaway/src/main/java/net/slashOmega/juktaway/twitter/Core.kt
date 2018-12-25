@@ -14,15 +14,24 @@ import java.util.concurrent.TimeUnit
  * Created on 2018/12/23.
  */
 
-var currentClient: PenicillinClient? = null
+lateinit var currentClient: PenicillinClient
     private set
 
-inline fun <T> withClient(block: PenicillinClient.() -> T) = currentClient?.use(block)
+lateinit var currentIdentifier: Identifier
+    private set
+
+val identifierList = dbUse {
+    select(Core.tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
+            .parseList(Core.accessSetParser)
+}
+
+val isIdentifierSet = identifierList.isNotEmpty()
+
+inline fun <T> withClient(block: PenicillinClient.() -> T) = currentClient.use(block)
 
 object Core {
-    data class TokensSet(val cs: String, val ck: String, val at: String, val ats: String, val userId: Long, val screenName: String)
-    private val accessSetParser = classParser<TokensSet>()
-    private const val tokensTable = "accounts"
+    internal val accessSetParser = classParser<Identifier>()
+    internal const val tokensTable = "accounts"
 
     init {
         dbUse {
@@ -37,16 +46,8 @@ object Core {
         }
     }
 
-    suspend fun switchToken(id: Long) {
-        val acc = try {
-            dbUse {
-                select(tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
-                        .whereArgs("id = {data}", "data" to id)
-                        .parseList(accessSetParser)
-            }[0]
-        } catch (e: Exception) {
-            return
-        }
+    suspend fun switchToken(acc: Identifier) {
+        currentIdentifier = acc
         currentClient = PenicillinClient {
             account {
                 application(acc.cs, acc.ck)
@@ -59,7 +60,20 @@ object Core {
         EventBus.getDefault().post(AccountChangeEvent())
     }
 
-    suspend fun addToken(set: TokensSet, switchClient: Boolean = true) {
+    suspend fun switchToken(id: Long) {
+        val acc = try {
+            dbUse {
+                select(tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
+                        .whereArgs("id = {data}", "data" to id)
+                        .parseList(accessSetParser)
+            }[0]
+        } catch (e: Exception) {
+            return
+        }
+        switchToken(acc)
+    }
+
+    suspend fun addToken(set: Identifier, switchClient: Boolean = true) {
         val id = withContext(Dispatchers.Default) {
             dbUse {
                 runCatching {
@@ -94,4 +108,9 @@ object Core {
             delete(tokensTable, "id = {id}", "id" to id)
         }
     }
+}
+
+data class Identifier(val cs: String, val ck: String, val at: String, val ats: String, val userId: Long, val screenName: String) {
+    override fun hashCode(): Int = at.hashCode()
+    override fun equals(other: Any?): Boolean = other is Identifier && this.at == other.at
 }

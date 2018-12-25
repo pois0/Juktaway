@@ -10,13 +10,14 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.Paging
 
 class TimelineFragment: BaseFragment() {
     override var tabId = TabManager.TIMELINE_TAB_ID
 
     override fun isSkip(row: Row): Boolean = !row.isStatus
-            || row.status?.retweetedStatus?.user?.id == AccessTokenManager.getUserId()
+            || row.status?.retweetedStatus?.user?.id == currentIdentifier.userId
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {

@@ -6,6 +6,7 @@ import java.util.ArrayList
 
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.ResponseList
 import twitter4j.TwitterException
 import twitter4j.UserList
@@ -14,7 +15,7 @@ class RegisterUserListsLoader(context: Context, private val mUserId: Long) : Abs
 
     override fun loadInBackground(): ArrayList<ResponseList<UserList>>? {
         return try {
-            arrayListOf(TwitterManager.twitter.getUserListsOwnerships(AccessTokenManager.getUserId(), 200, -1),
+            arrayListOf(TwitterManager.twitter.getUserListsOwnerships(currentIdentifier.userId, 200, -1),
                     TwitterManager.twitter.getUserListMemberships(mUserId, -1, true))
         } catch (e: TwitterException) {
             e.printStackTrace()

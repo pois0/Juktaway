@@ -4,6 +4,7 @@ import android.content.Context
 import com.google.gson.Gson
 import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import java.util.ArrayList
 
 object TabManager {
@@ -22,7 +23,7 @@ object TabManager {
 
     fun loadTabs(): ArrayList<Tab> {
         sTabs.clear()
-        getSharedPreferences().getString(TABS + AccessTokenManager.getUserId().toString() + "/v2", null).let {
+        getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let {
             val gson = Gson()
             val tabData = gson.fromJson<TabData>(it, TabData::class.java)
             sTabs = tabData?.tabs ?: arrayListOf()
@@ -41,8 +42,8 @@ object TabManager {
         tabData.tabs = tabs
         val json = Gson().toJson(tabData)
         getSharedPreferences().edit().apply {
-            remove(TABS + AccessTokenManager.getUserId().toString())
-            putString(TABS + AccessTokenManager.getUserId().toString() + "/v2", json)
+            remove(TABS + currentIdentifier.userId.toString())
+            putString(TABS + currentIdentifier.userId.toString() + "/v2", json)
         }.apply()
         sTabs = tabs
     }

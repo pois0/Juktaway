@@ -7,16 +7,16 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.app.LoaderManager
 import android.view.MenuItem
+import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.fragment.profile.UpdateProfileImageFragment
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.task.VerifyCredentialsLoader
-import net.slashOmega.juktaway.util.FileUtil
-import net.slashOmega.juktaway.util.ImageUtil
-import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_edit_profile.*
+import kotlinx.coroutines.*
+import net.slashOmega.juktaway.twitter.currentClient
+import net.slashOmega.juktaway.util.*
 import org.jetbrains.anko.startActivity
-import twitter4j.User
 import java.lang.ref.WeakReference
 
 class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<User> {
@@ -51,9 +51,20 @@ class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Use
                 }
             }
         }
+
+        var job: Job? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        currentClient.account.verifyCredentials().queue {
+            val user = it.result
+            name.setText(user.name)
+            location.setText(user.location)
+            url.setText(user.url)
+            description.setText(user.description)
+            icon.displayRoundedImage()
+            ImageUtil.displayRoundedImage(user.originalProfileImageURL, icon)
+        }
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_edit_profile)
@@ -73,6 +84,11 @@ class EditProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Use
             MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
             UpdateProfileTask(this).execute()
         }
+    }
+
+    override fun onStop() {
+        job?.cancel()
+        super.onStop()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

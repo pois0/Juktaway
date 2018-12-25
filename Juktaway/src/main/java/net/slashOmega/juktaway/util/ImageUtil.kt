@@ -32,8 +32,18 @@ fun ImageView.displayImage(url: Uri) {
     displayImage(url.toString())
 }
 
+fun ImageView.displayRoundedImage(url: String) {
+    if ((tag as? String) == url) return
+    tag = url
+    if (BasicSettings.userIconRoundedOn) {
+        ImageLoader.getInstance().displayImage(url, this, ImageUtil.sRoundedDisplayImageOptions)
+    } else {
+        ImageLoader.getInstance().displayImage(url, this)
+    }
+}
+
 object ImageUtil {
-    private val sRoundedDisplayImageOptions by lazy {
+    internal val sRoundedDisplayImageOptions by lazy {
         DisplayImageOptions.Builder()
                 .cacheInMemory(true)
                 .cacheOnDisc(true)

@@ -4,11 +4,8 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import jp.nephy.penicillin.PenicillinClient
-import net.slashOmega.juktaway.model.AccessTokenManager
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
@@ -16,7 +13,6 @@ import kotlinx.android.synthetic.main.activity_signin.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.*
 import net.slashOmega.juktaway.util.takeNotEmpty
-import net.slashOmega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.toast
 import twitter4j.auth.RequestToken
@@ -107,7 +103,7 @@ class SignInActivity: Activity() {
                     }
                 }
             }.getOrNull() ?: return@launch
-            Core.addToken(Core.TokensSet(ckTemp, csTemp, at, ats, id, sn))
+            Core.addToken(Core.Identifier(ckTemp, csTemp, at, ats, id, sn))
 
             MessageUtil.dismissProgressDialog()
             toast(R.string.toast_sign_in_success)

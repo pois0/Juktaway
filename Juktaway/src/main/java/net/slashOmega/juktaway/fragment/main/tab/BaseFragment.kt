@@ -3,7 +3,6 @@ package net.slashOmega.juktaway.fragment.main.tab
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.Fragment
-import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,9 +22,9 @@ import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
 import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
@@ -187,15 +186,15 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
             when {
                 row.isFavorite -> {
                     // お気に入りしたのが自分じゃない時
-                    if (row.source!!.id != AccessTokenManager.getUserId()) highlight = true
+                    if (row.source!!.id != currentIdentifier.userId) highlight = true
                 }
                 row.isStatus -> {
                     // 投稿主が自分じゃない時
-                    if (row.status!!.user.id != AccessTokenManager.getUserId()) highlight = true
+                    if (row.status!!.user.id != currentIdentifier.userId) highlight = true
                 }
                 row.isDirectMessage -> {
                     // 投稿主が自分じゃない時
-                    if (row.message!!.senderId != AccessTokenManager.getUserId()) highlight = true
+                    if (row.message!!.senderId != currentIdentifier.userId) highlight = true
                 }
             }
         }

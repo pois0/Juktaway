@@ -2,9 +2,9 @@ package net.slashOmega.juktaway.task
 
 import android.content.Context
 
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.Profile
 import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentIdentifier
 import twitter4j.Relationship
 import twitter4j.TwitterException
 import twitter4j.User
@@ -31,11 +31,11 @@ class ShowUserLoader : AbstractAsyncTaskLoader<Profile> {
             if (mScreenName != null) {
                 args = "name:$mScreenName"
                 mUser = twitter.showUser(mScreenName)
-                mRelationship = twitter.showFriendship(AccessTokenManager.getUserId(), mUser.id)
+                mRelationship = twitter.showFriendship(currentIdentifier.userId, mUser.id)
             } else {
                 args = "id:$mUserId"
                 mUser = twitter.showUser(mUserId)
-                mRelationship = twitter.showFriendship(AccessTokenManager.getUserId(), mUserId)
+                mRelationship = twitter.showFriendship(currentIdentifier.userId, mUserId)
             }
             Profile().apply {
                 relationship = mRelationship
