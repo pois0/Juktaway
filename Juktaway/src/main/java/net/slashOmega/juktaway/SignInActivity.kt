@@ -4,6 +4,7 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
 import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TwitterManager
@@ -23,7 +24,9 @@ import twitter4j.auth.RequestToken
  */
 class SignInActivity: Activity() {
     private val stateRequestToken = "request_token"
+    private val pinPublishedKey = "published"
     private var mRequestToken: RequestToken? = null
+    private var isPinPublished: Boolean = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -31,15 +34,6 @@ class SignInActivity: Activity() {
         setContentView(R.layout.activity_signin)
 
         pin_code.visibility = View.GONE
-
-        if (intent.getBooleanExtra("add_account", false)) {
-            consumer_key.setText(TwitterManager.consumerKey)
-            consumer_key.setText(TwitterManager.consumerSecret)
-            consumer_key.visibility = View.GONE
-            consumer_secret.visibility = View.GONE
-            startOAuth(true)
-            return
-        }
 
         start_oauth_button.setOnClickListener {
             if (pin_code.text.isNotBlank()) {
@@ -49,6 +43,22 @@ class SignInActivity: Activity() {
                 startOAuth()
             }
         }
+
+        if (intent.getBooleanExtra("add_account", false)) {
+            consumer_key.setText(TwitterManager.consumerKey)
+            consumer_key.setText(TwitterManager.consumerSecret)
+            consumer_key.visibility = View.GONE
+            consumer_secret.visibility = View.GONE
+        }
+    }
+
+    override fun onResume() {
+        super.onResume()
+        if (intent.getBooleanExtra("add_account", false)) {
+            if (!isPinPublished) startOAuth(true)
+            else pin_code.visibility = View.VISIBLE
+        }
+
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -56,6 +66,7 @@ class SignInActivity: Activity() {
 
         mRequestToken?.let {
             outState.putSerializable(stateRequestToken, it)
+            outState.putBoolean(pinPublishedKey, isPinPublished)
         }
     }
 
@@ -63,6 +74,7 @@ class SignInActivity: Activity() {
         super.onRestoreInstanceState(savedInstanceState)
 
         mRequestToken = savedInstanceState.getSerializable(stateRequestToken) as RequestToken
+        isPinPublished = savedInstanceState.getBoolean(pinPublishedKey)
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -138,6 +150,7 @@ class SignInActivity: Activity() {
             consumer_secret.visibility = View.GONE
             pin_code.visibility = View.VISIBLE
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+            isPinPublished = true
         }
     }
 }
