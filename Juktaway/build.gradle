@@ -38,8 +38,8 @@ android {
 
         multiDexEnabled true
         
-        versionCode 107
-        versionName '2.0.2'
+        versionCode 108
+        versionName '2.0.2b'
         applicationId "net.slashOmega.juktaway"
     }
 
