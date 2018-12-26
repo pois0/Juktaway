@@ -30,25 +30,25 @@ class SignInActivity: Activity() {
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_signin)
 
-        if(intent.getBooleanExtra("add_account", false)) {
+        pin_code.visibility = View.GONE
+
+        if (intent.getBooleanExtra("add_account", false)) {
+            consumer_key.setText(TwitterManager.consumerKey)
+            consumer_key.setText(TwitterManager.consumerSecret)
             consumer_key.visibility = View.GONE
             consumer_secret.visibility = View.GONE
-            start_oauth_button.visibility = View.GONE
-            connect_with_twitter.visibility = View.GONE
             startOAuth(true)
             return
         }
 
-        if (savedInstanceState?.get(stateRequestToken) != null) {
-            intent.data?.getQueryParameter("oauth_verifier").takeNotEmpty()?.let {
-                start_oauth_button.visibility = View.GONE
-                connect_with_twitter.visibility = View.GONE
+        start_oauth_button.setOnClickListener {
+            if (pin_code.text.isNotBlank()) {
                 MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                verifyOAuth(it)
+                verifyOAuth(pin_code.text.toString())
+            } else {
+                startOAuth()
             }
         }
-
-        start_oauth_button.setOnClickListener { startOAuth() }
     }
 
     override fun onSaveInstanceState(outState: Bundle) {
@@ -120,7 +120,7 @@ class SignInActivity: Activity() {
         GlobalScope.launch(Dispatchers.Main) {
             val token = withContext(Dispatchers.Default) {
                 tryAndTraceGet {
-                    TwitterManager.twitterInstance.getOAuthRequestToken(getString(R.string.twitter_callback_url))
+                    TwitterManager.twitterInstance.getOAuthRequestToken("oob")
                 }
             }
             MessageUtil.dismissProgressDialog()
@@ -136,8 +136,7 @@ class SignInActivity: Activity() {
             mRequestToken = token
             consumer_key.visibility = View.GONE
             consumer_secret.visibility = View.GONE
-            start_oauth_button.visibility = View.GONE
-            connect_with_twitter.visibility = View.GONE
+            pin_code.visibility = View.VISIBLE
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }
