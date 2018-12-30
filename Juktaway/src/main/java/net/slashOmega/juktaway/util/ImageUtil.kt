@@ -12,6 +12,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
+import jp.nephy.penicillin.endpoints.parameters.MediaType
 import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.ScaleImageActivity
 import net.slashOmega.juktaway.VideoActivity
@@ -121,5 +122,12 @@ object ImageUtil {
             wrapperGroup.visibility = View.GONE
         }
         play.visibility = if (status.videoUrl.isEmpty()) View.GONE else View.VISIBLE
+    }
+
+    fun toMediaType(format: String) = when(format.toLowerCase()) {
+        "png" -> MediaType.PNG
+        "gif" -> MediaType.GIF
+        "webp" -> MediaType.WebP
+        else -> MediaType.JPEG
     }
 }

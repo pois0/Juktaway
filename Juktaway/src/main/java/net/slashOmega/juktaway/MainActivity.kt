@@ -183,7 +183,7 @@ class MainActivity: FragmentActivity() {
                 startActivityForResult(Intent(this, AccountSettingActivity::class.java), REQUEST_ACCOUNT_SETTING)
                 return@setOnItemClickListener
             }
-            mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }.let {
+            mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }?.let {
                 GlobalScope.launch(Dispatchers.Main) {
                     Core.switchToken(it)
                     mAccessTokenAdapter.notifyDataSetChanged()
@@ -416,18 +416,20 @@ class MainActivity: FragmentActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun setTitle(title: CharSequence?) {
-        val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
-        if (matcher.find()) {
-            action_bar_title.text = matcher.group(2)
-            action_bar_sub_title.text = matcher.group(1)
-        } else {
-            action_bar_title.text = title
-            action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
-                BasicSettings.DisplayAccountName.SCREEN_NAME ->
-                     "@" + currentIdentifier.screenName
-                BasicSettings.DisplayAccountName.DISPLAY_NAME ->
-                    UserIconManager.getName(currentIdentifier.userId)
-                else -> ""
+        GlobalScope.launch {
+            val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
+            if (matcher.find()) {
+                action_bar_title.text = matcher.group(2)
+                action_bar_sub_title.text = matcher.group(1)
+            } else {
+                action_bar_title.text = title
+                action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
+                    BasicSettings.DisplayAccountName.SCREEN_NAME ->
+                        "@" + currentIdentifier.screenName
+                    BasicSettings.DisplayAccountName.DISPLAY_NAME ->
+                        UserIconManager.getName(currentIdentifier.userId)
+                    else -> ""
+                }
             }
         }
     }

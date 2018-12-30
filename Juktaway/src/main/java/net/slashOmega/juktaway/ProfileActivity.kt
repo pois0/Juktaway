@@ -4,40 +4,36 @@ import android.app.AlertDialog
 import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
-import android.os.AsyncTask
 import android.os.Build
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.models.Relationship
+import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.fragment.profile.*
-import net.slashOmega.juktaway.model.Profile
-import net.slashOmega.juktaway.model.TwitterManager
-import net.slashOmega.juktaway.task.ShowUserLoader
+import net.slashOmega.juktaway.twitter.currentClient
+import net.slashOmega.juktaway.twitter.currentIdentifier
+import net.slashOmega.juktaway.twitter.withClient
 import net.slashOmega.juktaway.util.KusoripuUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import net.slashOmega.juktaway.util.displayImage
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
-import twitter4j.Relationship
-import twitter4j.User
-import java.lang.ref.WeakReference
+import java.lang.Exception
 
-class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile> {
+class ProfileActivity: FragmentActivity() {
     companion object {
         private const val OPTION_MENU_DESTROY_BLOCK = 4
         private const val OPTION_MENU_GROUP_RELATION = 1
@@ -46,174 +42,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         private const val OPTION_MENU_CREATE_NO_RETWEET = 3
         private const val OPTION_MENU_DESTROY_OFFICIAL_MUTE = 5
         private const val OPTION_MENU_DESTROY_NO_RETWEET = 6
-
-        private class DestroyBlockTask(context: ProfileActivity) : AsyncTask<Long, Void, Boolean>() {
-            private val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean? {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.destroyBlock(it)
-                        net.slashOmega.juktaway.model.Relationship.removeBlock(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(success: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (success!!) {
-                    MessageUtil.showToast(R.string.toast_destroy_block_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_destroy_block_failure)
-                }
-
-            }
-        }
-
-        private class CreateNoRetweetTask(context: ProfileActivity, val notification: Boolean): AsyncTask<Long, Void, Boolean>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.updateFriendship(it, notification, false)
-                        net.slashOmega.juktaway.model.Relationship.setNoRetweet(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(result: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (result!!) {
-                    MessageUtil.showToast(R.string.toast_create_no_retweet_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_create_no_retweet_failure)
-                }
-            }
-        }
-
-        private class DestroyNoRetweetTask(context: ProfileActivity, val notification: Boolean): AsyncTask<Long, Void, Boolean>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.updateFriendship(it, notification, true)
-                        net.slashOmega.juktaway.model.Relationship.removeNoRetweet(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(result: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (result!!) {
-                    MessageUtil.showToast(R.string.toast_destroy_no_retweet_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_destroy_no_retweet_failure)
-                }
-            }
-        }
-
-        private class CreateOfficialMuteTask(context: ProfileActivity): AsyncTask<Long, Void, Boolean>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.destroyMute(it)
-                        net.slashOmega.juktaway.model.Relationship.removeOfficialMute(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(result: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (result!!) {
-                    MessageUtil.showToast(R.string.toast_destroy_official_mute_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_destroy_official_mute_failure)
-                }
-            }
-        }
-
-        private class DestroyOfficialMuteTask(context: ProfileActivity): AsyncTask<Long, Void, Boolean>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean {
-                return params[0]?.let {
-                    try {
-                        TwitterManager.twitter.destroyMute(it)
-                        net.slashOmega.juktaway.model.Relationship.removeOfficialMute(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(result: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (result!!) {
-                    MessageUtil.showToast(R.string.toast_destroy_official_mute_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_destroy_official_mute_failure)
-                }
-            }
-        }
-
-        private class ReportSpamTask(context: ProfileActivity) : AsyncTask<Long, Void, Boolean>() {
-            val ref = WeakReference(context)
-
-            override fun doInBackground(vararg params: Long?): Boolean? {
-                return params[0]?.let { try {
-                        TwitterManager.twitter.reportSpam(it)
-                        net.slashOmega.juktaway.model.Relationship.setBlock(it)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        false
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(success: Boolean?) {
-                MessageUtil.dismissProgressDialog()
-                if (success!!) {
-                    MessageUtil.showToast(R.string.toast_report_spam_success)
-                    ref.get()?.restart()
-                } else {
-                    MessageUtil.showToast(R.string.toast_report_spam_failure)
-                }
-
-            }
-        }
     }
 
     private lateinit var mUser: User
     private lateinit var mRelationship: Relationship
     private lateinit var menu: Menu
+    private var loadJob: Deferred<Pair<User, Relationship>?>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -225,23 +59,6 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             setDisplayHomeAsUpEnabled(true)
         }
 
-        val args = Bundle(1)
-        with (intent) {
-            if (Intent.ACTION_VIEW == action && data != null
-                    && data?.lastPathSegment.isNullOrEmpty().not()) {
-                args.putString("screenName", data!!.lastPathSegment)
-            } else {
-                val screenName = getStringExtra("screenName")
-                if (screenName != null) {
-                    args.putString("screenName", screenName)
-                } else {
-                    args.putLong("userId", getLongExtra("userId", 0))
-                }
-            }
-        }
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
-        supportLoaderManager.initLoader(0, args, this)
-
         collapse_label.setOnClickListener {
             with (frame) {
                 if (visibility == View.VISIBLE) {
@@ -252,6 +69,46 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
                     collapse_label.setText(R.string.fontello_up)
                 }
             }
+        }
+
+        GlobalScope.launch {
+            MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_loading))
+
+            runCatching {
+                val screenName = intent.run {
+                    if (Intent.ACTION_VIEW == action && data != null && data?.lastPathSegment.isNullOrEmpty().not()) {
+                        data!!.lastPathSegment
+                    } else {
+                        getStringExtra("screenName")
+                    }
+                }
+                val userId = intent.getLongExtra("userId", -1L)
+
+                loadJob = async(Dispatchers.Default) {
+                    screenName?.let {
+                        withClient {
+                            val userJob = user.show(screenName = it)
+                            val relJob = friendship.show(sourceScreenName = currentIdentifier.screenName, targetScreenName = it)
+                            userJob.await().result to relJob.await().result.relationship
+                        }
+                    } ?: userId.takeUnless { it == -1L }?.let {
+                        withClient {
+                            val userJob = user.show(userId = it)
+                            val relJob = friendship.show(sourceId = currentIdentifier.userId, targetId = it)
+                            userJob.await().result to relJob.await().result.relationship
+                        }
+                    } ?: throw IllegalArgumentException("Both of screen name and userId are null.")
+                }
+                loadJob?.await() ?: throw Exception("")
+            }.onSuccess {
+                mUser = it.first
+                mRelationship = it.second
+
+                onLoadFinished()
+            }.onFailure {
+                toast(R.string.toast_load_data_failure)
+            }
+            MessageUtil.dismissProgressDialog()
         }
     }
 
@@ -265,6 +122,12 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         super.onPause()
     }
 
+    override fun onStop() {
+        loadJob?.cancel()
+        loadJob = null
+        super.onStop()
+    }
+
     override fun onCreateOptionsMenu(menu: Menu?): Boolean {
         menuInflater.inflate(R.menu.profile, menu)
         menu?.let { this.menu = it }
@@ -276,171 +139,230 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return item?.let {
-            if (it.groupId == OPTION_MENU_GROUP_RELATION) {
-                when (it.itemId) {
-                    OPTION_MENU_CREATE_BLOCK ->
-                        AlertDialog.Builder(this)
-                                .setMessage(R.string.confirm_create_block)
-                                .setPositiveButton(R.string.button_create_block) { _, _ ->
-                                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    GlobalScope.launch {
-                                        val res = withContext(Dispatchers.Default) { runCatching {
-                                            TwitterManager.twitter.createBlock(mUser.id)
-                                            net.slashOmega.juktaway.model.Relationship.setBlock(mUser.id)
-                                        }.isSuccess }
-                                        MessageUtil.dismissProgressDialog()
-                                        if (res) {
-                                            MessageUtil.showToast(R.string.toast_create_block_success)
-                                            restart()
-                                        } else {
-                                            MessageUtil.showToast(R.string.toast_create_block_failure)
-                                        }
+        if (item == null) return false
+        if (item.groupId == OPTION_MENU_GROUP_RELATION) {
+            when (item.itemId) {
+                OPTION_MENU_CREATE_BLOCK ->
+                    AlertDialog.Builder(this)
+                            .setMessage(R.string.confirm_create_block)
+                            .setPositiveButton(R.string.button_create_block) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+                                    val res = runCatching {
+                                        currentClient.block.create(userId = mUser.id).await()
+                                    }.isSuccess
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.setBlock(mUser.id)
+                                        MessageUtil.showToast(R.string.toast_create_block_success)
+                                        restart()
+                                    } else {
+                                        MessageUtil.showToast(R.string.toast_create_block_failure)
                                     }
                                 }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                    OPTION_MENU_CREATE_OFFICIAL_MUTE ->
-                        AlertDialog.Builder(this)
-                                .setMessage(R.string.confirm_create_official_mute)
-                                .setPositiveButton(R.string.button_create_official_mute) { _, _ ->
-                                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    CreateOfficialMuteTask(this).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                    OPTION_MENU_CREATE_NO_RETWEET ->
-                        AlertDialog.Builder(this)
-                                .setMessage(R.string.confirm_create_no_retweet)
-                                .setPositiveButton(R.string.button_create_no_retweet) { _, _ ->
-                                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    CreateNoRetweetTask(this, mRelationship.isSourceNotificationsEnabled).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                    OPTION_MENU_DESTROY_BLOCK ->
-                        AlertDialog.Builder(this)
-                                .setMessage(R.string.confirm_create_block)
-                                .setPositiveButton(R.string.button_destroy_block) { _, _ ->
-                                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    DestroyBlockTask(this).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                    OPTION_MENU_DESTROY_OFFICIAL_MUTE ->
-                        AlertDialog.Builder(this)
-                                .setMessage(R.string.confirm_destroy_official_mute)
-                                .setPositiveButton(R.string.button_destroy_official_mute) { _, _ ->
-                                    MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                                    DestroyOfficialMuteTask(this).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                    OPTION_MENU_DESTROY_NO_RETWEET ->
-                        AlertDialog.Builder(this@ProfileActivity)
-                                .setMessage(R.string.confirm_destroy_no_retweet)
-                                .setPositiveButton(R.string.button_destroy_no_retweet) { _, _ ->
-                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
-                                    DestroyNoRetweetTask(this, mRelationship.isSourceNotificationsEnabled).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
-                }
-                true
-            } else {
-                when (it.itemId) {
-                    android.R.id.home ->
-                        finish()
-                    R.id.send_reply -> {
-                        val text = "@" + mUser.screenName
-                        startActivity<PostActivity>("status" to text, "selection" to text.length)
-                    }
-                    R.id.send_direct_messages -> {
-                        val text = "D " + mUser.screenName
-                        startActivity<PostActivity>("status" to text, "selection" to text.length)
-                    }
-                    R.id.send_kusoripu -> {
-                        GlobalScope.launch(Dispatchers.Main) {
-                            if (Build.VERSION.SDK_INT > 20) {
-                                val content = withContext(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }
-                                startActivity<PostActivity>("status" to content, "selection" to content.length)
-                            } else {
-                                toast(R.string.repooply_version)
                             }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+                OPTION_MENU_CREATE_OFFICIAL_MUTE ->
+                    AlertDialog.Builder(this)
+                            .setMessage(R.string.confirm_create_official_mute)
+                            .setPositiveButton(R.string.button_create_official_mute) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+                                    val res = runCatching {
+                                        currentClient.mute.create(userId = mUser.id).await()
+                                    }.isSuccess
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.setOfficialMute(mUser.id)
+                                        toast(R.string.toast_create_official_mute_success)
+                                        restart()
+                                    } else {
+                                        toast(R.string.toast_create_official_mute_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+                OPTION_MENU_CREATE_NO_RETWEET ->
+                    AlertDialog.Builder(this)
+                            .setMessage(R.string.confirm_create_no_retweet)
+                            .setPositiveButton(R.string.button_create_no_retweet) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+
+                                    val res = runCatching {
+                                        currentClient.friendship.update(userId = mUser.id, retweets = false).await()
+                                    }.isSuccess
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.setNoRetweet(mUser.id)
+                                        toast(R.string.toast_create_no_retweet_success)
+                                        restart()
+                                    } else {
+                                        toast(R.string.toast_create_no_retweet_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+                OPTION_MENU_DESTROY_BLOCK ->
+                    AlertDialog.Builder(this)
+                            .setMessage(R.string.confirm_create_block)
+                            .setPositiveButton(R.string.button_destroy_block) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+                                    val res = runCatching {
+                                        currentClient.block.destroy(userId = mUser.id).await()
+                                    }.isSuccess
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.removeBlock(mUser.id)
+                                        toast(R.string.toast_destroy_block_success)
+                                        restart()
+                                    } else {
+                                        MessageUtil.showToast(R.string.toast_destroy_block_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+                OPTION_MENU_DESTROY_OFFICIAL_MUTE ->
+                    AlertDialog.Builder(this)
+                            .setMessage(R.string.confirm_destroy_official_mute)
+                            .setPositiveButton(R.string.button_destroy_official_mute) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+                                    val res = runCatching {
+                                        currentClient.mute.destroy(userId = mUser.id).await()
+                                    }.isSuccess
+
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.removeOfficialMute(mUser.id)
+                                        toast(R.string.toast_destroy_official_mute_success)
+                                        restart()
+                                    } else {
+                                        toast(R.string.toast_destroy_official_mute_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+                OPTION_MENU_DESTROY_NO_RETWEET ->
+                    AlertDialog.Builder(this@ProfileActivity)
+                            .setMessage(R.string.confirm_destroy_no_retweet)
+                            .setPositiveButton(R.string.button_destroy_no_retweet) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+
+                                    val res = runCatching {
+                                        currentClient.friendship.update(userId = mUser.id, retweets = true).await()
+                                    }.isSuccess
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.removeNoRetweet(mUser.id)
+                                        toast(R.string.toast_destroy_no_retweet_success)
+                                        restart()
+                                    } else {
+                                        toast(R.string.toast_destroy_no_retweet_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
+            }
+        } else {
+            when (item.itemId) {
+                android.R.id.home ->
+                    finish()
+                R.id.send_reply -> {
+                    val text = "@" + mUser.screenName
+                    startActivity<PostActivity>("status" to text, "selection" to text.length)
+                }
+                R.id.send_direct_messages -> {
+                    val text = "D " + mUser.screenName
+                    startActivity<PostActivity>("status" to text, "selection" to text.length)
+                }
+                R.id.send_kusoripu -> {
+                    GlobalScope.launch(Dispatchers.Main) {
+                        if (Build.VERSION.SDK_INT > 20) {
+                            val content = withContext(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }
+                            startActivity<PostActivity>("status" to content, "selection" to content.length)
+                        } else {
+                            toast(R.string.repooply_version)
                         }
                     }
-                    R.id.add_to_list ->
-                        startActivity<RegisterUserListActivity>("userId" to mUser.id)
-                    R.id.open_twitter ->
-                        startActivity(Intent(Intent.ACTION_VIEW,
-                                Uri.parse("https://twitter.com/" + mUser.screenName)))
-                    R.id.open_favstar ->
-                        MessageUtil.showToast("This item is unavailable.")
-                    R.id.open_aclog ->
-                        startActivity(Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://aclog.koba789.com/" + mUser.screenName + "/timeline")))
-                    R.id.open_twilog ->
-                        startActivity(Intent(Intent.ACTION_VIEW,
-                                Uri.parse("http://twilog.org/" + mUser.screenName)))
-                    R.id.report_spam ->
-                        AlertDialog.Builder(this@ProfileActivity)
-                                .setMessage(R.string.confirm_report_spam)
-                                .setPositiveButton(R.string.button_report_spam) { _, _ ->
-                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
-                                    ReportSpamTask(this).execute(mUser.id)
-                                }
-                                .setNegativeButton(R.string.button_cancel) { _, _ -> }
-                                .show()
                 }
-                true
+                R.id.add_to_list ->
+                    startActivity<RegisterUserListActivity>("userId" to mUser.id)
+                R.id.open_twitter ->
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                            Uri.parse("https://twitter.com/" + mUser.screenName)))
+                R.id.open_favstar ->
+                    MessageUtil.showToast("This item is unavailable.")
+                R.id.open_aclog ->
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://aclog.koba789.com/" + mUser.screenName + "/timeline")))
+                R.id.open_twilog ->
+                    startActivity(Intent(Intent.ACTION_VIEW,
+                            Uri.parse("http://twilog.org/" + mUser.screenName)))
+                R.id.report_spam ->
+                    AlertDialog.Builder(this@ProfileActivity)
+                            .setMessage(R.string.confirm_report_spam)
+                            .setPositiveButton(R.string.button_report_spam) { _, _ ->
+                                GlobalScope.launch {
+                                    MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
+                                    val res = runCatching {
+                                        currentClient.user.reportSpam(userId = mUser.id)
+                                    }.isSuccess
+
+
+                                    MessageUtil.dismissProgressDialog()
+                                    if (res) {
+                                        net.slashOmega.juktaway.model.Relationship.setBlock(mUser.id)
+                                        toast(R.string.toast_report_spam_success)
+                                        restart()
+                                    } else {
+                                        toast(R.string.toast_report_spam_failure)
+                                    }
+                                }
+                            }
+                            .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                            .show()
             }
-        } ?: false
+        }
+        return true
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<Profile> {
-        return args!!.getString("screenName")?.let {
-            ShowUserLoader(this, it)
-        } ?: ShowUserLoader(this, args.getLong("userId"))
-    }
-
-    //TODO data binding
-    override fun onLoadFinished(loader: Loader<Profile>, profile: Profile?) {
-        MessageUtil.dismissProgressDialog()
-
-        if (profile == null) {
-            MessageUtil.showToast(R.string.toast_load_data_failure, "(null)")
-            return
-        }
-        if (profile.error != null && profile.error!!.isNotEmpty()) {
-            MessageUtil.showToast(R.string.toast_load_data_failure, profile.error!!)
-            return
-        }
-        mUser = profile.user!!
-        mRelationship = profile.relationship!!
-
+    private fun onLoadFinished() {
         favourites_count.text = getString(R.string.label_favourites, String.format("%1$,3d", mUser.favouritesCount))
         statuses_count.text = getString(R.string.label_tweets, String.format("%1$,3d", mUser.statusesCount))
         friends_count.text = getString(R.string.label_following, String.format("%1$,3d", mUser.friendsCount))
         followers_count.text = getString(R.string.label_followers, String.format("%1$,3d", mUser.followersCount))
         listed_count.text = getString(R.string.label_listed, String.format("%1$,3d", mUser.listedCount))
 
-        mUser.profileBannerMobileRetinaURL?.let {
-            banner.displayImage(it)
-        }
+        banner.displayImage(mUser.profileBannerUrlWithVariantSize(CommonUser.ProfileBannersSize.MobileRetina))
 
         with (menu) {
-            if (mRelationship.isSourceBlockingTarget) {
+            if (mRelationship.source.blocking) {
                 add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_DESTROY_BLOCK, 100, R.string.menu_destroy_block)
             } else {
                 add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_CREATE_BLOCK, 100, R.string.menu_create_block)
             }
-            if (mRelationship.isSourceFollowingTarget) {
-                if (mRelationship.isSourceMutingTarget) {
+            if (mRelationship.source.following) {
+                if (mRelationship.source.muting) {
                     add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_DESTROY_OFFICIAL_MUTE, 100, R.string.menu_destory_official_mute)
                 } else {
                     add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_CREATE_OFFICIAL_MUTE, 100, R.string.menu_create_official_mute)
                 }
-                if (mRelationship.isSourceWantRetweets) {
+                if (mRelationship.source.wantRetweets) {
                     add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_CREATE_NO_RETWEET, 100, R.string.menu_create_no_retweet)
                 } else {
                     add(OPTION_MENU_GROUP_RELATION, OPTION_MENU_DESTROY_NO_RETWEET, 100, R.string.menu_destory_no_retweet)
@@ -449,8 +371,8 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         }
 
         val args = Bundle().apply {
-            putSerializable("user", mUser)
-            putSerializable("relationship", mRelationship)
+            putString("user", mUser.toJsonString())
+            putString("relationship", mRelationship.toJsonString())
         }
         SimplePagerAdapter(this, pager).apply {
             addTab(SummaryFragment::class, args)
@@ -494,7 +416,7 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
         })
 
         val listArgs = Bundle().apply {
-            putSerializable("user", mUser)
+            putString("user", mUser.toJsonString())
         }
 
         SimplePagerAdapter(this, list_pager).apply {
@@ -529,8 +451,6 @@ class ProfileActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<Profile
             tabs[i].setOnClickListener { list_pager.currentItem = i }
         }
     }
-
-    override fun onLoaderReset(loader: Loader<Profile>) {}
 
     private fun restart() {
         startActivity(Intent().apply {

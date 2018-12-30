@@ -1,21 +1,23 @@
 package net.slashOmega.juktaway
 
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.models.TwitterList
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.fragment.list.UserListStatusesFragment
 import net.slashOmega.juktaway.fragment.list.UserMemberFragment
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.model.UserListCache
-import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_list.*
-import twitter4j.UserList
-import java.lang.ref.WeakReference
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.twitter.currentClient
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/08/27.
@@ -27,67 +29,9 @@ class UserListActivity: FragmentActivity() {
         private var mColorWhite: Int = 0
         private const val MENU_CREATE = 1
         private const val MENU_DESTROY = 2
-
-        private class CreateMenu(activity: UserListActivity): AsyncTask<Void, Void, Boolean>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg p0: Void?): Boolean {
-                return ref.get()?.run {
-                    try {
-                        TwitterManager.twitter.createUserListSubscription(mUserList.id)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(res: Boolean) {
-                if (res) {
-                    MessageUtil.showToast(R.string.toast_create_user_list_subscription_success)
-                    ref.get()?.let {
-                        it.mIsFollowing = true
-                        UserListCache.userLists?.apply {
-                            add(0, it.mUserList)
-                        }
-                    }
-                } else {
-                    MessageUtil.showToast(R.string.toast_create_user_list_subscription_failure)
-                }
-            }
-        }
-
-        private class DestroyMenu(activity: UserListActivity): AsyncTask<Void, Void, Boolean>() {
-            val ref = WeakReference(activity)
-
-            override fun doInBackground(vararg p0: Void?): Boolean {
-                return ref.get()?.run {
-                    try {
-                        TwitterManager.twitter.destroyUserListSubscription(mUserList.id)
-                        true
-                    } catch (e: Exception) {
-                        e.printStackTrace()
-                        null
-                    }
-                } ?: false
-            }
-
-            override fun onPostExecute(res: Boolean) {
-                if (res) {
-                    MessageUtil.showToast(R.string.toast_destroy_user_list_subscription_success)
-                    ref.get()?.let {
-                        it.mIsFollowing = false
-                        UserListCache.userLists?.apply { remove(it.mUserList) }
-                    }
-                } else {
-                    MessageUtil.showToast(R.string.toast_destroy_user_list_subscription_failure)
-                }
-            }
-        }
     }
 
-    private val mUserList by lazy { intent.getSerializableExtra("userList") as UserList}
+    private val mUserList by lazy { intent.getStringExtra("userList").toJsonObject().parse(TwitterList::class)}
     private var mIsFollowing: Boolean = false
 
 
@@ -101,28 +45,26 @@ class UserListActivity: FragmentActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        (intent.getSerializableExtra("userList") as UserList?)?.let { ul ->
-            mIsFollowing = ul.isFollowing
-            mColorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue)
-            mColorWhite = ThemeUtil.getThemeTextColor(R.attr.text_color)
-            users_label.setTextColor(mColorBlue)
+        mIsFollowing = mUserList.following
+        mColorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue)
+        mColorWhite = ThemeUtil.getThemeTextColor(R.attr.text_color)
+        users_label.setTextColor(mColorBlue)
 
-            /*
-             * スワイプで動かせるタブを実装するのに最低限必要な実装
-             */
-            val args = Bundle().apply { putLong("listId", mUserList.id) }
-            SimplePagerAdapter(this, list_pager).apply {
-                addTab(UserMemberFragment::class, args)
-                addTab(UserListStatusesFragment::class, args)
-            }.notifyDataSetChanged()
-            list_pager.addOnPageChangeListener (object: ViewPager.SimpleOnPageChangeListener() {
-                override fun onPageSelected(position: Int) {
-                    (if (position == 0) users_label else tweets_label).setTextColor(mColorBlue)
-                    (if (mCurrentPosition == 0) users_label else tweets_label).setTextColor(mColorWhite)
-                    mCurrentPosition = position
-                }
-            })
-        }
+        /*
+         * スワイプで動かせるタブを実装するのに最低限必要な実装
+         */
+        val args = Bundle().apply { putLong("listId", mUserList.id) }
+        SimplePagerAdapter(this, list_pager).apply {
+            addTab(UserMemberFragment::class, args)
+            addTab(UserListStatusesFragment::class, args)
+        }.notifyDataSetChanged()
+        list_pager.addOnPageChangeListener (object: ViewPager.SimpleOnPageChangeListener() {
+            override fun onPageSelected(position: Int) {
+                (if (position == 0) users_label else tweets_label).setTextColor(mColorBlue)
+                (if (mCurrentPosition == 0) users_label else tweets_label).setTextColor(mColorWhite)
+                mCurrentPosition = position
+            }
+        })
 
         users_label.setOnClickListener { list_pager.currentItem = 0 }
         tweets_label.setOnClickListener { list_pager.currentItem = 1 }
@@ -144,21 +86,38 @@ class UserListActivity: FragmentActivity() {
         }}} ?: false
     }
 
-    override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return item?.let { when (it.itemId) {
+    override fun onOptionsItemSelected(item: MenuItem?) = if(item == null) false
+        else when (item.itemId) {
             android.R.id.home -> {
                 finish()
                 true
             }
             MENU_CREATE -> {
-                CreateMenu(this).execute()
+                GlobalScope.launch {
+                    val res = runCatching { currentClient.list.subscribe(mUserList.id).await() }.isSuccess
+                    if (res) {
+                        toast(R.string.toast_create_user_list_subscription_success)
+                        mIsFollowing = true
+                        UserListCache.userLists.add(0, mUserList)
+                    } else {
+                        toast(R.string.toast_create_user_list_subscription_failure)
+                    }
+                }
                 true
             }
             MENU_DESTROY -> {
-                DestroyMenu(this).execute()
+                GlobalScope.launch {
+                    val res = runCatching { currentClient.list.unsubscribe(mUserList.id).await() }.isSuccess
+                    if (res) {
+                        toast(R.string.toast_destroy_user_list_subscription_success)
+                        mIsFollowing = false
+                        UserListCache.userLists.remove(mUserList)
+                    } else {
+                        toast(R.string.toast_destroy_user_list_subscription_failure)
+                    }
+                }
                 true
             }
             else -> false
-        }} ?: false
-    }
+        }
 }

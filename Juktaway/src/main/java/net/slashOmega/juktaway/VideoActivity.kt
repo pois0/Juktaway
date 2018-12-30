@@ -9,11 +9,9 @@ import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.view.Window
 import kotlinx.android.synthetic.main.activity_video.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.takeNotEmpty
 import net.slashOmega.juktaway.util.tryAndTraceGet
@@ -48,15 +46,12 @@ class VideoActivity: FragmentActivity() {
             pattern.matcher(statusUrl)?.let { m ->
                 if (m.find()) {
                     GlobalScope.launch(Dispatchers.Main) {
-                        async(Dispatchers.Default) {
-                            tryAndTraceGet {
-                                TwitterManager.twitter.showStatus(m.group(1).toLong())
-                            }
-                        }.await()?.run {
-                            videoUrl.takeNotEmpty()?.let {
-                                setVideoURI(it)
-                            }
-                        }
+                        // TODO 画質を選べるように
+                        val status = tryAndTraceGet {
+                            currentClient.status.show(m.group(1).toLong()).await()
+                        }?.result ?: return@launch
+                        status.extendedEntities?.media?.first { it.type == "video" }?.videoInfo?.variants?.get(1)?.url
+                                ?.let { setVideoURI(it) }
                     }
                 }
                 return
@@ -83,7 +78,7 @@ class VideoActivity: FragmentActivity() {
         super.onDestroy()
     }
 
-    fun setVideoURI(url: String) {
+    private fun setVideoURI(url: String) {
         musicWasPlaying = (getSystemService(Context.AUDIO_SERVICE) as AudioManager).isMusicActive
 
         guruguru.visibility = View.VISIBLE

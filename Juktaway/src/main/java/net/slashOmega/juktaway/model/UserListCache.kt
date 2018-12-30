@@ -1,10 +1,9 @@
 package net.slashOmega.juktaway.model
 
-import twitter4j.ResponseList
-import twitter4j.UserList
+import jp.nephy.penicillin.models.TwitterList
 
 object UserListCache {
-    var userLists: ResponseList<UserList>? = null
+    var userLists = mutableListOf<TwitterList>()
 
-    fun getUserList(id: Long) = userLists?.run { first { it.id == id } }
+    fun getUserList(id: Long) = userLists.run { first { it.id == id } }
 }

@@ -140,20 +140,18 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         limitation()
     }
 
-    fun addAll(rows: List<Row>) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                rows.filter { it !in Mute && !exists(it) }
-            }
-            launch(Dispatchers.Default) {
-                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
-            }
-            statuses.forEach {
-                super.add(it)
-                filter(it)
-            }
-            limitation()
+    suspend fun addAll(rows: List<Row>) {
+        val statuses = withContext(Dispatchers.Default) {
+            rows.filter { it !in Mute && !exists(it) }
         }
+        withContext(Dispatchers.Default) {
+            mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+        }
+        statuses.forEach {
+            super.add(it)
+            filter(it)
+        }
+        limitation()
     }
 
     fun addAllFromStatuses(statusesParam: List<Status>) {

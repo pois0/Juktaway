@@ -1,8 +1,8 @@
 package net.slashOmega.juktaway.model
 
-import twitter4j.DirectMessage
-import twitter4j.Status
-import twitter4j.User
+import jp.nephy.penicillin.models.DirectMessage
+import jp.nephy.penicillin.models.Status
+import jp.nephy.penicillin.models.User
 
 class Row {
 

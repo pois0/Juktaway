@@ -103,7 +103,7 @@ class SignInActivity: Activity() {
                     }
                 }
             }.getOrNull() ?: return@launch
-            Core.addToken(Core.Identifier(ckTemp, csTemp, at, ats, id, sn))
+            Core.addToken(Identifier(ckTemp, csTemp, at, ats, id, sn))
 
             MessageUtil.dismissProgressDialog()
             toast(R.string.toast_sign_in_success)

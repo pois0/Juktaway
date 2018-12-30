@@ -7,8 +7,10 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import android.widget.*
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.R
-import twitter4j.User
 
 /**
  * Created on 2018/09/01.
@@ -16,7 +18,7 @@ import twitter4j.User
 internal abstract class ProfileListFragmentBase: Fragment() {
     protected abstract val mAdapter: ArrayAdapter<*>
     protected abstract val layout: Int
-    protected val user by lazy { arguments!!.getSerializable("user") as User }
+    protected val user by lazy { arguments!!.getString("user")!!.toJsonObject().parse(User::class) }
     protected lateinit var mListView: ListView
     protected var mAutoLoader = false
     protected lateinit var mFooter: ProgressBar

@@ -47,17 +47,20 @@ object Core {
     }
 
     suspend fun switchToken(acc: Identifier) {
-        currentIdentifier = acc
-        currentClient = PenicillinClient {
-            account {
-                application(acc.cs, acc.ck)
-                token(acc.at, acc.ats)
-            }
+        withContext(Dispatchers.Default) {
+            currentIdentifier = acc
+            currentClient = PenicillinClient {
+                account {
+                    application(acc.cs, acc.ck)
+                    token(acc.at, acc.ats)
+                }
+                dispatcher { coroutineContext = Dispatchers.Default }
 
-            maxRetries = 3
-            retry(1, TimeUnit.SECONDS)
+                maxRetries = 3
+                retry(1, TimeUnit.SECONDS)
+            }
+            EventBus.getDefault().post(AccountChangeEvent())
         }
-        EventBus.getDefault().post(AccountChangeEvent())
     }
 
     suspend fun switchToken(id: Long) {
@@ -74,7 +77,7 @@ object Core {
     }
 
     suspend fun addToken(set: Identifier, switchClient: Boolean = true) {
-        val id = withContext(Dispatchers.Default) {
+        withContext(Dispatchers.Default) {
             dbUse {
                 runCatching {
                     select(tokensTable, "id")
@@ -100,7 +103,7 @@ object Core {
             }
         }
 
-        if (switchClient) switchToken(id)
+        if (switchClient) switchToken(set)
     }
 
     suspend fun removeToken(id: Long) {

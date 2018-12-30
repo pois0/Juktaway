@@ -10,12 +10,10 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
 import android.widget.ImageView.ScaleType
 import android.widget.LinearLayout
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentClient
+import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.displayImage
 import org.jetbrains.anko.support.v4.toast
@@ -51,11 +49,13 @@ class UpdateProfileImageFragment: DialogFragment() {
             .setPositiveButton(R.string.button_apply) { _, _ ->
                 MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
                 GlobalScope.launch(Dispatchers.Main) {
-                    async(Dispatchers.Default) {
-                        runCatching {
-                            TwitterManager.twitter.updateProfileImage(arguments!!.get(uriArg) as File)
+                    runCatching {
+                        withContext(Dispatchers.Default) {
+                            val file = arguments!!.get(uriArg) as File
+                            val format = ImageUtil.toMediaType(file.path.run { substring(lastIndexOf(".") + 1) })
+                            currentClient.account.updateProfileImage(file.readBytes(), format)
                         }
-                    }.await().run {
+                    }.run {
                         MessageUtil.dismissProgressDialog()
                         toast(if (isSuccess) R.string.toast_update_profile_image_success else R.string.toast_update_profile_image_failure)
                         dismiss()
