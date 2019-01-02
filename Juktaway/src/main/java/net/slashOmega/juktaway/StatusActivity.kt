@@ -13,7 +13,6 @@ import kotlinx.android.synthetic.main.activity_status.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -21,7 +20,7 @@ import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import org.jetbrains.anko.intentFor
 import twitter4j.Status
@@ -127,12 +126,10 @@ class StatusActivity: FragmentActivity() {
     }
 
     private fun load(idParam: Long) {
-        var statusId = idParam
+        var statusId = idParam.takeIf { it > 0 }
         GlobalScope.launch(Dispatchers.Main) {
-            while (statusId > 0) {
-                val status = withContext(Dispatchers.Default) {
-                    TwitterManager.twitter.showStatus(statusId)
-                } ?: run {
+            while (statusId != null) {
+                val status = runCatching { currentClient.status.show(statusId!!).await().result }.getOrNull() ?: run {
                     MessageUtil.showToast(R.string.toast_load_data_failure)
                     return@launch
                 }

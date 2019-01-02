@@ -4,14 +4,14 @@ import android.os.Bundle
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
+import jp.nephy.penicillin.models.CursorLists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.UserListAdapter
-import net.slashOmega.juktaway.model.TwitterManager
-import net.slashOmega.juktaway.util.tryAndTraceGet
+import net.slashOmega.juktaway.twitter.currentClient
 
 /**
  * Created on 2018/11/18.
@@ -19,20 +19,19 @@ import net.slashOmega.juktaway.util.tryAndTraceGet
 internal class UserListMembershipsFragment: ProfileListFragmentBase() {
     override val mAdapter by lazy { UserListAdapter(activity!!, R.layout.row_user_list) }
     override val layout = R.layout.list_guruguru
+    var nextCursor: PenicillinCursorJsonObjectAction<CursorLists>? = null
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val job = async(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitter.getUserListMemberships(user.id, cursor).apply {
-                        cursor = nextCursor
-                    }
-                }
-            }
+            val action = runCatching {
+                (nextCursor ?: currentClient.list.memberships(user.id)).await()
+            }.getOrNull()
+            nextCursor = action?.next()
 
             mFooter.visibility = View.GONE
-            job.await()?.run {
-                forEach { mAdapter.add(it) }
-                if (hasNext()) mAutoLoader = true
+            action?.result?.run {
+                lists.forEach { mAdapter.add(it) }
+                // TODO
+                if (nextCursor != 0L) mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
 

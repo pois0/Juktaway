@@ -10,13 +10,11 @@ import android.widget.ProgressBar
 import kotlinx.android.synthetic.main.fragment_retweeters.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.UserAdapter
-import net.slashOmega.juktaway.model.TwitterManager
-import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.tryAndTraceGet
+import net.slashOmega.juktaway.twitter.currentClient
+import org.jetbrains.anko.support.v4.toast
 
 class RetweetersFragment: DialogFragment() {
     private lateinit var mProgressBar: ProgressBar
@@ -30,17 +28,17 @@ class RetweetersFragment: DialogFragment() {
         list.adapter = mAdapter
         mProgressBar = guruguru
 
-        arguments?.getLong("statusId")?.takeIf { it > 0 }?.let { id ->
+        arguments?.getLong("statusId", -1L)?.takeIf { it > 0 }?.let { id ->
             GlobalScope.launch(Dispatchers.Main) {
-                val retweetJob = async(Dispatchers.Default) {
-                    tryAndTraceGet { TwitterManager.twitter.getRetweets(id) }
-                }
+                val statuses = runCatching { currentClient.status.retweets(id).await() }.getOrNull()
                 mProgressBar.visibility = View.GONE
 
-                retweetJob.await()?.let { statuses ->
+                if (statuses == null) {
+                    toast(R.string.toast_load_data_failure)
+                } else {
                     statuses.forEach { mAdapter.add(it.user) }
                     mAdapter.notifyDataSetChanged()
-                } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
+                }
             }
         }
     }

@@ -5,17 +5,14 @@ import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
-import net.slashOmega.juktaway.util.tryAndTraceGet
-import twitter4j.Paging
+import net.slashOmega.juktaway.twitter.currentClient
 import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
 
 
@@ -31,20 +28,16 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
 
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val v = withContext(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitter.getUserTimeline(user.id, Paging().apply {
-                        if (mMaxId > 0) {
-                            maxId = mMaxId
-                            count = BasicSettings.pageCount
-                        }
-                    })
-                }
-            }
+            val timeline = runCatching {
+                currentClient.timeline.run {
+                    if (mMaxId > 0) user(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
+                    else user(user.id)
+                }.await()
+            }.getOrNull()
 
             mFooter.visibility = View.GONE
 
-            v?.takeIf { it.isNotEmpty() }?.run {
+            timeline?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }

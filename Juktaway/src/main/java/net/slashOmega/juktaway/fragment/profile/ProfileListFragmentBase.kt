@@ -9,6 +9,8 @@ import android.view.ViewGroup
 import android.widget.*
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
+import jp.nephy.penicillin.models.PenicillinCursorModel
 import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.R
 
@@ -22,7 +24,6 @@ internal abstract class ProfileListFragmentBase: Fragment() {
     protected lateinit var mListView: ListView
     protected var mAutoLoader = false
     protected lateinit var mFooter: ProgressBar
-    protected var cursor = -1L
     private var isLoading = false
 
     protected fun finishLoading() {

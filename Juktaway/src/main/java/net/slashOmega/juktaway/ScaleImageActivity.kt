@@ -13,19 +13,18 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.fragment.ScaleImageFragment
-import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
 import net.slashOmega.juktaway.util.tryAndTrace
 import net.slashOmega.juktaway.util.tryAndTraceGet
-import twitter4j.Status
 import java.io.BufferedInputStream
 import java.io.File
 import java.io.FileOutputStream
@@ -145,11 +144,7 @@ class ScaleImageActivity: FragmentActivity() {
 
     private fun showStatus(id: Long) {
         GlobalScope.launch(Dispatchers.Main) {
-            withContext(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitter.showStatus(id)
-                }
-            }?.let { showStatus(it, 0) }
+            tryAndTraceGet { currentClient.status.show(id).await() }?.result?.let { showStatus(it, 0) }
         }
     }
 

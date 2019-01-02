@@ -13,6 +13,7 @@ import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_search.*
 import kotlinx.coroutines.*
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.tryAndTraceGet
 
 /**
@@ -90,8 +91,8 @@ class UserSearchActivity: FragmentActivity() {
 
     private fun userSearch(word: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val res = withContext(Dispatchers.Default) {
-                tryAndTraceGet { TwitterManager.twitter.searchUsers(word, mPage) }
+            val res = tryAndTraceGet {
+                currentClient.user.search(word, mPage, 20).await()
             }
             guruguru.visibility = View.GONE
             if (res == null) {

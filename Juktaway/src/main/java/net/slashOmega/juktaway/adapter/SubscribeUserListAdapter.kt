@@ -8,15 +8,21 @@ import android.support.v4.app.DialogFragment
 import android.view.View
 import android.view.ViewGroup
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.AlertDialogEvent
-import net.slashOmega.juktaway.model.AccessTokenManager
+import net.slashOmega.juktaway.event.model.DestroyUserListEvent
+import net.slashOmega.juktaway.model.UserListCache
 import net.slashOmega.juktaway.model.UserListWithRegistered
-import net.slashOmega.juktaway.task.DestroyUserListSubscriptionTask
-import net.slashOmega.juktaway.task.DestroyUserListTask
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import twitter4j.UserList
+import org.jetbrains.anko.support.v4.toast
 
 /**
  * Created on 2018/10/28.
@@ -30,7 +36,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
                 val dialog = if (currentIdentifier.userId == userList?.user?.id) DestroyUserListDialogFragment()
                 else DestroyUserListSubscriptionDialogFragment()
                 dialog.arguments = Bundle(1).apply {
-                    putSerializable("userList", userList)
+                    putString("userList", userList?.toJsonString())
                 }
                 EventBus.getDefault().post(AlertDialogEvent(dialog))
 
@@ -53,13 +59,23 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
 
     class DestroyUserListDialogFragment:DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val userList = arguments?.getSerializable("userList") as? UserList ?: return Dialog(activity)
+            val userList = arguments?.getString("userList")?.toJsonObject()?.parse(TwitterList::class) ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)
                     .setTitle(R.string.confirm_destroy_user_list)
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
-                        DestroyUserListTask(userList).execute()
-                        dismiss()
+                        GlobalScope.launch {
+                            runCatching { currentClient.list.destroy(userList.id).await() }
+                                    .onSuccess {
+                                        toast(R.string.toast_destroy_user_list_success)
+                                        EventBus.getDefault().post(DestroyUserListEvent(userList.id))
+                                        UserListCache.userLists.remove(userList)
+                                    }
+                                    .onFailure {
+                                        toast(R.string.toast_destroy_user_list_failure)
+                                    }
+                            dismiss()
+                        }
                     }
                     .setNegativeButton(R.string.button_no) { _, _ -> dismiss()}
                     .create()
@@ -68,13 +84,23 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
 
     class DestroyUserListSubscriptionDialogFragment:DialogFragment() {
         override fun onCreateDialog(savedInstanceState:Bundle?):Dialog {
-            val userList = arguments?.getSerializable("userList") as? UserList ?: return Dialog(activity)
+            val userList = arguments?.getString("userList")?.toJsonObject()?.parse(TwitterList::class) ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)
                     .setTitle(R.string.confirm_destroy_user_list_subscribe)
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
-                        DestroyUserListSubscriptionTask(userList).execute()
-                        dismiss()
+                        GlobalScope.launch {
+                            runCatching { currentClient.list.unsubscribe(userList.id).await() }
+                                    .onSuccess {
+                                        toast(R.string.toast_destroy_user_list_subscription_success)
+                                        EventBus.getDefault().post(DestroyUserListEvent(userList.id))
+                                        UserListCache.userLists.remove(userList)
+                                    }
+                                    .onFailure {
+                                        toast(R.string.toast_destroy_user_list_subscription_failure)
+                                    }
+                            dismiss()
+                        }
                     }
                     .setNegativeButton(R.string.button_no) { _, _ -> dismiss() }
                     .create()

@@ -17,6 +17,7 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -25,18 +26,14 @@ import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.layouts.fontelloTextView
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount
-import net.slashOmega.juktaway.util.TwitterUtil.uri
 import org.jetbrains.anko.*
-import twitter4j.Status
 import java.util.*
 
 /**

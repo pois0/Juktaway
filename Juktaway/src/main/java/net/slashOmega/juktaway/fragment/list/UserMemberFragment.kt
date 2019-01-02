@@ -1,7 +1,5 @@
 package net.slashOmega.juktaway.fragment.list
 
-
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
@@ -10,48 +8,19 @@ import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
+import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
+import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.view.*
-
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.UserAdapter
-import net.slashOmega.juktaway.model.TwitterManager
-import twitter4j.PagableResponseList
-import twitter4j.User
-import java.lang.ref.WeakReference
+import net.slashOmega.juktaway.twitter.currentClient
 
 class UserMemberFragment : Fragment() {
-    companion object {
-        private class UserListMembersTask(f: UserMemberFragment): AsyncTask<Long, Void, PagableResponseList<User>>() {
-            val ref = WeakReference(f)
-
-            override fun doInBackground(vararg params: Long?): PagableResponseList<User>? = ref.get()?.run { params[0]?.let {
-                try {
-                    val userListsMembers = TwitterManager.twitter.getUserListMembers(it, mCursor)
-                    mCursor = userListsMembers.nextCursor
-                    userListsMembers
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }}
-
-            override fun onPostExecute(userListsMembers: PagableResponseList<User>?) { ref.get()?.run {
-                mFooter.visibility = View.GONE
-                if (userListsMembers == null) return
-                for (user in userListsMembers) {
-                    mAdapter.add(user)
-                }
-                if (userListsMembers.hasNext()) {
-                    mAutoLoader = true
-                }
-                mListView.visibility = View.VISIBLE
-            }}
-        }
-    }
-
     private lateinit var mAdapter: UserAdapter
     private var mListId: Long = 0L
-    private var mCursor: Long = -1L
+    private var mCursor: PenicillinCursorJsonObjectAction<CursorUsers>? = null
     private lateinit var mListView: ListView
     private lateinit var mFooter: ProgressBar
     private var mAutoLoader = false
@@ -83,13 +52,27 @@ class UserMemberFragment : Fragment() {
         registerForContextMenu(mListView)
 
         mFooter = guruguru
-        UserListMembersTask(this@UserMemberFragment).execute(mListId)
+        applyListMembers(mListId)
     }
 
     private fun additionalReading() {
         if (!mAutoLoader) return
         mFooter.visibility = View.VISIBLE
         mAutoLoader = false
-        UserListMembersTask(this).execute(mListId)
+        applyListMembers(mListId)
+    }
+
+    private fun applyListMembers(listId: Long) {
+        GlobalScope.launch {
+            val resp = runCatching {
+                (mCursor ?: currentClient.list.members(listId)).await()
+            }.getOrNull()
+            mFooter.visibility = View.GONE
+            if (resp == null) return@launch
+            mCursor = resp.next()
+            mAdapter.addAll(resp.result.users)
+            if (resp.result.nextCursor < 0) mAutoLoader = true
+            mListView.visibility = View.VISIBLE
+        }
     }
 }

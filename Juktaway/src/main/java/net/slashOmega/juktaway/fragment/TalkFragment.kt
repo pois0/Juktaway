@@ -12,6 +12,10 @@ import android.widget.AbsListView.LayoutParams
 import android.widget.ListView
 import com.google.common.primitives.Longs
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.endpoints.parameters.SearchResultType
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -26,13 +30,12 @@ import net.slashOmega.juktaway.listener.HeaderStatusLongClickListener
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.tryAndTraceGet
 import twitter4j.Query
-import twitter4j.Status
 import java.util.*
 
 class TalkFragment: DialogFragment() {
-    private val mTwitter by lazy { TwitterManager.twitter }
     private val mAdapter by lazy { StatusAdapter(activity!!) }
     private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }
@@ -61,8 +64,8 @@ class TalkFragment: DialogFragment() {
 
         setContentView(R.layout.list_talk)
 
-        (arguments?.getSerializable("status") as? Status)?.let { status ->
-            val inReplyToAreaPixels = if (status.inReplyToStatusId > 0) resources.displayMetrics.heightPixels else 0
+        arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let { status ->
+            val inReplyToAreaPixels = if (status.inReplyToStatusId ?: -1L > 0) resources.displayMetrics.heightPixels else 0
             val (headerH, footerH) = if (BasicSettings.talkOrderNewest) Pair(100, inReplyToAreaPixels)
                     else Pair(inReplyToAreaPixels, 100)
             mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, headerH)
@@ -82,7 +85,7 @@ class TalkFragment: DialogFragment() {
             mAdapter.add(Row.newStatus(status))
 
             if (!BasicSettings.talkOrderNewest) mListView.setSelectionFromTop(1, 0)
-            loadTalk(status.inReplyToStatusId)
+            loadTalk(status.inReplyToStatusId ?: -1L)
             loadTalkReply(status)
         }
     }
@@ -107,9 +110,7 @@ class TalkFragment: DialogFragment() {
         var statusId = idParam
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
-                val status = withContext(Dispatchers.Default) {
-                    tryAndTraceGet { mTwitter.showStatus(statusId) }
-                } ?: break
+                val status = tryAndTraceGet { currentClient.status.show(statusId).await().result } ?: break
 
                 if (BasicSettings.talkOrderNewest) {
                     mAdapter.addSuspend(Row.newStatus(status))
@@ -122,7 +123,7 @@ class TalkFragment: DialogFragment() {
                     }
                 }
 
-                statusId = status.inReplyToStatusId
+                statusId = status.inReplyToStatusId ?: -1
             }
             dialog?.removeGuruGuru()
         }
@@ -132,19 +133,17 @@ class TalkFragment: DialogFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = withContext(Dispatchers.Default) {
                 try {
-                    val toQuery = Query("to:" + source.user.screenName + " AND filter:replies").apply {
-                        count = 200
-                        sinceId = source.id
-                        resultType = Query.ResultType.recent
-                    }
-                    val toResult = mTwitter.search(toQuery)
-                    val searchStatuses = toResult.tweets
-                    if (toResult.hasNext()) searchStatuses.addAll(mTwitter.search(toResult.nextQuery()).tweets)
+                    val resp = currentClient.search.search("to:${source.user.screenName} AND filter:replies",
+                            count = 200, sinceId = source.id, resultType = SearchResultType.Recent).await()
+                    val searchStatuses = resp.statuses
+                    if (toResult) searchStatuses.addAll(mTwitter.search(toResult.nextQuery()).tweets)
                     val fromQuery = Query("from:" + source.user.screenName + " AND filter:replies").apply {
                         count = 200
                         sinceId = source.id
                         resultType = Query.ResultType.recent
                     }
+                    resp.result.searchMetadat
+                    TwitterManager.twitter.search(Query()).hasNext()
                     val fromResult = mTwitter.search(fromQuery)
                     searchStatuses.addAll(fromResult.tweets)
                     val isLoadMap = LongSparseArray<Boolean>().apply { searchStatuses.forEach { put(it.id, true) } }

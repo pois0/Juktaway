@@ -1,8 +1,8 @@
 package net.slashOmega.juktaway.model
 
-import twitter4j.UserList
+import jp.nephy.penicillin.models.TwitterList
 
 class UserListWithRegistered {
-    var userList: UserList? = null
+    var userList: TwitterList? = null
     var isRegistered: Boolean = false
 }
