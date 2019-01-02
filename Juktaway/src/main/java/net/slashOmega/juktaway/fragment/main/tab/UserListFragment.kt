@@ -6,6 +6,7 @@ import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
@@ -27,14 +28,16 @@ class UserListFragment: BaseFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = try {
                 val twitter = TwitterManager.twitter
-                twitter.getUserListStatuses(tabId, Paging().also {
-                    if (mMaxId > 0 && !mReloading) {
-                        it.maxId = mMaxId - 1
-                        it.count = BasicSettings.pageCount
-                    } else {
-                        twitter.getUserListMembers(tabId, 0).forEach { mMembers.append(it.id, true) }
-                    }
-                })
+                withContext(Dispatchers.Default) {
+                    twitter.getUserListStatuses(tabId, Paging().also {
+                        if (mMaxId > 0 && !mReloading) {
+                            it.maxId = mMaxId - 1
+                            it.count = BasicSettings.pageCount
+                        } else {
+                            twitter.getUserListMembers(tabId, 0).forEach { mMembers.append(it.id, true) }
+                        }
+                    })
+                }
             } catch (e: OutOfMemoryError) {
                 null
             } catch (e: Exception) {
