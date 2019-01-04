@@ -95,7 +95,6 @@ object Core {
                                     "cs" to set.cs)
                             .parseSingle(LongParser)
                 }.getOrNull() ?: run {
-                    Log.d("addToken", "adding")
                     insert(tokensTable,
                             "cs" to set.cs,
                             "ck" to set.ck,

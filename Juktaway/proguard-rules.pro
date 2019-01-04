@@ -27,11 +27,7 @@
 
 # http://qiita.com/petitviolet/items/1b709f3f0db2659a271a
 -keepnames class net.slashOmega.juktaway.model.** { *; }
--keepnames class net.slashOmega.juktaway.settings.** { *; }
-
-# for Twitter4j
--dontwarn twitter4j.**
--keep class twitter4j.** { *; }
+-keepnames class net.slashOmega.juktaway.settings.** { *; }F
 
 # *** Debug ***
 # -renamesourcefileattribute SourceFile
