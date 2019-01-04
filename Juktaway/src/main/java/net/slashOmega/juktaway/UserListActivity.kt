@@ -14,6 +14,7 @@ import net.slashOmega.juktaway.fragment.list.UserMemberFragment
 import net.slashOmega.juktaway.model.UserListCache
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_list.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.twitter.currentClient
@@ -93,7 +94,7 @@ class UserListActivity: FragmentActivity() {
                 true
             }
             MENU_CREATE -> {
-                GlobalScope.launch {
+                GlobalScope.launch(Dispatchers.Main) {
                     val res = runCatching { currentClient.list.subscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_create_user_list_subscription_success)
@@ -106,7 +107,7 @@ class UserListActivity: FragmentActivity() {
                 true
             }
             MENU_DESTROY -> {
-                GlobalScope.launch {
+                GlobalScope.launch(Dispatchers.Main) {
                     val res = runCatching { currentClient.list.unsubscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_destroy_user_list_subscription_success)

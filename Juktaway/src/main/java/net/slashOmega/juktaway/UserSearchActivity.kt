@@ -7,7 +7,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AbsListView
 import net.slashOmega.juktaway.adapter.UserAdapter
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil

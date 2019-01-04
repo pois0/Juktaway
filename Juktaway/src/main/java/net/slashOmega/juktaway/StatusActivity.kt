@@ -9,6 +9,9 @@ import android.support.v4.app.FragmentActivity
 import android.view.Window
 import android.view.WindowManager
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_status.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -23,7 +26,6 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import org.jetbrains.anko.intentFor
-import twitter4j.Status
 
 /**
  * Created on 2018/08/29.
@@ -81,10 +83,10 @@ class StatusActivity: FragmentActivity() {
             showProgressDialog(getString(R.string.progress_loading))
             load(statusId)
         } else {
-            (intent.getSerializableExtra("status") as? Status)?.let {
+            intent.getStringExtra("status")?.toJsonObject()?.parse<Status>()?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
-                if (inReplyToStatusId > 0) {
+                if (inReplyToStatusId != null) {
                     showProgressDialog(getString(R.string.progress_loading))
                     load(inReplyToStatusId)
                     // LoadTask(this).execute(inReplyToStatusId)
@@ -107,10 +109,6 @@ class StatusActivity: FragmentActivity() {
         mProgressDialog = ProgressDialog(this)
         mProgressDialog?.setMessage(message)
         mProgressDialog?.show()
-    }
-
-    private fun dismissProgressDialog() {
-        mProgressDialog?.dismiss()
     }
 
     fun onEventMainThread(event: AlertDialogEvent) {

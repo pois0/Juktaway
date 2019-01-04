@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.model
 
 import android.support.v4.util.LongSparseArray
+import jp.nephy.penicillin.models.Status
 
 /**
  * どのツイートをふぁぼ又はRTしているかを管理する
@@ -13,7 +14,7 @@ object FavRetweetManager {
 
     fun removeFav(id: Long?) { mIsFavMap.remove(id!!) }
 
-    fun isFav(status: twitter4j.Status): Boolean
+    fun isFav(status: Status): Boolean
             = mIsFavMap.get(status.id, false)
             || status.retweetedStatus?.let { mIsFavMap.get(it.id, false) } ?: false
 
@@ -25,7 +26,7 @@ object FavRetweetManager {
         }
     }
 
-    fun getRtId(status: twitter4j.Status): Long?
+    fun getRtId(status: Status): Long?
             = mRtIdMap.get(status.id) ?: status.retweetedStatus?.let { mRtIdMap.get(it.id) }
 
     fun getRtId(id: Long): Long? = mRtIdMap.get(id)

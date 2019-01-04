@@ -49,17 +49,6 @@
             android:textSize="18sp"
             tools:paddingBottom="0dp"
             tools:textColor="@android:color/white"/>
-
-        <net.slashOmega.juktaway.widget.FontelloButton
-            android:id="@+id/action_bar_streaming_button"
-            android:minWidth="0dp"
-            android:layout_width="48dp"
-            android:layout_height="wrap_content"
-            android:background="@drawable/action_bar_stateful"
-            android:text="@string/fontello_flash"
-            android:textSize="18sp"
-            tools:paddingBottom="0dp"
-            tools:textColor="@android:color/white"/>
     </LinearLayout>
 
     <FrameLayout

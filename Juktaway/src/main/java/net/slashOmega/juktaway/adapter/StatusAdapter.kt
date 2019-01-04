@@ -17,6 +17,9 @@ import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,6 +31,7 @@ import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
+import net.slashOmega.juktaway.model.displayUserIcon
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
 import net.slashOmega.juktaway.twitter.currentIdentifier
@@ -43,13 +47,16 @@ import java.util.*
 class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext, 0) {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
-            override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
+            override fun onCreateDialog(savedInstanceState: Bundle?)
+                    = arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_destroy_retweet)
                         .setMessage(it.text)
                         .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
-                            ActionUtil.doDestroyRetweet(it)
-                            dismiss()
+                            GlobalScope.launch(Dispatchers.Main) {
+                                ActionUtil.doDestroyRetweet(it)
+                                dismiss()
+                            }
                         }
                         .setNegativeButton(getString(R.string.button_cancel)) { _, _ -> dismiss() }
                         .create()
@@ -57,7 +64,8 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         }
 
         class RetweetDialogFragment: DialogFragment() {
-            override fun onCreateDialog(savedInstanceState: Bundle?) = (arguments?.getSerializable("status") as? Status)?.let {
+            override fun onCreateDialog(savedInstanceState: Bundle?)
+                    = arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_retweet)
                         .setMessage(it.text)
@@ -66,8 +74,10 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             dismiss()
                         }
                         .setPositiveButton(R.string.button_retweet) { _, _ ->
-                            ActionUtil.doRetweet(it.id)
-                            dismiss()
+                            GlobalScope.launch(Dispatchers.Main) {
+                                ActionUtil.doRetweet(it.id)
+                                dismiss()
+                            }
                         }
                         .setNegativeButton(R.string.button_cancel) { _, _ -> dismiss() }
                         .create()
@@ -194,7 +204,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     private fun filter(row: Row) {
         GlobalScope.launch(Dispatchers.Default) {
-            row.status?.takeIf { it.isRetweeted }?.let { status ->
+            row.status?.takeIf { it.retweeted }?.let { status ->
                 status.retweetedStatus?.takeIf { status.user.id == currentIdentifier.userId }?.let { retweet ->
                     FavRetweetManager.setRtId(retweet.id, status.id)
                 }
@@ -319,8 +329,8 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         setOnClickListener {
                             startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
                         }
-                        //TODO
-                        //UserIconManager.displayUserIcon(s.user, this)
+
+                        displayUserIcon(s.user)
                     }.lparams(width = dip(48), height = dip(48)) {
                         below(R.id.action_container)
                         bottomMargin = dip(6)
@@ -351,7 +361,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         rightOf(R.id.display_name)
                         baselineOf(R.id.display_name)
                     }
-                    if (s.user.isProtected) {
+                    if (s.user.protected) {
                         fontelloTextView {
                             id = R.id.lock
                             text = resources.getString(R.string.fontello_lock)
@@ -369,7 +379,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         id = R.id.datetime_relative
                         textColor = Color.parseColor("#666666")
                         setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize - 2)
-                        text = TimeUtil.getRelativeTime(s.createdAt)
+                        text = TimeUtil.getRelativeTime(s.createdAt.date)
                     }.lparams {
                         alignParentRight()
                         baselineOf(R.id.display_name)
@@ -517,7 +527,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             else Color.parseColor("#666666")
                             textSize = 14f
                             setOnClickListener {
-                                if (s.user.isProtected) {
+                                if (s.user.protected) {
                                     MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share)
                                     return@setOnClickListener
                                 }
@@ -527,14 +537,14 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                         toast(R.string.toast_destroy_retweet_progress)
                                     } else {
                                         val dialog = DestroyRetweetDialogFragment().apply {
-                                            arguments = Bundle(1).apply { putSerializable("status", s) }
+                                            arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
                                         }
                                         EventBus.getDefault().post(AlertDialogEvent(dialog))
                                     }
                                 } ?: run {
                                     val dialog = RetweetDialogFragment().apply {
                                         arguments = Bundle(1).apply {
-                                            putSerializable("status", s)
+                                            putString("status", s.toJsonString())
                                         }
                                     }
                                     EventBus.getDefault().post(AlertDialogEvent(dialog))
@@ -577,11 +587,11 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 if (tag == "is_fav") {
                                     tag = "no_fav"
                                     textColor = Color.parseColor("#666666")
-                                    ActionUtil.doDestroyFavorite(s.id)
+                                    GlobalScope.launch(Dispatchers.Main) { ActionUtil.doDestroyFavorite(s.id) }
                                 } else {
                                     tag = "is_fav"
                                     textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
-                                    ActionUtil.doFavorite(s.id)
+                                    GlobalScope.launch(Dispatchers.Main) { ActionUtil.doFavorite(s.id) }
                                 }
                             }
                         }.lparams {
@@ -606,7 +616,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             bottomPadding = dip(2)
                             textColor = Color.parseColor("#666666")
                             textSize = 8f //sp
-                            text = "via ${StatusUtil.getClientName(s.source)}"
+                            text = "via ${StatusUtil.getClientName(s.source.name)}"
                         }.lparams {
                             alignParentRight()
                         }
@@ -615,7 +625,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = TimeUtil.getAbsoluteTime(s.createdAt)
+                            text = TimeUtil.getAbsoluteTime(s.createdAt.date)
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()

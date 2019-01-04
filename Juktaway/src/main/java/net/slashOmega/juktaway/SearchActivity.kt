@@ -5,19 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-import android.support.v4.app.LoaderManager
-import android.support.v4.content.Loader
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.core.PenicillinJsonObjectAction
+import jp.nephy.penicillin.core.hasNext
+import jp.nephy.penicillin.core.next
 import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -25,37 +23,24 @@ import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.PressEnterListener
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
-import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
-import net.slashOmega.juktaway.model.TwitterManager
-import net.slashOmega.juktaway.task.AbstractAsyncTaskLoader
+import net.slashOmega.juktaway.twitter.currentClient
+import net.slashOmega.juktaway.util.ActivityJob
 import net.slashOmega.juktaway.util.KeyboardUtil
-import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
-import twitter4j.Query
-import twitter4j.QueryResult
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/08/24.
  */
-class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryResult> {
+class SearchActivity: FragmentActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
-
-        private class SearchLoader(context: Context, val query: Query): AbstractAsyncTaskLoader<QueryResult>(context) {
-            override fun loadInBackground(): QueryResult? {
-                return try {
-                    TwitterManager.twitter.search(query)
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
-        }
+        var job by ActivityJob()
     }
 
     private lateinit var mAdapter: StatusAdapter
-    private var mNextQuery: Query? = null
+    private var nextAction: PenicillinJsonObjectAction<jp.nephy.penicillin.models.Search>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -68,13 +53,13 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
         }
 
         mAdapter = StatusAdapter(this)
-        search_list.let {l ->
+        search_list.let { l ->
             l.adapter = mAdapter
             l.onItemClickListener = StatusClickListener(this)
             l.onItemLongClickListener = StatusLongClickListener(this)
         }
 
-        searchWords.setOnKeyListener (PressEnterListener {
+        searchWords.setOnKeyListener ( PressEnterListener {
             search()
             true
         })
@@ -112,6 +97,11 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
     override fun onPause() {
         EventBus.getDefault().unregister(this)
         super.onPause()
+    }
+
+    override fun onStop() {
+        job = null
+        super.onStop()
     }
 
     fun onEventMainThread(event: AlertDialogEvent) {
@@ -153,62 +143,60 @@ class SearchActivity: FragmentActivity(), LoaderManager.LoaderCallbacks<QueryRes
     }
 
     private fun additionalReading() {
-        if (mNextQuery != null) {
+        nextAction?.let { action ->
             guruguru.visibility = View.VISIBLE
 
-            supportLoaderManager.restartLoader(0, Bundle(1).apply {
-                putSerializable("query", mNextQuery)
-            }, this)
-            mNextQuery = null
+            job = action.queue {
+                val statuses = it.result.statuses
+                if (it.hasNext()) nextAction = it.next()
+
+                val count = mAdapter.count
+                mAdapter.addAllFromStatuses(statuses)
+                mAdapter.notifyDataSetChanged()
+
+                search_list.visibility = View.VISIBLE
+                if (count == 0) search_list.setSelection(0)
+                guruguru.visibility = View.GONE
+
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                        .hideSoftInputFromWindow(searchWords.windowToken, 0)
+            }
         }
     }
 
     private fun search() {
         KeyboardUtil.hideKeyboard(searchWords)
-        searchWords.text?.let {
+        searchWords.text?.let { text ->
             mAdapter.clear()
             search_list.visibility = View.GONE
             guruguru.visibility = View.GONE
-            mNextQuery = null
+            nextAction = null
 
-            supportLoaderManager.restartLoader(0, Bundle(1).apply {
-                putSerializable("query", Query(it.toString() + " exclude:retweets"))
-            }, this).forceLoad()
+            job = currentClient.search.search(text.toString() + " exclude:retweets").queue {
+                val statuses = it.result.statuses
+                if (it.hasNext()) nextAction = it.next()
+
+                val count = mAdapter.count
+                mAdapter.addAllFromStatuses(statuses)
+                mAdapter.notifyDataSetChanged()
+
+                search_list.visibility = View.VISIBLE
+                if (count == 0) search_list.setSelection(0)
+                guruguru.visibility = View.GONE
+
+                (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
+                        .hideSoftInputFromWindow(searchWords.windowToken, 0)
+            }
         }
     }
 
-    override fun onCreateLoader(id: Int, args: Bundle?): Loader<QueryResult> {
-        return SearchLoader(this, args?.getSerializable("query") as Query)
-    }
-
-    override fun onLoadFinished(loader: Loader<QueryResult>, result: QueryResult?) {
-        result?.apply {
-            if (hasNext()) mNextQuery = nextQuery()
-
-            val count = mAdapter.count
-
-            tweets?.forEach { mAdapter.add(Row.newStatus(it)) }
-
-            search_list.visibility = View.VISIBLE
-            if (count == 0) search_list.setSelection(0)
-            guruguru.visibility = View.GONE
-
-            (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
-                    .hideSoftInputFromWindow(searchWords.windowToken, 0)
-        } ?: MessageUtil.showToast(R.string.toast_load_data_failure)
-    }
-
-    override fun onLoaderReset(loader: android.support.v4.content.Loader<QueryResult>) {}
-
     private fun createSavedSearch(word: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val res = withContext(Dispatchers.Default) {
-                runCatching { TwitterManager.twitter.createSavedSearch(word) }.isSuccess
-            }
+            val res = runCatching { currentClient.savedSearch.create(word) }.isSuccess
 
             if (res) {
                 setResult(RESULT_CREATE_SAVED_SEARCH)
-                MessageUtil.showToast(getString(R.string.toast_save_success))
+                toast(getString(R.string.toast_save_success))
             }
         }
     }

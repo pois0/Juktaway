@@ -1,5 +1,7 @@
 package net.slashOmega.juktaway.twitter
 
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.util.SharedPreference
 
 /**
@@ -12,9 +14,11 @@ internal var rtTemp by SharedPreference("twitter", "rtTemp", "")
 internal var rtsTemp by SharedPreference("twitter", "rtTemp", "")
 object AuthTemp {
     suspend fun clearTemps() {
-        ckTemp = ""
-        csTemp = ""
-        rtTemp = ""
-        rtsTemp = ""
+        withContext(Dispatchers.Default) {
+            ckTemp = ""
+            csTemp = ""
+            rtTemp = ""
+            rtsTemp = ""
+        }
     }
 }

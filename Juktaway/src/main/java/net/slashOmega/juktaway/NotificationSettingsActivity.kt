@@ -1,10 +1,8 @@
 package net.slashOmega.juktaway
 
-import android.app.ActionBar
 import android.app.Activity
 import android.os.Bundle
 import android.preference.PreferenceFragment
-import android.preference.PreferenceManager
 import android.view.MenuItem
 
 import net.slashOmega.juktaway.util.ThemeUtil

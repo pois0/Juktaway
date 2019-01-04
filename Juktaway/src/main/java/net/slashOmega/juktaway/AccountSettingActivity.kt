@@ -6,23 +6,26 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
-import net.slashOmega.juktaway.adapter.account.AccessTokenAdapter
+import net.slashOmega.juktaway.adapter.account.IdentifierAdapter
 import net.slashOmega.juktaway.fragment.dialog.AccountSwitchDialogFragment
 import net.slashOmega.juktaway.listener.OnTrashListener
 import net.slashOmega.juktaway.listener.RemoveAccountListener
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.twitter.Core
+import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.twitter.identifierList
 import org.jetbrains.anko.startActivity
-import twitter4j.auth.AccessToken
 
 /**
  * Created on 2018/08/23.
  */
 class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
-    private lateinit var mAccountAdapter: AccessTokenAdapter
+    private lateinit var mAccountAdapter: IdentifierAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -34,7 +37,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        mAccountAdapter = AccessTokenAdapter(this, R.layout.row_account) .apply {
+        mAccountAdapter = IdentifierAdapter(this, R.layout.row_account) .apply {
             identifierList.forEach { add(it) }
             mOnTrashListener = object: OnTrashListener {
                 override fun onTrash(position: Int) { getItem(position)?.let {
@@ -49,7 +52,7 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
                 mAccountAdapter.getItem(i).also {
                     if (it?.userId != currentIdentifier.userId) {
                         setResult(Activity.RESULT_OK, Intent().apply {
-                            putExtra("accessToken", it)
+                            putExtra("identifier", it)
                         })
                         finish()
                     }
@@ -71,8 +74,8 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
         return true
     }
 
-    override fun removeAccount(accessToken: AccessToken) {
-        mAccountAdapter.remove(accessToken)
-        AccessTokenManager.removeAccessToken(accessToken)
+    override fun removeIdentifier(identifier: Identifier) {
+        mAccountAdapter.remove(identifier)
+        GlobalScope.launch(Dispatchers.Main) { Core.removeIdentifier(identifier) }
     }
 }

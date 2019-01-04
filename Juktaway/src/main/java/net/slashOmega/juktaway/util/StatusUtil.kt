@@ -3,18 +3,20 @@ package net.slashOmega.juktaway.util
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
-import net.slashOmega.juktaway.model.AccessTokenManager
+import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import twitter4j.Status
 import java.util.*
 import java.util.regex.Pattern
 
 val Status.videoUrl: String
     get() {
-        for (extendedMediaEntity in mediaEntities) {
-            for (videoVariant in extendedMediaEntity.videoVariants) {
-                if (videoVariant.url.lastIndexOf("mp4") != -1) {
-                    return videoVariant.url
+        //TODO
+        extendedEntities?.run {
+            for (entity in media) {
+                entity.videoInfo?.variants?.run {
+                    for (v in this) {
+                        if (v.url.lastIndexOf("mp4") != -1) return v.url
+                    }
                 }
             }
         }
@@ -24,7 +26,7 @@ val Status.videoUrl: String
 val Status.imageUrls: List<String>
     get() {
         val imageUrls = ArrayList<String>()
-        urlEntities.map { it.expandedURL }.forEach { url ->
+        entities.urls.map { it.expandedUrl }.forEach { url ->
             for (set in ImageUrlTransformer.list) {
                 val matcher = set.pattern.matcher(url)
                 if (matcher.find()) {
@@ -34,7 +36,7 @@ val Status.imageUrls: List<String>
             }
         }
 
-        mediaEntities.takeNotEmpty()?.map { it.mediaURL }?.forEach { imageUrls.add(it) }
+        entities.media.takeNotEmpty()?.map { it.mediaUrl }?.forEach { imageUrls.add(it) }
 
         return imageUrls
     }
@@ -65,7 +67,7 @@ object StatusUtil {
         if (status.inReplyToUserId == userId) {
             return true
         }
-        val mentions = status.userMentionEntities
+        val mentions = status.entities.userMentions
         for (mention in mentions) {
             if (mention.id == userId) {
                 return true
@@ -82,14 +84,14 @@ object StatusUtil {
      */
     fun getExpandedText(status: Status): String {
         var text = status.text
-        for (url in status.urlEntities) {
+        for (url in status.entities.urls) {
             val m = Pattern.compile(url.url).matcher(text)
-            text = m.replaceAll(url.expandedURL)
+            text = m.replaceAll(url.expandedUrl)
         }
 
-        for (media in status.mediaEntities) {
+        for (media in status.entities.media) {
             val m = Pattern.compile(media.url).matcher(text)
-            text = m.replaceAll(media.expandedURL)
+            text = m.replaceAll(media.expandedUrl)
         }
         return text
     }
@@ -102,7 +104,7 @@ object StatusUtil {
      */
     fun getImageUrls(status: Status): ArrayList<String> {
         val imageUrls = ArrayList<String>()
-        status.urlEntities.map { it.expandedURL }.forEach { url ->
+        status.entities.urls.map { it.expandedUrl }.forEach { url ->
             for (set in ImageUrlTransformer.list) {
                 val matcher = set.pattern.matcher(url)
                 if (matcher.find()) {
@@ -112,9 +114,7 @@ object StatusUtil {
             }
         }
 
-        if (status.mediaEntities.isNotEmpty()) {
-            status.mediaEntities.map { it.mediaURL }.forEach { imageUrls.add(it) }
-        }
+        status.entities.media.takeNotEmpty()?.map { it.mediaUrl }?.forEach { imageUrls.add(it) }
 
         return imageUrls
     }

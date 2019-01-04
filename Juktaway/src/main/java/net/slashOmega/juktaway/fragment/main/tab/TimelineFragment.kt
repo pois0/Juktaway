@@ -13,9 +13,6 @@ import net.slashOmega.juktaway.twitter.currentIdentifier
 class TimelineFragment: BaseFragment() {
     override var tabId = TabManager.TIMELINE_TAB_ID
 
-    override fun isSkip(row: Row): Boolean = !row.isStatus
-            || row.status?.retweetedStatus?.user?.id == currentIdentifier.userId
-
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {

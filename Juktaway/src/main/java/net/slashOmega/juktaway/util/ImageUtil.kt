@@ -12,12 +12,14 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
+import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.parameters.MediaType
+import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.ScaleImageActivity
 import net.slashOmega.juktaway.VideoActivity
 import net.slashOmega.juktaway.settings.BasicSettings
-import twitter4j.Status
+import java.io.File
 
 /**
  * Created on 2018/10/25.
@@ -42,6 +44,8 @@ fun ImageView.displayRoundedImage(url: String) {
         ImageLoader.getInstance().displayImage(url, this)
     }
 }
+
+fun File.mediaType() = ImageUtil.toMediaType(path.run { substring(lastIndexOf(".") + 1) })
 
 object ImageUtil {
     internal val sRoundedDisplayImageOptions by lazy {
@@ -105,7 +109,7 @@ object ImageUtil {
                 image.setOnClickListener {
                     if (status.videoUrl.isEmpty()) {
                         context.startActivity(Intent(it.context, ScaleImageActivity::class.java).apply {
-                            putExtra("status", status)
+                            putExtra("status", status.toJsonString())
                             putExtra("index", i)
                         })
                     } else {

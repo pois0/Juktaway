@@ -235,7 +235,6 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
      * @param row ツイート情報
      */
     fun addStack(row: Row) {
-        if (isSkip(row)) return
         mStackRows.add(row)
         if (!mScrolling && isTop) {
             showStack()
@@ -243,11 +242,6 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
             EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
         }
     }
-
-    /**
-     * そのツイート（またはメッセージ）を表示するかどうかのチェック
-     */
-    protected abstract fun isSkip(row: Row): Boolean
 
     /**
      * タブ固有のID、ユーザーリストではリストのIDを、その他はマイナスの固定値を返す

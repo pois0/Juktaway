@@ -2,9 +2,7 @@ package net.slashOmega.juktaway.settings
 
 import android.content.Context
 import android.content.SharedPreferences
-
 import net.slashOmega.juktaway.JuktawayApplication
-import net.slashOmega.juktaway.NotificationService
 
 object BasicSettings {
 
@@ -92,13 +90,5 @@ object BasicSettings {
         fastScrollOn = preferences.getBoolean("fast_scroll_on", true)
         talkOrderNewest = preferences.getBoolean("talk_order_newest", false)
         displayAccountName = DisplayAccountName.valueOf(preferences.getString("display_account_name", "screen_name")!!.toUpperCase())
-    }
-
-    fun resetNotification() {
-        if (notificationOn) {
-            NotificationService.start()
-        } else {
-            NotificationService.stop()
-        }
     }
 }

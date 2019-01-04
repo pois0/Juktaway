@@ -4,8 +4,13 @@ import android.content.Context
 import android.content.Intent
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.PenicillinException
 import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.endpoints.parameters.MediaCategory
+import jp.nephy.penicillin.endpoints.parameters.MediaFileComponent
+import jp.nephy.penicillin.endpoints.parameters.MediaType
+import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
@@ -14,26 +19,45 @@ import net.slashOmega.juktaway.PostActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.event.action.OpenEditorEvent
 import net.slashOmega.juktaway.event.action.StatusActionEvent
+import net.slashOmega.juktaway.event.model.StreamingDestroyMessageEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.model.FavRetweetManager
-import net.slashOmega.juktaway.task.DestroyDirectMessageTask
+import net.slashOmega.juktaway.settings.PostStockSettings
+import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import org.jetbrains.anko.startActivity
-import twitter4j.DirectMessage
-
+import java.io.File
 
 suspend fun Status.favorite() = ActionUtil.doFavorite(id)
 
 suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
 
-object ActionUtil {
-    suspend fun updateStatus() {
-        val e = runCatching {
-            currentClient.status.update()
-        }
-    }
+suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
+        asClient {
+            if (imageList.isNotEmpty()) status.updateWithMediaFile(str,
+                    imageList.map { MediaFileComponent(
+                            file = it,
+                            type = it.mediaType(),
+                            category = if (it.mediaType() == MediaType.GIF) MediaCategory.TweetGif else MediaCategory.TweetImage
+                    ) },
+                    null,
+                    "inReplyToStatusId" to inReplyToStatusId
+                )
+            else status.update(str, inReplyToStatusId)
+        }.await().result
+    }.onSuccess { s ->
+        s.entities.hashtags.forEach { PostStockSettings.addHashtag("#${it.text}") }
+    }.exceptionOrNull()
 
+suspend fun Identifier.sendDirectMessage(rawMessage: String) = asClient { sendDirectMessage(rawMessage) }
+
+suspend fun PenicillinClient.sendDirectMessage(rawMessage: String) = runCatching {
+    val message = rawMessage.split(" ".toRegex(), 3)
+    directMessage.create(message[2], screenName = message[1]).await()
+}.exceptionOrNull()
+
+object ActionUtil {
     suspend fun doFavorite(statusId: Long) {
         withContext(Dispatchers.Default) {
             FavRetweetManager.setFav(statusId)
@@ -205,7 +229,15 @@ object ActionUtil {
         }
     }
 
-    fun doDestroyDirectMessage(id: Long) { DestroyDirectMessageTask().execute(id) }
+    suspend fun destroyDirectMessage(id: Long) {
+        val dm = runCatching { currentClient.directMessage.delete(id).await().result }.getOrNull()
+        if (dm != null) {
+            MessageUtil.showToast(R.string.toast_destroy_direct_message_success)
+            EventBus.getDefault().post(StreamingDestroyMessageEvent(dm.id))
+        } else {
+            MessageUtil.showToast(R.string.toast_destroy_direct_message_failure)
+        }
+    }
 
     fun doQuote(status: Status, context: Context) {
         val text = " https://twitter.com/${status.user.screenName}/status/${status.id}"

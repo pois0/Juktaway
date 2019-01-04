@@ -10,12 +10,9 @@ import android.view.View
 import android.view.Window
 import kotlinx.android.synthetic.main.activity_video.*
 import kotlinx.coroutines.*
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.takeNotEmpty
 import net.slashOmega.juktaway.util.tryAndTraceGet
-import net.slashOmega.juktaway.util.videoUrl
 import java.util.regex.Pattern
 
 /**

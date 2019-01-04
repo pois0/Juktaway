@@ -10,7 +10,6 @@ import android.content.ContentValues
 import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.content.pm.ResolveInfo
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
@@ -27,28 +26,30 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import android.widget.ListView
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.core.PenicillinException
+import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
 import kotlinx.android.synthetic.main.row_word.view.*
 import kotlinx.android.synthetic.main.spinner_switch_account.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.model.UserIconManager.displayUserIcon
-import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.PostStockSettings
 import net.slashOmega.juktaway.settings.PostStockSettings.drafts
 import net.slashOmega.juktaway.settings.PostStockSettings.hashtags
-import net.slashOmega.juktaway.task.SendDirectMessageTask
 import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.twitter.identifierList
 import net.slashOmega.juktaway.util.*
-import twitter4j.Status
-import twitter4j.StatusUpdate
-import twitter4j.TwitterException
-import twitter4j.auth.AccessToken
+import org.jetbrains.anko.toast
 import java.io.File
 import java.io.FileNotFoundException
-import java.lang.ref.WeakReference
 
 @SuppressLint("SetTextI18n", "InflateParams")
 class PostActivity: FragmentActivity() {
@@ -57,52 +58,7 @@ class PostActivity: FragmentActivity() {
         private const val REQUEST_CAMERA = 2
         private const val REQUEST_TWICCA = 3
         private const val REQUEST_PERMISSIONS_CAMERA = 1
-        private const val OPTION_MENU_GROUP_TWICCA = 1
-        private const val ERROR_CODE_DUPLICATE_STATUS = 187
-        private const val ERROR_CODE_NOT_FOLLOW_DM = 150
         private const val MAX_IMAGE = 4
-
-        private class SendDMTask(context: PostActivity, token: AccessToken): SendDirectMessageTask(token) {
-            val ref = WeakReference(context)
-            override fun onPostExecute(e: TwitterException?) {
-                MessageUtil.dismissProgressDialog()
-                e?.apply {
-                    MessageUtil.showToast(
-                            if (errorCode == ERROR_CODE_NOT_FOLLOW_DM)
-                                R.string.toast_update_status_not_Follow
-                            else
-                                R.string.toast_update_status_failure)
-                } ?: ref.get()?.run {
-                    status_text.setText("")
-                    if (!mWidgetMode) {
-                        finish()
-                    }
-                }
-            }
-        }
-
-        private class UpdateStatusTask(context: PostActivity, token: AccessToken, list: ArrayList<File>)
-                : net.slashOmega.juktaway.task.UpdateStatusTask(token, list) {
-            val ref = WeakReference(context)
-            override fun onPostExecute(e: TwitterException?) {
-                MessageUtil.dismissProgressDialog()
-                e?.apply {
-                    MessageUtil.showToast(
-                            if(errorCode == ERROR_CODE_DUPLICATE_STATUS)
-                                R.string.toast_update_status_already
-                            else
-                                R.string.toast_update_status_failure)
-                } ?: ref.get()?.run {
-                    status_text.setText("")
-                    if (!mWidgetMode) {
-                        finish()
-                    } else {
-                        image_preview_container.removeAllViews()
-                        tweet_button.isEnabled = false
-                    }
-                }
-            }
-        }
     }
 
     private lateinit var mContext: Activity
@@ -113,7 +69,6 @@ class PostActivity: FragmentActivity() {
     private var mDraftDialog: AlertDialog? = null
     private var mImgPath: File? = null
     private var mImageUri: Uri? = null
-    private var mTwiccaPlugins: List<ResolveInfo>? = null
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -124,16 +79,15 @@ class PostActivity: FragmentActivity() {
 
         // Wear からリプライを返す
         RemoteInput.getResultsFromIntent(intent)?.run {
-            val charSequence = getCharSequence(NotificationService.EXTRA_VOICE_REPLY)
-            var inReplyToStatus = intent.getSerializableExtra("inReplyToStatus") as Status
+            var inReplyToStatus = intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parse<Status>() ?: return@run
             mInReplyToStatusId = inReplyToStatus.id
             var inReplyToUserScreenName = inReplyToStatus.user.screenName
             if (inReplyToStatus.retweetedStatus != null) {
-                inReplyToStatus = inReplyToStatus.retweetedStatus
+                inReplyToStatus = inReplyToStatus.retweetedStatus!!
                 inReplyToUserScreenName = inReplyToStatus.user.screenName
             }
             mInReplyToStatusId = inReplyToStatus.id
-            status_text.setText("@" + inReplyToUserScreenName + " " + charSequence.toString())
+            status_text.setText("@$inReplyToUserScreenName")
 
             tweet()
             return
@@ -189,9 +143,9 @@ class PostActivity: FragmentActivity() {
             } ?: status_text.setSelection(start)
         }
 
-        (intent.getSerializableExtra("inReplyToStatus") as? Status)?.run {retweetedStatus?:this}?.run {
+        intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parse<Status>()?.run {retweetedStatus?:this}?.run {
             mInReplyToStatusId = id
-            ImageUtil.displayRoundedImage(user.profileImageURL, in_reply_to_user_icon)
+            ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
             in_reply_to_status.text = text
 
             // スクロール可能にするのに必要
@@ -283,7 +237,7 @@ class PostActivity: FragmentActivity() {
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
-                        val draft = adapter.getItem(i)
+                        val draft = adapter.getItem(i)!!
                         setText(draft)
                         mDraftDialog?.dismiss()
                         adapter.remove(draft)
@@ -381,7 +335,7 @@ class PostActivity: FragmentActivity() {
         if (resultCode != Activity.RESULT_OK) return
         data?.apply {
             when (requestCode) {
-                REQUEST_GALLERY -> setImage(this.data)
+                REQUEST_GALLERY -> setImage(this.data!!)
                 REQUEST_CAMERA -> mImageUri?.let { setImage(it) }
                 REQUEST_TWICCA -> status_text.setText(getStringExtra(Intent.EXTRA_TEXT))
             }
@@ -390,7 +344,7 @@ class PostActivity: FragmentActivity() {
 
     private fun setImage(uri: Uri) {
         try {
-            val inputStream = contentResolver.openInputStream(uri)
+            val inputStream = contentResolver.openInputStream(uri)!!
             val imageView = layoutInflater.inflate(R.layout.image_preview, null) as ImageView
             imageView.tag = FileUtil.writeToTempFile(cacheDir, inputStream)
 
@@ -413,7 +367,7 @@ class PostActivity: FragmentActivity() {
                     return
                 }
             }
-            MessageUtil.showToast(R.string.toast_set_image_success)
+            toast(R.string.toast_set_image_success)
             tweet_button.isEnabled = true
         } catch (e: FileNotFoundException) {
             e.printStackTrace()
@@ -455,29 +409,10 @@ class PostActivity: FragmentActivity() {
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
         menuInflater.inflate(R.menu.post, menu)
-        mTwiccaPlugins = mTwiccaPlugins
-                ?: TwiccaPlugin.getResolveInfo(this.packageManager, TwiccaPlugin.TWICCA_ACTION_EDIT_TWEET)
-        if (mTwiccaPlugins?.isNotEmpty() == true) {
-            packageManager?.let { pm ->
-                mTwiccaPlugins!!.forEachIndexed { i, info ->
-                    menu.add(OPTION_MENU_GROUP_TWICCA, i, 100, info.activityInfo.loadLabel(pm))
-                }
-            }
-        }
         return true
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        if (item?.groupId == OPTION_MENU_GROUP_TWICCA) {
-            mTwiccaPlugins?.let { plugins -> status_text.text?.let {text ->
-                plugins[item.itemId].activityInfo?.let { info ->
-                    startActivityForResult(TwiccaPlugin.createIntentEditTweet(
-                            "", text.toString(), "", 0, info.packageName, info.name
-                    ), REQUEST_TWICCA)
-                }
-            }}
-            return true
-        }
         when (item?.itemId) {
             android.R.id.home -> onBackPressed()
             R.id.tweet_clear -> status_text.setText("")
@@ -489,23 +424,48 @@ class PostActivity: FragmentActivity() {
     }
 
     private fun tweet() {
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_sending))
-        val text = status_text.text.toString()
-        if (text.startsWith("D ")) {
-            SendDMTask(this, switch_account_spinner.selectedItem as AccessToken).execute(text)
-        } else {
-            val sUpdate = StatusUpdate(text).apply {
-                if (mInReplyToStatusId > 0) inReplyToStatusId = mInReplyToStatusId
-            }
-            val mImagePathList = arrayListOf<File>().apply {
-                image_preview_container.let { container ->
-                    for (i in 0 until container.childCount) {
-                        add(container.getChildAt(i).tag as File)
+        GlobalScope.launch(Dispatchers.Main) {
+            MessageUtil.showProgressDialog(this@PostActivity, getString(R.string.progress_sending))
+            val text = status_text.text.toString()
+            if (text.startsWith("D ")) {
+                val e = (switch_account_spinner.selectedItem as Identifier).sendDirectMessage(text)
+                MessageUtil.dismissProgressDialog()
+
+                e?.apply {
+                    toast(if (this is PenicillinException && error == TwitterErrorMessage.YouCannotSendMessagesToUsersWhoAreNotFollowingYou)
+                                R.string.toast_update_status_not_Follow
+                            else
+                                R.string.toast_update_status_failure)
+                } ?: run {
+                    status_text.setText("")
+                    if (!mWidgetMode) finish()
+                }
+            } else {
+                val mImagePathList = arrayListOf<File>().apply {
+                    image_preview_container.let { container ->
+                        for (i in 0 until container.childCount) {
+                            add(container.getChildAt(i).tag as File)
+                        }
+                    }
+                }
+
+                val e = (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
+                        mInReplyToStatusId.takeIf { it > 0 },
+                        mImagePathList)
+                MessageUtil.dismissProgressDialog()
+                (e as? PenicillinException)?.let {
+                    if (e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                    else R.string.toast_update_status_failure
+                } ?: run {
+                    status_text.setText("")
+                    if (!mWidgetMode) {
+                        finish()
+                    } else {
+                        image_preview_container.removeAllViews()
+                        tweet_button.isEnabled = false
                     }
                 }
             }
-            UpdateStatusTask(this, switch_account_spinner.selectedItem as AccessToken, mImagePathList)
-                    .execute(sUpdate)
         }
     }
 

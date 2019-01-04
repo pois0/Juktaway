@@ -14,9 +14,6 @@ dependencies {
     implementation 'com.google.code.gson:gson:2.8.5'
     implementation 'com.google.guava:guava:25.0-android'
     implementation 'de.greenrobot:eventbus:2.2.0'
-    implementation "org.twitter4j:twitter4j-core:${twitter4jVersion}"
-    implementation "org.twitter4j:twitter4j-async:${twitter4jVersion}"
-    implementation "org.twitter4j:twitter4j-stream:${twitter4jVersion}"
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation 'com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9'
@@ -97,6 +94,9 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/kotlinx-io.kotlin_module'
+        exclude 'META-INF/atomicfu.kotlin_module'
+        exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
     }
 }
 

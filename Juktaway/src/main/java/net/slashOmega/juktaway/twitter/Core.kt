@@ -1,12 +1,15 @@
 package net.slashOmega.juktaway.twitter
 
+import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.event.action.AccountChangeEvent
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
+import net.slashOmega.juktaway.util.SharedPreference
 import org.jetbrains.anko.db.*
+import java.io.Serializable
 import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
@@ -20,45 +23,51 @@ lateinit var currentClient: PenicillinClient
 lateinit var currentIdentifier: Identifier
     private set
 
-val identifierList = dbUse {
-    select(Core.tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
-            .parseList(Core.accessSetParser)
-}
+val identifierList
+    get() = dbUse {
+        select(Core.tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
+                .parseList(Core.identifierParser)
+    }
 
-val isIdentifierSet = identifierList.isNotEmpty()
+val isIdentifierSet
+    get() = identifierList.isNotEmpty()
 
 inline fun <T> withClient(block: PenicillinClient.() -> T) = currentClient.use(block)
 
 object Core {
-    internal val accessSetParser = classParser<Identifier>()
+    internal val identifierParser = classParser<Identifier>()
     internal const val tokensTable = "accounts"
+    private var lastIdentifierAts by SharedPreference("twittercore", "lastIdentifier", "")
 
-    init {
+    fun initialize() {
         dbUse {
             createTable(tokensTable, true,
                     "id" to INTEGER + PRIMARY_KEY,
-                    "cs" to TEXT + NOT_NULL,
                     "ck" to TEXT + NOT_NULL,
-                    "at" to TEXT + NOT_NULL,
-                    "ats" to TEXT + NOT_NULL,
+                    "cs" to TEXT + NOT_NULL,
+                    "at" to TEXT + NOT_NULL + UNIQUE,
+                    "ats" to TEXT + NOT_NULL + UNIQUE,
                     "userId" to INTEGER + NOT_NULL,
                     "screenName" to TEXT + NOT_NULL)
+        }
+
+        if (isIdentifierSet) {
+            currentIdentifier = dbUse {
+                select(tokensTable, "ck", "cs", "at", "ats", "userId", "screenName")
+                        .whereArgs("ats = {ats}", "ats" to lastIdentifierAts)
+                        .parseSingle(identifierParser)
+            }
+
+            currentClient = currentIdentifier.toClient()
         }
     }
 
     suspend fun switchToken(acc: Identifier) {
         withContext(Dispatchers.Default) {
+            if (identifierList.size > 1) currentClient.close()
             currentIdentifier = acc
-            currentClient = PenicillinClient {
-                account {
-                    application(acc.cs, acc.ck)
-                    token(acc.at, acc.ats)
-                }
-                dispatcher { coroutineContext = Dispatchers.Default }
-
-                maxRetries = 3
-                retry(1, TimeUnit.SECONDS)
-            }
+            currentClient = acc.toClient()
+            lastIdentifierAts = currentIdentifier.ats
             EventBus.getDefault().post(AccountChangeEvent())
         }
     }
@@ -66,10 +75,10 @@ object Core {
     suspend fun switchToken(id: Long) {
         val acc = try {
             dbUse {
-                select(tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
+                select(tokensTable, "ck", "cs", "at", "ats", "userId", "screenName")
                         .whereArgs("id = {data}", "data" to id)
-                        .parseList(accessSetParser)
-            }[0]
+                        .parseSingle(identifierParser)
+            }
         } catch (e: Exception) {
             return
         }
@@ -86,6 +95,7 @@ object Core {
                                     "cs" to set.cs)
                             .parseSingle(LongParser)
                 }.getOrNull() ?: run {
+                    Log.d("addToken", "adding")
                     insert(tokensTable,
                             "cs" to set.cs,
                             "ck" to set.ck,
@@ -93,12 +103,6 @@ object Core {
                             "ats" to set.ats,
                             "userId" to set.userId,
                             "screenName" to set.screenName)
-
-                    select(tokensTable, "id")
-                            .whereArgs("(userId = {userId}) and (cs = {cs})",
-                                    "userId" to set.userId,
-                                    "cs" to set.cs)
-                            .parseSingle(LongParser)
                 }
             }
         }
@@ -106,14 +110,36 @@ object Core {
         if (switchClient) switchToken(set)
     }
 
-    suspend fun removeToken(id: Long) {
-        dbUse {
-            delete(tokensTable, "id = {id}", "id" to id)
+    suspend fun removeIdentifier(id: Long) {
+        withContext(Dispatchers.Default) {
+            dbUse {
+                delete(tokensTable, "id = {id}", "id" to id)
+            }
+        }
+    }
+
+    suspend fun removeIdentifier(identifier: Identifier) {
+        withContext(Dispatchers.Default) {
+            dbUse {
+                delete(tokensTable, "at = {at}", "at" to identifier.at)
+            }
         }
     }
 }
 
-data class Identifier(val cs: String, val ck: String, val at: String, val ats: String, val userId: Long, val screenName: String) {
+data class Identifier(val ck: String, val cs: String, val at: String, val ats: String, val userId: Long, val screenName: String): Serializable {
     override fun hashCode(): Int = at.hashCode()
     override fun equals(other: Any?): Boolean = other is Identifier && this.at == other.at
+    fun toClient() = PenicillinClient {
+        account {
+            application(ck, cs)
+            token(at, ats)
+        }
+        dispatcher { coroutineContext = Dispatchers.Default }
+
+        maxRetries = 3
+        retry(1, TimeUnit.SECONDS)
+    }
+
+    inline fun <T> asClient(block: PenicillinClient.() -> T) = toClient().use(block)
 }

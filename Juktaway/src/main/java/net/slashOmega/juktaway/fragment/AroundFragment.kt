@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway.fragment
 
 import android.app.Dialog
-import android.os.AsyncTask
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.view.View
@@ -11,6 +10,7 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.fragment_around.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
@@ -18,19 +18,15 @@ import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
-import twitter4j.Paging
-import twitter4j.ResponseList
-import java.lang.ref.WeakReference
 
 class AroundFragment: DialogFragment() {
     private lateinit var mProgressBarTop: ProgressBar
     private lateinit var mProgressBarBottom: ProgressBar
     private val mAdapter by lazy { StatusAdapter(activity!!) }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity!!).apply {
         window?.requestFeature(WindowManager.LayoutParams.FLAG_FULLSCREEN)
         window?.setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
         setContentView(R.layout.fragment_around)
@@ -47,7 +43,7 @@ class AroundFragment: DialogFragment() {
             }
             arguments?.getString("status")?.toJsonObject()?.parse<Status>()?.let { origin ->
                 mAdapter.add(Row.newStatus(origin))
-                GlobalScope.launch {
+                GlobalScope.launch(Dispatchers.Main) {
                     val beforeList = runCatching {
                         currentClient.timeline.user(origin.user.id, count = 3, maxId = origin.id - 1).await()
                     }.getOrNull() ?: run {

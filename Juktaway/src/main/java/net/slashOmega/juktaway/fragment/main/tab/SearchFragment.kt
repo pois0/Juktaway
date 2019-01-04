@@ -2,16 +2,18 @@ package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.Bundle
 import android.view.View
+import jp.nephy.penicillin.core.PenicillinJsonObjectAction
+import jp.nephy.penicillin.core.hasNext
+import jp.nephy.penicillin.core.next
+import jp.nephy.penicillin.models.Search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
-import net.slashOmega.juktaway.model.TwitterManager
-import twitter4j.Query
+import net.slashOmega.juktaway.twitter.currentClient
 
 class SearchFragment: BaseFragment() {
-    private var mQuery: Query? = null
+    private var action: PenicillinJsonObjectAction<Search>? = null
 
     override var tabId = 0L
 
@@ -23,45 +25,37 @@ class SearchFragment: BaseFragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    override fun isSkip(row: Row): Boolean = !row.isStatus || (row.status?.text?.contains(mSearchWord)?.not()?: true)
-
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val qr = try {
-                TwitterManager.twitter.search(
-                        mQuery?.takeUnless { mReloading }?: Query("$mSearchWord exclude:retweets"))
-
-            } catch (e: OutOfMemoryError) {
-                null
-            } catch (e: Exception) {
-                e.printStackTrace()
-                null
-            }
+            val qr = runCatching {
+                (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
+                        .await()
+            }.getOrNull()
 
             when {
                 qr == null -> {
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                     mListView.visibility = View.VISIBLE
-                    mQuery = null
+                    action = null
                 }
                 mReloading -> {
                     clear()
-                    mAdapter?.addAllFromStatusesSuspend(qr.tweets)
+                    mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
                     mReloading = false
                     if (qr.hasNext()) {
-                        mQuery = qr.nextQuery()
+                        action = qr.next()
                         mAutoLoader = true
                     } else {
-                        mQuery = null
+                        action = null
                         mAutoLoader = false
                     }
                     mPullToRefreshLayout.setRefreshComplete()
                 }
                 else -> {
-                    mAdapter?.extensionAddAllFromStatusesSuspend(qr.tweets)
+                    mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
                     mAutoLoader = true
-                    mQuery = qr.nextQuery()
+                    if (qr.hasNext()) action = qr.next()
                     mListView.visibility = View.VISIBLE
                 }
             }

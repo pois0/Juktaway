@@ -10,17 +10,17 @@ import android.view.WindowManager
 import android.widget.AbsListView
 import android.widget.AbsListView.LayoutParams
 import android.widget.ListView
-import com.google.common.primitives.Longs
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.core.hasNext
+import jp.nephy.penicillin.core.next
 import jp.nephy.penicillin.endpoints.parameters.SearchResultType
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -28,12 +28,10 @@ import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.HeaderStatusClickListener
 import net.slashOmega.juktaway.listener.HeaderStatusLongClickListener
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
-import net.slashOmega.juktaway.util.tryAndTraceGet
-import twitter4j.Query
 import java.util.*
+import kotlin.collections.ArrayList
 
 class TalkFragment: DialogFragment() {
     private val mAdapter by lazy { StatusAdapter(activity!!) }
@@ -56,7 +54,7 @@ class TalkFragment: DialogFragment() {
         }
     }
 
-    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity).apply {
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity!!).apply {
         window?.apply {
             requestFeature(Window.FEATURE_NO_TITLE)
             setFlags(WindowManager.LayoutParams.FLAG_FULLSCREEN, WindowManager.LayoutParams.FLAG_LAYOUT_IN_SCREEN)
@@ -65,9 +63,9 @@ class TalkFragment: DialogFragment() {
         setContentView(R.layout.list_talk)
 
         arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let { status ->
-            val inReplyToAreaPixels = if (status.inReplyToStatusId ?: -1L > 0) resources.displayMetrics.heightPixels else 0
+            val inReplyToAreaPixels = if (status.inReplyToStatusId != null) resources.displayMetrics.heightPixels else 0
             val (headerH, footerH) = if (BasicSettings.talkOrderNewest) Pair(100, inReplyToAreaPixels)
-                    else Pair(inReplyToAreaPixels, 100)
+            else Pair(inReplyToAreaPixels, 100)
             mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, headerH)
             mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, footerH)
 
@@ -85,7 +83,7 @@ class TalkFragment: DialogFragment() {
             mAdapter.add(Row.newStatus(status))
 
             if (!BasicSettings.talkOrderNewest) mListView.setSelectionFromTop(1, 0)
-            loadTalk(status.inReplyToStatusId ?: -1L)
+            status.inReplyToStatusId?.let { loadTalk(it) }
             loadTalkReply(status)
         }
     }
@@ -110,7 +108,7 @@ class TalkFragment: DialogFragment() {
         var statusId = idParam
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
-                val status = tryAndTraceGet { currentClient.status.show(statusId).await().result } ?: break
+                val status = runCatching { currentClient.status.show(statusId).await().result }.getOrNull() ?: break
 
                 if (BasicSettings.talkOrderNewest) {
                     mAdapter.addSuspend(Row.newStatus(status))
@@ -123,7 +121,7 @@ class TalkFragment: DialogFragment() {
                     }
                 }
 
-                statusId = status.inReplyToStatusId ?: -1
+                status.inReplyToStatusId?.let { statusId = it }
             }
             dialog?.removeGuruGuru()
         }
@@ -131,78 +129,73 @@ class TalkFragment: DialogFragment() {
 
     private fun loadTalkReply(source: Status) {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                try {
-                    val resp = currentClient.search.search("to:${source.user.screenName} AND filter:replies",
-                            count = 200, sinceId = source.id, resultType = SearchResultType.Recent).await()
-                    val searchStatuses = resp.statuses
-                    if (toResult) searchStatuses.addAll(mTwitter.search(toResult.nextQuery()).tweets)
-                    val fromQuery = Query("from:" + source.user.screenName + " AND filter:replies").apply {
-                        count = 200
-                        sinceId = source.id
-                        resultType = Query.ResultType.recent
-                    }
-                    resp.result.searchMetadat
-                    TwitterManager.twitter.search(Query()).hasNext()
-                    val fromResult = mTwitter.search(fromQuery)
-                    searchStatuses.addAll(fromResult.tweets)
-                    val isLoadMap = LongSparseArray<Boolean>().apply { searchStatuses.forEach { put(it.id, true) } }
-                    val lookupStatuses = ArrayList<twitter4j.Status>()
-                    val statusIds = ArrayList<Long>()
-                    searchStatuses.forEach {
-                        if (it.inReplyToStatusId > 0 && !isLoadMap.get(it.inReplyToStatusId,  false)) {
-                            statusIds.add(it.inReplyToStatusId)
-                            isLoadMap.put(it.inReplyToStatusId, true)
-                            if (statusIds.size == 100) {
-                                lookupStatuses.addAll(mTwitter.lookup(*Longs.toArray(statusIds)))
-                                statusIds.clear()
-                            }
+            runCatching {
+                val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",
+                        count = 200,
+                        sinceId = source.id,
+                        resultType = SearchResultType.Recent).await()
+                val searchedStatuses = toResult.result.statuses.toMutableList()
+                if (toResult.hasNext()) searchedStatuses.addAll(toResult.next().await().result.statuses)
+
+                val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
+                        count = 200,
+                        sinceId = source.id,
+                        resultType = SearchResultType.Recent).await()
+                searchedStatuses.addAll(fromResult.result.statuses)
+                val isLoadMap = LongSparseArray<Boolean>().apply { searchedStatuses.forEach { put(it.id, true) } }
+                val lookupStatuses = ArrayList<Status>()
+                val statusIds = mutableListOf<Long>()
+                searchedStatuses.forEach { status ->
+                    if (status.inReplyToStatusId != null &&
+                            status.inReplyToStatusId?.let { isLoadMap.get(it, false) } == true) {
+                        statusIds.add(status.inReplyToStatusId!!)
+                        isLoadMap.put(status.inReplyToStatusId!!, true)
+                        if (statusIds.size == 200) {
+                            lookupStatuses.addAll(currentClient.status.lookup(statusIds).await())
+                            statusIds.clear()
                         }
                     }
+                }
 
-                    if (statusIds.size > 0) lookupStatuses.addAll(mTwitter.lookup(*Longs.toArray(statusIds)))
+                if (statusIds.size > 0) lookupStatuses.addAll(currentClient.status.lookup(statusIds).await())
 
-                    searchStatuses.addAll(lookupStatuses)
+                searchedStatuses.addAll(lookupStatuses)
 
-                    searchStatuses.sortWith(Comparator { a0, a1 -> when {
-                        a0.id > a1.id -> 1
-                        a0.id == a1.id -> 0
-                        else -> -1
-                    }})
+                searchedStatuses.sortWith(Comparator { a0, a1 -> when {
+                    a0.id > a1.id -> 1
+                    a0.id == a1.id -> 0
+                    else -> -1
+                }})
 
-                    val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
-                    ArrayList<twitter4j.Status>().apply {
-                        searchStatuses.forEach {
-                            if (isReplyMap.get(it.inReplyToStatusId, false)) {
-                                add(it)
-                                isReplyMap.put(it.id, true)
-                            }
+                val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
+                mutableListOf<Status>().apply {
+                    searchedStatuses.forEach { status ->
+                        if (status.inReplyToStatusId?.let { isReplyMap.get(it, false) } == true) {
+                            add(status)
+                            isReplyMap.put(status.id, true)
                         }
                     }
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
                 }
-            } ?: return@launch
+            }.onSuccess { statuses ->
+                if (dialog == null) return@launch
+                dialog.run {
+                    if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
+                }.visibility = View.GONE
 
-            if (dialog == null) return@launch
-            dialog.run {
-                if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
-            }.visibility = View.GONE
+                if (BasicSettings.talkOrderNewest) {
+                    val lastPos = mListView.lastVisiblePosition
 
-            if (BasicSettings.talkOrderNewest) {
-                val lastPos = mListView.lastVisiblePosition
+                    val y = mListView.getChildAt(lastPos)?.top ?: 0
 
-                val y = mListView.getChildAt(lastPos)?.top ?: 0
+                    statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
+                    mListView.setSelectionFromTop(lastPos + statuses.size, y)
 
-                statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
-                mListView.setSelectionFromTop(lastPos + statuses.size, y)
-
-                if (mListView.firstVisiblePosition > 0) {
-                    mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                    if (mListView.firstVisiblePosition > 0) {
+                        mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                    }
+                } else {
+                    mAdapter.addAllFromStatuses(statuses)
                 }
-            } else {
-                statuses.forEach { mAdapter.addSuspend(Row.newStatus(it)) }
             }
         }
     }

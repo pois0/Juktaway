@@ -13,9 +13,9 @@ import android.widget.LinearLayout
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.twitter.currentClient
-import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.displayImage
+import net.slashOmega.juktaway.util.mediaType
 import org.jetbrains.anko.support.v4.toast
 import java.io.File
 
@@ -52,8 +52,7 @@ class UpdateProfileImageFragment: DialogFragment() {
                     runCatching {
                         withContext(Dispatchers.Default) {
                             val file = arguments!!.get(uriArg) as File
-                            val format = ImageUtil.toMediaType(file.path.run { substring(lastIndexOf(".") + 1) })
-                            currentClient.account.updateProfileImage(file.readBytes(), format)
+                            currentClient.account.updateProfileImage(file.readBytes(), file.mediaType())
                         }
                     }.run {
                         MessageUtil.dismissProgressDialog()

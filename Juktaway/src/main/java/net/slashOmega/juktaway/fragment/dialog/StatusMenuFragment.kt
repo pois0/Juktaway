@@ -4,7 +4,6 @@ import android.app.AlertDialog
 import android.app.Dialog
 import android.content.Context
 import android.content.Intent
-import android.content.pm.ResolveInfo
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
@@ -14,6 +13,15 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ListView
 import android.widget.TextView
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.models.DirectMessage
+import jp.nephy.penicillin.models.Status
+import jp.nephy.penicillin.models.User
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.SearchActivity
@@ -21,23 +29,14 @@ import net.slashOmega.juktaway.adapter.ArrayAdapterBase
 import net.slashOmega.juktaway.fragment.AroundFragment
 import net.slashOmega.juktaway.fragment.RetweetersFragment
 import net.slashOmega.juktaway.fragment.TalkFragment
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.FavRetweetManager
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.plugin.TwiccaPlugin
 import net.slashOmega.juktaway.settings.mute.SourceMute
 import net.slashOmega.juktaway.settings.mute.UserMute
 import net.slashOmega.juktaway.settings.mute.WordMute
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import net.slashOmega.juktaway.util.ActionUtil
-import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.StatusUtil
-import net.slashOmega.juktaway.util.ThemeUtil
-import net.slashOmega.juktaway.util.TwitterUtil.uri
-import twitter4j.DirectMessage
-import twitter4j.Status
-import twitter4j.URLEntity
-import twitter4j.User
+import net.slashOmega.juktaway.util.*
+import org.jetbrains.anko.startActivity
 
 /**
  * Created on 2018/10/27.
@@ -47,12 +46,12 @@ class StatusMenuFragment: DialogFragment() {
         fun newInstance(row: Row) = StatusMenuFragment().apply {
             arguments = Bundle().apply {
                 if (row.isDirectMessage) {
-                    putSerializable("directMessage", row.message)
+                    putString("directMessage", row.message!!.toJsonString())
                 } else {
-                    putSerializable("status", row.status)
+                    putString("status", row.status!!.toJsonString())
                 }
                 if (row.isFavorite) {
-                    putSerializable("favoriteSourceUser", row.source)
+                    putString("favoriteSourceUser", row.source!!.toJsonString())
                 }
             }
         }
@@ -60,13 +59,9 @@ class StatusMenuFragment: DialogFragment() {
 
     private lateinit var mActivity: FragmentActivity
 
-    private var mTwiccaPlugins: List<ResolveInfo> = mutableListOf()
-
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        activity?.let {
-            mActivity = it
-            ThemeUtil.setTheme(it)
-        } ?: return Dialog(null)
+        mActivity = activity!!
+        ThemeUtil.setTheme(activity!!)
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)
                 .setView(ListView(mActivity).apply {
@@ -75,17 +70,17 @@ class StatusMenuFragment: DialogFragment() {
                             adapter.getItem(i)?.callback?.run()
                         }
                     }).let {
-                        val message = arguments?.getSerializable("directMessage") as? DirectMessage
+                        val message = arguments?.getString("directMessage")?.toJsonObject()?.parse<DirectMessage>()
                         if (message != null) onDirectMessage(message, adapter, it)
-                        else onStatus(arguments!!.getSerializable("status") as Status, adapter, it)
+                        else onStatus(arguments!!.getString("status")!!.toJsonObject().parse(), adapter, it)
                     }
                 .create()
     }
 
 
 
-    private fun onDirectMessage(message: DirectMessage, adapter: MenuAdapter, builder: AlertDialog.Builder) = builder.also {
-        it.setTitle(message.senderScreenName)
+    private fun onDirectMessage(message: DirectMessage, adapter: MenuAdapter, builder: AlertDialog.Builder) = builder.apply {
+        setTitle(message.senderScreenName)
         /*
          * 返信(DM)
          */
@@ -98,14 +93,16 @@ class StatusMenuFragment: DialogFragment() {
          * ツイ消し(DM)
          */
         adapter.add(Menu(R.string.context_menu_destroy_direct_message, Runnable {
-            ActionUtil.doDestroyDirectMessage(message.id)
-            dismiss()
+            GlobalScope.launch(Dispatchers.Main) {
+                ActionUtil.destroyDirectMessage(message.id)
+                dismiss()
+            }
         }))
 
         /*
          * ツイート内のメンション
          */
-        for (mention in message.userMentionEntities) {
+        for (mention in message.entities.userMentions) {
             adapter.add(Menu("@" + mention.screenName, Runnable {
                 val intent = Intent(mActivity, ProfileActivity::class.java)
                 intent.putExtra("screenName", mention.screenName)
@@ -116,17 +113,17 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * ツイート内のURL
          */
-        val urls = message.urlEntities
+        val urls = message.entities.urls.map { it.expandedUrl }
         addUrls(adapter, urls)
     }
 
-    private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = builder.also {
+    private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = builder.apply {
         val retweet = status.retweetedStatus
         val source = retweet ?: status
-        val mentions = source.userMentionEntities
-        val isPublic = !source.user.isProtected
+        val mentions = source.entities.userMentions
+        val isPublic = !source.user.protected
 
-        builder.setTitle(status.text)
+        setTitle(status.text)
 
         /*
          * リプ
@@ -161,13 +158,17 @@ class StatusMenuFragment: DialogFragment() {
          */
         if (FavRetweetManager.isFav(status)) {
             adapter.add(Menu(R.string.context_menu_destroy_favorite, Runnable {
-                ActionUtil.doDestroyFavorite(status.id)
-                dismiss()
+                GlobalScope.launch(Dispatchers.Main) {
+                    ActionUtil.doDestroyFavorite(status.id)
+                    dismiss()
+                }
             }))
         } else {
             adapter.add(Menu(R.string.context_menu_create_favorite, Runnable {
-                ActionUtil.doFavorite(status.id)
-                dismiss()
+                GlobalScope.launch(Dispatchers.Main) {
+                    ActionUtil.doFavorite(status.id)
+                    dismiss()
+                }
             }))
         }
 
@@ -180,8 +181,10 @@ class StatusMenuFragment: DialogFragment() {
              * ツイ消し
              */
             adapter.add(Menu(R.string.context_menu_destroy_status, Runnable {
-                ActionUtil.doDestroyStatus(status.id)
-                dismiss()
+                GlobalScope.launch(Dispatchers.Main) {
+                    ActionUtil.doDestroyStatus(status.id)
+                    dismiss()
+                }
             }))
         }
 
@@ -194,8 +197,10 @@ class StatusMenuFragment: DialogFragment() {
              * RT解除
              */
             adapter.add(Menu(R.string.context_menu_destroy_retweet, Runnable {
-                ActionUtil.doDestroyRetweet(status)
-                dismiss()
+                GlobalScope.launch(Dispatchers.Main) {
+                    ActionUtil.doDestroyRetweet(status)
+                    dismiss()
+                }
             }))
         } else {
 
@@ -213,9 +218,11 @@ class StatusMenuFragment: DialogFragment() {
                      * ふぁぼ＆RT
                      */
                     adapter.add(Menu(R.string.context_menu_favorite_and_retweet, Runnable {
-                        ActionUtil.doFavorite(status.id)
-                        ActionUtil.doRetweet(status.id)
-                        dismiss()
+                        GlobalScope.launch(Dispatchers.Main) {
+                            ActionUtil.doFavorite(status.id)
+                            ActionUtil.doRetweet(status.id)
+                            dismiss()
+                        }
                     }))
                 }
 
@@ -223,8 +230,10 @@ class StatusMenuFragment: DialogFragment() {
                  * RT
                  */
                 adapter.add(Menu(R.string.context_menu_retweet, Runnable {
-                    ActionUtil.doRetweet(status.id)
-                    dismiss()
+                    GlobalScope.launch(Dispatchers.Main) {
+                        ActionUtil.doRetweet(status.id)
+                        dismiss()
+                    }
                 }))
             }
         }
@@ -249,7 +258,7 @@ class StatusMenuFragment: DialogFragment() {
          */
         adapter.add(Menu(R.string.context_menu_talk, Runnable {
             TalkFragment().apply {
-                arguments = Bundle().apply { putSerializable("status", source) }
+                arguments = Bundle().apply { putString("status", source.toJsonString()) }
             }.show(mActivity.supportFragmentManager, "dialog")
         }))
 
@@ -258,31 +267,29 @@ class StatusMenuFragment: DialogFragment() {
          */
         adapter.add(Menu(R.string.context_menu_show_around, Runnable {
             AroundFragment().apply {
-                arguments = Bundle().apply { putSerializable("status", source) }
+                arguments = Bundle().apply { putString("status", source.toJsonString()) }
             }.show(mActivity.supportFragmentManager, "dialog")
         }))
 
         /*
          * ツイート内のURL
          */
-        val urls = source.urlEntities
+        val urls = source.entities.urls.map { it.expandedUrl }
         addUrls(adapter, urls)
 
         /*
          * ツイート内のURL(画像)
          */
-        val medias = source.mediaEntities
+        val medias = source.entities.media.map { it.expandedUrl }
         addUrls(adapter, medias)
 
         /*
          * ツイート内のハッシュタグ
          */
-        val hashtags = source.hashtagEntities
+        val hashtags = source.entities.hashtags
         for (hashtag in hashtags) {
             adapter.add(Menu("#" + hashtag.text, Runnable {
-                mActivity.startActivity(Intent(mActivity, SearchActivity::class.java).apply {
-                    putExtra("query", "#" + hashtag.text)
-                })
+                mActivity.startActivity<SearchActivity>("query" to "#" + hashtag.text)
             }))
         }
 
@@ -301,7 +308,7 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * ふぁぼした人
          */
-        val favoriteSourceUser = arguments!!.getSerializable("favoriteSourceUser") as? User
+        val favoriteSourceUser = arguments!!.getString("favoriteSourceUser")?.toJsonObject()?.parse<User>()
         if (favoriteSourceUser != null) {
             users.put(favoriteSourceUser.id, true)
             adapter.add(Menu("@" + favoriteSourceUser.screenName, Runnable {
@@ -343,27 +350,6 @@ class StatusMenuFragment: DialogFragment() {
         if (isPublic) {
 
             /*
-             * TwiccaPlugin
-             */
-            if (mTwiccaPlugins.isEmpty()) {
-                mTwiccaPlugins = TwiccaPlugin.getResolveInfo(mActivity.packageManager,
-                        TwiccaPlugin.TWICCA_ACTION_SHOW_TWEET)
-            }
-            if (!mTwiccaPlugins.isEmpty()) {
-                val pm = mActivity.packageManager
-                for (resolveInfo in mTwiccaPlugins) {
-                    if (pm == null || resolveInfo.activityInfo == null) continue
-
-                    val label = resolveInfo.activityInfo.loadLabel(pm) as? String ?: continue
-                    adapter.add(Menu(label, Runnable {
-                        mActivity.startActivity(TwiccaPlugin.createIntentShowTweet(status,
-                                resolveInfo.activityInfo.packageName,
-                                resolveInfo.activityInfo.name))
-                    }))
-                }
-            }
-
-            /*
              * ツイートを共有
              */
             adapter.add(Menu(R.string.context_menu_share_url, Runnable {
@@ -389,11 +375,11 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * viaをミュート
          */
-        adapter.add(Menu(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.source)), Runnable {
+        adapter.add(Menu(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.source.name)), Runnable {
             AlertDialog.Builder(activity)
-                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.source)))
+                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.source.name)))
                     .setPositiveButton(R.string.button_ok) { _, _->
-                        SourceMute += StatusUtil.getClientName(source.source)
+                        SourceMute += StatusUtil.getClientName(source.source.name)
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }
@@ -434,10 +420,10 @@ class StatusMenuFragment: DialogFragment() {
         }))
     }
 
-    private fun addUrls(adapter: MenuAdapter, urls: Array<out URLEntity>) {
+    private fun addUrls(adapter: MenuAdapter, urls: List<String>) {
         for (url in urls) {
-            adapter.add(Menu(url.expandedURL, Runnable {
-                mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url.expandedURL)))
+            adapter.add(Menu(url, Runnable {
+                mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                 dismiss()
             }))
         }

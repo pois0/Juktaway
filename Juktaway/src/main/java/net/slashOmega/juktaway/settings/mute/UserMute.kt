@@ -1,8 +1,8 @@
 package net.slashOmega.juktaway.settings.mute
 
+import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import org.jetbrains.anko.db.*
-import twitter4j.User
 
 /**
  * Created on 2018/11/09.

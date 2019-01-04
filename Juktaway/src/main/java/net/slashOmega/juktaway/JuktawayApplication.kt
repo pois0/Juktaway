@@ -7,6 +7,8 @@ import android.support.multidex.MultiDex
 import android.support.multidex.MultiDexApplication
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
+import net.slashOmega.juktaway.twitter.Core
+import net.slashOmega.juktaway.twitter.currentClient
 
 class JuktawayApplication: MultiDexApplication() {
     companion object {
@@ -29,6 +31,7 @@ class JuktawayApplication: MultiDexApplication() {
 
 
         // load setting files
+        Core.initialize()
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
 
@@ -36,5 +39,10 @@ class JuktawayApplication: MultiDexApplication() {
         font = Typeface.createFromAsset(assets, "fontello.ttf")
 
         if (BuildConfig.DEBUG) Thread.setDefaultUncaughtExceptionHandler(MyUncaughtExceptionHandler(app))
+    }
+
+    override fun onTerminate() {
+        currentClient.close()
+        super.onTerminate()
     }
 }

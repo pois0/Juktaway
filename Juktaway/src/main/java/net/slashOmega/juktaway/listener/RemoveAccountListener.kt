@@ -1,7 +1,7 @@
 package net.slashOmega.juktaway.listener
 
-import twitter4j.auth.AccessToken
+import net.slashOmega.juktaway.twitter.Identifier
 
 interface RemoveAccountListener {
-    fun removeAccount(accessToken: AccessToken)
+    fun removeIdentifier(identifier: Identifier)
 }

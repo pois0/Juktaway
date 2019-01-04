@@ -1,12 +1,11 @@
 package net.slashOmega.juktaway.model
 
+import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.models.Status
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.twitter.identifierList
-
-import twitter4j.Status
-import twitter4j.Twitter
-import twitter4j.TwitterException
 
 object Relationship {
     private val blockList = mutableListOf<Long>()
@@ -15,15 +14,15 @@ object Relationship {
     private val myIdList = mutableListOf<Long>()
 
     init {
-        val accessTokens = identifierList
-        if (accessTokens.isNotEmpty()) {
-            for (accessToken in accessTokens) {
-                val twitter = TwitterManager.twitterInstance
-                twitter.oAuthAccessToken = accessToken
-                myIdList.add(accessToken.userId)
-                loadBlock(twitter)
-                loadOfficialMute(twitter)
-                loadNoRetweet(twitter)
+        GlobalScope.launch(Dispatchers.Default) {
+            val identifiers = identifierList
+            myIdList.addAll(identifiers.map { it.userId })
+            identifiers.forEach {
+                it.asClient {
+                    loadBlock(this)
+                    loadOfficialMute(this)
+                    loadNoRetweet(this)
+                }
             }
         }
     }
@@ -49,40 +48,19 @@ object Relationship {
 
     fun removeNoRetweet(userId: Long) { noRetweetList.remove(userId) }
 
-    fun loadBlock(twitter: Twitter) {
-        GlobalScope.launch {
-            try {
-                twitter.blocksIDs?.iDs?.let {
-                    blockList.addAll(it.toList())
-                }
-            } catch (e: TwitterException) {
-                e.printStackTrace()
-            }
-        }
+    private suspend fun loadBlock(client: PenicillinClient) {
+        runCatching { client.block.listIds().await().result.ids }
+                .getOrNull()?.let { blockList.addAll(it) }
     }
 
-    fun loadOfficialMute(twitter: Twitter) {
-        GlobalScope.launch {
-            try {
-                twitter.getMutesIDs(-1L)?.iDs?.let {
-                    officialMuteList.addAll(it.toList())
-                }
-            } catch (e: TwitterException) {
-                e.printStackTrace()
-            }
-        }
+    private suspend fun loadOfficialMute(client: PenicillinClient) {
+        runCatching { client.mute.listIds().await().result.ids }
+                .getOrNull()?.let { officialMuteList.addAll(it) }
     }
 
-    fun loadNoRetweet(twitter: Twitter) {
-        GlobalScope.launch {
-            try {
-                twitter.noRetweetsFriendships?.iDs?.let {
-                    noRetweetList.addAll(it.toList())
-                }
-            } catch (e: TwitterException) {
-                e.printStackTrace()
-            }
-        }
+    private suspend fun loadNoRetweet(client : PenicillinClient) {
+        runCatching { client.friendship.noRetweetsIds().await().result.ids }
+                .getOrNull()?.let { noRetweetList.addAll(it) }
     }
     private fun isThatStatusVisible(id: Long): Boolean = isMe(id) || !(isBlock(id) || isOfficialMute(id))
 

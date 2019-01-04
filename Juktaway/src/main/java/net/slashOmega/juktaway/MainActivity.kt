@@ -21,6 +21,10 @@ import android.widget.AdapterView
 import android.widget.Button
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.core.PenicillinException
+import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
 import kotlinx.coroutines.Dispatchers
@@ -34,31 +38,16 @@ import net.slashOmega.juktaway.event.NewRecordEvent
 import net.slashOmega.juktaway.event.action.AccountChangeEvent
 import net.slashOmega.juktaway.event.action.OpenEditorEvent
 import net.slashOmega.juktaway.event.action.PostAccountChangeEvent
-import net.slashOmega.juktaway.event.connection.StreamingConnectionEvent
 import net.slashOmega.juktaway.event.settings.BasicSettingsChangeEvent
-import net.slashOmega.juktaway.fragment.main.StreamingSwitchDialogFragment
 import net.slashOmega.juktaway.fragment.main.tab.*
 import net.slashOmega.juktaway.model.TabManager
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.settings.BasicSettings
-import net.slashOmega.juktaway.task.SendDirectMessageTask
-import net.slashOmega.juktaway.task.UpdateStatusTask
-import net.slashOmega.juktaway.twitter.Core
-import net.slashOmega.juktaway.twitter.currentIdentifier
-import net.slashOmega.juktaway.twitter.isIdentifierSet
-import net.slashOmega.juktaway.twitter.identifierList
-import net.slashOmega.juktaway.util.KeyboardUtil
-import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.ThemeUtil
-import net.slashOmega.juktaway.util.TwitterUtil
+import net.slashOmega.juktaway.twitter.*
+import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.widget.FontelloButton
 import org.jetbrains.anko.startActivity
-import twitter4j.Status
-import twitter4j.StatusUpdate
-import twitter4j.TwitterException
-import twitter4j.auth.AccessToken
-import java.lang.ref.WeakReference
+import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
@@ -68,30 +57,7 @@ class MainActivity: FragmentActivity() {
         private const val REQUEST_SETTINGS = 300
         private const val REQUEST_TAB_SETTINGS = 400
         private const val REQUEST_SEARCH = 500
-        private const val ERROR_CODE_DUPLICATE_STATUS = 187
         private val USER_LIST_PATTERN = Pattern.compile("^(@[a-zA-Z0-9_]+)/(.*)$")
-
-        private class SendQuickDMTask(context: MainActivity): SendDirectMessageTask(null) {
-            private val ref = WeakReference(context)
-
-            override fun onPostExecute(res: TwitterException?) {
-                MessageUtil.dismissProgressDialog()
-                res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) }
-                        ?: ref.get()?.quick_tweet_edit?.setText("")
-            }
-        }
-
-        private class UpdateQuickStatusTask(context: MainActivity): UpdateStatusTask(null, arrayListOf()) {
-            private val ref = WeakReference(context)
-
-            override fun onPostExecute(res: TwitterException?) {
-                MessageUtil.dismissProgressDialog()
-                res?.run { MessageUtil.showToast(
-                        if (res.errorCode == ERROR_CODE_DUPLICATE_STATUS) R.string.toast_update_status_already
-                        else R.string.toast_update_status_failure
-                )} ?: ref.get()?.quick_tweet_edit?.setText("")
-            }
-        }
     }
 
     private var mDefaultTextColor: Int = 0
@@ -118,7 +84,7 @@ class MainActivity: FragmentActivity() {
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
 
-    private var mSwitchAccessToken: AccessToken? = null
+    private var mSwitchAccessToken: Identifier? = null
 
 
     @SuppressLint("InflateParams")
@@ -153,9 +119,6 @@ class MainActivity: FragmentActivity() {
                     }
                 }
             }
-        }
-        action_bar_streaming_button.setOnClickListener {
-            StreamingSwitchDialogFragment.newInstance(!BasicSettings.streamingMode).show(supportFragmentManager, "dialog")
         }
         action_bar_search_button.setOnClickListener { startSearch() }
 
@@ -193,18 +156,34 @@ class MainActivity: FragmentActivity() {
         }
 
         send_button.setOnClickListener {
-            val msg = quick_tweet_edit.string
-            if (msg.isNotEmpty()) {
-                MessageUtil.showProgressDialog(this, getString(R.string.progress_sending))
-                if (msg.startsWith("D ")) {
-                    SendQuickDMTask(this).execute(msg)
-                } else {
-                    UpdateQuickStatusTask(this).execute(StatusUpdate(msg).apply {
-                        if (mInReplyToStatus != null) {
-                            inReplyToStatusId = mInReplyToStatus!!.id
+            GlobalScope.launch(Dispatchers.Main) {
+                val msg = quick_tweet_edit.string
+                if (msg.isNotEmpty()) {
+                    MessageUtil.showProgressDialog(this@MainActivity, getString(R.string.progress_sending))
+                    if (msg.startsWith("D ")) {
+                        val res = currentClient.sendDirectMessage(msg)
+                        MessageUtil.dismissProgressDialog()
+                        res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) }
+                                ?: quick_tweet_edit.setText("")
+                    } else {
+
+                        val e = runCatching {
+                            currentClient.status.run {
+                                mInReplyToStatus?.let { s ->
+                                    update(msg, inReplyToStatusId = s.id)
+                                } ?: update(msg)
+                            }.await()
+                        }.exceptionOrNull()
+
+                        MessageUtil.dismissProgressDialog()
+                        (e as? PenicillinException)?.run {
+                            toast(if (error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                            else R.string.toast_update_status_failure)
+                        } ?: run {
                             mInReplyToStatus = null
+                            quick_tweet_edit.setText("")
                         }
-                    })
+                    }
                 }
             }
         }
@@ -217,7 +196,7 @@ class MainActivity: FragmentActivity() {
                             intent.putExtra("status", string)
                             intent.putExtra("selection", string.length)
                             mInReplyToStatus?.run {
-                                intent.putExtra("inReplyToStatus", this)
+                                intent.putExtra("inReplyToStatus", this.toJsonString())
                             }
                             setText("")
                             clearFocus()
@@ -248,7 +227,7 @@ class MainActivity: FragmentActivity() {
     override fun onStart() {
         super.onStart()
 
-        MyUncaughtExceptionHandler.showBugReportDialogIfExist(this)
+        //MyUncaughtExceptionHandler.showBugReportDialogIfExist(this)
 
         with (window) {
             if (BasicSettings.keepScreenOn) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
@@ -267,7 +246,7 @@ class MainActivity: FragmentActivity() {
             }
             REQUEST_ACCOUNT_SETTING -> {
                 if (resultCode == Activity.RESULT_OK)
-                    mSwitchAccessToken = data?.getSerializableExtra("accessToken") as AccessToken
+                    mSwitchAccessToken = data?.getSerializableExtra("identifier") as Identifier
                 mAccessTokenAdapter.clear()
                 identifierList.forEach {
                     mAccessTokenAdapter.add(it)
@@ -321,24 +300,13 @@ class MainActivity: FragmentActivity() {
             }
         }, 1000)
 
-        if (mSwitchAccessToken != null) {
-            TwitterManager.switchAccessToken(mSwitchAccessToken!!)
-            mSwitchAccessToken = null
+        mSwitchAccessToken?.let {
+            GlobalScope.launch(Dispatchers.Main) { Core.switchToken(it) }
         }
-        TwitterManager.resumeStreaming()
-        with (action_bar_streaming_button) {
-            when {
-                TwitterManager.twitterStreamConnected ->
-                    ThemeUtil.setThemeTextColor(this, R.attr.holo_green)
-                BasicSettings.streamingMode ->
-                    ThemeUtil.setThemeTextColor(this, R.attr.holo_red)
-                else -> setTextColor(Color.WHITE)
-            }
-        }
+        mSwitchAccessToken = null
     }
 
     override fun onPause() {
-        TwitterManager.pauseStreaming()
         EventBus.getDefault().unregister(this)
         super.onPause()
     }
@@ -386,8 +354,6 @@ class MainActivity: FragmentActivity() {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
-        outState?.putInt("signalButtonColor", action_bar_streaming_button.currentHintTextColor)
-
         tab_menus.run {
             val tabColors = IntArray(childCount)
             for (i in 0 until childCount) {
@@ -403,7 +369,6 @@ class MainActivity: FragmentActivity() {
         super.onRestoreInstanceState(savedInstanceState)
 
         savedInstanceState?.let {
-            action_bar_streaming_button.setTextColor(it.getInt("signalButtonColor"))
             with (tab_menus) {
                 it.getIntArray("tabColors")?.let { colors ->
                     for (i in 0 until Math.min(childCount, colors.size)) {
@@ -416,7 +381,7 @@ class MainActivity: FragmentActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun setTitle(title: CharSequence?) {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
             if (matcher.find()) {
                 action_bar_title.text = matcher.group(2)
@@ -559,7 +524,6 @@ class MainActivity: FragmentActivity() {
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
         if (BasicSettings.quickMode) showQuickPanel()
-        if (BasicSettings.streamingMode) TwitterManager.startStreaming()
     }
 
     private fun showTopView() {
@@ -671,23 +635,8 @@ class MainActivity: FragmentActivity() {
                 putExtra("status", e.text)
                 e.selectionStart?.let { putExtra("selection", it) }
                 e.selectionStop?.let { putExtra("selection_stop", it) }
-                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it) }
+                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it.toJsonString()) }
             })
-        }
-    }
-
-    fun onEventMainThread(e: StreamingConnectionEvent) {
-        if (BasicSettings.streamingMode) {
-            ThemeUtil.setThemeTextColor(action_bar_streaming_button, when (e.status) {
-                StreamingConnectionEvent.Status.STREAMING_CONNECT ->
-                    R.attr.holo_green
-                StreamingConnectionEvent.Status.STREAMING_CLEANUP ->
-                    R.attr.holo_orange
-                else ->
-                    R.attr.holo_red
-            })
-        } else {
-            action_bar_streaming_button.setTextColor(Color.WHITE)
         }
     }
 

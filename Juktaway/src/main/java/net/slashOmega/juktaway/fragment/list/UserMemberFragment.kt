@@ -11,6 +11,7 @@ import android.widget.ProgressBar
 import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
 import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
@@ -63,7 +64,7 @@ class UserMemberFragment : Fragment() {
     }
 
     private fun applyListMembers(listId: Long) {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             val resp = runCatching {
                 (mCursor ?: currentClient.list.members(listId)).await()
             }.getOrNull()

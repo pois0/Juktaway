@@ -6,14 +6,14 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import jp.nephy.penicillin.models.SavedSearch
 import kotlinx.android.synthetic.main.row_auto_complete.view.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.MainActivity
 import net.slashOmega.juktaway.R
-import net.slashOmega.juktaway.model.TwitterManager
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.nullToEmpty
-import twitter4j.SavedSearch
 
 /**
  * Created on 2018/11/17.
@@ -47,14 +47,9 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                             .setMessage(String.format(mContext.getString(R.string.confirm_destroy_saved_search), item))
                             .setPositiveButton(R.string.button_yes) { _, _ ->
                                 GlobalScope.launch(Dispatchers.Main) {
-                                    if (withContext(Dispatchers.Default) {
-                                                runCatching {
-                                                    TwitterManager.twitter.destroySavedSearch(search.id)
-                                                }.run {
-                                                    exceptionOrNull()?.printStackTrace()
-                                                    isSuccess
-                                                }
-                                            }) MessageUtil.showToast(R.string.toast_destroy_success)
+                                    runCatching { currentClient.savedSearch.destroy(search.id).await() }.onSuccess {
+                                        MessageUtil.showToast(R.string.toast_destroy_success)
+                                    }
                                 }
                             }
                             .setNegativeButton(R.string.button_no) { _, _ -> }
@@ -104,18 +99,9 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
 
     private fun getSavedSearches() {
         GlobalScope.launch(Dispatchers.Main) {
-            withContext(Dispatchers.Default) {
-                try {
-                    TwitterManager.twitter.savedSearches
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }?.let {
+            runCatching { currentClient.savedSearch.list().await() }.onSuccess { savedList ->
                 mSavedSearches.clear()
-                for (search in it) {
-                    mSavedSearches.add(0, search)
-                }
+                savedList.forEach { mSavedSearches.add(0, it) }
             }
         }
     }

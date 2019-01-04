@@ -4,6 +4,7 @@ import android.app.Activity
 import android.app.NotificationManager
 import android.content.Context
 import android.os.Bundle
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.util.ActionUtil
@@ -18,7 +19,7 @@ class FavoriteActivity: Activity() {
         if (intent.getBooleanExtra("notification", false))
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
         intent.getLongExtra("statusId", -1L).takeIf { it > 0 }?.let {
-            GlobalScope.launch { ActionUtil.doFavorite(it) }
+            GlobalScope.launch(Dispatchers.Main) { ActionUtil.doFavorite(it) }
         }
         finish()
     }

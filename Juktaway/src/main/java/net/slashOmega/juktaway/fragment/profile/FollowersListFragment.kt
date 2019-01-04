@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
+import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
 import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -10,9 +11,11 @@ import net.slashOmega.juktaway.adapter.UserAdapter
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.tryAndTraceGet
 
-internal class FollowersListFragment: ProfileListFragmentBase<CursorUsers>() {
+internal class FollowersListFragment: ProfileListFragmentBase() {
     override val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
     override val layout = R.layout.list_guruguru
+    var cursor: PenicillinCursorJsonObjectAction<CursorUsers>? = null
+
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
             val action = cursor ?: currentClient.follower.list(user.screenName)

@@ -8,7 +8,10 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.EditProfileActivity
 import net.slashOmega.juktaway.R
@@ -16,11 +19,11 @@ import net.slashOmega.juktaway.ScaleImageActivity
 import net.slashOmega.juktaway.util.ImageUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import kotlinx.android.synthetic.main.fragment_profile_summary.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import twitter4j.Relationship
 
 class SummaryFragment: Fragment() {
     private var mFollowFlg = false
@@ -32,15 +35,14 @@ class SummaryFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return arguments?.let { arg ->
-            val v = inflater.inflate(R.layout.fragment_profile_summary, container, false) ?: return null
-            mUser = (arg.getSerializable("mUser") as User?) ?: return null
-            relationship = (arg.getSerializable("relationship") as Relationship?) ?: return null
+            mUser = arg.getString("mUser")?.toJsonObject()?.parse() ?: return null
+            relationship = arg.getString("relationship")?.toJsonObject()?.parse() ?: return null
             isMyProfile = mUser.id == currentIdentifier.userId
 
-            mFollowFlg = relationship.isSourceFollowingTarget
-            mBlocking = relationship.isSourceBlockingTarget
+            mFollowFlg = relationship.source.following
+            mBlocking = relationship.source.blocking
 
-            v
+            inflater.inflate(R.layout.fragment_profile_summary, container, false)
         }
     }
 
@@ -57,7 +59,7 @@ class SummaryFragment: Fragment() {
         name.text = mUser.name
         screen_name.text = "@" + mUser.screenName
         lock.visibility = if(mUser.protected) View.VISIBLE else View.GONE
-        followed_by.text = if(relationship.isSourceFollowedByTarget) getString(R.string.label_followed_by_target) else ""
+        followed_by.text = if(relationship.source.followedBy) getString(R.string.label_followed_by_target) else ""
         follow.visibility = View.VISIBLE
         follow.setText( when {
             isMyProfile -> R.string.button_edit_profile
@@ -75,7 +77,7 @@ class SummaryFragment: Fragment() {
                             .setMessage(R.string.confirm_unfollow)
                             .setPositiveButton(R.string.button_unfollow) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
                                     val res = runCatching { currentClient.friendship.destroy(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
@@ -97,7 +99,7 @@ class SummaryFragment: Fragment() {
                             .setMessage(R.string.confirm_destroy_block)
                             .setPositiveButton(R.string.button_destroy_block) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
                                     val res = runCatching { currentClient.block.destroy(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
@@ -119,7 +121,7 @@ class SummaryFragment: Fragment() {
                             .setMessage(R.string.confirm_follow)
                             .setPositiveButton(R.string.button_follow) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
                                     val res = runCatching { currentClient.friendship.create(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()

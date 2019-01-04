@@ -6,12 +6,13 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.widget.AdapterView
+import jp.nephy.jsonkt.toJsonString
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.fragment.AroundFragment
 import net.slashOmega.juktaway.fragment.TalkFragment
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.util.ActionUtil
-import net.slashOmega.juktaway.util.TwitterUtil.uri
+import net.slashOmega.juktaway.util.uri
 
 /**
  * Created on 2018/08/27.
@@ -24,9 +25,9 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
             val source = status.retweetedStatus ?: status
             when (BasicSettings.longTapAction) {
                 "talk" ->
-                    if (source.inReplyToStatusId > 0) {
+                    if (source.inReplyToStatusId != null) {
                         TalkFragment().apply {
-                            arguments = Bundle().apply { putSerializable("status", source) }
+                            arguments = Bundle().apply { putString("status", source.toJsonString()) }
                         }.show(activity.supportFragmentManager, "dialog")
                         true
                     } else false
@@ -36,7 +37,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                 }
                 "show_around" -> {
                     AroundFragment().apply {
-                        arguments = Bundle().apply { putSerializable("status", source) }
+                        arguments = Bundle().apply { putString("status", source.toJsonString()) }
                     }.show(activity.supportFragmentManager, "dialog")
                     true
                 }

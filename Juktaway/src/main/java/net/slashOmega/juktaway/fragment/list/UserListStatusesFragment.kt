@@ -10,6 +10,7 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.list_guruguru.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
@@ -77,7 +78,7 @@ class UserListStatusesFragment : Fragment() {
     }
 
     private fun applyUserList() {
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
                 (if (mMaxId > 0) currentClient.list.timeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
                 else currentClient.list.timeline(mListId)).await()

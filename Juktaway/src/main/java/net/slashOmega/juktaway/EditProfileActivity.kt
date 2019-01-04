@@ -44,7 +44,7 @@ class EditProfileActivity: FragmentActivity(){
 
         save_button.setOnClickListener {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-            GlobalScope.launch {
+            GlobalScope.launch(Dispatchers.Main) {
                 runCatching {
                     currentClient.account.updateProfile(
                             name.text.toString(),

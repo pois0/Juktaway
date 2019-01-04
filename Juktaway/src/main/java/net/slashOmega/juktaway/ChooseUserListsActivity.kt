@@ -3,33 +3,48 @@ package net.slashOmega.juktaway
 import android.app.Activity
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-import android.support.v4.content.Loader
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.models.TwitterList
 import net.slashOmega.juktaway.adapter.SubscribeUserListAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.model.DestroyUserListEvent
-import net.slashOmega.juktaway.model.AccessTokenManager
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.UserListCache
 import net.slashOmega.juktaway.model.UserListWithRegistered
-import net.slashOmega.juktaway.task.UserListsLoader
 import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_choose_user_lists.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.Job
+import kotlinx.coroutines.launch
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import twitter4j.ResponseList
-import twitter4j.UserList
 import java.util.*
 
 /**
  * Created on 2018/08/29.
  */
-class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.LoaderManager.LoaderCallbacks<ResponseList<UserList>> {
+class ChooseUserListsActivity: FragmentActivity() {
+    companion object {
+        var job: Job? = null
+    }
 
     private lateinit var mAdapter: SubscribeUserListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        job = currentClient.list.list().queue { lists ->
+            GlobalScope.launch(Dispatchers.Main) {
+                lists.forEach {
+                    mAdapter.add(UserListWithRegistered().apply {
+                        isRegistered = TabManager.hasTabId(it.id)
+                        userList = it
+                    })
+                }
+            }
+            UserListCache.userLists = lists
+        }
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_choose_user_lists)
@@ -50,7 +65,7 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
 
         button_save.setOnClickListener { _ ->
             val checkMap = HashMap<Long, Boolean>()
-            val checkList = ArrayList<UserList>()
+            val checkList = ArrayList<TwitterList>()
             for (i in 0 until mAdapter.count) {
                 val userListWithRegistered = mAdapter.getItem(i)
                 userListWithRegistered?.userList?.let {
@@ -82,8 +97,6 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
             setResult(Activity.RESULT_OK)
             finish()
         }
-
-        supportLoaderManager.initLoader<ResponseList<UserList>>(0, null, this)
     }
 
     override fun onResume() {
@@ -94,6 +107,12 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
     override fun onPause() {
         EventBus.getDefault().unregister(this)
         super.onPause()
+    }
+
+    override fun onStop() {
+        job?.cancel()
+        job = null
+        super.onStop()
     }
 
     fun onEventMainThread(event: AlertDialogEvent) { event.dialogFragment.show(supportFragmentManager, "dialog") }
@@ -110,18 +129,4 @@ class ChooseUserListsActivity: FragmentActivity(), android.support.v4.app.Loader
         }
         return true
     }
-
-    override fun onCreateLoader(arg0: Int, arg1: Bundle?): Loader<ResponseList<UserList>> = UserListsLoader(this)
-
-    override fun onLoadFinished(arg0: Loader<ResponseList<UserList>>, userLists: ResponseList<UserList>?) {
-        userLists?.forEach {
-            mAdapter.add(UserListWithRegistered().apply {
-                isRegistered = TabManager.hasTabId(it.id)
-                userList = it
-            })
-        }
-        UserListCache.userLists = userLists
-    }
-
-    override fun onLoaderReset(arg0: Loader<ResponseList<UserList>>) {}
 }

@@ -23,7 +23,6 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/post_widget"/>
         </receiver>
-        <service android:name=".NotificationService" android:exported="false" />
         <activity
             android:name="net.slashOmega.juktaway.MainActivity"
             android:label="@string/app_name"

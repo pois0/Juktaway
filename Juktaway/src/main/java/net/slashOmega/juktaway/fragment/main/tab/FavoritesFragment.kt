@@ -4,34 +4,21 @@ import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.model.*
 import net.slashOmega.juktaway.settings.BasicSettings
-import net.slashOmega.juktaway.twitter.currentIdentifier
-import twitter4j.Paging
+import net.slashOmega.juktaway.twitter.currentClient
 
 class FavoritesFragment: BaseFragment() {
     override var tabId = TabManager.FAVORITES_TAB_ID
 
-    override fun isSkip(row: Row): Boolean = !row.isFavorite || row.source?.id != currentIdentifier.userId
-
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                try {
-                    TwitterManager.twitter.getFavorites(Paging().also {
-                        if (mMaxId > 0 && !mReloading) {
-                            it.maxId = mMaxId - 1
-                            it.count = BasicSettings.pageCount
-                        }
-                    })
-                } catch (e: OutOfMemoryError) {
-                    null
-                } catch (e: Exception) {
-                    e.printStackTrace()
-                    null
-                }
-            }
+            val statuses = runCatching {
+                currentClient.favorite.run {
+                    if (mMaxId > 0 && !mReloading) list(maxId = mMaxId, count = BasicSettings.pageCount)
+                    else list(count = BasicSettings.pageCount)
+                }.await()
+            }.getOrNull()
 
             when {
                 statuses.isNullOrEmpty() -> {

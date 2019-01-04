@@ -7,10 +7,11 @@ import android.graphics.Paint
 import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
-import twitter4j.Status
-
-import java.util.regex.Matcher
+import jp.nephy.penicillin.models.Status
 import java.util.regex.Pattern
+
+val Status.uri: Uri
+    get() =  Uri.parse("https://twitter.com/" + user.screenName + "/status/" + id.toString())
 
 object TwitterUtil {
 
@@ -117,7 +118,4 @@ object TwitterUtil {
         this >= 100000 -> "${String.format("%1$.1f", this.toFloat() / 1000)}k"
         else -> this.toString()
     }
-
-    val Status.uri: Uri
-       get() =  Uri.parse("https://twitter.com/" + user.screenName + "/status/" + id.toString())
 }

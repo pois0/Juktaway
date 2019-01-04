@@ -13,6 +13,8 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
+import jp.nephy.jsonkt.parse
+import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
@@ -56,7 +58,7 @@ class ScaleImageActivity: FragmentActivity() {
             intent.data?.toString()
         } else {
             intent.extras?.run {
-                (getSerializable("status") as Status?)?.let {
+                getString("status")?.toJsonObject()?.parse<Status>()?.let {
                     showStatus(it, getInt("index", 0))
                 }
                 getString("url")

@@ -12,17 +12,13 @@ import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.*
-import net.slashOmega.juktaway.util.takeNotEmpty
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.toast
-import twitter4j.auth.RequestToken
 
 /**
  * Created on 2018/08/29.
  */
 class SignInActivity: Activity() {
-    private val stateRequestToken = "request_token"
-    private var mRequestToken: RequestToken? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -38,30 +34,7 @@ class SignInActivity: Activity() {
             return
         }
 
-        if (savedInstanceState?.get(stateRequestToken) != null) {
-            intent.data?.getQueryParameter("oauth_verifier").takeNotEmpty()?.let {
-                start_oauth_button.visibility = View.GONE
-                connect_with_twitter.visibility = View.GONE
-                MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-                verifyOAuth(it)
-            }
-        }
-
         start_oauth_button.setOnClickListener { startOAuth() }
-    }
-
-    override fun onSaveInstanceState(outState: Bundle) {
-        super.onSaveInstanceState(outState)
-
-        mRequestToken?.let {
-            outState.putSerializable(stateRequestToken, it)
-        }
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        mRequestToken = savedInstanceState.getSerializable(stateRequestToken) as RequestToken
     }
 
     override fun onNewIntent(intent: Intent?) {
@@ -78,7 +51,7 @@ class SignInActivity: Activity() {
 
     private fun startOAuth(addUser: Boolean = false) {
         GlobalScope.launch(Dispatchers.Main) {
-            launch(Dispatchers.Default) { AuthTemp.clearTemps() }
+            AuthTemp.clearTemps()
             if (!addUser) {
                 if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
                     toast(R.string.signin_csck_blank)
@@ -92,7 +65,7 @@ class SignInActivity: Activity() {
 
     private fun verifyOAuth(param: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val (at, ats, id, sn) = runCatching {
+            runCatching {
                 withContext(Dispatchers.Default) {
                     PenicillinClient {
                         account {
@@ -102,27 +75,27 @@ class SignInActivity: Activity() {
                         client.oauth.accessToken(rtTemp, rtsTemp, param)
                     }
                 }
-            }.getOrNull() ?: return@launch
-            Core.addToken(Identifier(ckTemp, csTemp, at, ats, id, sn))
+            }.onSuccess { (at, ats, id, sn) ->
+                Core.addToken(Identifier(ckTemp, csTemp, at, ats, id, sn))
 
-            MessageUtil.dismissProgressDialog()
-            toast(R.string.toast_sign_in_success)
-            withClient { UserIconManager.addUserIconMap(account.verifyCredentials().await().result) }
-            startActivity(intentFor<MainActivity>().apply {
-                flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-            })
-            finish()
+                MessageUtil.dismissProgressDialog()
+                toast(R.string.toast_sign_in_success)
+                currentClient.run { UserIconManager.addUserIconMap(account.verifyCredentials().await().result) }
+                startActivity(intentFor<MainActivity>().apply {
+                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                })
+                finish()
+            }
         }
     }
 
-    private fun addUserOAuth(cs: String, ck: String) {
+    private fun addUserOAuth(ck: String, cs: String) {
         GlobalScope.launch(Dispatchers.Main) {
             csTemp = cs
             ckTemp = ck
-            val url = withContext(Dispatchers.Default) {
-                PenicillinClient {
+            val url = PenicillinClient {
                     account {
-                        application(cs, ck)
+                        application(ck, cs)
                     }
                 }.use { client ->
                     val (rt, rts) = client.oauth.requestToken(getString(R.string.twitter_callback_url))
@@ -130,7 +103,6 @@ class SignInActivity: Activity() {
                     rtsTemp = rts
                     client.oauth.authorizeUrl(rt)
                 }
-            }
             MessageUtil.dismissProgressDialog()
 
             consumer_key.visibility = View.GONE

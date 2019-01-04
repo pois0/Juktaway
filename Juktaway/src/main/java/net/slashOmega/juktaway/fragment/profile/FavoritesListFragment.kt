@@ -13,10 +13,8 @@ import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.Row
-import net.slashOmega.juktaway.model.TwitterManager
 import net.slashOmega.juktaway.settings.BasicSettings
-import net.slashOmega.juktaway.util.tryAndTraceGet
-import twitter4j.Paging
+import net.slashOmega.juktaway.twitter.currentClient
 
 /**
  * Created on 2018/11/18.
@@ -28,19 +26,15 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
 
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val job = async(Dispatchers.Default) {
-                tryAndTraceGet {
-                    TwitterManager.twitter.getFavorites(user.id, Paging().apply {
-                        if (mMaxId > 0) {
-                            maxId = mMaxId - 1
-                            count = BasicSettings.pageCount
-                        }
-                    })
-                }
-            }
+            val statuses = runCatching {
+                currentClient.favorite.run {
+                    if (mMaxId > 0) list(userId = user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                    else list(userId = user.id, count = BasicSettings.pageCount)
+                }.await()
+            }.getOrNull()
 
             mFooter.visibility = View.GONE
-            job.await()?.takeIf { it.isNotEmpty() }?.run {
+            statuses?.takeIf { it.isNotEmpty() }?.run {
                 forEach {
                     if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
                     mAdapter.add(Row.newStatus(it))

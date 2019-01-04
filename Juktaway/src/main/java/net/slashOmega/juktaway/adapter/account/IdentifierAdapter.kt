@@ -15,7 +15,7 @@ import net.slashOmega.juktaway.util.ThemeUtil
 /**
  * Created on 2018/10/20.
  */
-class AccessTokenAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Identifier>(context, mLayout) {
+class IdentifierAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Identifier>(context, mLayout) {
     var mOnTrashListener: OnTrashListener? = null
     private val mColorBlue by lazy { ThemeUtil.getThemeTextColor(R.attr.holo_blue) }
 

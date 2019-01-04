@@ -74,7 +74,7 @@ object ImageResizer {
      * @param bitmap 変換対象ビットマップ
      * @return 変換後Bitmap
      */
-    fun half(bitmap: Bitmap?) = bitmap?.run {
+    private fun half(bitmap: Bitmap?) = bitmap?.run {
         Bitmap.createBitmap(this, 0, 0, width, height, Matrix().apply {
             postScale(0.5f, 0.5f)
         }, false).apply { bitmap.recycle() }

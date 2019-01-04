@@ -13,6 +13,7 @@ import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
+import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
@@ -64,7 +65,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
                     .setTitle(R.string.confirm_destroy_user_list)
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
-                        GlobalScope.launch {
+                        GlobalScope.launch(Dispatchers.Main) {
                             runCatching { currentClient.list.destroy(userList.id).await() }
                                     .onSuccess {
                                         toast(R.string.toast_destroy_user_list_success)
@@ -89,7 +90,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
                     .setTitle(R.string.confirm_destroy_user_list_subscribe)
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
-                        GlobalScope.launch {
+                        GlobalScope.launch(Dispatchers.Main) {
                             runCatching { currentClient.list.unsubscribe(userList.id).await() }
                                     .onSuccess {
                                         toast(R.string.toast_destroy_user_list_subscription_success)

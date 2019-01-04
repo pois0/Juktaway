@@ -24,7 +24,6 @@ import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.fragment.profile.*
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
-import net.slashOmega.juktaway.twitter.withClient
 import net.slashOmega.juktaway.util.KusoripuUtil
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
@@ -71,7 +70,7 @@ class ProfileActivity: FragmentActivity() {
             }
         }
 
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_loading))
 
             runCatching {
@@ -86,13 +85,13 @@ class ProfileActivity: FragmentActivity() {
 
                 loadJob = async(Dispatchers.Default) {
                     screenName?.let {
-                        withClient {
+                        currentClient.run {
                             val userJob = user.show(screenName = it)
                             val relJob = friendship.show(sourceScreenName = currentIdentifier.screenName, targetScreenName = it)
                             userJob.await().result to relJob.await().result.relationship
                         }
                     } ?: userId.takeUnless { it == -1L }?.let {
-                        withClient {
+                        currentClient.run {
                             val userJob = user.show(userId = it)
                             val relJob = friendship.show(sourceId = currentIdentifier.userId, targetId = it)
                             userJob.await().result to relJob.await().result.relationship
@@ -146,7 +145,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this)
                             .setMessage(R.string.confirm_create_block)
                             .setPositiveButton(R.string.button_create_block) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
                                         currentClient.block.create(userId = mUser.id).await()
@@ -168,7 +167,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this)
                             .setMessage(R.string.confirm_create_official_mute)
                             .setPositiveButton(R.string.button_create_official_mute) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
                                         currentClient.mute.create(userId = mUser.id).await()
@@ -190,7 +189,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this)
                             .setMessage(R.string.confirm_create_no_retweet)
                             .setPositiveButton(R.string.button_create_no_retweet) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
@@ -213,7 +212,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this)
                             .setMessage(R.string.confirm_create_block)
                             .setPositiveButton(R.string.button_destroy_block) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
                                         currentClient.block.destroy(userId = mUser.id).await()
@@ -235,7 +234,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this)
                             .setMessage(R.string.confirm_destroy_official_mute)
                             .setPositiveButton(R.string.button_destroy_official_mute) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
                                         currentClient.mute.destroy(userId = mUser.id).await()
@@ -258,7 +257,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this@ProfileActivity)
                             .setMessage(R.string.confirm_destroy_no_retweet)
                             .setPositiveButton(R.string.button_destroy_no_retweet) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
@@ -317,7 +316,7 @@ class ProfileActivity: FragmentActivity() {
                     AlertDialog.Builder(this@ProfileActivity)
                             .setMessage(R.string.confirm_report_spam)
                             .setPositiveButton(R.string.button_report_spam) { _, _ ->
-                                GlobalScope.launch {
+                                GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
                                         currentClient.user.reportSpam(userId = mUser.id)

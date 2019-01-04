@@ -51,7 +51,6 @@ object TabManager {
     fun generalTabs() = ArrayList<Tab>().apply {
         add(Tab(TIMELINE_TAB_ID))
         add(Tab(INTERACTIONS_TAB_ID))
-        add(Tab(DIRECT_MESSAGES_TAB_ID))
         add(Tab(FAVORITES_TAB_ID))
     }
 

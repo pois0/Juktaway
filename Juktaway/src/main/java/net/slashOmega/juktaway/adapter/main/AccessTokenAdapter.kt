@@ -6,7 +6,6 @@ import android.view.ViewGroup
 import kotlinx.android.synthetic.main.row_switch_account.view.*
 import net.slashOmega.juktaway.adapter.ArrayAdapterBase
 import net.slashOmega.juktaway.model.UserIconManager.displayUserIcon
-import net.slashOmega.juktaway.twitter.Core
 import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.twitter.identifierList
@@ -24,7 +23,7 @@ class AccessTokenAdapter(context: Context?, resourceId: Int, private val highlig
             getItem(pos)?.let { token ->
                 icon.displayUserIcon(token.userId)
                 screen_name.text = token.screenName
-                screen_name.setTextColor(if (currentIdentifier?.userId == token.userId) highlightColor else defaultColor)
+                screen_name.setTextColor(if (currentIdentifier.userId == token.userId) highlightColor else defaultColor)
             }
         }
 }

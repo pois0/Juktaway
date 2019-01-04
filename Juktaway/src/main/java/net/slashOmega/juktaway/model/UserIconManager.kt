@@ -17,6 +17,17 @@ import org.jetbrains.anko.db.*
 /**
  * Created on 2018/11/01.
  */
+
+fun ImageView.displayUserIcon(user: CommonUser) {
+    val url = user.profileImageUrlHttpsWithVariantSize(  when (BasicSettings.userIconSize) {
+        BasicSettings.UserIconSize.LARGE -> CommonUser.ProfileImageSize.Bigger
+        BasicSettings.UserIconSize.NORMAL -> CommonUser.ProfileImageSize.Normal
+        BasicSettings.UserIconSize.SMALL -> CommonUser.ProfileImageSize.Mini
+        else -> return
+    } )
+    ImageUtil.displayImage(url, this, BasicSettings.userIconRoundedOn)
+}
+
 object UserIconManager {
     private const val tableName = "userIcon"
 
@@ -27,8 +38,6 @@ object UserIconManager {
                 "name" to TEXT + NOT_NULL)
     }}
 
-    fun ImageView.displayUserIcon(user: CommonUser) { displayUserIcon(user, this) }
-
     fun ImageView.displayUserIcon(userId: Long) {
         val url = dbUse {
         select(tableName, "iconUrl")
@@ -36,16 +45,6 @@ object UserIconManager {
                 .parseSingle(StringParser)
         }
         ImageUtil.displayRoundedImage(url, this)
-    }
-
-    fun displayUserIcon(user: CommonUser, view: ImageView) {
-        val url = user.profileImageUrlWithVariantSize(  when (BasicSettings.userIconSize) {
-            BasicSettings.UserIconSize.LARGE -> CommonUser.ProfileImageSize.Bigger
-            BasicSettings.UserIconSize.NORMAL -> CommonUser.ProfileImageSize.Normal
-            BasicSettings.UserIconSize.SMALL -> CommonUser.ProfileImageSize.Mini
-            else -> return
-        } )
-        ImageUtil.displayImage(url, view, BasicSettings.userIconRoundedOn)
     }
 
     suspend fun getName(userId: Long): String = withContext(Dispatchers.Default) {
@@ -66,7 +65,7 @@ object UserIconManager {
 
     fun warmUpUserIconMap() {
         if (!isIdentifierSet) return
-        GlobalScope.launch {
+        GlobalScope.launch(Dispatchers.Main) {
             val data = dbUse { select(tableName, "userId").parseList(LongParser) }
             if (data.isNullOrEmpty()) return@launch
             tryAndTraceGet {
