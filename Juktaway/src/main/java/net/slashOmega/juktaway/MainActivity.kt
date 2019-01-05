@@ -31,7 +31,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.adapter.SearchAdapter
-import net.slashOmega.juktaway.adapter.main.AccessTokenAdapter
+import net.slashOmega.juktaway.adapter.main.IdentifierAdapter
 import net.slashOmega.juktaway.adapter.main.MainPagerAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.event.NewRecordEvent
@@ -64,7 +64,7 @@ class MainActivity: FragmentActivity() {
     private var mDisabledTextColor: Int = 0
     private var mSearchAdapter: SearchAdapter? = null
     private val mAccessTokenAdapter by lazy {
-        AccessTokenAdapter(this,
+        IdentifierAdapter(this,
                 R.layout.row_switch_account,
                 ThemeUtil.getThemeTextColor(R.attr.holo_blue),
                 ThemeUtil.getThemeTextColor(R.attr.text_color))
@@ -642,7 +642,6 @@ class MainActivity: FragmentActivity() {
 
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(e: AccountChangeEvent) {
-        mAccessTokenAdapter.notifyDataSetInvalidated()
         setupTab()
         EventBus.getDefault().post(PostAccountChangeEvent(mMainPagerAdapter.getItemId(mViewPager.currentItem)))
     }

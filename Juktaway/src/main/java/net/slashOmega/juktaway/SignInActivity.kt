@@ -6,6 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.models.special.RequestTokenResponse
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil
@@ -19,34 +20,50 @@ import org.jetbrains.anko.toast
  * Created on 2018/08/29.
  */
 class SignInActivity: Activity() {
+    private val pinPublishedKey = "published"
+    private var isPinPublished: Boolean = false
+    private var mRequestToken: RequestTokenResponse? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_signin)
 
-        if(intent.getBooleanExtra("add_account", false)) {
-            consumer_key.visibility = View.GONE
-            consumer_secret.visibility = View.GONE
-            start_oauth_button.visibility = View.GONE
-            connect_with_twitter.visibility = View.GONE
-            startOAuth(true)
-            return
+        start_oauth_button.setOnClickListener {
+            if (pin_code.text.isNotBlank()) {
+                MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
+                verifyOAuth(pin_code.text.toString())
+            } else {
+                startOAuth()
+            }
         }
-
-        start_oauth_button.setOnClickListener { startOAuth() }
     }
 
-    override fun onNewIntent(intent: Intent?) {
-        if (intent == null || intent.data == null
-                || !intent.data!!.toString().startsWith(getString(R.string.twitter_callback_url))) {
-            finish()
-            return
+    override fun onResume() {
+        super.onResume()
+        if (isPinPublished) {
+            pin_code.visibility = View.VISIBLE
+            consumer_key.visibility = View.GONE
+            consumer_secret.visibility = View.GONE
+        } else {
+            pin_code.visibility = View.GONE
+            consumer_key.visibility = View.VISIBLE
+            consumer_secret.visibility = View.VISIBLE
         }
-        val oauthVerifier = intent.data!!.getQueryParameter("oauth_verifier")
-        if (oauthVerifier.isNullOrEmpty()) return
-        MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-        verifyOAuth(oauthVerifier)
+    }
+
+    override fun onSaveInstanceState(outState: Bundle) {
+        super.onSaveInstanceState(outState)
+
+        mRequestToken?.let {
+            outState.putBoolean(pinPublishedKey, isPinPublished)
+        }
+    }
+
+    override fun onRestoreInstanceState(savedInstanceState: Bundle) {
+        super.onRestoreInstanceState(savedInstanceState)
+
+        isPinPublished = savedInstanceState.getBoolean(pinPublishedKey)
     }
 
     private fun startOAuth(addUser: Boolean = false) {
@@ -66,25 +83,27 @@ class SignInActivity: Activity() {
     private fun verifyOAuth(param: String) {
         GlobalScope.launch(Dispatchers.Main) {
             runCatching {
-                withContext(Dispatchers.Default) {
-                    PenicillinClient {
-                        account {
-                            application(ckTemp, csTemp)
-                        }
-                    }.use { client ->
-                        client.oauth.accessToken(rtTemp, rtsTemp, param)
+                PenicillinClient {
+                    account {
+                        application(ckTemp, csTemp)
                     }
+                }.use { client ->
+                    client.oauth.accessToken(rtTemp, rtsTemp, param)
                 }
             }.onSuccess { (at, ats, id, sn) ->
                 Core.addToken(Identifier(ckTemp, csTemp, at, ats, id, sn))
 
                 MessageUtil.dismissProgressDialog()
                 toast(R.string.toast_sign_in_success)
-                currentClient.run { UserIconManager.addUserIconMap(account.verifyCredentials().await().result) }
+                UserIconManager.addUserIconMap(currentClient.account.verifyCredentials().await().result)
                 startActivity(intentFor<MainActivity>().apply {
                     flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
                 })
                 finish()
+            }.onFailure {
+                it.printStackTrace()
+                MessageUtil.dismissProgressDialog()
+                toast(R.string.toast_sign_in_failure)
             }
         }
     }
@@ -98,17 +117,14 @@ class SignInActivity: Activity() {
                         application(ck, cs)
                     }
                 }.use { client ->
-                    val (rt, rts) = client.oauth.requestToken(getString(R.string.twitter_callback_url))
+                    val (rt, rts) = client.oauth.requestToken()
                     rtTemp = rt
                     rtsTemp = rts
                     client.oauth.authorizeUrl(rt)
                 }
             MessageUtil.dismissProgressDialog()
 
-            consumer_key.visibility = View.GONE
-            consumer_secret.visibility = View.GONE
-            start_oauth_button.visibility = View.GONE
-            connect_with_twitter.visibility = View.GONE
+            isPinPublished = true
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }

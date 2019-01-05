@@ -127,7 +127,10 @@ class StatusActivity: FragmentActivity() {
         var statusId = idParam.takeIf { it > 0 }
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId != null) {
-                val status = runCatching { currentClient.status.show(statusId!!).await().result }.getOrNull() ?: run {
+                val status = runCatching { currentClient.status.show(statusId!!).await().result }.getOrNull()
+                MessageUtil.dismissProgressDialog()
+
+                if(status == null) {
                     MessageUtil.showToast(R.string.toast_load_data_failure)
                     return@launch
                 }

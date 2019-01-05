@@ -18,7 +18,7 @@ class TimelineFragment: BaseFragment() {
             val statuses = runCatching {
                 (if (mMaxId > 0 && !mReloading) currentClient.timeline.home(maxId = mMaxId - 1, count = BasicSettings.pageCount)
                         else currentClient.timeline.home()).await()
-            }.getOrNull()
+            }.onFailure { it.printStackTrace() }.getOrNull()
 
             when {
                 statuses.isNullOrEmpty() -> {

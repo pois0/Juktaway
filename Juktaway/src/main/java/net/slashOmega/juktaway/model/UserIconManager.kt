@@ -40,9 +40,9 @@ object UserIconManager {
 
     fun ImageView.displayUserIcon(userId: Long) {
         val url = dbUse {
-        select(tableName, "iconUrl")
-                .whereArgs("(userId) = {id}", "id" to userId)
-                .parseSingle(StringParser)
+            select(tableName, "iconUrl")
+                    .whereArgs("(userId) = {id}", "id" to userId)
+                    .parseSingle(StringParser)
         }
         ImageUtil.displayRoundedImage(url, this)
     }
@@ -58,7 +58,13 @@ object UserIconManager {
     suspend fun addUserIconMap(user: CommonUser) {
         withContext(Dispatchers.Default) {
             dbUse {
-                insert(tableName, "userId" to user.id, "iconUrl" to user.profileImageUrl, "name" to user.name)
+                runCatching {
+                    select(tableName, "userId")
+                            .whereArgs("userId = {id}", "id" to user.id)
+                            .parseSingle(LongParser)
+                }.onFailure {
+                    insert(tableName, "userId" to user.id, "iconUrl" to user.profileImageUrl, "name" to user.name)
+                }
             }
         }
     }

@@ -1,6 +1,5 @@
 package net.slashOmega.juktaway.twitter
 
-import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
 import kotlinx.coroutines.Dispatchers
@@ -10,7 +9,6 @@ import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import net.slashOmega.juktaway.util.SharedPreference
 import org.jetbrains.anko.db.*
 import java.io.Serializable
-import java.lang.Exception
 import java.util.concurrent.TimeUnit
 
 /**
@@ -25,7 +23,7 @@ lateinit var currentIdentifier: Identifier
 
 val identifierList
     get() = dbUse {
-        select(Core.tokensTable, "cs", "ck", "at", "ats", "userId", "screenName")
+        select(Core.tokensTable, "ck", "cs", "at", "ats", "userId", "screenName")
                 .parseList(Core.identifierParser)
     }
 
@@ -72,21 +70,8 @@ object Core {
         }
     }
 
-    suspend fun switchToken(id: Long) {
-        val acc = try {
-            dbUse {
-                select(tokensTable, "ck", "cs", "at", "ats", "userId", "screenName")
-                        .whereArgs("id = {data}", "data" to id)
-                        .parseSingle(identifierParser)
-            }
-        } catch (e: Exception) {
-            return
-        }
-        switchToken(acc)
-    }
-
-    suspend fun addToken(set: Identifier, switchClient: Boolean = true) {
-        withContext(Dispatchers.Default) {
+    suspend fun addToken(set: Identifier, switchClient: Boolean = true): Boolean {
+        val res = withContext(Dispatchers.Default) {
             dbUse {
                 runCatching {
                     select(tokensTable, "id")
@@ -94,27 +79,20 @@ object Core {
                                     "userId" to set.userId,
                                     "cs" to set.cs)
                             .parseSingle(LongParser)
-                }.getOrNull() ?: run {
+                }.onFailure {
                     insert(tokensTable,
-                            "cs" to set.cs,
                             "ck" to set.ck,
+                            "cs" to set.cs,
                             "at" to set.at,
                             "ats" to set.ats,
                             "userId" to set.userId,
                             "screenName" to set.screenName)
-                }
+                }.isFailure
             }
         }
 
         if (switchClient) switchToken(set)
-    }
-
-    suspend fun removeIdentifier(id: Long) {
-        withContext(Dispatchers.Default) {
-            dbUse {
-                delete(tokensTable, "id = {id}", "id" to id)
-            }
-        }
+        return res
     }
 
     suspend fun removeIdentifier(identifier: Identifier) {

@@ -13,17 +13,15 @@ import net.slashOmega.juktaway.twitter.identifierList
 /**
  * Created on 2018/10/20.
  */
-class AccessTokenAdapter(context: Context?, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<Identifier>(context, resourceId) {
-    init {
-        identifierList.forEach { add(it) }
-    }
+class IdentifierAdapter(context: Context?, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<Identifier>(context, resourceId) {
+    init { identifierList.forEach { add(it) } }
 
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ ->
-            getItem(pos)?.let { token ->
-                icon.displayUserIcon(token.userId)
-                screen_name.text = token.screenName
-                screen_name.setTextColor(if (currentIdentifier.userId == token.userId) highlightColor else defaultColor)
+            getItem(pos)?.let { identifier ->
+                icon.displayUserIcon(identifier.userId)
+                screen_name.text = identifier.screenName
+                screen_name.setTextColor(if (currentIdentifier.userId == identifier.userId) highlightColor else defaultColor)
             }
         }
 }
