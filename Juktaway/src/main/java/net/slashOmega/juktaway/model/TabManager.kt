@@ -26,7 +26,9 @@ object TabManager {
         getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let {
             val gson = Gson()
             val tabData = gson.fromJson<TabData>(it, TabData::class.java)
-            sTabs = tabData?.tabs ?: arrayListOf()
+            sTabs = (tabData?.tabs ?: arrayListOf()).apply {
+                removeAll { it.id == DIRECT_MESSAGES_TAB_ID }
+            }
             for (tab in sTabs) {
                 if (tab.id <= SEARCH_TAB_ID) {
                     tab.id = SEARCH_TAB_ID - Math.abs(tab.name.hashCode())
@@ -48,7 +50,7 @@ object TabManager {
         sTabs = tabs
     }
 
-    fun generalTabs() = ArrayList<Tab>().apply {
+    private fun generalTabs() = ArrayList<Tab>().apply {
         add(Tab(TIMELINE_TAB_ID))
         add(Tab(INTERACTIONS_TAB_ID))
         add(Tab(FAVORITES_TAB_ID))
@@ -66,7 +68,7 @@ object TabManager {
     }
 
     class Tab(var id: Long) {
-        fun getString(id: Int) = JuktawayApplication.app.getString(id)
+        fun getString(id: Int): String = JuktawayApplication.app.getString(id)
 
         var name = ""
             get() = when {

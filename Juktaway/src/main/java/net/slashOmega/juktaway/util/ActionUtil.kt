@@ -2,6 +2,7 @@ package net.slashOmega.juktaway.util
 
 import android.content.Context
 import android.content.Intent
+import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.PenicillinClient
@@ -35,7 +36,7 @@ suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
 
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
-            if (imageList.isNotEmpty()) status.updateWithMediaFile(str,
+            (if (imageList.isNotEmpty()) status.updateWithMediaFile(str,
                     imageList.map { MediaFileComponent(
                             file = it,
                             type = it.mediaType(),
@@ -44,8 +45,8 @@ suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null
                     null,
                     "inReplyToStatusId" to inReplyToStatusId
                 )
-            else status.update(str, inReplyToStatusId)
-        }.await().result
+            else status.update(status = str, inReplyToStatusId = inReplyToStatusId)).await().result
+        }
     }.onSuccess { s ->
         s.entities.hashtags.forEach { PostStockSettings.addHashtag("#${it.text}") }
     }.exceptionOrNull()

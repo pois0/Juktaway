@@ -29,6 +29,7 @@ import android.widget.ListView
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.core.PenicillinException
+import jp.nephy.penicillin.core.PenicillinLocalizedException
 import jp.nephy.penicillin.core.TwitterErrorMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
@@ -452,6 +453,7 @@ class PostActivity: FragmentActivity() {
                 val e = (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
                         mInReplyToStatusId.takeIf { it > 0 },
                         mImagePathList)
+                e?.printStackTrace()
                 MessageUtil.dismissProgressDialog()
                 (e as? PenicillinException)?.let {
                     if (e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already

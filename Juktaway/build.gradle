@@ -12,7 +12,6 @@ dependencies {
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "io.ktor:ktor-client-android:$ktor_version"
     implementation 'com.google.code.gson:gson:2.8.5'
-    implementation 'com.google.guava:guava:25.0-android'
     implementation 'de.greenrobot:eventbus:2.2.0'
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
@@ -36,8 +35,8 @@ android {
 
         multiDexEnabled true
         
-        versionCode 106
-        versionName '2.0.1b'
+        versionCode 110
+        versionName '3.0-Beta1'
         applicationId "net.slashOmega.juktaway"
     }
 
