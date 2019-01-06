@@ -4,7 +4,6 @@ import android.view.View
 import de.greenrobot.event.EventBus
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.async
 import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
@@ -27,18 +26,15 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                currentClient.favorite.run {
+                currentClient.favorites.run {
                     if (mMaxId > 0) list(userId = user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
                     else list(userId = user.id, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
 
-            mFooter.visibility = View.GONE
             statuses?.takeIf { it.isNotEmpty() }?.run {
-                forEach {
-                    if (mMaxId == 0L || mMaxId > it.id) mMaxId = it.id
-                    mAdapter.add(Row.newStatus(it))
-                }
+                mMaxId = statuses.last().id
+                mAdapter.extensionAddAllFromStatusesSuspend(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
@@ -62,7 +58,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        mAdapter.removeStatus(event.statusId!!)
+        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
     private fun additionalReading() {

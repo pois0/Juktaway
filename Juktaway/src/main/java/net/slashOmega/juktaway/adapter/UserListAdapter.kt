@@ -6,7 +6,8 @@ import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.extensions.models.ProfileImageSize
+import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_user_list.view.*
 import net.slashOmega.juktaway.ProfileActivity
@@ -21,7 +22,7 @@ class UserListAdapter(c: Context, id: Int): ArrayAdapterBase<TwitterList>(c, id)
     override val View.mView: (Int, ViewGroup?) -> Unit
         @SuppressLint("SetTextI18n")
         get() = { pos, _ -> getItem(pos)?.let { userList ->
-            ImageUtil.displayRoundedImage(userList.user.profileImageUrlWithVariantSize(CommonUser.ProfileImageSize.Bigger), icon)
+            ImageUtil.displayRoundedImage(userList.user.profileImageUrlWithVariantSize(ProfileImageSize.Bigger), icon)
             list_name.text = userList.name
             screen_name.text = userList.user.screenName
             description.text = userList.description

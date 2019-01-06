@@ -31,11 +31,9 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
             val timeline = runCatching {
                 currentClient.timeline.run {
                     if (mMaxId > 0) user(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
-                    else user(user.id)
+                    else user(user.id, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
-
-            mFooter.visibility = View.GONE
 
             timeline?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
@@ -70,7 +68,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        mAdapter.removeStatus(event.statusId!!)
+        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
     fun onRefreshStarted(view: View) {

@@ -1,6 +1,8 @@
 package net.slashOmega.juktaway.model
 
 import android.widget.ImageView
+import jp.nephy.penicillin.extensions.models.ProfileImageSize
+import jp.nephy.penicillin.extensions.models.profileImageUrlHttpsWithVariantSize
 import jp.nephy.penicillin.models.CommonUser
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -18,14 +20,21 @@ import org.jetbrains.anko.db.*
  * Created on 2018/11/01.
  */
 
-fun ImageView.displayUserIcon(user: CommonUser) {
-    val url = user.profileImageUrlHttpsWithVariantSize(  when (BasicSettings.userIconSize) {
-        BasicSettings.UserIconSize.LARGE -> CommonUser.ProfileImageSize.Bigger
-        BasicSettings.UserIconSize.NORMAL -> CommonUser.ProfileImageSize.Normal
-        BasicSettings.UserIconSize.SMALL -> CommonUser.ProfileImageSize.Mini
-        else -> return
-    } )
-    ImageUtil.displayImage(url, this, BasicSettings.userIconRoundedOn)
+suspend fun ImageView.displayUserIcon(user: CommonUser) {
+    val url = withContext(Dispatchers.Default) {
+        when (BasicSettings.userIconSize) {
+            BasicSettings.UserIconSize.LARGE -> ProfileImageSize.Bigger
+            BasicSettings.UserIconSize.NORMAL -> ProfileImageSize.Normal
+            BasicSettings.UserIconSize.SMALL -> ProfileImageSize.Mini
+            else -> null
+        }?.let { user.profileImageUrlHttpsWithVariantSize(it) }
+    } ?: return
+
+    if (BasicSettings.userIconRoundedOn) {
+        ImageUtil.displayImage(url, this)
+    } else {
+        ImageUtil.displayRoundedImage(url, this)
+    }
 }
 
 object UserIconManager {
@@ -75,11 +84,11 @@ object UserIconManager {
             val data = dbUse { select(tableName, "userId").parseList(LongParser) }
             if (data.isNullOrEmpty()) return@launch
             tryAndTraceGet {
-                val users = currentClient.user.lookupByIds(data).await()
+                val users = currentClient.users.lookupByIds(data).await()
                 dbUse {
                     users.forEach { u ->
                         update(tableName,
-                                "iconUrl" to u.profileImageUrlHttpsWithVariantSize(CommonUser.ProfileImageSize.Bigger),
+                                "iconUrl" to u.profileImageUrlHttpsWithVariantSize(ProfileImageSize.Bigger),
                                 "name" to u.name)
                                 .whereArgs("(userId = {userId})", "userId" to u.id)
                                 .exec()

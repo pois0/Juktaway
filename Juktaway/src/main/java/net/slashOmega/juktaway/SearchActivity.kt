@@ -5,15 +5,17 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
+import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import de.greenrobot.event.EventBus
-import jp.nephy.penicillin.core.PenicillinJsonObjectAction
-import jp.nephy.penicillin.core.hasNext
-import jp.nephy.penicillin.core.next
+import jp.nephy.penicillin.core.request.action.JsonObjectApiAction
+import jp.nephy.penicillin.extensions.cursor.hasNext
+import jp.nephy.penicillin.extensions.cursor.next
+import jp.nephy.penicillin.models.Search
 import kotlinx.android.synthetic.main.activity_search.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.adapter.StatusAdapter
@@ -24,6 +26,7 @@ import net.slashOmega.juktaway.listener.PressEnterListener
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.TabManager
+import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.ActivityJob
 import net.slashOmega.juktaway.util.KeyboardUtil
@@ -36,11 +39,10 @@ import org.jetbrains.anko.toast
 class SearchActivity: FragmentActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
-        var job by ActivityJob()
     }
 
     private lateinit var mAdapter: StatusAdapter
-    private var nextAction: PenicillinJsonObjectAction<jp.nephy.penicillin.models.Search>? = null
+    private var nextAction: JsonObjectApiAction<Search>? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -99,11 +101,6 @@ class SearchActivity: FragmentActivity() {
         super.onPause()
     }
 
-    override fun onStop() {
-        job = null
-        super.onStop()
-    }
-
     fun onEventMainThread(event: AlertDialogEvent) {
         event.dialogFragment.show(supportFragmentManager, "dialog")
     }
@@ -113,7 +110,7 @@ class SearchActivity: FragmentActivity() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        mAdapter.removeStatus(event.statusId!!)
+        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -144,14 +141,14 @@ class SearchActivity: FragmentActivity() {
 
     private fun additionalReading() {
         nextAction?.let { action ->
-            guruguru.visibility = View.VISIBLE
-
-            job = action.queue {
-                val statuses = it.result.statuses
-                if (it.hasNext()) nextAction = it.next()
+            GlobalScope.launch(Dispatchers.Main) {
+                guruguru.visibility = View.VISIBLE
+                val result = action.await()
+                val statuses = result.result.statuses
+                if (result.hasNext) nextAction = result.next
 
                 val count = mAdapter.count
-                mAdapter.addAllFromStatuses(statuses)
+                mAdapter.extensionAddAllFromStatusesSuspend(statuses)
                 mAdapter.notifyDataSetChanged()
 
                 search_list.visibility = View.VISIBLE
@@ -169,30 +166,36 @@ class SearchActivity: FragmentActivity() {
         searchWords.text?.let { text ->
             mAdapter.clear()
             search_list.visibility = View.GONE
-            guruguru.visibility = View.GONE
+            guruguru.visibility = View.VISIBLE
             nextAction = null
+            GlobalScope.launch(Dispatchers.Main) {
+                val result = runCatching {
+                    currentClient.search.search(text.toString() + " exclude:retweets", count = BasicSettings.pageCount).await()
+                }.getOrNull()
+                if (result != null) {
+                    val statuses = result.result.statuses
+                    if (result.hasNext) nextAction = result.next
 
-            job = currentClient.search.search(text.toString() + " exclude:retweets").queue {
-                val statuses = it.result.statuses
-                if (it.hasNext()) nextAction = it.next()
+                    val count = mAdapter.count
+                    mAdapter.addAllFromStatusesSuspend(statuses)
+                    mAdapter.notifyDataSetChanged()
 
-                val count = mAdapter.count
-                mAdapter.addAllFromStatuses(statuses)
-                mAdapter.notifyDataSetChanged()
 
-                search_list.visibility = View.VISIBLE
-                if (count == 0) search_list.setSelection(0)
+                    search_list.visibility = View.VISIBLE
+                    if (count == 0) search_list.setSelection(0)
+                }
                 guruguru.visibility = View.GONE
 
                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                         .hideSoftInputFromWindow(searchWords.windowToken, 0)
+
             }
         }
     }
 
     private fun createSavedSearch(word: String) {
         GlobalScope.launch(Dispatchers.Main) {
-            val res = runCatching { currentClient.savedSearch.create(word) }.isSuccess
+            val res = runCatching { currentClient.savedSearches.create(word) }.isSuccess
 
             if (res) {
                 setResult(RESULT_CREATE_SAVED_SEARCH)

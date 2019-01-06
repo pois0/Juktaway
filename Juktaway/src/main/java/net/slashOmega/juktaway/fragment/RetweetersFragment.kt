@@ -30,7 +30,7 @@ class RetweetersFragment: DialogFragment() {
 
         arguments?.getLong("statusId", -1L)?.takeIf { it > 0 }?.let { id ->
             GlobalScope.launch(Dispatchers.Main) {
-                val statuses = runCatching { currentClient.status.retweets(id).await() }.getOrNull()
+                val statuses = runCatching { currentClient.statuses.retweets(id).await() }.getOrNull()
                 mProgressBar.visibility = View.GONE
 
                 if (statuses == null) {

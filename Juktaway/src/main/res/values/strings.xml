@@ -64,7 +64,7 @@
     <string name="description_icon">Profile Icon</string>
     <string name="dialog_title_draft">Drafts</string>
     <string name="dialog_title_hashtag">Hashtags</string>
-    <string name="format_user_created_at">\'Beginning Twitter: \'yyyy/MM/dd</string>
+    <string name="format_user_created_at">\'Since \'yyyy/MM/dd</string>
     <string name="label_bio">Bio</string>
     <string name="label_connect_with_twitter">Connect with Twitter</string>
     <string name="label_created_at">Beginning</string>

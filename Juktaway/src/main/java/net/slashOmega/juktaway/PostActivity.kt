@@ -28,12 +28,12 @@ import android.widget.ImageView
 import android.widget.ListView
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.core.PenicillinException
-import jp.nephy.penicillin.core.PenicillinLocalizedException
-import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinException
+import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
+import kotlinx.android.synthetic.main.list.view.*
 import kotlinx.android.synthetic.main.row_word.view.*
 import kotlinx.android.synthetic.main.spinner_switch_account.view.*
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +57,6 @@ class PostActivity: FragmentActivity() {
     companion object {
         private const val REQUEST_GALLERY = 1
         private const val REQUEST_CAMERA = 2
-        private const val REQUEST_TWICCA = 3
         private const val REQUEST_PERMISSIONS_CAMERA = 1
         private const val MAX_IMAGE = 4
     }
@@ -113,7 +112,7 @@ class PostActivity: FragmentActivity() {
         registerForContextMenu(img_button)
 
         // アカウント切り替え
-        switch_account_spinner.adapter = AccessTokenAdapter(this, R.layout.spinner_switch_account).apply {
+        switch_account_spinner.adapter = IdentifierAdapter(this, R.layout.spinner_switch_account).apply {
             setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
             identifierList.forEachIndexed { i, token ->
                 add(token)
@@ -233,8 +232,8 @@ class PostActivity: FragmentActivity() {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = DraftAdapter(this, R.layout.row_word)
             drafts.forEach { tag -> adapter.add(tag) }
-            //TODO
-            view.findViewById<ListView>(R.id.list_list).apply {
+
+            it.list_list.apply {
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
@@ -338,7 +337,6 @@ class PostActivity: FragmentActivity() {
             when (requestCode) {
                 REQUEST_GALLERY -> setImage(this.data!!)
                 REQUEST_CAMERA -> mImageUri?.let { setImage(it) }
-                REQUEST_TWICCA -> status_text.setText(getStringExtra(Intent.EXTRA_TEXT))
             }
         }
     }
@@ -504,7 +502,7 @@ class PostActivity: FragmentActivity() {
         }
     }
 
-    private class AccessTokenAdapter(context: Context, val mLayout: Int)
+    private class IdentifierAdapter(context: Context, val mLayout: Int)
             : ArrayAdapter<Identifier>(context, mLayout) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 

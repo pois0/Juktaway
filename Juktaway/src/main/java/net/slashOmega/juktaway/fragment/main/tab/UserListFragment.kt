@@ -19,9 +19,9 @@ class UserListFragment: BaseFragment() {
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                currentClient.list.run {
+                currentClient.lists.run {
                     if (mMaxId > 0 && !mReloading) timeline(tabId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                    else timeline(tabId)
+                    else timeline(tabId, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
 

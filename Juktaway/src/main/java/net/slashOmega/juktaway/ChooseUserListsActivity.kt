@@ -34,17 +34,17 @@ class ChooseUserListsActivity: FragmentActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        job = currentClient.list.list().queue { lists ->
-            GlobalScope.launch(Dispatchers.Main) {
-                lists.forEach {
-                    mAdapter.add(UserListWithRegistered().apply {
-                        isRegistered = TabManager.hasTabId(it.id)
-                        userList = it
-                    })
-                }
+        job = GlobalScope.launch(Dispatchers.Main) {
+            val lists = currentClient.lists.list().await()
+            lists.forEach {
+                mAdapter.add(UserListWithRegistered().apply {
+                    isRegistered = TabManager.hasTabId(it.id)
+                    userList = it
+                })
             }
-            UserListCache.userLists = lists
+            UserListCache.userLists = lists.toMutableList()
         }
+
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_choose_user_lists)

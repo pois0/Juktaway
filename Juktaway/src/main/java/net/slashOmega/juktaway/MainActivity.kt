@@ -22,8 +22,8 @@ import android.widget.Button
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.core.PenicillinException
-import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinException
+import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -163,12 +163,10 @@ class MainActivity: FragmentActivity() {
                     if (msg.startsWith("D ")) {
                         val res = currentClient.sendDirectMessage(msg)
                         MessageUtil.dismissProgressDialog()
-                        res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) }
-                                ?: quick_tweet_edit.setText("")
+                        res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText("")
                     } else {
-
                         val e = runCatching {
-                            currentClient.status.run {
+                            currentClient.statuses.run {
                                 mInReplyToStatus?.let { s ->
                                     update(msg, inReplyToStatusId = s.id)
                                 } ?: update(msg)

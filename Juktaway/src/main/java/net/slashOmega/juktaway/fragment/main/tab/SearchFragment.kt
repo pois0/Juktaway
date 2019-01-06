@@ -2,9 +2,9 @@ package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.Bundle
 import android.view.View
-import jp.nephy.penicillin.core.PenicillinJsonObjectAction
-import jp.nephy.penicillin.core.hasNext
-import jp.nephy.penicillin.core.next
+import jp.nephy.penicillin.core.request.action.JsonObjectApiAction
+import jp.nephy.penicillin.extensions.cursor.hasNext
+import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -13,7 +13,7 @@ import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.twitter.currentClient
 
 class SearchFragment: BaseFragment() {
-    private var action: PenicillinJsonObjectAction<Search>? = null
+    private var action: JsonObjectApiAction<Search>? = null
 
     override var tabId = 0L
 
@@ -43,8 +43,8 @@ class SearchFragment: BaseFragment() {
                     clear()
                     mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
                     mReloading = false
-                    if (qr.hasNext()) {
-                        action = qr.next()
+                    if (qr.hasNext) {
+                        action = qr.next
                         mAutoLoader = true
                     } else {
                         action = null
@@ -55,7 +55,7 @@ class SearchFragment: BaseFragment() {
                 else -> {
                     mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
                     mAutoLoader = true
-                    if (qr.hasNext()) action = qr.next()
+                    if (qr.hasNext) action = qr.next
                     mListView.visibility = View.VISIBLE
                 }
             }

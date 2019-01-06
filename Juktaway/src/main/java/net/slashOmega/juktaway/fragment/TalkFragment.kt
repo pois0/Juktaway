@@ -13,9 +13,9 @@ import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.core.hasNext
-import jp.nephy.penicillin.core.next
 import jp.nephy.penicillin.endpoints.parameters.SearchResultType
+import jp.nephy.penicillin.extensions.cursor.hasNext
+import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
@@ -100,7 +100,7 @@ class TalkFragment: DialogFragment() {
 
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) { mAdapter.removeStatus(event.statusId!!) }
+    fun onEventMainThread(event: StreamingDestroyStatusEvent) { GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) } }
 
     private fun Dialog.removeGuruGuru() { (if (BasicSettings.talkOrderNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
 
@@ -108,7 +108,7 @@ class TalkFragment: DialogFragment() {
         var statusId = idParam
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId > 0) {
-                val status = runCatching { currentClient.status.show(statusId).await().result }.getOrNull() ?: break
+                val status = runCatching { currentClient.statuses.show(statusId).await().result }.getOrNull() ?: break
 
                 if (BasicSettings.talkOrderNewest) {
                     mAdapter.addSuspend(Row.newStatus(status))
@@ -135,7 +135,7 @@ class TalkFragment: DialogFragment() {
                         sinceId = source.id,
                         resultType = SearchResultType.Recent).await()
                 val searchedStatuses = toResult.result.statuses.toMutableList()
-                if (toResult.hasNext()) searchedStatuses.addAll(toResult.next().await().result.statuses)
+                if (toResult.hasNext) searchedStatuses.addAll(toResult.next.await().result.statuses)
 
                 val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
                         count = 200,
@@ -151,13 +151,13 @@ class TalkFragment: DialogFragment() {
                         statusIds.add(status.inReplyToStatusId!!)
                         isLoadMap.put(status.inReplyToStatusId!!, true)
                         if (statusIds.size == 200) {
-                            lookupStatuses.addAll(currentClient.status.lookup(statusIds).await())
+                            lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
                             statusIds.clear()
                         }
                     }
                 }
 
-                if (statusIds.size > 0) lookupStatuses.addAll(currentClient.status.lookup(statusIds).await())
+                if (statusIds.size > 0) lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
 
                 searchedStatuses.addAll(lookupStatuses)
 

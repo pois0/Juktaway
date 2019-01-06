@@ -8,7 +8,8 @@ import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
-import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
+import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
+import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.view.*
 import kotlinx.coroutines.Dispatchers
@@ -21,7 +22,7 @@ import net.slashOmega.juktaway.twitter.currentClient
 class UserMemberFragment : Fragment() {
     private lateinit var mAdapter: UserAdapter
     private var mListId: Long = 0L
-    private var mCursor: PenicillinCursorJsonObjectAction<CursorUsers>? = null
+    private var mCursor: CursorJsonObjectApiAction<CursorUsers>? = null
     private lateinit var mListView: ListView
     private lateinit var mFooter: ProgressBar
     private var mAutoLoader = false
@@ -66,11 +67,11 @@ class UserMemberFragment : Fragment() {
     private fun applyListMembers(listId: Long) {
         GlobalScope.launch(Dispatchers.Main) {
             val resp = runCatching {
-                (mCursor ?: currentClient.list.members(listId)).await()
+                (mCursor ?: currentClient.lists.members(listId)).await()
             }.getOrNull()
             mFooter.visibility = View.GONE
             if (resp == null) return@launch
-            mCursor = resp.next()
+            mCursor = resp.next
             mAdapter.addAll(resp.result.users)
             if (resp.result.nextCursor < 0) mAutoLoader = true
             mListView.visibility = View.VISIBLE

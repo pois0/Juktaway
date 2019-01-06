@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
+import android.util.Log
 import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +28,7 @@ class InteractionsFragment: BaseFragment() {
                 finishLoad()
                 return@launch
             }
+
             statuses.forEach { if (mMaxId <= 0L || mMaxId > it.id) mMaxId = it.id }
             if (mReloading) {
                 clear()

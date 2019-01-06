@@ -13,18 +13,18 @@ class DirectMessagesFragment: BaseFragment() {
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val sentMessages = currentClient.directMessage.run {
+            val sentMessages = currentClient.directMessages.run {
                 if (mSentDirectMessagesMaxId > 0 && !mReloading) sentMessages(maxId = mSentDirectMessagesMaxId - 1,
                         count = BasicSettings.pageCount / 2)
                 else sentMessages(count = 10)
             }.await().apply {
                 lastOrNull { mDirectMessagesMaxId <= 0L || mDirectMessagesMaxId > it.id }?.let { mDirectMessagesMaxId = it.id }
             }
-            currentClient.directMessage.run {
+            currentClient.directMessages.run {
                 if (mDirectMessagesMaxId > 0 && !mReloading) list( maxId = mDirectMessagesMaxId - 1,
                         count = BasicSettings.pageCount / 2)
                 else list(count = 10)
-            }.await().apply {
+            }.await().toMutableList().apply {
                 lastOrNull { mDirectMessagesMaxId <= 0L || mDirectMessagesMaxId > it.id }?.let { mDirectMessagesMaxId = it.id }
                 addAll(sentMessages)
             }

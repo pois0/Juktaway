@@ -11,6 +11,9 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
 import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.NewRecordEvent
@@ -37,7 +40,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     protected var mReloading = false
     protected var isLoading = false
     private var mScrolling = false
-    internal var mMaxId = 0L // 読み込んだ最新のツイートID
+    protected var mMaxId = 0L // 読み込んだ最新のツイートID
     protected var mDirectMessagesMaxId = 0L // 読み込んだ最新の受信メッセージID
     protected var mSentDirectMessagesMaxId = 0L // 読み込んだ最新の送信メッセージID
     private val mStackRows = ArrayList<Row>()
@@ -276,15 +279,17 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
      * @param event ツイート
      */
     open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        val removePositions = mAdapter?.removeStatus(event.statusId!!) ?: ArrayList(0)
-        for (removePosition in removePositions) {
-            if (removePosition >= 0) {
-                val visiblePosition = mListView.firstVisiblePosition
-                if (visiblePosition > removePosition) {
-                    val view = mListView.getChildAt(0)
-                    val y = view?.top ?: 0
-                    mListView.setSelectionFromTop(visiblePosition - 1, y)
-                    break
+        GlobalScope.launch(Dispatchers.Main) {
+            val removePositions = mAdapter?.removeStatus(event.statusId!!) ?: ArrayList(0)
+            for (removePosition in removePositions) {
+                if (removePosition >= 0) {
+                    val visiblePosition = mListView.firstVisiblePosition
+                    if (visiblePosition > removePosition) {
+                        val view = mListView.getChildAt(0)
+                        val y = view?.top ?: 0
+                        mListView.setSelectionFromTop(visiblePosition - 1, y)
+                        break
+                    }
                 }
             }
         }

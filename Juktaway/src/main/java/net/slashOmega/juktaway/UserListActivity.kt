@@ -95,7 +95,7 @@ class UserListActivity: FragmentActivity() {
             }
             MENU_CREATE -> {
                 GlobalScope.launch(Dispatchers.Main) {
-                    val res = runCatching { currentClient.list.subscribe(mUserList.id).await() }.isSuccess
+                    val res = runCatching { currentClient.lists.subscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_create_user_list_subscription_success)
                         mIsFollowing = true
@@ -108,7 +108,7 @@ class UserListActivity: FragmentActivity() {
             }
             MENU_DESTROY -> {
                 GlobalScope.launch(Dispatchers.Main) {
-                    val res = runCatching { currentClient.list.unsubscribe(mUserList.id).await() }.isSuccess
+                    val res = runCatching { currentClient.lists.unsubscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_destroy_user_list_subscription_success)
                         mIsFollowing = false

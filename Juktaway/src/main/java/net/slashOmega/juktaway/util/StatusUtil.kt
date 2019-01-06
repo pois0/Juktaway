@@ -3,6 +3,7 @@ package net.slashOmega.juktaway.util
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
+import android.util.Log
 import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import java.util.*
@@ -102,19 +103,17 @@ object StatusUtil {
      * @param status ツイート
      * @return 画像のURL
      */
-    fun getImageUrls(status: Status): ArrayList<String> {
-        val imageUrls = ArrayList<String>()
+    fun getImageUrls(status: Status): List<String> {
+        val imageUrls = status.extendedEntities?.media.takeNotEmpty()?.map { it.mediaUrl }?.toMutableList() ?: mutableListOf()
         status.entities.urls.map { it.expandedUrl }.forEach { url ->
             for (set in ImageUrlTransformer.list) {
                 val matcher = set.pattern.matcher(url)
                 if (matcher.find()) {
                     imageUrls.add(set.urlGenerator(url, matcher))
-                    continue
+                    break
                 }
             }
         }
-
-        status.entities.media.takeNotEmpty()?.map { it.mediaUrl }?.forEach { imageUrls.add(it) }
 
         return imageUrls
     }

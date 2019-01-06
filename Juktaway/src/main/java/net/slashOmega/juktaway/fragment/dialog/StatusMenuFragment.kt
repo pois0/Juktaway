@@ -16,6 +16,7 @@ import android.widget.TextView
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
@@ -375,11 +376,11 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * viaをミュート
          */
-        adapter.add(Menu(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.source.name)), Runnable {
+        adapter.add(Menu(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.via.name)), Runnable {
             AlertDialog.Builder(activity)
-                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.source.name)))
+                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.via.name)))
                     .setPositiveButton(R.string.button_ok) { _, _->
-                        SourceMute += StatusUtil.getClientName(source.source.name)
+                        SourceMute += StatusUtil.getClientName(source.via.name)
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }

@@ -14,7 +14,8 @@ import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.extensions.models.ProfileBannerSize
+import jp.nephy.penicillin.extensions.models.profileBannerUrlWithVariantSize
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
@@ -86,14 +87,14 @@ class ProfileActivity: FragmentActivity() {
                 loadJob = async(Dispatchers.Default) {
                     screenName?.let {
                         currentClient.run {
-                            val userJob = user.show(screenName = it)
-                            val relJob = friendship.show(sourceScreenName = currentIdentifier.screenName, targetScreenName = it)
+                            val userJob = users.show(screenName = it)
+                            val relJob = friendships.show(sourceScreenName = currentIdentifier.screenName, targetScreenName = it)
                             userJob.await().result to relJob.await().result.relationship
                         }
                     } ?: userId.takeUnless { it == -1L }?.let {
                         currentClient.run {
-                            val userJob = user.show(userId = it)
-                            val relJob = friendship.show(sourceId = currentIdentifier.userId, targetId = it)
+                            val userJob = users.show(userId = it)
+                            val relJob = friendships.show(sourceId = currentIdentifier.userId, targetId = it)
                             userJob.await().result to relJob.await().result.relationship
                         }
                     } ?: throw IllegalArgumentException("Both of screen name and userId are null.")
@@ -148,7 +149,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.block.create(userId = mUser.id).await()
+                                        currentClient.blocks.create(userId = mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -170,7 +171,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.mute.create(userId = mUser.id).await()
+                                        currentClient.mutes.create(userId = mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -193,7 +194,7 @@ class ProfileActivity: FragmentActivity() {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
-                                        currentClient.friendship.update(userId = mUser.id, retweets = false).await()
+                                        currentClient.friendships.update(userId = mUser.id, retweets = false).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -215,7 +216,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.block.destroy(userId = mUser.id).await()
+                                        currentClient.blocks.destroy(userId = mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -237,7 +238,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.mute.destroy(userId = mUser.id).await()
+                                        currentClient.mutes.destroy(userId = mUser.id).await()
                                     }.isSuccess
 
 
@@ -261,7 +262,7 @@ class ProfileActivity: FragmentActivity() {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
-                                        currentClient.friendship.update(userId = mUser.id, retweets = true).await()
+                                        currentClient.friendships.update(userId = mUser.id, retweets = true).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -319,7 +320,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.user.reportSpam(userId = mUser.id)
+                                        currentClient.users.reportSpam(userId = mUser.id)
                                     }.isSuccess
 
 
@@ -347,7 +348,7 @@ class ProfileActivity: FragmentActivity() {
         followers_count.text = getString(R.string.label_followers, String.format("%1$,3d", mUser.followersCount))
         listed_count.text = getString(R.string.label_listed, String.format("%1$,3d", mUser.listedCount))
 
-        banner.displayImage(mUser.profileBannerUrlWithVariantSize(CommonUser.ProfileBannersSize.MobileRetina))
+        mUser.profileBannerUrlWithVariantSize(ProfileBannerSize.MobileRetina)?.let { banner.displayImage(it) }
 
         with (menu) {
             if (mRelationship.source.blocking) {

@@ -25,8 +25,8 @@ class RegisterUserListActivity : FragmentActivity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         job = GlobalScope.launch(Dispatchers.Main) {
             currentClient.runCatching {
-                list.ownerships(count = 200).await().result.lists to
-                        list.memberships(intent.getLongExtra("userId", -1)).await().result.lists
+                lists.ownerships(count = 200).await().result.lists to
+                        lists.memberships(intent.getLongExtra("userId", -1)).await().result.lists
             }.getOrNull()?.let { (own, member) ->
                 val registeredMap = member.associateBy({it.id}, {true})
                 own.forEach {

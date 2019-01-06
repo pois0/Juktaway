@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.settings.mute
 
+import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.util.StatusUtil
@@ -18,7 +19,7 @@ object Mute {
         val rt = status.retweetedStatus
         val sourceStatus = rt ?: status
         if (rt != null && rt.user in UserMute) return true
-        if (StatusUtil.getClientName(sourceStatus.source.name) in SourceMute) return true
+        if (StatusUtil.getClientName(sourceStatus.via.name) in SourceMute) return true
         val text = sourceStatus.text
         for (word in WordMute.getAllItems()) {
             if (text.contains(word)) return true

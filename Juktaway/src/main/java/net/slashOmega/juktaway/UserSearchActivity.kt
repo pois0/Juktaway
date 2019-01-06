@@ -91,7 +91,7 @@ class UserSearchActivity: FragmentActivity() {
     private fun userSearch(word: String) {
         GlobalScope.launch(Dispatchers.Main) {
             val res = tryAndTraceGet {
-                currentClient.user.search(word, mPage, 20).await()
+                currentClient.users.search(word, mPage, 20).await()
             }
             guruguru.visibility = View.GONE
             if (res == null) {

@@ -66,7 +66,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
                         GlobalScope.launch(Dispatchers.Main) {
-                            runCatching { currentClient.list.destroy(userList.id).await() }
+                            runCatching { currentClient.lists.destroy(userList.id).await() }
                                     .onSuccess {
                                         toast(R.string.toast_destroy_user_list_success)
                                         EventBus.getDefault().post(DestroyUserListEvent(userList.id))
@@ -91,7 +91,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
                         GlobalScope.launch(Dispatchers.Main) {
-                            runCatching { currentClient.list.unsubscribe(userList.id).await() }
+                            runCatching { currentClient.lists.unsubscribe(userList.id).await() }
                                     .onSuccess {
                                         toast(R.string.toast_destroy_user_list_subscription_success)
                                         EventBus.getDefault().post(DestroyUserListEvent(userList.id))

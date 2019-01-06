@@ -47,7 +47,7 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                             .setMessage(String.format(mContext.getString(R.string.confirm_destroy_saved_search), item))
                             .setPositiveButton(R.string.button_yes) { _, _ ->
                                 GlobalScope.launch(Dispatchers.Main) {
-                                    runCatching { currentClient.savedSearch.destroy(search.id).await() }.onSuccess {
+                                    runCatching { currentClient.savedSearches.destroy(search.id).await() }.onSuccess {
                                         MessageUtil.showToast(R.string.toast_destroy_success)
                                     }
                                 }
@@ -99,7 +99,7 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
 
     private fun getSavedSearches() {
         GlobalScope.launch(Dispatchers.Main) {
-            runCatching { currentClient.savedSearch.list().await() }.onSuccess { savedList ->
+            runCatching { currentClient.savedSearches.list().await() }.onSuccess { savedList ->
                 mSavedSearches.clear()
                 savedList.forEach { mSavedSearches.add(0, it) }
             }

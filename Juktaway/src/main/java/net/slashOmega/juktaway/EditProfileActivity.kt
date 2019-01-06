@@ -5,7 +5,8 @@ import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.MenuItem
-import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.extensions.models.ProfileImageSize
+import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import net.slashOmega.juktaway.fragment.profile.UpdateProfileImageFragment
 import kotlinx.android.synthetic.main.activity_edit_profile.*
 import kotlinx.coroutines.*
@@ -21,14 +22,15 @@ class EditProfileActivity: FragmentActivity(){
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        job = currentClient.account.verifyCredentials().queue {
-            val user = it.result
+        job = GlobalScope.launch(Dispatchers.Main) {
+            val user = currentClient.account.verifyCredentials().await().result
             name.setText(user.name)
             location.setText(user.location)
             url.setText(user.url)
             description.setText(user.description)
-            icon.displayRoundedImage(user.profileImageUrlWithVariantSize(CommonUser.ProfileImageSize.Original))
+            icon.displayRoundedImage(user.profileImageUrlWithVariantSize(ProfileImageSize.Original))
         }
+
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_edit_profile)

@@ -9,8 +9,6 @@ import android.view.ViewGroup
 import android.widget.*
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
-import jp.nephy.penicillin.models.PenicillinCursorModel
 import jp.nephy.penicillin.models.User
 import net.slashOmega.juktaway.R
 
@@ -27,6 +25,7 @@ internal abstract class ProfileListFragmentBase: Fragment() {
     private var isLoading = false
 
     protected fun finishLoading() {
+        mFooter.visibility = View.GONE
         Handler().postDelayed({ isLoading = false }, 200)
     }
 

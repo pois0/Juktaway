@@ -6,7 +6,7 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import jp.nephy.penicillin.PenicillinClient
-import jp.nephy.penicillin.models.special.RequestTokenResponse
+import jp.nephy.penicillin.models.RequestTokenResponse
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.ThemeUtil

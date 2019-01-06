@@ -68,7 +68,7 @@ class UserListStatusesFragment : Fragment() {
 
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) { mAdapter.removeStatus(event.statusId!!) }
+    fun onEventMainThread(event: StreamingDestroyStatusEvent) { GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) } }
 
     private fun additionalReading() {
         if (!mAutoLoader) return
@@ -80,8 +80,8 @@ class UserListStatusesFragment : Fragment() {
     private fun applyUserList() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                (if (mMaxId > 0) currentClient.list.timeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                else currentClient.list.timeline(mListId)).await()
+                (if (mMaxId > 0) currentClient.lists.timeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                else currentClient.lists.timeline(mListId)).await()
             }.getOrNull()
             mFooter.visibility = View.GONE
 

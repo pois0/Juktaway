@@ -146,7 +146,7 @@ class ScaleImageActivity: FragmentActivity() {
 
     private fun showStatus(id: Long) {
         GlobalScope.launch(Dispatchers.Main) {
-            tryAndTraceGet { currentClient.status.show(id).await() }?.result?.let { showStatus(it, 0) }
+            tryAndTraceGet { currentClient.statuses.show(id).await() }?.result?.let { showStatus(it, 0) }
         }
     }
 

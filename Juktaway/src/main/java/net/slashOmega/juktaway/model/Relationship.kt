@@ -49,17 +49,17 @@ object Relationship {
     fun removeNoRetweet(userId: Long) { noRetweetList.remove(userId) }
 
     private suspend fun loadBlock(client: PenicillinClient) {
-        runCatching { client.block.listIds().await().result.ids }
+        runCatching { client.blocks.listIds().await().result.ids }
                 .getOrNull()?.let { blockList.addAll(it) }
     }
 
     private suspend fun loadOfficialMute(client: PenicillinClient) {
-        runCatching { client.mute.listIds().await().result.ids }
+        runCatching { client.mutes.listIds().await().result.ids }
                 .getOrNull()?.let { officialMuteList.addAll(it) }
     }
 
     private suspend fun loadNoRetweet(client : PenicillinClient) {
-        runCatching { client.friendship.noRetweetsIds().await().result.ids }
+        runCatching { client.friendships.noRetweetsIds().await().result.ids }
                 .getOrNull()?.let { noRetweetList.addAll(it) }
     }
     private fun isThatStatusVisible(id: Long): Boolean = isMe(id) || !(isBlock(id) || isOfficialMute(id))

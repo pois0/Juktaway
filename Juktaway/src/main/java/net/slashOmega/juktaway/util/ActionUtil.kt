@@ -2,12 +2,11 @@ package net.slashOmega.juktaway.util
 
 import android.content.Context
 import android.content.Intent
-import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.PenicillinClient
-import jp.nephy.penicillin.core.PenicillinException
-import jp.nephy.penicillin.core.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinException
+import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
 import jp.nephy.penicillin.endpoints.parameters.MediaCategory
 import jp.nephy.penicillin.endpoints.parameters.MediaFileComponent
 import jp.nephy.penicillin.endpoints.parameters.MediaType
@@ -36,7 +35,7 @@ suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
 
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
-            (if (imageList.isNotEmpty()) status.updateWithMediaFile(str,
+            (if (imageList.isNotEmpty()) statuses.updateWithMediaFile(str,
                     imageList.map { MediaFileComponent(
                             file = it,
                             type = it.mediaType(),
@@ -45,7 +44,7 @@ suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null
                     null,
                     "inReplyToStatusId" to inReplyToStatusId
                 )
-            else status.update(status = str, inReplyToStatusId = inReplyToStatusId)).await().result
+            else statuses.update(status = str, inReplyToStatusId = inReplyToStatusId)).await().result
         }
     }.onSuccess { s ->
         s.entities.hashtags.forEach { PostStockSettings.addHashtag("#${it.text}") }
@@ -55,7 +54,7 @@ suspend fun Identifier.sendDirectMessage(rawMessage: String) = asClient { sendDi
 
 suspend fun PenicillinClient.sendDirectMessage(rawMessage: String) = runCatching {
     val message = rawMessage.split(" ".toRegex(), 3)
-    directMessage.create(message[2], screenName = message[1]).await()
+    directMessages.create(message[2], screenName = message[1]).await()
 }.exceptionOrNull()
 
 object ActionUtil {
@@ -65,7 +64,7 @@ object ActionUtil {
             EventBus.getDefault().post(StatusActionEvent())
         }
 
-        val e = runCatching { currentClient.favorite.create(statusId).await() }.exceptionOrNull() as? PenicillinException
+        val e = runCatching { currentClient.favorites.create(statusId).await() }.exceptionOrNull() as? PenicillinException
         when {
             e == null -> MessageUtil.showToast(R.string.toast_destroy_favorite_success)
             e.error?.code == 139 -> MessageUtil.showToast(R.string.toast_favorite_already)
@@ -83,7 +82,7 @@ object ActionUtil {
             EventBus.getDefault().post(StatusActionEvent())
         }
 
-        val e = runCatching { currentClient.favorite.destroy(statusId).await() }.exceptionOrNull() as? PenicillinException
+        val e = runCatching { currentClient.favorites.destroy(statusId).await() }.exceptionOrNull() as? PenicillinException
         when {
             e == null -> MessageUtil.showToast(R.string.toast_destroy_favorite_success)
             e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> MessageUtil.showToast(R.string.toast_destroy_favorite_already)
@@ -97,7 +96,7 @@ object ActionUtil {
 
     suspend fun doDestroyStatus(statusId: Long) {
         val res = runCatching {
-            currentClient.status.delete(statusId).await()
+            currentClient.statuses.delete(statusId).await()
         }.isSuccess
         if (res) {
             MessageUtil.showToast(R.string.toast_destroy_status_success)
@@ -112,14 +111,14 @@ object ActionUtil {
         EventBus.getDefault().post(StatusActionEvent())
 
         runCatching {
-            currentClient.status.retweet(statusId).await().result
+            currentClient.statuses.retweet(statusId).await().result
         }.onSuccess {
             FavRetweetManager.setRtId(it.retweetedStatus!!.id, it.id)
             MessageUtil.showToast(R.string.toast_retweet_success)
         }.onFailure {
             FavRetweetManager.setRtId(statusId, null)
-            val e = it as PenicillinException
-            if (e.error?.code == 37) MessageUtil.showToast(R.string.toast_retweet_already)
+            val e = it as? PenicillinException
+            if (e?.error?.code == 37) MessageUtil.showToast(R.string.toast_retweet_already)
             else {
                 EventBus.getDefault().post(StatusActionEvent())
                 MessageUtil.showToast(R.string.toast_retweet_failure)
@@ -163,7 +162,7 @@ object ActionUtil {
         EventBus.getDefault().post(StatusActionEvent())
 
         runCatching {
-            currentClient.status.delete(statusId).await()
+            currentClient.statuses.delete(statusId).await()
         }.onSuccess {
             MessageUtil.showToast(R.string.toast_destroy_retweet_success)
             EventBus.getDefault().post(StreamingDestroyStatusEvent(statusId))
@@ -231,7 +230,7 @@ object ActionUtil {
     }
 
     suspend fun destroyDirectMessage(id: Long) {
-        val dm = runCatching { currentClient.directMessage.delete(id).await().result }.getOrNull()
+        val dm = runCatching { currentClient.directMessages.delete(id).await().result }.getOrNull()
         if (dm != null) {
             MessageUtil.showToast(R.string.toast_destroy_direct_message_success)
             EventBus.getDefault().post(StreamingDestroyMessageEvent(dm.id))

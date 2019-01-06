@@ -10,7 +10,7 @@ object FavRetweetManager {
     private val mIsFavMap = LongSparseArray<Boolean>()
     private val mRtIdMap = LongSparseArray<Long>()
 
-    fun setFav(id: Long?) { mIsFavMap.put(id!!, true) }
+    fun setFav(id: Long) { mIsFavMap.put(id, true) }
 
     fun removeFav(id: Long?) { mIsFavMap.remove(id!!) }
 

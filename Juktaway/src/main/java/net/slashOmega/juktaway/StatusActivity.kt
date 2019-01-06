@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway
 
 import android.app.NotificationManager
-import android.app.ProgressDialog
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
@@ -31,7 +30,6 @@ import org.jetbrains.anko.intentFor
  * Created on 2018/08/29.
  */
 class StatusActivity: FragmentActivity() {
-    private var mProgressDialog: ProgressDialog? = null
     private lateinit var mAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -44,8 +42,7 @@ class StatusActivity: FragmentActivity() {
         if (intent.getBooleanExtra("notification", false)) {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
         }
-        val statusId: Long
-        if (Intent.ACTION_VIEW == intent.action) {
+        val statusId = if (Intent.ACTION_VIEW == intent.action) {
             val uri = intent.data
             if (uri == null || uri.path == null) return
             when {
@@ -61,11 +58,9 @@ class StatusActivity: FragmentActivity() {
                     finish()
                     return
                 }
-                else -> statusId = java.lang.Long.parseLong(uri.lastPathSegment)
+                else -> java.lang.Long.parseLong(uri.lastPathSegment!!)
             }
-        } else {
-            statusId = intent.getLongExtra("id", -1L)
-        }
+        } else intent.getLongExtra("id", -1L)
 
         setContentView(R.layout.activity_status)
 
@@ -80,16 +75,15 @@ class StatusActivity: FragmentActivity() {
             onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
         }
         if (statusId > 0) {
-            showProgressDialog(getString(R.string.progress_loading))
+            MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
             load(statusId)
         } else {
             intent.getStringExtra("status")?.toJsonObject()?.parse<Status>()?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
                 if (inReplyToStatusId != null) {
-                    showProgressDialog(getString(R.string.progress_loading))
+                    MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
                     load(inReplyToStatusId)
-                    // LoadTask(this).execute(inReplyToStatusId)
                 }
             }
         }
@@ -105,12 +99,6 @@ class StatusActivity: FragmentActivity() {
         super.onPause()
     }
 
-    private fun showProgressDialog(message: String) {
-        mProgressDialog = ProgressDialog(this)
-        mProgressDialog?.setMessage(message)
-        mProgressDialog?.show()
-    }
-
     fun onEventMainThread(event: AlertDialogEvent) {
         event.dialogFragment.show(supportFragmentManager, "dialog")
     }
@@ -120,14 +108,14 @@ class StatusActivity: FragmentActivity() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        mAdapter.removeStatus(event.statusId!!)
+        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
     private fun load(idParam: Long) {
         var statusId = idParam.takeIf { it > 0 }
         GlobalScope.launch(Dispatchers.Main) {
             while (statusId != null) {
-                val status = runCatching { currentClient.status.show(statusId!!).await().result }.getOrNull()
+                val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
                 MessageUtil.dismissProgressDialog()
 
                 if(status == null) {

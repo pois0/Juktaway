@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
+import android.util.TimingLogger
 import android.view.View
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -15,10 +16,14 @@ class TimelineFragment: BaseFragment() {
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
+            val logger = TimingLogger("TIMING_LOGGER", "timing")
+
             val statuses = runCatching {
                 (if (mMaxId > 0 && !mReloading) currentClient.timeline.home(maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                        else currentClient.timeline.home()).await()
+                        else currentClient.timeline.home(count = BasicSettings.pageCount)).await()
             }.onFailure { it.printStackTrace() }.getOrNull()
+
+            logger.addSplit("loading")
 
             when {
                 statuses.isNullOrEmpty() -> {
@@ -40,6 +45,9 @@ class TimelineFragment: BaseFragment() {
                     mListView.visibility = View.VISIBLE
                 }
             }
+
+            logger.addSplit("drawing")
+            logger.dumpToLog()
 
             finishLoad()
         }

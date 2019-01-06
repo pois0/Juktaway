@@ -3,7 +3,6 @@ package net.slashOmega.juktaway.adapter
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.content.Context
-import android.content.Intent
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
@@ -20,6 +19,8 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.extensions.createdAt
+import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -27,6 +28,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.ProfileActivity
 import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.StatusActivity
 import net.slashOmega.juktaway.event.AlertDialogEvent
 import net.slashOmega.juktaway.layouts.fontelloTextView
 import net.slashOmega.juktaway.model.FavRetweetManager
@@ -125,13 +127,12 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         val statuses = withContext(Dispatchers.Default) {
             statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
         }
-        GlobalScope.launch(Dispatchers.Default) {
+        Dispatchers.Default.doAsync {
             mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
         }
-        statuses.forEach {
-            super.add(it)
-            filter(it)
-        }
+
+        filterAll(statuses)
+        super.addAll(statuses)
         mLimit++
     }
 
@@ -151,13 +152,13 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         val statuses = withContext(Dispatchers.Default) {
             rows.filter { it !in Mute && !exists(it) }
         }
-        withContext(Dispatchers.Default) {
+        Dispatchers.Default.doAsync {
             mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
         }
-        statuses.forEach {
-            super.add(it)
-            filter(it)
-        }
+
+        filterAll(statuses)
+        super.addAll(statuses)
+
         limitation()
     }
 
@@ -171,13 +172,13 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         val statuses = withContext(Dispatchers.Default) {
             statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
         }
-        GlobalScope.launch(Dispatchers.Default) {
+        Dispatchers.Default.doAsync {
             mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
         }
-        statuses.forEach {
-            super.add(it)
-            filter(it)
-        }
+
+        filterAll(statuses)
+        super.addAll(statuses)
+
         limitation()
     }
 
@@ -202,13 +203,23 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     private fun exists(row: Row) = row.isStatus && row.status!!.id in mIdSet
 
-    private fun filter(row: Row) {
-        GlobalScope.launch(Dispatchers.Default) {
+    private suspend fun filter(row: Row) {
+        withContext(Dispatchers.Default) {
             row.status?.takeIf { it.retweeted }?.let { status ->
                 status.retweetedStatus?.takeIf { status.user.id == currentIdentifier.userId }?.let { retweet ->
                     FavRetweetManager.setRtId(retweet.id, status.id)
                 }
             }
+        }
+    }
+
+    private fun filterAll(rows: Collection<Row>) {
+        Dispatchers.Default.doAsync {
+            rows.filter { it.status?.retweetedStatus?.user?.id == currentIdentifier.userId }
+                    .map { it.status!! to it.status!!.retweetedStatus!! }
+                    .forEach { (status, retweet) ->
+                        FavRetweetManager.setRtId(retweet.id, status.id)
+                    }
         }
     }
 
@@ -223,12 +234,12 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         }
     }
 
-    fun removeStatus(id: Long): List<Int> {
+    suspend fun removeStatus(id: Long): List<Int> {
         var pos = 0
         val positions = mutableListOf<Int>()
         val rows = mutableListOf<Row>()
 
-        GlobalScope.launch(Dispatchers.Default) {
+        withContext(Dispatchers.Default) {
             for (i in 0 until count) {
                 val row = getItem(i)?.takeUnless { it.isDirectMessage } ?: continue
                 val status = row.status
@@ -330,7 +341,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
                         }
 
-                        displayUserIcon(s.user)
+                        GlobalScope.launch(Dispatchers.Main) { displayUserIcon(s.user) }
                     }.lparams(width = dip(48), height = dip(48)) {
                         below(R.id.action_container)
                         bottomMargin = dip(6)
@@ -460,7 +471,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 }
                             }
                             setOnClickListener {
-                                startActivity(Intent(Intent.ACTION_VIEW, qs.uri))
+                                startActivity<StatusActivity>("status" to qs.toJsonString())
                             }
                         }
                     }.lparams(width = matchParent) {
@@ -527,7 +538,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             else Color.parseColor("#666666")
                             textSize = 14f
                             setOnClickListener {
-                                if (s.user.protected) {
+                                if (s.user.protected && s.user.id != currentIdentifier.userId) {
                                     MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share)
                                     return@setOnClickListener
                                 }
@@ -616,7 +627,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             bottomPadding = dip(2)
                             textColor = Color.parseColor("#666666")
                             textSize = 8f //sp
-                            text = "via ${StatusUtil.getClientName(s.source.name)}"
+                            text = "via ${StatusUtil.getClientName(s.via.name)}"
                         }.lparams {
                             alignParentRight()
                         }

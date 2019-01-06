@@ -70,15 +70,7 @@ object ImageUtil {
                         .build())
     }
 
-    fun displayImage(url: String, view: ImageView, isRounded: Boolean) {
-        if (isRounded) {
-            displayImage(url, view)
-        } else {
-            displayRoundedImage(url, view)
-        }
-    }
-
-    private fun displayImage(url: String, view: ImageView) {
+    fun displayImage(url: String, view: ImageView) {
         val tag = view.tag as? String
         if (tag != null && tag == url) return
         view.tag = url
@@ -97,7 +89,7 @@ object ImageUtil {
     }
 
     fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: TextView, status: Status) {
-        StatusUtil.getImageUrls(status).takeNotEmpty()?.let {imageUrls ->
+        StatusUtil.getImageUrls(status).takeNotEmpty()?.let { imageUrls ->
             group.removeAllViews()
             imageUrls.forEachIndexed { i, url ->
                 val image = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }

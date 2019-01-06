@@ -45,7 +45,7 @@ class VideoActivity: FragmentActivity() {
                     GlobalScope.launch(Dispatchers.Main) {
                         // TODO 画質を選べるように
                         val status = tryAndTraceGet {
-                            currentClient.status.show(m.group(1).toLong()).await()
+                            currentClient.statuses.show(m.group(1).toLong()).await()
                         }?.result ?: return@launch
                         status.extendedEntities?.media?.first { it.type == "video" }?.videoInfo?.variants?.get(1)?.url
                                 ?.let { setVideoURI(it) }

@@ -1,7 +1,9 @@
 package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
-import jp.nephy.penicillin.core.PenicillinCursorJsonObjectAction
+import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
+import jp.nephy.penicillin.extensions.cursor.hasNext
+import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -14,21 +16,20 @@ import net.slashOmega.juktaway.util.tryAndTraceGet
 internal class FollowersListFragment: ProfileListFragmentBase() {
     override val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
     override val layout = R.layout.list_guruguru
-    var cursor: PenicillinCursorJsonObjectAction<CursorUsers>? = null
+    var cursor: CursorJsonObjectApiAction<CursorUsers>? = null
 
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val action = cursor ?: currentClient.follower.list(user.screenName)
+            val action = cursor ?: currentClient.followers.list(user.screenName)
             val resp = tryAndTraceGet {
                 action.await().apply {
-                    cursor = next()
+                    cursor = next
                 }
             }
-            mFooter.visibility = View.GONE
+
             if (resp != null) {
                 resp.result.users.takeIf { it.isNotEmpty() }?.forEach { mAdapter.add(it) }
-                // TODO hasNext
-                if (resp.result.nextCursor != 0L) mAutoLoader = true
+                if (resp.hasNext) mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
             finishLoading()

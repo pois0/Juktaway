@@ -5,7 +5,8 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
-import jp.nephy.penicillin.models.CommonUser
+import jp.nephy.penicillin.extensions.models.ProfileImageSize
+import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.row_user.view.*
 import net.slashOmega.juktaway.ProfileActivity
@@ -19,7 +20,7 @@ class UserAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<User>(mCo
         @SuppressLint("SetTextI18n")
         get() = { position, _ ->
             getItem(position)?.let { user ->
-                ImageUtil.displayRoundedImage(user.profileImageUrlWithVariantSize(CommonUser.ProfileImageSize.Bigger), icon)
+                ImageUtil.displayRoundedImage(user.profileImageUrlWithVariantSize(ProfileImageSize.Bigger), icon)
                 display_name.text = user.name
                 screen_name.text = "@${user.screenName}"
                 user.description?.takeIf { it.isNotEmpty() }?.let {
