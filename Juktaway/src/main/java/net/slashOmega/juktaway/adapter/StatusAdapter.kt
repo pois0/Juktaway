@@ -9,6 +9,8 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.util.Log
+import android.util.TimingLogger
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -113,7 +115,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                 super.add(it)
                 filter(it)
             }
-            mLimit++
+            mLimit += rows.size
         }
     }
 
@@ -124,16 +126,21 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     suspend fun extensionAddAllFromStatusesSuspend(statusesParam: List<Status>) {
+        val logger = TimingLogger("TIMING_LOGGER", "addall")
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
+            Mute.filterAll(statusesParam).map { Row.newStatus(it) }.filter { !exists(it) }
         }
+        logger.addSplit("filtering")
         Dispatchers.Default.doAsync {
-            mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
+            mIdSet.addAll(statuses.map { it.status!!.id })
         }
+        logger.addSplit("launching")
 
         filterAll(statuses)
         super.addAll(statuses)
-        mLimit++
+        mLimit += statuses.size
+        logger.addSplit("finished")
+        logger.dumpToLog()
     }
 
     override fun add(row: Row) {
@@ -170,11 +177,9 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.map { Row.newStatus(it) }.filter { it !in Mute && !exists(it) }
+            Mute.filterAll(statusesParam).map { Row.newStatus(it) }.filter { !exists(it) }
         }
-        Dispatchers.Default.doAsync {
-            mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
-        }
+        Dispatchers.Default.doAsync { mIdSet.addAll(statuses.map { it.status!!.id }) }
 
         filterAll(statuses)
         super.addAll(statuses)
@@ -627,7 +632,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             bottomPadding = dip(2)
                             textColor = Color.parseColor("#666666")
                             textSize = 8f //sp
-                            text = "via ${StatusUtil.getClientName(s.via.name)}"
+                            text = "via ${s.via.name}"
                         }.lparams {
                             alignParentRight()
                         }

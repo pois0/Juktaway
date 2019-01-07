@@ -11,7 +11,21 @@ import net.slashOmega.juktaway.util.StatusUtil
 object Mute {
     fun isMute(row: Row): Boolean = row.takeIf { it.isStatus }?.let { isMute(it.status!!) } ?: false
 
-    fun isMute(status: Status): Boolean = run {
+    fun filterAll(statuses: List<Status>): List<Status> {
+        val userMute = UserMute.getAllItems().map { it.first }
+        val sourceMute = SourceMute.getAllItems()
+        val wordMute = WordMute.getAllItems()
+        return statuses.filter { status ->
+            val source = status.retweetedStatus ?: status
+            status.user.id !in userMute &&
+            status.entities.userMentions.map { it.id }.any { userMute.contains(it) }.not() &&
+            status.retweetedStatus?.user?.id !in userMute &&
+            source.via.name !in sourceMute &&
+            wordMute.contains(source.text).not()
+        }
+    }
+
+    fun isMute(status: Status): Boolean {
         if (status.user in UserMute) return true
         for (m in status.entities.userMentions) {
             if (m.id in UserMute) return true

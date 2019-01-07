@@ -13,7 +13,6 @@ class FavoritesFragment: BaseFragment() {
     override var tabId = TabManager.FAVORITES_TAB_ID
 
     override fun taskExecute() {
-        Log.d("favorite", "maxId = $mMaxId mReloading $mReloading")
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
                 currentClient.favorites.run {

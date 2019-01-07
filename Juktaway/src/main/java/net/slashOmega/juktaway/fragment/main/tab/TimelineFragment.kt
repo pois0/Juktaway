@@ -1,29 +1,24 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
-import android.util.TimingLogger
+import android.util.Log
 import android.view.View
+import io.ktor.http.fullPath
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
-import net.slashOmega.juktaway.twitter.currentIdentifier
 
 class TimelineFragment: BaseFragment() {
     override var tabId = TabManager.TIMELINE_TAB_ID
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val logger = TimingLogger("TIMING_LOGGER", "timing")
-
             val statuses = runCatching {
                 (if (mMaxId > 0 && !mReloading) currentClient.timeline.home(maxId = mMaxId - 1, count = BasicSettings.pageCount)
                         else currentClient.timeline.home(count = BasicSettings.pageCount)).await()
             }.onFailure { it.printStackTrace() }.getOrNull()
-
-            logger.addSplit("loading")
 
             when {
                 statuses.isNullOrEmpty() -> {
@@ -33,21 +28,18 @@ class TimelineFragment: BaseFragment() {
                 }
                 mReloading -> {
                     clear()
-                    statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                    mAdapter?.addAllFromStatusesSuspend(statuses)
+                    mMaxId = statuses.last().id
+                    mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
                     mReloading = false
                     mPullToRefreshLayout.setRefreshComplete()
                 }
                 else -> {
-                    statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                    mMaxId = statuses.last().id
                     mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
             }
-
-            logger.addSplit("drawing")
-            logger.dumpToLog()
 
             finishLoad()
         }
