@@ -5,6 +5,7 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.view.View
+import android.widget.ArrayAdapter
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.models.RequestTokenResponse
 import net.slashOmega.juktaway.model.UserIconManager
@@ -14,6 +15,7 @@ import kotlinx.android.synthetic.main.activity_signin.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.*
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.sdk27.coroutines.onItemSelectedListener
 import org.jetbrains.anko.toast
 
 /**
@@ -21,8 +23,10 @@ import org.jetbrains.anko.toast
  */
 class SignInActivity: Activity() {
     private val pinPublishedKey = "published"
+    private val consumerKey = "consumer"
     private var isPinPublished: Boolean = false
     private var mRequestToken: RequestTokenResponse? = null
+    private var consumer: Consumer? = null
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -37,12 +41,26 @@ class SignInActivity: Activity() {
                 startOAuth()
             }
         }
+
+        consumer_spinner.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item).apply {
+            setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
+            addAll(consumerList.map {it.name})
+        }
+
+        consumer_spinner.onItemSelectedListener {
+            (consumer_spinner.selectedItem as? String)?.let {
+                GlobalScope.launch {
+                    consumer = Core.getConsumer(it)
+                }
+            }
+        }
     }
 
     override fun onResume() {
         super.onResume()
         if (isPinPublished) {
             pin_code.visibility = View.VISIBLE
+            consumer_spinner.visibility = View.GONE
             consumer_key.visibility = View.GONE
             consumer_secret.visibility = View.GONE
         } else {
@@ -57,6 +75,7 @@ class SignInActivity: Activity() {
 
         mRequestToken?.let {
             outState.putBoolean(pinPublishedKey, isPinPublished)
+            outState.putString(consumerKey, consumer?.name)
         }
     }
 
@@ -64,6 +83,7 @@ class SignInActivity: Activity() {
         super.onRestoreInstanceState(savedInstanceState)
 
         isPinPublished = savedInstanceState.getBoolean(pinPublishedKey)
+        GlobalScope.launch { consumer = savedInstanceState.getString(consumerKey)?.let { Core.getConsumer(it) } }
     }
 
     private fun startOAuth(addUser: Boolean = false) {

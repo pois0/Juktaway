@@ -11,6 +11,9 @@
               android:screenOrientation="portrait"
               tools:context=".MainActivity">
 
+    <Spinner
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content" android:id="@+id/consumer_spinner"/>
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
