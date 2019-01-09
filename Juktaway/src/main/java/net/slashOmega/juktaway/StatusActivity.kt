@@ -25,6 +25,7 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import org.jetbrains.anko.intentFor
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/08/29.
@@ -119,7 +120,7 @@ class StatusActivity: FragmentActivity() {
                 MessageUtil.dismissProgressDialog()
 
                 if(status == null) {
-                    MessageUtil.showToast(R.string.toast_load_data_failure)
+                    toast(R.string.toast_load_data_failure)
                     return@launch
                 }
 

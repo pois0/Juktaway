@@ -14,11 +14,11 @@ import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.*
 import org.jetbrains.anko.toast
 
+private const val REQ_PICK_PROFILE_IMAGE = 1
+
 class EditProfileActivity: FragmentActivity(){
     companion object {
-        private const val REQ_PICK_PROFILE_IMAGE = 1
-
-        var job: Job? = null
+        private var job: Job? = null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {

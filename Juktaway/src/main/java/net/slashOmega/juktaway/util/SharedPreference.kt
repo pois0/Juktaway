@@ -4,7 +4,7 @@ import android.content.Context
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import net.slashOmega.juktaway.JuktawayApplication
+import net.slashOmega.juktaway.app
 import kotlin.reflect.KProperty
 
 /**
@@ -14,7 +14,7 @@ import kotlin.reflect.KProperty
 @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
 open class SharedPreference<T>(prefName: String, private val key: String, private val default: T) {
     private val pref by lazy {
-        JuktawayApplication.app.getSharedPreferences(prefName, Context.MODE_PRIVATE)!!
+        app.getSharedPreferences(prefName, Context.MODE_PRIVATE)!!
     }
 
     private var raw: T

@@ -3,13 +3,12 @@ package net.slashOmega.juktaway.util
 import android.content.Context
 import android.view.View
 import android.view.inputmethod.InputMethodManager
-import net.slashOmega.juktaway.JuktawayApplication
+import net.slashOmega.juktaway.app
 
 object KeyboardUtil {
 
     private val inputMethodManager: InputMethodManager
-        get() = JuktawayApplication.app
-                .getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
+        get() = app.getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager
 
     @JvmOverloads
     fun showKeyboard(view: View, delay: Int = 200) {

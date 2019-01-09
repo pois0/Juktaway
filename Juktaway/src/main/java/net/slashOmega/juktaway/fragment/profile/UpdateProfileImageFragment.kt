@@ -19,14 +19,11 @@ import net.slashOmega.juktaway.util.mediaType
 import org.jetbrains.anko.support.v4.toast
 import java.io.File
 
-/**
- * Created on 2018/11/24.
- */
+private const val imgPathArg = "imgPath"
+private const val uriArg = "uri"
+
 class UpdateProfileImageFragment: DialogFragment() {
     companion object {
-        private const val imgPathArg = "imgPath"
-        private const val uriArg = "uri"
-
         fun newInstance(imgPath: File, uri: Uri) = UpdateProfileImageFragment().apply {
             arguments = Bundle(2).apply {
                 putSerializable(imgPathArg, imgPath)

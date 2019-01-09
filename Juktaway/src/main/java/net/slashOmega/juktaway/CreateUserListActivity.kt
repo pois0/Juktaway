@@ -16,11 +16,9 @@ import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.twitter.currentClient
 import org.jetbrains.anko.toast
 
-class CreateUserListActivity: Activity() {
-    companion object {
-        private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
-    }
+private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
+class CreateUserListActivity: Activity() {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)

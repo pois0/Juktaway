@@ -14,18 +14,38 @@
     <Spinner
             android:layout_width="match_parent"
             android:layout_height="wrap_content" android:id="@+id/consumer_spinner"/>
-    <EditText
+    <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/consumer_key" android:hint="Consumer Key"/>
-    <EditText
-            android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/consumer_secret" android:hint="Consumer Secret"/>
+            android:layout_height="wrap_content" android:id="@+id/consumer_layout">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="5">
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_name" android:hint="Consumer Name"/>
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_key" android:hint="Consumer Key"/>
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_secret" android:hint="Consumer Secret"/>
+        </LinearLayout>
+        <Button
+                android:text="@string/add_consumer_button_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" android:id="@+id/add_consumer_button" android:layout_weight="1"/>
+    </LinearLayout>
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"

@@ -21,6 +21,7 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.extensions.complete
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
@@ -38,6 +39,7 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.displayUserIcon
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
+import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount

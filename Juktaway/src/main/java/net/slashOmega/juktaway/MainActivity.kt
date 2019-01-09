@@ -163,7 +163,7 @@ class MainActivity: FragmentActivity() {
                     if (msg.startsWith("D ")) {
                         val res = currentClient.sendDirectMessage(msg)
                         MessageUtil.dismissProgressDialog()
-                        res?.run { MessageUtil.showToast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText("")
+                        res?.run { toast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText("")
                     } else {
                         val e = runCatching {
                             currentClient.statuses.run {

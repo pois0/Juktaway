@@ -17,7 +17,7 @@ import org.jetbrains.anko.startActivity
 
 class RegisterUserListActivity : FragmentActivity() {
     companion object {
-        var job: Job? = null
+        private var job: Job? = null
     }
 
     private lateinit var mAdapter: RegisterListAdapter

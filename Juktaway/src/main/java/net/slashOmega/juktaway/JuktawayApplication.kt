@@ -10,14 +10,11 @@ import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.Core
 import net.slashOmega.juktaway.twitter.currentClient
 
-class JuktawayApplication: MultiDexApplication() {
-    companion object {
-        lateinit var app: JuktawayApplication
-        //TODO private set
-        lateinit var font: Typeface
-        //TODO private set
-    }
+internal lateinit var app: JuktawayApplication
 
+internal lateinit var font: Typeface
+
+class JuktawayApplication: MultiDexApplication() {
     override fun attachBaseContext(base: Context?) {
         super.attachBaseContext(base)
         MultiDex.install(this)

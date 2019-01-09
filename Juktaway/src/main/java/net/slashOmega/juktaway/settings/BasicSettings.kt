@@ -2,7 +2,7 @@ package net.slashOmega.juktaway.settings
 
 import android.content.Context
 import android.content.SharedPreferences
-import net.slashOmega.juktaway.JuktawayApplication
+import net.slashOmega.juktaway.app
 
 object BasicSettings {
 
@@ -34,8 +34,7 @@ object BasicSettings {
     private const val QUICK_MODE = "quickMode"
 
     private val sharedPreferences: SharedPreferences
-        get() = JuktawayApplication.app
-                .getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE)
+        get() = app.getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE)
 
     val quickMode: Boolean
         get() = sharedPreferences.getBoolean(QUICK_MODE, false)

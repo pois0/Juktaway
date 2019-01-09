@@ -3,7 +3,7 @@ package net.slashOmega.juktaway.widget
 import android.content.Context
 import android.util.AttributeSet
 import android.widget.TextView
-import net.slashOmega.juktaway.JuktawayApplication
+import net.slashOmega.juktaway.font
 
 class FontelloTextView : TextView {
 
@@ -19,5 +19,5 @@ class FontelloTextView : TextView {
         init()
     }
 
-    private fun init() { typeface = JuktawayApplication.font }
+    private fun init() { typeface = font }
 }

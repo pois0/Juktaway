@@ -15,9 +15,9 @@ import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.parameters.MediaType
 import jp.nephy.penicillin.models.Status
-import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.ScaleImageActivity
 import net.slashOmega.juktaway.VideoActivity
+import net.slashOmega.juktaway.app
 import net.slashOmega.juktaway.settings.BasicSettings
 import java.io.File
 
@@ -65,7 +65,7 @@ object ImageUtil {
                 .build()
 
         ImageLoader.getInstance().init(
-                ImageLoaderConfiguration.Builder(JuktawayApplication.app)
+                ImageLoaderConfiguration.Builder(app)
                         .defaultDisplayImageOptions(defaultOptions)
                         .build())
     }

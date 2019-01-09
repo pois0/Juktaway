@@ -155,10 +155,10 @@ class ProfileActivity: FragmentActivity() {
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         net.slashOmega.juktaway.model.Relationship.setBlock(mUser.id)
-                                        MessageUtil.showToast(R.string.toast_create_block_success)
+                                        toast(R.string.toast_create_block_success)
                                         restart()
                                     } else {
-                                        MessageUtil.showToast(R.string.toast_create_block_failure)
+                                        toast(R.string.toast_create_block_failure)
                                     }
                                 }
                             }
@@ -225,7 +225,7 @@ class ProfileActivity: FragmentActivity() {
                                         toast(R.string.toast_destroy_block_success)
                                         restart()
                                     } else {
-                                        MessageUtil.showToast(R.string.toast_destroy_block_failure)
+                                        toast(R.string.toast_destroy_block_failure)
                                     }
                                 }
                             }

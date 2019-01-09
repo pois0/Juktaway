@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.twitter
 
+import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
 import kotlinx.coroutines.Dispatchers
@@ -8,6 +9,7 @@ import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.event.action.AccountChangeEvent
 import net.slashOmega.juktaway.twitter.Core.consumerParser
+import net.slashOmega.juktaway.twitter.Core.consumerTable
 import net.slashOmega.juktaway.twitter.Core.identifierParser
 import net.slashOmega.juktaway.util.JuktawayDBOpenHelper.Companion.dbUse
 import net.slashOmega.juktaway.util.SharedPreference
@@ -80,6 +82,7 @@ object Core {
 
     suspend fun switchToken(acc: Identifier) {
         withContext(Dispatchers.Default) {
+            println(acc.toString())
             if (identifierList.size > 1) currentClient.close()
             currentIdentifier = acc
             currentClient = acc.toClient()
@@ -112,21 +115,10 @@ object Core {
         return res
     }
 
-    suspend fun addConsumer(consumer: Consumer) = withContext(Dispatchers.Default) {
+    suspend fun addConsumer(name: String, ck: String, cs: String) = withContext(Dispatchers.Default) {
             dbUse {
-                runCatching {
-                    select(consumerTable, "id")
-                            .whereArgs("(cs = {cs}) or (name = {name})",
-                                    "cs" to consumer.cs,
-                                    "name" to consumer.name)
-                            .parseSingle(LongParser)
-                }.onFailure {
-                    insert(consumerTable,
-                            "name" to consumer.name,
-                            "ck" to consumer.ck,
-                            "cs" to consumer.cs)
-                }.isFailure
-            }
+                insert(consumerTable, "name" to name, "ck" to ck, "cs" to cs)
+            } != -1L
         }
 
     suspend fun removeIdentifier(identifier: Identifier) {
@@ -153,14 +145,25 @@ object Core {
                         .parseSingle(consumerParser)
             }
         }
+
+    suspend fun getConsumer(consumerId: Long) = withContext(Dispatchers.Default) {
+        dbUse {
+            runCatching {
+                select(consumerTable, "id", "name", "ck", "cs")
+                        .whereArgs("id = {id}", "id" to consumerId)
+                        .parseSingle(consumerParser)
+            }.getOrNull()
+        }
+    }
 }
 
-data class Identifier(val consumerId: String, val at: String, val ats: String, val userId: Long, val screenName: String): Serializable {
+data class Identifier(val consumerId: Long, val at: String, val ats: String, val userId: Long, val screenName: String): Serializable {
     override fun hashCode(): Int = at.hashCode()
     override fun equals(other: Any?): Boolean = other is Identifier && this.at == other.at
     suspend fun toClient(): PenicillinClient = withContext(Dispatchers.Default) {
+        Log.d("toClient", consumerId.toString())
         val consumer = dbUse {
-            select(consumerId, "id", "name", "ck", "cs")
+            select(consumerTable, "id", "name", "ck", "cs")
                     .whereArgs("id = {id}", "id" to consumerId)
                     .parseSingle(consumerParser)
         }

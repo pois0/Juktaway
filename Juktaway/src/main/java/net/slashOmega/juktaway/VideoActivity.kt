@@ -13,16 +13,12 @@ import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.tryAndTraceGet
+import org.jetbrains.anko.toast
 import java.util.regex.Pattern
 
-/**
- * Created on 2018/08/22.
- */
-class VideoActivity: FragmentActivity() {
-    companion object {
-        val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/video/(\\d+)/?.*")!!
-    }
+private val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/video/(\\d+)/?.*")!!
 
+class VideoActivity: FragmentActivity() {
     private var musicWasPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -33,7 +29,7 @@ class VideoActivity: FragmentActivity() {
         setContentView(R.layout.activity_video)
 
         if (intent.extras == null) {
-            MessageUtil.showToast("Missing Bundle in Intent")
+            toast("Missing Bundle in Intent")
             finish()
             return
         }

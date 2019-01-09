@@ -4,7 +4,9 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
+import android.util.Log
 import android.view.View
+import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.models.RequestTokenResponse
@@ -14,21 +16,30 @@ import net.slashOmega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_signin.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.*
+import net.slashOmega.juktaway.util.SharedPreference
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.sdk27.coroutines.onItemSelectedListener
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/08/29.
  */
+
+private const val pinPublishedKey = "published"
+
+private var consumerIdTemp by SharedPreference("twitter", "consumertemp", -1L)
+private var rtTemp by SharedPreference("twitter", "rtTemp", "")
+private var rtsTemp by SharedPreference("twitter", "rtTemp", "")
+
 class SignInActivity: Activity() {
-    private val pinPublishedKey = "published"
-    private val consumerKey = "consumer"
+
     private var isPinPublished: Boolean = false
     private var mRequestToken: RequestTokenResponse? = null
     private var consumer: Consumer? = null
+    private val addConsumerString by lazy { getString(R.string.add_consumer) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
+        Log.d("signin", "table: ${consumerList.size}")
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_signin)
@@ -45,28 +56,66 @@ class SignInActivity: Activity() {
         consumer_spinner.adapter = ArrayAdapter<String>(this, android.R.layout.simple_spinner_item).apply {
             setDropDownViewResource(android.R.layout.simple_spinner_dropdown_item)
             addAll(consumerList.map {it.name})
+            add(addConsumerString)
         }
 
-        consumer_spinner.onItemSelectedListener {
-            (consumer_spinner.selectedItem as? String)?.let {
-                GlobalScope.launch {
-                    consumer = Core.getConsumer(it)
+        consumer_spinner.onItemSelectedListener = object: AdapterView.OnItemSelectedListener {
+            override fun onItemSelected(parent: AdapterView<*>?, view: View?, position: Int, id: Long) {
+                val str = (consumer_spinner.getItemAtPosition(position) as String)
+                if (str == addConsumerString) {
+                    consumer_layout.visibility = View.VISIBLE
+                } else if (consumerList.isNotEmpty()) GlobalScope.launch(Dispatchers.Main) {
+                    consumer_layout.visibility = View.GONE
+                    consumer = Core.getConsumer(str).also {
+                        consumerIdTemp = it.id
+                    }
                 }
+            }
+            override fun onNothingSelected(parent: AdapterView<*>?) {}
+        }
+
+        add_consumer_button.onClick {
+            GlobalScope.launch(Dispatchers.Main) {
+                val consumerName = consumer_name.text.toString()
+                if (Core.addConsumer(consumerName, consumer_key.text.toString(), consumer_secret.text.toString())) {
+                    consumer = Core.getConsumer(consumerName).also { c ->
+                        consumer = c
+                        consumerIdTemp = c.id
+                        println(c.id)
+                    }
+                    consumer_spinner.visibility = View.VISIBLE
+                    toast(R.string.add_consumer_succeeded)
+                    consumer_name.setText("")
+                    consumer_key.setText("")
+                    consumer_secret.setText("")
+                    consumer_layout.visibility = View.GONE
+                    (consumer_spinner.adapter as ArrayAdapter<String>).run {
+                        insert(consumerName, count - 1)
+                        consumer_spinner.setSelection(getPosition(consumerName))
+                    }
+                } else toast(R.string.add_consumer_failed)
             }
         }
     }
 
     override fun onResume() {
         super.onResume()
-        if (isPinPublished) {
-            pin_code.visibility = View.VISIBLE
-            consumer_spinner.visibility = View.GONE
-            consumer_key.visibility = View.GONE
-            consumer_secret.visibility = View.GONE
-        } else {
-            pin_code.visibility = View.GONE
-            consumer_key.visibility = View.VISIBLE
-            consumer_secret.visibility = View.VISIBLE
+        when {
+            isPinPublished -> {
+                pin_code.visibility = View.VISIBLE
+                consumer_spinner.visibility = View.GONE
+                consumer_layout.visibility = View.GONE
+            }
+            consumerList.isNotEmpty() -> {
+                pin_code.visibility = View.GONE
+                consumer_spinner.visibility = View.VISIBLE
+                consumer_layout.visibility = if (consumer_spinner.selectedItem as? String == addConsumerString) View.VISIBLE else View.GONE
+            }
+            else -> {
+                pin_code.visibility = View.GONE
+                consumer_spinner.visibility = View.GONE
+                consumer_layout.visibility = View.VISIBLE
+            }
         }
     }
 
@@ -75,7 +124,6 @@ class SignInActivity: Activity() {
 
         mRequestToken?.let {
             outState.putBoolean(pinPublishedKey, isPinPublished)
-            outState.putString(consumerKey, consumer?.name)
         }
     }
 
@@ -83,20 +131,22 @@ class SignInActivity: Activity() {
         super.onRestoreInstanceState(savedInstanceState)
 
         isPinPublished = savedInstanceState.getBoolean(pinPublishedKey)
-        GlobalScope.launch { consumer = savedInstanceState.getString(consumerKey)?.let { Core.getConsumer(it) } }
+        GlobalScope.launch {
+            if (consumerIdTemp != -1L) {
+                consumer = Core.getConsumer(consumerIdTemp)
+            }
+        }
     }
 
-    private fun startOAuth(addUser: Boolean = false) {
+    private fun startOAuth() {
         GlobalScope.launch(Dispatchers.Main) {
-            AuthTemp.clearTemps()
-            if (!addUser) {
-                if (consumer_key.text.isBlank() || consumer_secret.text.isBlank()) {
-                    toast(R.string.signin_csck_blank)
-                    return@launch
-                }
+            clearTemps()
+            if (consumer_spinner.selectedItem as? String == addConsumerString) {
+                toast(R.string.not_select_consumer)
+                return@launch
             }
             MessageUtil.showProgressDialog(this@SignInActivity, getString(R.string.progress_process))
-            addUserOAuth(consumer_key.text.toString(), consumer_secret.text.toString())
+            addUserOAuth()
         }
     }
 
@@ -105,13 +155,13 @@ class SignInActivity: Activity() {
             runCatching {
                 PenicillinClient {
                     account {
-                        application(ckTemp, csTemp)
+                        application(consumer!!.ck, consumer!!.cs)
                     }
                 }.use { client ->
                     client.oauth.accessToken(rtTemp, rtsTemp, param)
                 }
             }.onSuccess { (at, ats, id, sn) ->
-                Core.addToken(Identifier(ckTemp, csTemp, at, ats, id, sn))
+                Core.addToken(Identifier(consumer!!.id, at, ats, id, sn))
 
                 MessageUtil.dismissProgressDialog()
                 toast(R.string.toast_sign_in_success)
@@ -128,13 +178,11 @@ class SignInActivity: Activity() {
         }
     }
 
-    private fun addUserOAuth(ck: String, cs: String) {
+    private fun addUserOAuth() {
         GlobalScope.launch(Dispatchers.Main) {
-            csTemp = cs
-            ckTemp = ck
             val url = PenicillinClient {
                     account {
-                        application(ck, cs)
+                        application(consumer!!.ck, consumer!!.cs)
                     }
                 }.use { client ->
                     val (rt, rts) = client.oauth.requestToken()
@@ -146,6 +194,13 @@ class SignInActivity: Activity() {
 
             isPinPublished = true
             startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+        }
+    }
+
+    private suspend fun clearTemps() {
+        withContext(Dispatchers.Default) {
+            rtTemp = ""
+            rtsTemp = ""
         }
     }
 }

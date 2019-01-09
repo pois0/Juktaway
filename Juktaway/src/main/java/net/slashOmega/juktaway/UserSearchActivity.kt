@@ -14,6 +14,7 @@ import kotlinx.android.synthetic.main.activity_user_search.*
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.tryAndTraceGet
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/08/29.
@@ -95,7 +96,7 @@ class UserSearchActivity: FragmentActivity() {
             }
             guruguru.visibility = View.GONE
             if (res == null) {
-                MessageUtil.showToast(R.string.toast_load_data_failure)
+                toast(R.string.toast_load_data_failure)
                 return@launch
             }
             res.forEach { mAdapter.add(it) }

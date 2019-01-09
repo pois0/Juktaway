@@ -2,8 +2,8 @@ package net.slashOmega.juktaway.model
 
 import android.content.Context
 import com.google.gson.Gson
-import net.slashOmega.juktaway.JuktawayApplication
 import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.app
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import java.util.ArrayList
 
@@ -17,8 +17,7 @@ object TabManager {
     private const val TABS = "tabs-"
     private var sTabs = arrayListOf<Tab>()
 
-    private fun getSharedPreferences()
-        = JuktawayApplication.app.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    private fun getSharedPreferences() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
 
     fun loadTabs(): ArrayList<Tab> {
@@ -68,15 +67,15 @@ object TabManager {
     }
 
     class Tab(var id: Long) {
-        fun getString(id: Int): String = JuktawayApplication.app.getString(id)
+        fun getString(id: Int): String =app.getString(id)
 
         var name = ""
             get() = when {
-                id == TIMELINE_TAB_ID -> JuktawayApplication.app.getString(R.string.title_main)
-                id == INTERACTIONS_TAB_ID -> JuktawayApplication.app.getString(R.string.title_interactions)
-                id == DIRECT_MESSAGES_TAB_ID -> JuktawayApplication.app.getString(R.string.title_direct_messages)
-                id == FAVORITES_TAB_ID -> JuktawayApplication.app.getString(R.string.title_favorites)
-                id <= SEARCH_TAB_ID -> JuktawayApplication.app.getString(R.string.title_search) + ":" + field
+                id == TIMELINE_TAB_ID ->app.getString(R.string.title_main)
+                id == INTERACTIONS_TAB_ID ->app.getString(R.string.title_interactions)
+                id == DIRECT_MESSAGES_TAB_ID ->app.getString(R.string.title_direct_messages)
+                id == FAVORITES_TAB_ID ->app.getString(R.string.title_favorites)
+                id <= SEARCH_TAB_ID ->app.getString(R.string.title_search) + ":" + field
                 else -> field
             }
 
