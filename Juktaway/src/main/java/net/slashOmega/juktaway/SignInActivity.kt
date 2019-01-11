@@ -89,7 +89,7 @@ class SignInActivity: Activity() {
                     consumer_key.setText("")
                     consumer_secret.setText("")
                     consumer_layout.visibility = View.GONE
-                    (consumer_spinner.adapter as ArrayAdapter<String>).run {
+                    (consumer_spinner.adapter as? ArrayAdapter<String>)?.run {
                         insert(consumerName, count - 1)
                         consumer_spinner.setSelection(getPosition(consumerName))
                     }
@@ -180,7 +180,8 @@ class SignInActivity: Activity() {
 
     private fun addUserOAuth() {
         GlobalScope.launch(Dispatchers.Main) {
-            val url = PenicillinClient {
+            runCatching {
+                PenicillinClient {
                     account {
                         application(consumer!!.ck, consumer!!.cs)
                     }
@@ -190,10 +191,13 @@ class SignInActivity: Activity() {
                     rtsTemp = rts
                     client.oauth.authorizeUrl(rt)
                 }
+            }.onSuccess {
+                isPinPublished = true
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+            }.onFailure {
+                toast(R.string.toast_sign_in_failure)
+            }
             MessageUtil.dismissProgressDialog()
-
-            isPinPublished = true
-            startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
         }
     }
 
