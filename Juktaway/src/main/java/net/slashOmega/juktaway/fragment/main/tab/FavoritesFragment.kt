@@ -16,8 +16,8 @@ class FavoritesFragment: BaseFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
                 currentClient.favorites.run {
-                    if (mMaxId > 0 && !mReloading) list(maxId = mMaxId, count = BasicSettings.pageCount)
-                    else list(count = BasicSettings.pageCount)
+                    if (mMaxId > 0 && !mReloading) list(maxId = mMaxId, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
+                    else list(count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
                 }.await()
             }.getOrNull()
 

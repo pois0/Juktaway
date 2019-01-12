@@ -30,8 +30,8 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val timeline = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0) user(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
-                    else user(user.id, count = BasicSettings.pageCount)
+                    if (mMaxId > 0) user(user.id, maxId = mMaxId, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
+                    else user(user.id, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
                 }.await()
             }.getOrNull()
 

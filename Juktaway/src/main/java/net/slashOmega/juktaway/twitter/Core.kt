@@ -3,6 +3,8 @@ package net.slashOmega.juktaway.twitter
 import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.core.emulation.EmulationMode
+import jp.nephy.penicillin.core.emulation.OfficialClient
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -28,16 +30,20 @@ lateinit var currentIdentifier: Identifier
     private set
 
 val identifierList
-    get() = dbUse {
-        select(Core.identifierTable, "consumerId", "at", "ats", "userId", "screenName")
-                .parseList(identifierParser)
-    }
+    get() = runCatching {
+        dbUse {
+            select(Core.identifierTable, "consumerId", "at", "ats", "userId", "screenName")
+                    .parseList(identifierParser)
+        }
+    }.getOrNull() ?: emptyList()
 
 val consumerList
-    get() = dbUse {
-        select(Core.consumerTable, "id", "name", "ck", "cs")
-                .parseList(consumerParser)
-    }
+    get() = runCatching {
+        dbUse {
+            select(Core.consumerTable, "id", "name", "ck", "cs")
+                    .parseList(consumerParser)
+        }
+    }.getOrNull() ?: emptyList()
 
 val isIdentifierSet
     get() = identifierList.isNotEmpty()
@@ -65,6 +71,15 @@ object Core {
                     "name" to TEXT + NOT_NULL + UNIQUE,
                     "ck" to TEXT + NOT_NULL + UNIQUE,
                     "cs" to TEXT + NOT_NULL + UNIQUE)
+            if (consumerList.isNullOrEmpty()) {
+                dbUse {
+                    val iPhone = OfficialClient.OAuth1a.TwitterForiPhone
+                    insert(consumerTable, "name" to "Twitter for Android",
+                            "ck" to iPhone.consumerKey,
+                            "cs" to iPhone.consumerSecret
+                    )
+                }
+            }
         }
 
         if (isIdentifierSet) {
@@ -129,13 +144,14 @@ object Core {
         }
     }
 
-    suspend fun removeConsumer(consumer: Consumer) {
-        withContext(Dispatchers.Default) {
+    suspend fun removeConsumer(consumer: Consumer) = withContext(Dispatchers.Default) {
+        if (consumer.ck == OfficialClient.OAuth1a.TwitterForiPhone.consumerKey) return@withContext false
+        runCatching {
             dbUse {
                 delete(identifierTable, "consumerId = {consumerId}", "consumerId" to consumer.id)
                 delete(identifierTable, "id = {id}", "id" to consumer.id)
             }
-        }
+        }.isSuccess
     }
 
     suspend fun getConsumer(name: String) = withContext(Dispatchers.Default) {
@@ -173,6 +189,7 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
                 token(at, ats)
             }
             dispatcher { coroutineContext = Dispatchers.Default }
+            emulationMode = EmulationMode.TwitterForiPhone
 
             maxRetries = 3
             retry(1, TimeUnit.SECONDS)

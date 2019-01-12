@@ -4,6 +4,7 @@ import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
 import android.util.Log
+import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import java.util.*
@@ -84,7 +85,7 @@ object StatusUtil {
      * @return 短縮URLを展開したツイート本文
      */
     fun getExpandedText(status: Status): String {
-        var text = status.text
+        var text = status.fullText()
         for (url in status.entities.urls) {
             val m = Pattern.compile(url.url).matcher(text)
             text = m.replaceAll(url.expandedUrl)

@@ -16,8 +16,8 @@ class InteractionsFragment: BaseFragment() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0 && !mReloading) mention(count = BasicSettings.pageCount, maxId = mMaxId - 1)
-                    else mention(count = BasicSettings.pageCount)
+                    if (mMaxId > 0 && !mReloading) mention(count = BasicSettings.pageCount, maxId = mMaxId - 1, options = *arrayOf("tweet_mode" to "extended"))
+                    else mention(count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
                 }.await()
             }.getOrNull()
 

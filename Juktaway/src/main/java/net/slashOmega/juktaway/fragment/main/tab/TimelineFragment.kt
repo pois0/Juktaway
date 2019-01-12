@@ -16,8 +16,8 @@ class TimelineFragment: BaseFragment() {
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                (if (mMaxId > 0 && !mReloading) currentClient.timeline.home(maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                        else currentClient.timeline.home(count = BasicSettings.pageCount)).await()
+                (if (mMaxId > 0 && !mReloading) currentClient.timeline.home(maxId = mMaxId - 1, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
+                        else currentClient.timeline.home(count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))).await()
             }.onFailure { it.printStackTrace() }.getOrNull()
 
             when {

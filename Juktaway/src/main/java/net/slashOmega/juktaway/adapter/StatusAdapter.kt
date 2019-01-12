@@ -95,32 +95,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     private var mLimit = limit
     private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
-    fun extensionAdd(row: Row) {
-        GlobalScope.launch(Dispatchers.Main) {
-            if (withContext (Dispatchers.Default) { row in Mute || exists(row) }) return@launch
-            super.add(row)
-            if (row.isStatus) mIdSet.add(row.status!!.id)
-            filter(row)
-            mLimit++
-        }
-    }
-
-    fun extensionAddAll(rows: List<Row>) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val statuses = withContext(Dispatchers.Default) {
-                rows.filter { it !in Mute && !exists(it) }
-            }
-            launch(Dispatchers.Default) {
-                mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
-            }
-            statuses.forEach {
-                super.add(it)
-                filter(it)
-            }
-            mLimit += rows.size
-        }
-    }
-
     fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         GlobalScope.launch(Dispatchers.Main) {
             extensionAddAllFromStatusesSuspend(statusesParam)

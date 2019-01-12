@@ -45,7 +45,7 @@ class AroundFragment: DialogFragment() {
                 mAdapter.add(Row.newStatus(origin))
                 GlobalScope.launch(Dispatchers.Main) {
                     val beforeList = runCatching {
-                        currentClient.timeline.user(origin.user.id, count = 3, maxId = origin.id - 1).await()
+                        currentClient.timeline.user(origin.user.id, count = 3, maxId = origin.id - 1, options = *arrayOf("tweet_mode" to "extended")).await()
                     }.getOrNull() ?: run {
                         MessageUtil.showToast(R.string.toast_load_data_failure)
                         return@launch
@@ -58,7 +58,7 @@ class AroundFragment: DialogFragment() {
                     val afterList = runCatching {
                         var lastId = beforeList[0].id - 1
                         for(i in 0 until 5) {
-                            val statuses = currentClient.timeline.user(origin.user.id, count = 200, maxId = lastId).await()
+                            val statuses = currentClient.timeline.user(origin.user.id, count = 200, maxId = lastId, options = *arrayOf("tweet_mode" to "extended")).await()
                             for ((j, row) in statuses.withIndex()) {
                                 if (row.id == origin.id && j > 0) return@runCatching statuses.subList(Math.max(0, j - 4), j - 1)
                             }

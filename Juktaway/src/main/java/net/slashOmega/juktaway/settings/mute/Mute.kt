@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.settings.mute
 
+import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.model.Row
@@ -21,7 +22,7 @@ object Mute {
             status.entities.userMentions.map { it.id }.any { userMute.contains(it) }.not() &&
             status.retweetedStatus?.user?.id !in userMute &&
             source.via.name !in sourceMute &&
-            wordMute.contains(source.text).not()
+            wordMute.contains(source.fullText).not()
         }
     }
 
