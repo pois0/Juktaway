@@ -186,7 +186,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         filterAll(statuses)
         super.addAll(statuses)
 
-        limitation()
+        // limitation()
     }
 
     override fun insert(row: Row, index: Int) {
@@ -200,7 +200,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         super.insert(row, index)
         if (row.isStatus) mIdSet.add(row.status!!.id)
         filter(row)
-        limitation()
+        // limitation()
     }
 
     override fun remove(row: Row) {
