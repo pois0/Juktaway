@@ -9,6 +9,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
+import net.slashOmega.juktaway.R
+import net.slashOmega.juktaway.app
 import net.slashOmega.juktaway.event.action.AccountChangeEvent
 import net.slashOmega.juktaway.twitter.Core.consumerParser
 import net.slashOmega.juktaway.twitter.Core.consumerTable
@@ -74,9 +76,13 @@ object Core {
             if (consumerList.isNullOrEmpty()) {
                 dbUse {
                     val iPhone = OfficialClient.OAuth1a.TwitterForiPhone
-                    insert(consumerTable, "name" to "Twitter for Android",
+                    insert(consumerTable, "name" to "Twitter for iPhone",
                             "ck" to iPhone.consumerKey,
                             "cs" to iPhone.consumerSecret
+                    )
+                    insert(consumerTable, "name" to "Juktaway",
+                            "ck" to app.getString(R.string.juktaway_ck),
+                            "ck" to app.getString(R.string.juktaway_cs)
                     )
                 }
             }
