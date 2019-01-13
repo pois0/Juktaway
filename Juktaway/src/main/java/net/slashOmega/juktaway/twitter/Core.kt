@@ -50,8 +50,6 @@ val consumerList
 val isIdentifierSet
     get() = identifierList.isNotEmpty()
 
-inline fun <T> withClient(block: PenicillinClient.() -> T) = currentClient.use(block)
-
 object Core {
     internal val identifierParser = classParser<Identifier>()
     internal val consumerParser = classParser<Consumer>()
@@ -82,7 +80,7 @@ object Core {
                     )
                     insert(consumerTable, "name" to "Juktaway",
                             "ck" to app.getString(R.string.juktaway_ck),
-                            "ck" to app.getString(R.string.juktaway_cs)
+                            "cs" to app.getString(R.string.juktaway_cs)
                     )
                 }
             }
