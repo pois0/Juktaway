@@ -149,13 +149,14 @@ object Core {
     }
 
     suspend fun removeConsumer(consumer: Consumer) = withContext(Dispatchers.Default) {
-        if (consumer.ck == OfficialClient.OAuth1a.TwitterForiPhone.consumerKey) return@withContext false
-        runCatching {
-            dbUse {
-                delete(identifierTable, "consumerId = {consumerId}", "consumerId" to consumer.id)
-                delete(identifierTable, "id = {id}", "id" to consumer.id)
-            }
-        }.isSuccess
+        consumer.ck != OfficialClient.OAuth1a.TwitterForAndroid.consumerKey
+                && consumer.ck != app.getString(R.string.juktaway_ck)
+                && runCatching {
+                    dbUse {
+                        delete(identifierTable, "consumerId = {consumerId}", "consumerId" to consumer.id)
+                        delete(identifierTable, "id = {id}", "id" to consumer.id)
+                    }
+                }.isSuccess
     }
 
     suspend fun getConsumer(name: String) = withContext(Dispatchers.Default) {

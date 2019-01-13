@@ -23,6 +23,7 @@ import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.complete
 import jp.nephy.penicillin.extensions.createdAt
+import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
@@ -418,7 +419,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textView {
                                 id = R.id.quoted_status
                                 textSize = 12f //sp
-                                text = qs.text
+                                text = qs.fullText()
                                 //tools:text = Hello World. //not support attribute
                             }.lparams {
                                 below(R.id.quoted_display_name)
