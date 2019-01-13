@@ -20,17 +20,17 @@ class SearchFragment: BaseFragment() {
     override var mSearchWord: String = ""
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (mSearchWord.isEmpty()) mSearchWord = arguments?.getString("searchWord") ?: ""
+        if (mSearchWord.isEmpty()) mSearchWord = arguments?.getString("searchWord")?.removeRange(0, 7) ?: ""
         tabId = TabManager.SEARCH_TAB_ID - Math.abs(mSearchWord.hashCode())
         super.onActivityCreated(savedInstanceState)
     }
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val qr = runCatching {
+            val qr = net.slashOmega.juktaway.util.tryAndTraceGet {
                 (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
                         .await()
-            }.getOrNull()
+            }
 
             when {
                 qr == null -> {

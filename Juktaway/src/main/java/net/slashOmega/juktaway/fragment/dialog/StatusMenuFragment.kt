@@ -16,6 +16,7 @@ import android.widget.TextView
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
@@ -124,7 +125,7 @@ class StatusMenuFragment: DialogFragment() {
         val mentions = source.entities.userMentions
         val isPublic = !source.user.protected
 
-        setTitle(status.text)
+        setTitle(status.fullText ?: status.text)
 
         /*
          * リプ
