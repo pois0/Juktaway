@@ -22,7 +22,7 @@ object Mute {
             status.entities.userMentions.map { it.id }.any { userMute.contains(it) }.not() &&
             status.retweetedStatus?.user?.id !in userMute &&
             source.via.name !in sourceMute &&
-            wordMute.contains(source.fullText).not()
+            wordMute.contains(source.fullText()).not()
         }
     }
 
@@ -35,7 +35,7 @@ object Mute {
         val sourceStatus = rt ?: status
         if (rt != null && rt.user in UserMute) return true
         if (StatusUtil.getClientName(sourceStatus.via.name) in SourceMute) return true
-        val text = sourceStatus.text
+        val text = sourceStatus.fullText()
         for (word in WordMute.getAllItems()) {
             if (text.contains(word)) return true
         }

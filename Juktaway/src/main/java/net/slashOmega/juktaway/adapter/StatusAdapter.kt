@@ -9,7 +9,6 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.Log
 import android.util.TimingLogger
 import android.util.TypedValue
 import android.view.Gravity
@@ -21,7 +20,6 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.extensions.complete
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
@@ -40,7 +38,6 @@ import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.model.displayUserIcon
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.settings.mute.Mute
-import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.util.*
 import net.slashOmega.juktaway.util.TwitterUtil.omitCount
@@ -61,7 +58,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         .setMessage(it.text)
                         .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
                             GlobalScope.launch(Dispatchers.Main) {
-                                ActionUtil.doDestroyRetweet(it)
+                                it.destroyRetweet()
                                 dismiss()
                             }
                         }
@@ -82,7 +79,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         }
                         .setPositiveButton(R.string.button_retweet) { _, _ ->
                             GlobalScope.launch(Dispatchers.Main) {
-                                ActionUtil.doRetweet(it.id)
+                                it.retweet()
                                 dismiss()
                             }
                         }
@@ -420,7 +417,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 id = R.id.quoted_status
                                 textSize = 12f //sp
                                 text = qs.fullText()
-                                //tools:text = Hello World. //not support attribute
                             }.lparams {
                                 below(R.id.quoted_display_name)
                             }
@@ -465,7 +461,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         }
                     }
 
-
                     frameLayout {
                         id = R.id.images_container_wrapper
 
@@ -505,7 +500,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             setOnClickListener {
                                 ActionUtil.doReplyAll(s, mContext)
                             }
-                            //tools:ignore = SpUsage //not support attribute
                         }
 
                         fontelloTextView {
@@ -580,11 +574,11 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 if (tag == "is_fav") {
                                     tag = "no_fav"
                                     textColor = Color.parseColor("#666666")
-                                    GlobalScope.launch(Dispatchers.Main) { ActionUtil.doDestroyFavorite(s.id) }
+                                    GlobalScope.launch(Dispatchers.Main) { s.unfavorite() }
                                 } else {
                                     tag = "is_fav"
                                     textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
-                                    GlobalScope.launch(Dispatchers.Main) { ActionUtil.doFavorite(s.id) }
+                                    GlobalScope.launch(Dispatchers.Main) { s.favorite() }
                                 }
                             }
                         }.lparams {
@@ -635,7 +629,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             imageView {
                                 id = R.id.retweet_icon
                                 contentDescription = resources.getString(R.string.description_icon)
-                                //UserIconManager.displayUserIcon(status.user, this)
+                                GlobalScope.launch(Dispatchers.Main) { displayUserIcon(s.user) }
                             }.lparams(width = dip(18), height = dip(18)) {
                                 rightMargin = dip(4)
                             }

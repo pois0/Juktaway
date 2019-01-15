@@ -21,6 +21,7 @@ import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.adapter.StatusAdapter
 import net.slashOmega.juktaway.event.action.StatusActionEvent
@@ -130,49 +131,53 @@ class TalkFragment: DialogFragment() {
     private fun loadTalkReply(source: Status) {
         GlobalScope.launch(Dispatchers.Main) {
             runCatching {
-                val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",
-                        count = 200,
-                        sinceId = source.id,
-                        resultType = SearchResultType.Recent).await()
-                val searchedStatuses = toResult.result.statuses.toMutableList()
-                if (toResult.hasNext) searchedStatuses.addAll(toResult.next.await().result.statuses)
+                withContext(Dispatchers.Default) {
+                    val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",
+                            count = 200,
+                            sinceId = source.id,
+                            resultType = SearchResultType.Recent).await()
+                    val searchedStatuses = toResult.result.statuses.toMutableList()
+                    if (toResult.hasNext) searchedStatuses.addAll(toResult.next.await().result.statuses)
 
-                val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
-                        count = 200,
-                        sinceId = source.id,
-                        resultType = SearchResultType.Recent).await()
-                searchedStatuses.addAll(fromResult.result.statuses)
-                val isLoadMap = LongSparseArray<Boolean>().apply { searchedStatuses.forEach { put(it.id, true) } }
-                val lookupStatuses = ArrayList<Status>()
-                val statusIds = mutableListOf<Long>()
-                searchedStatuses.forEach { status ->
-                    if (status.inReplyToStatusId != null &&
-                            status.inReplyToStatusId?.let { isLoadMap.get(it, false) } == true) {
-                        statusIds.add(status.inReplyToStatusId!!)
-                        isLoadMap.put(status.inReplyToStatusId!!, true)
-                        if (statusIds.size == 200) {
-                            lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
-                            statusIds.clear()
+                    val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
+                            count = 200,
+                            sinceId = source.id,
+                            resultType = SearchResultType.Recent).await()
+                    searchedStatuses.addAll(fromResult.result.statuses)
+                    val isLoadMap = LongSparseArray<Boolean>().apply { searchedStatuses.forEach { put(it.id, true) } }
+                    val lookupStatuses = ArrayList<Status>()
+                    val statusIds = mutableListOf<Long>()
+                    searchedStatuses.forEach { status ->
+                        if (status.inReplyToStatusId != null &&
+                                status.inReplyToStatusId?.let { isLoadMap.get(it, false) } == true) {
+                            statusIds.add(status.inReplyToStatusId!!)
+                            isLoadMap.put(status.inReplyToStatusId!!, true)
+                            if (statusIds.size == 200) {
+                                lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
+                                statusIds.clear()
+                            }
                         }
                     }
-                }
 
-                if (statusIds.size > 0) lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
+                    if (statusIds.size > 0) lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
 
-                searchedStatuses.addAll(lookupStatuses)
+                    searchedStatuses.addAll(lookupStatuses)
 
-                searchedStatuses.sortWith(Comparator { a0, a1 -> when {
-                    a0.id > a1.id -> 1
-                    a0.id == a1.id -> 0
-                    else -> -1
-                }})
+                    searchedStatuses.sortWith(Comparator { a0, a1 ->
+                        when {
+                            a0.id > a1.id -> 1
+                            a0.id == a1.id -> 0
+                            else -> -1
+                        }
+                    })
 
-                val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
-                mutableListOf<Status>().apply {
-                    searchedStatuses.forEach { status ->
-                        if (status.inReplyToStatusId?.let { isReplyMap.get(it, false) } == true) {
-                            add(status)
-                            isReplyMap.put(status.id, true)
+                    val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
+                    mutableListOf<Status>().apply {
+                        searchedStatuses.forEach { status ->
+                            if (status.inReplyToStatusId?.let { isReplyMap.get(it, false) } == true) {
+                                add(status)
+                                isReplyMap.put(status.id, true)
+                            }
                         }
                     }
                 }

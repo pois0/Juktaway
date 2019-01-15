@@ -33,6 +33,10 @@ suspend fun Status.favorite() = ActionUtil.doFavorite(id)
 
 suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
 
+suspend fun Status.retweet() = ActionUtil.doRetweet(id)
+
+suspend fun Status.destroyRetweet() = ActionUtil.doDestroyRetweet(this)
+
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
             (if (imageList.isNotEmpty()) statuses.updateWithMediaFile(str,
@@ -66,7 +70,7 @@ object ActionUtil {
 
         val e = runCatching { currentClient.favorites.create(statusId).await() }.exceptionOrNull() as? PenicillinException
         when {
-            e == null -> MessageUtil.showToast(R.string.toast_destroy_favorite_success)
+            e == null -> MessageUtil.showToast(R.string.toast_favorite_success)
             e.error?.code == 139 -> MessageUtil.showToast(R.string.toast_favorite_already)
             else -> {
                 FavRetweetManager.removeFav(statusId)

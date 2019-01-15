@@ -30,6 +30,7 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
@@ -44,11 +45,14 @@ import net.slashOmega.juktaway.model.UserIconManager.displayUserIcon
 import net.slashOmega.juktaway.settings.PostStockSettings
 import net.slashOmega.juktaway.settings.PostStockSettings.drafts
 import net.slashOmega.juktaway.settings.PostStockSettings.hashtags
+import net.slashOmega.juktaway.twitter.Core
 import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.twitter.identifierList
 import net.slashOmega.juktaway.util.*
+import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.toast
+import org.jetbrains.anko.wrapContent
 import java.io.File
 import java.io.FileNotFoundException
 
@@ -146,7 +150,7 @@ class PostActivity: FragmentActivity() {
         intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parse<Status>()?.run {retweetedStatus?:this}?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
-            in_reply_to_status.text = text
+            in_reply_to_status.text = fullText()
 
             // スクロール可能にするのに必要
             in_reply_to_status.movementMethod = ScrollingMovementMethod.getInstance()
@@ -507,22 +511,31 @@ class PostActivity: FragmentActivity() {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val token = getItem(position)!!
+            val identifier = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
                 setPadding(16, 0, 0, 0)
 
-                spinner_switch_account_icon.displayUserIcon(token.userId)
-                spinner_switch_account_screen_name.text = token.screenName
+                spinner_switch_account_icon.displayUserIcon(identifier.userId)
+                spinner_switch_account_screen_name.text = identifier.screenName
+                GlobalScope.launch(Dispatchers.Main) {
+                    spinner_switch_account_consumer_name.text = Core.getConsumer(identifier.consumerId)?.name
+                    spinner_switch_account_consumer_name.width = wrapContent
+                }
             }
         }
 
         override fun getDropDownView(position: Int, convertView: View?, parent: ViewGroup?): View {
-            val token = getItem(position)!!
+            val identifier = getItem(position)!!
 
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
-                spinner_switch_account_icon?.displayUserIcon(token.userId)
-                spinner_switch_account_screen_name.text = token.screenName
+                spinner_switch_account_icon?.displayUserIcon(identifier.userId)
+                spinner_switch_account_screen_name.text = identifier.screenName
+                GlobalScope.launch(Dispatchers.Main) {
+                    spinner_switch_account_consumer_name.text = Core.getConsumer(identifier.consumerId)?.name
+                    spinner_switch_account_consumer_name.width = wrapContent
+                    spinner_switch_account_layout.minimumWidth = wrapContent
+                }
             }
         }
     }

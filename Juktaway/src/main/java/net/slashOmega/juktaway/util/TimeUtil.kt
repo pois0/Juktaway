@@ -1,11 +1,10 @@
 package net.slashOmega.juktaway.util
 
 import java.text.SimpleDateFormat
-import java.util.Date
-import java.util.Locale
+import java.util.*
 
 object TimeUtil {
-    private val DATE_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss", Locale.ENGLISH)
+    private val DATE_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss'.'SSS", Locale.ENGLISH)
 
     /**
      * 相対時刻取得

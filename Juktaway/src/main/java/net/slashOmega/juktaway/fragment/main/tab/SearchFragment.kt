@@ -27,19 +27,11 @@ class SearchFragment: BaseFragment() {
 
     override fun taskExecute() {
         GlobalScope.launch(Dispatchers.Main) {
-            val qr = net.slashOmega.juktaway.util.tryAndTraceGet {
+            runCatching {
                 (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
                         .await()
-            }
-
-            when {
-                qr == null -> {
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                    mListView.visibility = View.VISIBLE
-                    action = null
-                }
-                mReloading -> {
+            }.onSuccess { qr ->
+                if(mReloading) {
                     clear()
                     mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
                     mReloading = false
@@ -51,13 +43,18 @@ class SearchFragment: BaseFragment() {
                         mAutoLoader = false
                     }
                     mPullToRefreshLayout.setRefreshComplete()
-                }
-                else -> {
+                } else {
                     mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
                     mAutoLoader = true
                     if (qr.hasNext) action = qr.next
                     mListView.visibility = View.VISIBLE
                 }
+            }.onFailure {
+                it.printStackTrace()
+                mReloading = false
+                mPullToRefreshLayout.setRefreshComplete()
+                mListView.visibility = View.VISIBLE
+                action = null
             }
             finishLoad()
         }

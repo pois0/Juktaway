@@ -125,7 +125,7 @@ class StatusMenuFragment: DialogFragment() {
         val mentions = source.entities.userMentions
         val isPublic = !source.user.protected
 
-        setTitle(status.fullText ?: status.text)
+        setTitle(status.fullText())
 
         /*
          * リプ
