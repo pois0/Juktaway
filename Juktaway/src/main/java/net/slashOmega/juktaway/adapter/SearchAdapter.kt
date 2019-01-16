@@ -13,7 +13,7 @@ import net.slashOmega.juktaway.MainActivity
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
-import net.slashOmega.juktaway.util.nullToEmpty
+import net.slashOmega.juktaway.util.nullToBlank
 
 /**
  * Created on 2018/11/17.
@@ -72,9 +72,9 @@ class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>
                 mSearchWord = constraint.toString()
                 mStrings.apply {
                     clear()
-                    add(mSearchWord + mContext?.getString(R.string.label_search_tweet).nullToEmpty())
-                    add(mSearchWord + mContext?.getString(R.string.label_search_user).nullToEmpty())
-                    add("@" + mSearchWord + mContext?.getString(R.string.label_display_profile).nullToEmpty())
+                    add(mSearchWord + mContext?.getString(R.string.label_search_tweet).nullToBlank())
+                    add(mSearchWord + mContext?.getString(R.string.label_search_user).nullToBlank())
+                    add("@" + mSearchWord + mContext?.getString(R.string.label_display_profile).nullToBlank())
                 }
             }
             return filterResults.apply {

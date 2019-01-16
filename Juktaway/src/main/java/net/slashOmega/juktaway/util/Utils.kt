@@ -27,7 +27,7 @@ inline fun <T, R> T.tryAndTraceGet (block: T.() -> R): R? = runCatching { block(
     getOrNull()
 }
 
-fun String?.nullToEmpty() = this ?: ""
+fun String?.nullToBlank() = this ?: ""
 
 fun CharSequence?.toString() = this?.toString() ?: ""
 

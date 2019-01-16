@@ -12,7 +12,6 @@ import kotlinx.android.synthetic.main.activity_create_user_list.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.twitter.currentClient
 import org.jetbrains.anko.toast
 

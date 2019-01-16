@@ -84,7 +84,7 @@ class MainActivity: FragmentActivity() {
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
 
-    private var mSwitchAccessToken: Identifier? = null
+    private var mSwitchIdentifier: Identifier? = null
 
 
     @SuppressLint("InflateParams")
@@ -238,13 +238,11 @@ class MainActivity: FragmentActivity() {
 
         when (requestCode) {
             REQUEST_TAB_SETTINGS -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    setupTab()
-                }
+                if (resultCode == Activity.RESULT_OK) setupTab()
             }
             REQUEST_ACCOUNT_SETTING -> {
                 if (resultCode == Activity.RESULT_OK)
-                    mSwitchAccessToken = data?.getSerializableExtra("identifier") as Identifier
+                    mSwitchIdentifier = data?.getSerializableExtra("identifier") as Identifier
                 mAccessTokenAdapter.clear()
                 identifierList.forEach {
                     mAccessTokenAdapter.add(it)
@@ -253,8 +251,8 @@ class MainActivity: FragmentActivity() {
             REQUEST_SETTINGS -> {
                 if (resultCode == Activity.RESULT_OK) {
                     BasicSettings.init()
-                    finish()
                     startActivity<MainActivity>()
+                    finish()
                 }
             }
             REQUEST_SEARCH -> {
@@ -298,10 +296,10 @@ class MainActivity: FragmentActivity() {
             }
         }, 1000)
 
-        mSwitchAccessToken?.let {
+        mSwitchIdentifier?.let {
             GlobalScope.launch(Dispatchers.Main) { Core.switchToken(it) }
         }
-        mSwitchAccessToken = null
+        mSwitchIdentifier = null
     }
 
     override fun onPause() {

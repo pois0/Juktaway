@@ -30,7 +30,6 @@ import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
 import net.slashOmega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
-import java.net.MalformedURLException
 import java.net.URL
 import java.util.regex.Pattern
 
@@ -112,23 +111,19 @@ class ScaleImageActivity: FragmentActivity() {
 
     private fun saveImage() {
         GlobalScope.launch(Dispatchers.Main) {
-            val url = runCatching {
-                    URL(imageUrls[pager.currentItem])
-            }.onFailure { e ->
-                e.printStackTrace()
-                toast(R.string.toast_save_image_failure)
-            }.getOrNull() ?: return@launch
-            withContext(Dispatchers.Default) {
-                runCatching {
+            runCatching {
+                val url = URL(imageUrls[pager.currentItem])
+                withContext(Dispatchers.Default) {
                     (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(DownloadManager.Request(Uri.parse(url.toString())).apply {
                         setTitle("Download ${status.user.name}'s image")
                         setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, url.path.split("/").last())
                         allowScanningByMediaScanner()
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     })
-                }.onFailure {
-                    toast("Failed to save image.")
                 }
+            }.onFailure { e ->
+                e.printStackTrace()
+                toast(R.string.toast_save_image_failure)
             }
         }
     }
