@@ -1,9 +1,11 @@
 package net.slashOmega.juktaway
 
 import android.Manifest
+import android.app.DownloadManager
+import android.content.Context
 import android.content.Intent
 import android.content.pm.PackageManager
-import android.media.MediaScannerConnection
+import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
@@ -20,19 +22,16 @@ import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.fragment.ScaleImageFragment
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.MessageUtil
 import net.slashOmega.juktaway.util.StatusUtil
-import net.slashOmega.juktaway.util.tryAndTrace
 import net.slashOmega.juktaway.util.tryAndTraceGet
-import java.io.BufferedInputStream
-import java.io.File
-import java.io.FileOutputStream
+import org.jetbrains.anko.toast
 import java.net.MalformedURLException
 import java.net.URL
-import java.util.*
 import java.util.regex.Pattern
 
 class ScaleImageActivity: FragmentActivity() {
@@ -41,6 +40,7 @@ class ScaleImageActivity: FragmentActivity() {
         const val REQUEST_PERMISSIONS_STORAGE = 1
     }
 
+    private lateinit var status: Status
     private val imageUrls = mutableListOf<String>()
     private lateinit var simplePagerAdapter: SimplePagerAdapter
 
@@ -58,9 +58,8 @@ class ScaleImageActivity: FragmentActivity() {
             intent.data?.toString()
         } else {
             intent.extras?.run {
-                getString("status")?.toJsonObject()?.parse<Status>()?.let {
-                    showStatus(it, getInt("index", 0))
-                }
+                status = getString("status")?.toJsonObject()?.parse<Status>() ?: return@run null
+                showStatus(status, getInt("index", 0))
                 getString("url")
             }
         } ?: return
@@ -87,8 +86,8 @@ class ScaleImageActivity: FragmentActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?): Boolean {
-        return item?.run {
-            if(itemId == R.id.save) {
+        return item?.let {
+            if(item.itemId == R.id.save) {
                 if(ContextCompat.checkSelfPermission(this@ScaleImageActivity,
                                 Manifest.permission.WRITE_EXTERNAL_STORAGE)
                         == PackageManager.PERMISSION_GRANTED)
@@ -113,32 +112,22 @@ class ScaleImageActivity: FragmentActivity() {
 
     private fun saveImage() {
         GlobalScope.launch(Dispatchers.Main) {
-            val url = try {
+            val url = runCatching {
                     URL(imageUrls[pager.currentItem])
-                } catch (e: MalformedURLException) {
-                    e.printStackTrace()
-                    MessageUtil.showToast(R.string.toast_save_image_failure)
-                    return@launch
-                }
-            launch(Dispatchers.Default) {
-                tryAndTrace {
-                    url.openConnection().connect()
-                    val file = File(File(Environment.getExternalStorageDirectory(), "/download/"),
-                            "${Date().time}.jpg")
-                    BufferedInputStream(url.openStream(), 10 * 1024).use { input ->
-                        val data = ByteArray(1024)
-                        var count: Int
-                        FileOutputStream(file).use { output ->
-                            while (input.read(data).let { res ->
-                                        count = res
-                                        res != -1
-                                    }) {
-                                output.write(data, 0, count)
-                            }
-                            output.flush()
-                        }
-                    }
-                    MediaScannerConnection.scanFile(applicationContext, arrayOf(file.path), arrayOf("image/jpeg"), null)
+            }.onFailure { e ->
+                e.printStackTrace()
+                toast(R.string.toast_save_image_failure)
+            }.getOrNull() ?: return@launch
+            withContext(Dispatchers.Default) {
+                runCatching {
+                    (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(DownloadManager.Request(Uri.parse(url.toString())).apply {
+                        setTitle("Download ${status.user.name}'s image")
+                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, url.path.split("/").last())
+                        allowScanningByMediaScanner()
+                        setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
+                    })
+                }.onFailure {
+                    toast("Failed to save image.")
                 }
             }
         }
