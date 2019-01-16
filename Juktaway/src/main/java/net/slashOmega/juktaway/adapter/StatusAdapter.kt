@@ -73,7 +73,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                     = arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_retweet)
-                        .setMessage(it.text)
+                        .setMessage(it.fullText())
                         .setNeutralButton(R.string.button_quote) { _, _ ->
                             ActionUtil.doQuote(it, activity!!)
                             dismiss()
