@@ -121,7 +121,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
             // Status(ツイート)をViewに描写するアダプター
             mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
-            taskExecute()
+            GlobalScope.launch(Dispatchers.Main) { taskExecute() }
         }
 
         mListView.adapter = mAdapter
@@ -140,9 +140,11 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     override fun onRefreshStarted(view: View) { reload() }
 
     fun reload() {
-        mReloading = true
-        mPullToRefreshLayout.isRefreshing = true
-        taskExecute()
+        GlobalScope.launch(Dispatchers.Main) {
+            mReloading = true
+            mPullToRefreshLayout.isRefreshing = true
+            taskExecute()
+        }
     }
 
     protected fun clear() {
@@ -154,15 +156,17 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
 
     protected fun additionalReading() {
         if (!mAutoLoader || mReloading) return
-        mFooter.visibility = View.VISIBLE
-        mAutoLoader = false
-        taskExecute()
+        GlobalScope.launch(Dispatchers.Main) {
+            mFooter.visibility = View.VISIBLE
+            mAutoLoader = false
+            taskExecute()
+        }
     }
 
     internal fun goToTop(): Boolean {
         mListView.setSelection(0)
         return if (mStackRows.size > 0) {
-            showStack()
+            GlobalScope.launch(Dispatchers.Main) { showStack() }
             false
         } else true
     }
@@ -257,7 +261,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     /**
      * 読み込み用のAsyncTaskを実行する
      */
-    protected abstract fun taskExecute()
+    protected abstract suspend fun taskExecute()
 
     /**
      *

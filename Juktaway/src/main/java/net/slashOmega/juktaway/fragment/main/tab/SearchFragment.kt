@@ -25,38 +25,36 @@ class SearchFragment: BaseFragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    override fun taskExecute() {
-        GlobalScope.launch(Dispatchers.Main) {
-            runCatching {
-                (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
-                        .await()
-            }.onSuccess { qr ->
-                if(mReloading) {
-                    clear()
-                    mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
-                    mReloading = false
-                    if (qr.hasNext) {
-                        action = qr.next
-                        mAutoLoader = true
-                    } else {
-                        action = null
-                        mAutoLoader = false
-                    }
-                    mPullToRefreshLayout.setRefreshComplete()
-                } else {
-                    mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
-                    mAutoLoader = true
-                    if (qr.hasNext) action = qr.next
-                    mListView.visibility = View.VISIBLE
-                }
-            }.onFailure {
-                it.printStackTrace()
+    override suspend fun taskExecute() {
+        runCatching {
+            (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
+                    .await()
+        }.onSuccess { qr ->
+            if(mReloading) {
+                clear()
+                mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
                 mReloading = false
+                if (qr.hasNext) {
+                    action = qr.next
+                    mAutoLoader = true
+                } else {
+                    action = null
+                    mAutoLoader = false
+                }
                 mPullToRefreshLayout.setRefreshComplete()
+            } else {
+                mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
+                mAutoLoader = true
+                if (qr.hasNext) action = qr.next
                 mListView.visibility = View.VISIBLE
-                action = null
             }
-            finishLoad()
+        }.onFailure {
+            it.printStackTrace()
+            mReloading = false
+            mPullToRefreshLayout.setRefreshComplete()
+            mListView.visibility = View.VISIBLE
+            action = null
         }
+        finishLoad()
     }
 }

@@ -50,7 +50,6 @@ import net.slashOmega.juktaway.twitter.Identifier
 import net.slashOmega.juktaway.twitter.currentIdentifier
 import net.slashOmega.juktaway.twitter.identifierList
 import net.slashOmega.juktaway.util.*
-import org.jetbrains.anko.matchParent
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.wrapContent
 import java.io.File

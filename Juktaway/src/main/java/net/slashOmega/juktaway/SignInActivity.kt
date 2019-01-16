@@ -4,7 +4,6 @@ import android.app.Activity
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.util.Log
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
@@ -40,7 +39,6 @@ class SignInActivity: Activity() {
     private val addConsumerString by lazy { getString(R.string.add_consumer) }
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        Log.d("signin", "table: ${consumerList.size}")
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
         setContentView(R.layout.activity_signin)

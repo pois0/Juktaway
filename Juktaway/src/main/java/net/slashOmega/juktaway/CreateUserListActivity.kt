@@ -37,10 +37,7 @@ class CreateUserListActivity: Activity() {
                         else ListCreationMode.Private
                 val description = list_description.text.toString()
                 runCatching {
-                    withContext(Dispatchers.Default) {
-
-                        currentClient.lists.create(listName, privacy, description)
-                    }
+                    currentClient.lists.create(listName, privacy, description).await()
                 }.onSuccess {
                     toast(R.string.toast_create_user_list_success)
                     finish()

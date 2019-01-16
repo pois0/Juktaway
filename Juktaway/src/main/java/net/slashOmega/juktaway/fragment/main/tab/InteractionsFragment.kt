@@ -11,34 +11,32 @@ import net.slashOmega.juktaway.twitter.currentClient
 class InteractionsFragment: BaseFragment() {
     override var tabId = TabManager.INTERACTIONS_TAB_ID
 
-    override fun taskExecute() {
-        GlobalScope.launch(Dispatchers.Main) {
-            runCatching {
-                currentClient.timeline.mention(
-                        count = BasicSettings.pageCount,
-                        maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                        options = *arrayOf("tweet_mode" to "extended")
-                ).await()
-            }.onSuccess { statuses ->
-                statuses.forEach { if (mMaxId <= 0L || mMaxId > it.id) mMaxId = it.id }
-                if (mReloading) {
-                    clear()
-                    mAdapter?.addAllFromStatuses(statuses)
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                } else {
-                    mAdapter?.extensionAddAllFromStatuses(statuses)
-                    mAutoLoader = true
-                    mListView.visibility = View.VISIBLE
-                }
-            }.onFailure {
-                it.printStackTrace()
+    override suspend fun taskExecute() {
+        runCatching {
+            currentClient.timeline.mention(
+                    count = BasicSettings.pageCount,
+                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
+                    options = *arrayOf("tweet_mode" to "extended")
+            ).await()
+        }.onSuccess { statuses ->
+            statuses.forEach { if (mMaxId <= 0L || mMaxId > it.id) mMaxId = it.id }
+            if (mReloading) {
+                clear()
+                mAdapter?.addAllFromStatuses(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
+            } else {
+                mAdapter?.extensionAddAllFromStatuses(statuses)
+                mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
-
-            finishLoad()
+        }.onFailure {
+            it.printStackTrace()
+            mReloading = false
+            mPullToRefreshLayout.setRefreshComplete()
+            mListView.visibility = View.VISIBLE
         }
+
+        finishLoad()
     }
 }

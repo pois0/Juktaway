@@ -28,7 +28,6 @@ import net.slashOmega.juktaway.listener.StatusLongClickListener
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
-import net.slashOmega.juktaway.util.ActivityJob
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.ThemeUtil
 import org.jetbrains.anko.toast

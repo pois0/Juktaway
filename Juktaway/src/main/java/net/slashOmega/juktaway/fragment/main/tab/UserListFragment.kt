@@ -16,39 +16,37 @@ class UserListFragment: BaseFragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    override fun taskExecute() {
-        GlobalScope.launch(Dispatchers.Main) {
-            val statuses = runCatching {
-                currentClient.lists.run {
-                    if (mMaxId > 0 && !mReloading) timeline(tabId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                    else timeline(tabId, count = BasicSettings.pageCount)
-                }.await()
-            }.getOrNull()
+    override suspend fun taskExecute() {
+        val statuses = runCatching {
+            currentClient.lists.run {
+                if (mMaxId > 0 && !mReloading) timeline(tabId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                else timeline(tabId, count = BasicSettings.pageCount)
+            }.await()
+        }.getOrNull()
 
-            when {
-                statuses.isNullOrEmpty() -> {
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                    mListView.visibility = View.VISIBLE
-                }
-                mReloading -> {
-                    clear()
-                    statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                    mAdapter?.addAllFromStatusesSuspend(statuses)
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                }
-                else -> {
-                    for (status in statuses) {
-                        if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
-                    }
-                    mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
-                    mAutoLoader = true
-                    mListView.visibility = View.VISIBLE
-                }
+        when {
+            statuses.isNullOrEmpty() -> {
+                mReloading = false
+                mPullToRefreshLayout.setRefreshComplete()
+                mListView.visibility = View.VISIBLE
             }
-
-            finishLoad()
+            mReloading -> {
+                clear()
+                statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                mAdapter?.addAllFromStatusesSuspend(statuses)
+                mReloading = false
+                mPullToRefreshLayout.setRefreshComplete()
+            }
+            else -> {
+                for (status in statuses) {
+                    if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
+                }
+                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAutoLoader = true
+                mListView.visibility = View.VISIBLE
+            }
         }
+
+        finishLoad()
     }
 }

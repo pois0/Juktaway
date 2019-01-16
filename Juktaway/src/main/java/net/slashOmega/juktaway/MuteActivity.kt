@@ -39,9 +39,8 @@ class MuteActivity: FragmentActivity() {
         val colorBlue = ThemeUtil.getThemeTextColor(R.attr.holo_blue)
         val colorWhite = ThemeUtil.getThemeTextColor(R.attr.text_color)
 
-        val tabs = arrayListOf<TextView>(tab_user, tab_source, tab_word).apply {
-            forEachIndexed { i, tab -> tab.setOnClickListener { pager.currentItem = i } }
-        }
+        val tabs = arrayListOf<TextView>(tab_user, tab_source, tab_word)
+        tabs.forEachIndexed { i, tab -> tab.setOnClickListener { pager.currentItem = i } }
 
         tabs[0].setTextColor(colorBlue)
         pager.addOnPageChangeListener(object: ViewPager.SimpleOnPageChangeListener() {

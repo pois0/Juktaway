@@ -11,34 +11,32 @@ import net.slashOmega.juktaway.twitter.currentClient
 class TimelineFragment: BaseFragment() {
     override var tabId = TabManager.TIMELINE_TAB_ID
 
-    override fun taskExecute() {
-        GlobalScope.launch(Dispatchers.Main) {
-            runCatching {
-                currentClient.timeline.home(
-                        count = BasicSettings.pageCount,
-                        maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                        options = *arrayOf("tweet_mode" to "extended")
-                ).await()
-            }.onSuccess { statuses ->
-                if (mReloading) {
-                    clear()
-                    mMaxId = statuses.last().id
-                    mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
-                    mReloading = false
-                    mPullToRefreshLayout.setRefreshComplete()
-                } else {
-                    mMaxId = statuses.last().id
-                    mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
-                    mAutoLoader = true
-                    mListView.visibility = View.VISIBLE
-                }
-            }.onFailure {
+    override suspend fun taskExecute() {
+        runCatching {
+            currentClient.timeline.home(
+                    count = BasicSettings.pageCount,
+                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
+                    options = *arrayOf("tweet_mode" to "extended")
+            ).await()
+        }.onSuccess { statuses ->
+            if (mReloading) {
+                clear()
+                mMaxId = statuses.last().id
+                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
+            } else {
+                mMaxId = statuses.last().id
+                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
-
-            finishLoad()
+        }.onFailure {
+            mReloading = false
+            mPullToRefreshLayout.setRefreshComplete()
+            mListView.visibility = View.VISIBLE
         }
+
+        finishLoad()
     }
 }

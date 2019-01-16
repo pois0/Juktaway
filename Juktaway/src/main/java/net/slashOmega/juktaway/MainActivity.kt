@@ -190,7 +190,7 @@ class MainActivity: FragmentActivity() {
             startActivity(getIntent(PostActivity::class.java).also { intent ->
                 if (quick_tweet_layout.visibility == View.VISIBLE) {
                     with (quick_tweet_edit) {
-                        if (!string.isEmpty()) {
+                        if (string.isNotEmpty()) {
                             intent.putExtra("status", string)
                             intent.putExtra("selection", string.length)
                             mInReplyToStatus?.run {
