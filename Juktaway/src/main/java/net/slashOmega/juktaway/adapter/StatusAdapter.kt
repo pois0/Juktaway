@@ -21,6 +21,7 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
+import jp.nephy.penicillin.extensions.idObj
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
@@ -612,7 +613,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = TimeUtil.getAbsoluteTime(s.createdAt.date)
+                            text = TimeUtil.getAbsoluteTime(s.idObj.toDate())
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()
@@ -629,7 +630,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             imageView {
                                 id = R.id.retweet_icon
                                 contentDescription = resources.getString(R.string.description_icon)
-                                GlobalScope.launch(Dispatchers.Main) { displayUserIcon(s.user) }
+                                GlobalScope.launch(Dispatchers.Main) { displayUserIcon(status.user) }
                             }.lparams(width = dip(18), height = dip(18)) {
                                 rightMargin = dip(4)
                             }
