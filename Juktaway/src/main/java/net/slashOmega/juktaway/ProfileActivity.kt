@@ -292,12 +292,8 @@ class ProfileActivity: FragmentActivity() {
                 }
                 R.id.send_kusoripu -> {
                     GlobalScope.launch(Dispatchers.Main) {
-                        if (Build.VERSION.SDK_INT > 20) {
-                            val content = withContext(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }
-                            startActivity<PostActivity>("status" to content, "selection" to content.length)
-                        } else {
-                            toast(R.string.repooply_version)
-                        }
+                        val content = withContext(Dispatchers.Default) { KusoripuUtil.getKusoripu(mUser.screenName) }
+                        startActivity<PostActivity>("status" to content, "selection" to content.length)
                     }
                 }
                 R.id.add_to_list ->
