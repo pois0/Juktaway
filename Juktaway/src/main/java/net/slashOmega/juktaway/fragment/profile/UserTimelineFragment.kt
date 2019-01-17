@@ -44,7 +44,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                     mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                    mAdapter.extensionAddAllFromStatusesSuspend(this)
+                    mAdapter.extensionAddAllFromStatuses(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }

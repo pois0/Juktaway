@@ -94,13 +94,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     private var mLimit = limit
     private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
-    fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
-        GlobalScope.launch(Dispatchers.Main) {
-            extensionAddAllFromStatusesSuspend(statusesParam)
-        }
-    }
-
-    suspend fun extensionAddAllFromStatusesSuspend(statusesParam: List<Status>) {
+    suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         val logger = TimingLogger("TIMING_LOGGER", "addall")
         val statuses = withContext(Dispatchers.Default) {
             Mute.filterAll(statusesParam).map { Row.newStatus(it) }.filter { !exists(it) }

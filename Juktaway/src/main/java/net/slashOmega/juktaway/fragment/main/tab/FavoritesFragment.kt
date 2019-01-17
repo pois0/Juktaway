@@ -1,10 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
-import android.util.Log
 import android.view.View
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.*
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
@@ -33,7 +29,7 @@ class FavoritesFragment: BaseFragment() {
                     FavRetweetManager.setFav(status.id)
                 }
                 mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
             }
@@ -42,7 +38,7 @@ class FavoritesFragment: BaseFragment() {
                     FavRetweetManager.setFav(status.id)
                 }
                 mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }

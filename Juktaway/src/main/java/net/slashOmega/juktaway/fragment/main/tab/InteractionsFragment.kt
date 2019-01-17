@@ -1,9 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.view.View
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient

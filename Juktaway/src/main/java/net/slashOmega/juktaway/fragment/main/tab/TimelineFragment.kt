@@ -1,9 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.view.View
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
@@ -22,12 +19,12 @@ class TimelineFragment: BaseFragment() {
             if (mReloading) {
                 clear()
                 mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
             } else {
                 mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }

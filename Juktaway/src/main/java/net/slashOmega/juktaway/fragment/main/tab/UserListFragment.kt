@@ -2,9 +2,6 @@ package net.slashOmega.juktaway.fragment.main.tab
 
 import android.os.Bundle
 import android.view.View
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
 
@@ -33,7 +30,7 @@ class UserListFragment: BaseFragment() {
             mReloading -> {
                 clear()
                 statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
-                mAdapter?.addAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
                 mPullToRefreshLayout.setRefreshComplete()
             }
@@ -41,7 +38,7 @@ class UserListFragment: BaseFragment() {
                 for (status in statuses) {
                     if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
                 }
-                mAdapter?.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }

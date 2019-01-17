@@ -5,7 +5,6 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
-import android.util.Log
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -147,7 +146,7 @@ class SearchActivity: FragmentActivity() {
                 if (result.hasNext) nextAction = result.next
 
                 val count = mAdapter.count
-                mAdapter.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter.extensionAddAllFromStatuses(statuses)
                 mAdapter.notifyDataSetChanged()
 
                 search_list.visibility = View.VISIBLE

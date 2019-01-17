@@ -6,9 +6,6 @@ import jp.nephy.penicillin.core.request.action.JsonObjectApiAction
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.twitter.currentClient
 
@@ -32,7 +29,7 @@ class SearchFragment: BaseFragment() {
         }.onSuccess { qr ->
             if(mReloading) {
                 clear()
-                mAdapter?.addAllFromStatusesSuspend(qr.result.statuses)
+                mAdapter?.extensionAddAllFromStatuses(qr.result.statuses)
                 mReloading = false
                 if (qr.hasNext) {
                     action = qr.next
@@ -43,7 +40,7 @@ class SearchFragment: BaseFragment() {
                 }
                 mPullToRefreshLayout.setRefreshComplete()
             } else {
-                mAdapter?.extensionAddAllFromStatusesSuspend(qr.result.statuses)
+                mAdapter?.extensionAddAllFromStatuses(qr.result.statuses)
                 mAutoLoader = true
                 if (qr.hasNext) action = qr.next
                 mListView.visibility = View.VISIBLE

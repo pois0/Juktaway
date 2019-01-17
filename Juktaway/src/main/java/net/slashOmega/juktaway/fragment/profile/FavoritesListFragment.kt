@@ -11,7 +11,6 @@ import net.slashOmega.juktaway.event.action.StatusActionEvent
 import net.slashOmega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slashOmega.juktaway.listener.StatusClickListener
 import net.slashOmega.juktaway.listener.StatusLongClickListener
-import net.slashOmega.juktaway.model.Row
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
 
@@ -34,7 +33,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
 
             statuses?.takeIf { it.isNotEmpty() }?.run {
                 mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatusesSuspend(statuses)
+                mAdapter.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
