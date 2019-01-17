@@ -56,7 +56,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                     = arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_destroy_retweet)
-                        .setMessage(it.text)
+                        .setMessage(it.fullText())
                         .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
                             GlobalScope.launch(Dispatchers.Main) {
                                 it.destroyRetweet()
