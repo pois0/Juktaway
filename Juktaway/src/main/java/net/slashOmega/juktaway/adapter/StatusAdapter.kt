@@ -312,7 +312,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         topPadding = dip(2)
                         contentDescription = resources.getString(R.string.description_icon)
                         setOnClickListener {
-                            startActivity(it.context.intentFor<ProfileActivity>("screenName" to s.user.screenName))
+                            startActivity(it.context.intentFor<ProfileActivity>("userJson" to s.user.toJsonString()))
                         }
 
                         displayUserIcon(s.user)
