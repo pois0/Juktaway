@@ -20,15 +20,13 @@ import org.jetbrains.anko.db.*
  * Created on 2018/11/01.
  */
 
-suspend fun ImageView.displayUserIcon(user: CommonUser) {
-    val url = withContext(Dispatchers.Default) {
-        when (BasicSettings.userIconSize) {
+fun ImageView.displayUserIcon(user: CommonUser) {
+    val url = when (BasicSettings.userIconSize) {
             BasicSettings.UserIconSize.LARGE -> ProfileImageSize.Bigger
             BasicSettings.UserIconSize.NORMAL -> ProfileImageSize.Normal
             BasicSettings.UserIconSize.SMALL -> ProfileImageSize.Mini
             else -> null
-        }?.let { user.profileImageUrlHttpsWithVariantSize(it) }
-    } ?: return
+        }?.let { user.profileImageUrlHttpsWithVariantSize(it) } ?: return
 
     if (BasicSettings.userIconRoundedOn) {
         ImageUtil.displayImage(url, this)
