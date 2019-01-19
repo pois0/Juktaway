@@ -1,7 +1,6 @@
 package net.slashOmega.juktaway.util
 
 import android.content.Context
-import android.content.Intent
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.PenicillinClient
@@ -189,11 +188,7 @@ object ActionUtil {
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, status, text.length, null))
         } else {
-            context.startActivity(Intent(context, PostActivity::class.java).apply {
-                putExtra("status", text)
-                putExtra("selection", text.length)
-                putExtra("inReplyToStatus", status.toJsonString())
-            })
+            context.startActivity<PostActivity>("status" to text, "selection" to text.length, "inReplyToStatus" to status.toJsonString())
         }
     }
 
@@ -226,10 +221,7 @@ object ActionUtil {
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, null, text.length, null))
         } else {
-            context.startActivity(Intent(context, PostActivity::class.java).apply {
-                putExtra("status", text)
-                putExtra("selection", text.length)
-            })
+            context.startActivity<PostActivity>("status" to text, "selection" to text.length)
         }
     }
 
