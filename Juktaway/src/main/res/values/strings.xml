@@ -267,4 +267,7 @@
     <string name="not_select_consumer">Select consumer</string>
     <string name="pref_layout_title">Layouts</string>
     <string name="pref_operation_title">Operations</string>
+    <string name="quick_posting_menu_title">Quick posting menu</string>
+    <string name="quick_posting_menu_fix_initial_tweet">Fix current text to initial text</string>
+    <string name="quick_posting_menu_unfixed_success">Unfixed initial text.</string>
 </resources>

@@ -25,7 +25,6 @@ import android.text.method.ScrollingMovementMethod
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import android.widget.ListView
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.core.exceptions.PenicillinException
@@ -215,7 +214,7 @@ class PostActivity: FragmentActivity() {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
             val adapter = HashtagAdapter(this, R.layout.row_word)
             hashtags.forEach { tag -> adapter.add(tag) }
-            view.findViewById<ListView>(R.id.list_list).apply {
+            it.list_list.apply {
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {

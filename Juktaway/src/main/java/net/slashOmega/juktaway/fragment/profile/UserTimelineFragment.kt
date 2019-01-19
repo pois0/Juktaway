@@ -63,6 +63,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         super.onPause()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) {
         mAdapter.notifyDataSetChanged()
     }
@@ -71,7 +72,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
-    fun onRefreshStarted(view: View) {
+    fun onRefreshStarted() {
         mReload = true
         mMaxId = 0
         showList()

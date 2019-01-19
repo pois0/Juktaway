@@ -103,6 +103,7 @@ class SearchActivity: FragmentActivity() {
         event.dialogFragment.show(supportFragmentManager, "dialog")
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) {
         mAdapter.notifyDataSetChanged()
     }

@@ -52,6 +52,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         super.onPause()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) {
         mAdapter.notifyDataSetChanged()
     }

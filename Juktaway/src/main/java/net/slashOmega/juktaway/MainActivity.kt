@@ -39,6 +39,7 @@ import net.slashOmega.juktaway.event.action.AccountChangeEvent
 import net.slashOmega.juktaway.event.action.OpenEditorEvent
 import net.slashOmega.juktaway.event.action.PostAccountChangeEvent
 import net.slashOmega.juktaway.event.settings.BasicSettingsChangeEvent
+import net.slashOmega.juktaway.fragment.dialog.QuickPostMenuFragment
 import net.slashOmega.juktaway.fragment.main.tab.*
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.model.UserIconManager
@@ -85,6 +86,8 @@ class MainActivity: FragmentActivity() {
     private var mInReplyToStatus: Status? = null
 
     private var mSwitchIdentifier: Identifier? = null
+    var statusInitialText: String = ""
+        private set
 
 
     @SuppressLint("InflateParams")
@@ -163,23 +166,20 @@ class MainActivity: FragmentActivity() {
                     if (msg.startsWith("D ")) {
                         val res = currentClient.sendDirectMessage(msg)
                         MessageUtil.dismissProgressDialog()
-                        res?.run { toast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText("")
+                        res?.run { toast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText(statusInitialText)
                     } else {
-                        val e = runCatching {
+                        runCatching {
                             currentClient.statuses.run {
                                 mInReplyToStatus?.let { s ->
                                     update(msg, inReplyToStatusId = s.id)
                                 } ?: update(msg)
                             }.await()
-                        }.exceptionOrNull()
-
-                        MessageUtil.dismissProgressDialog()
-                        (e as? PenicillinException)?.run {
-                            toast(if (error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
-                            else R.string.toast_update_status_failure)
-                        } ?: run {
+                        }.onSuccess {
                             mInReplyToStatus = null
-                            quick_tweet_edit.setText("")
+                            quick_tweet_edit.setText(statusInitialText)
+                        }.onFailure { e ->
+                            toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                            else R.string.toast_update_status_failure)
                         }
                     }
                 }
@@ -196,7 +196,7 @@ class MainActivity: FragmentActivity() {
                             mInReplyToStatus?.run {
                                 intent.putExtra("inReplyToStatus", this.toJsonString())
                             }
-                            setText("")
+                            setText(statusInitialText)
                             clearFocus()
                         }
                     }
@@ -205,10 +205,7 @@ class MainActivity: FragmentActivity() {
         }
 
         post_button.setOnLongClickListener {
-            if (quick_tweet_layout.visibility == View.VISIBLE)
-                hideQuickPanel()
-            else
-                showQuickPanel()
+            QuickPostMenuFragment().show(supportFragmentManager, "dialog")
             true
         }
 
@@ -654,4 +651,8 @@ class MainActivity: FragmentActivity() {
     private fun <T> getIntent(cls: Class<T>): Intent {
         return Intent(this, cls)
     }
+
+    fun fixStatusInitialText() { statusInitialText = quick_tweet_edit.text.toString() }
+
+    fun unfixStatusInitialText() { statusInitialText = "" }
 }

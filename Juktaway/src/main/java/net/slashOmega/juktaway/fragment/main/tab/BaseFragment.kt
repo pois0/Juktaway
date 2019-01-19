@@ -273,8 +273,10 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
     /**
      * 高速スクロールの設定が変わったら切り替える
      */
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = BasicSettings.fastScrollOn }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter?.notifyDataSetChanged() }
 
     /**

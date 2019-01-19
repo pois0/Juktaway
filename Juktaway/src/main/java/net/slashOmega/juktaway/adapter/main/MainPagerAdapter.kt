@@ -41,7 +41,7 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
 
     override fun getPageTitle(position: Int) = mTabs[position].apply {
         if (tabTitle == "-" && args != null) {
-            UserListCache.getUserList(args.getInt("userListId").toLong())?.let {
+            UserListCache.getUserList(args.getInt("userListId").toLong()).let {
                 tabTitle = if (it.user.id == currentIdentifier.userId) it.name else it.fullName
             }
         }

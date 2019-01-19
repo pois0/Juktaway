@@ -66,6 +66,7 @@ class UserListStatusesFragment : Fragment() {
         super.onPause()
     }
 
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) { GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) } }

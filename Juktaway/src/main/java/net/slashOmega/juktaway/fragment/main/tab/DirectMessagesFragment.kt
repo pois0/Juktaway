@@ -33,5 +33,6 @@ class DirectMessagesFragment: BaseFragment() {
      * DM削除通知
      * @param event DMのID
      */
+    @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StreamingDestroyMessageEvent) { mAdapter?.removeDirectMessage(event.statusId!!) }
 }
