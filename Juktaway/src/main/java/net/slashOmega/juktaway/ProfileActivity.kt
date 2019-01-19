@@ -76,13 +76,14 @@ class ProfileActivity: FragmentActivity() {
             MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_loading))
 
             runCatching {
-                intent.getStringExtra("userJson").takeIf { it.isNotEmpty() }?.let {
+                intent.getStringExtra("userJson")?.takeIf { it.isNotEmpty() }?.let {
                     loadJob = async(Dispatchers.Default) {
                         val user = it.toJsonObject().parse<User>()
                         user to currentClient.friendships.show(sourceId = currentIdentifier.userId, targetId = user.id).await().result.relationship
                     }
                     return@runCatching loadJob?.await() ?: throw Exception("")
                 }
+
                 val screenName = intent.run {
                     if (Intent.ACTION_VIEW == action && data != null && data?.lastPathSegment.isNullOrEmpty().not()) {
                         data!!.lastPathSegment

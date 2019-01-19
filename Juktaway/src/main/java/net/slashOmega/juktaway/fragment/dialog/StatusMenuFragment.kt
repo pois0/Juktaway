@@ -302,9 +302,7 @@ class StatusMenuFragment: DialogFragment() {
          */
         users.put(source.user.id, true)
         adapter.add(Menu("@" + source.user.screenName, Runnable {
-            mActivity.startActivity(Intent(mActivity, ProfileActivity::class.java).apply {
-                putExtra("screenName", source.user.screenName)
-            })
+            mActivity.startActivity<ProfileActivity>("userJson" to source.user.toJsonString())
         }))
 
         /*
@@ -327,7 +325,7 @@ class StatusMenuFragment: DialogFragment() {
             users.put(status.user.id, true)
             adapter.add(Menu("@" + status.user.screenName, Runnable {
                 mActivity.startActivity(Intent(mActivity, ProfileActivity::class.java).apply {
-                    putExtra("screenName", status.user.screenName)
+                    mActivity.startActivity<ProfileActivity>("userJson" to status.user.toJsonString())
                 })
             }))
         }
