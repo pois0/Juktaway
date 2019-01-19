@@ -9,6 +9,7 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
+import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.view.*

@@ -9,6 +9,7 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.endpoints.lists
 import kotlinx.android.synthetic.main.list_guruguru.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

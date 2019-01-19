@@ -24,6 +24,7 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*

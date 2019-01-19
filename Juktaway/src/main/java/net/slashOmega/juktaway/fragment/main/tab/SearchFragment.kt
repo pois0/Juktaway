@@ -3,6 +3,7 @@ package net.slashOmega.juktaway.fragment.main.tab
 import android.os.Bundle
 import android.view.View
 import jp.nephy.penicillin.core.request.action.JsonObjectApiAction
+import jp.nephy.penicillin.endpoints.search
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search

@@ -10,6 +10,7 @@ import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
 import android.widget.ImageView.ScaleType
 import android.widget.LinearLayout
+import jp.nephy.penicillin.endpoints.account
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.twitter.currentClient

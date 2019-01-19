@@ -1,6 +1,7 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
 import android.view.View
+import jp.nephy.penicillin.endpoints.timeline
 import net.slashOmega.juktaway.model.TabManager
 import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient

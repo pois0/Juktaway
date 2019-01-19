@@ -7,9 +7,12 @@ import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.endpoints.directMessages
+import jp.nephy.penicillin.endpoints.favorites
 import jp.nephy.penicillin.endpoints.parameters.MediaCategory
 import jp.nephy.penicillin.endpoints.parameters.MediaFileComponent
 import jp.nephy.penicillin.endpoints.parameters.MediaType
+import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers

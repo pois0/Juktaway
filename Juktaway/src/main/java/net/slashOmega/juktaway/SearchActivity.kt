@@ -12,6 +12,8 @@ import android.view.inputmethod.InputMethodManager
 import android.widget.AbsListView
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.core.request.action.JsonObjectApiAction
+import jp.nephy.penicillin.endpoints.savedSearches
+import jp.nephy.penicillin.endpoints.search
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
@@ -102,6 +104,7 @@ class SearchActivity: FragmentActivity() {
     fun onEventMainThread(event: AlertDialogEvent) {
         event.dialogFragment.show(supportFragmentManager, "dialog")
     }
+
 
     fun onEventMainThread(event: StatusActionEvent) {
         mAdapter.notifyDataSetChanged()

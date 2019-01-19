@@ -11,6 +11,7 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
 import kotlinx.coroutines.Dispatchers

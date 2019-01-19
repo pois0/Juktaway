@@ -5,6 +5,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
+import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.CursorLists

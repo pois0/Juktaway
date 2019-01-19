@@ -3,6 +3,7 @@ package net.slashOmega.juktaway.adapter
 import android.content.Context
 import android.view.View
 import android.view.ViewGroup
+import jp.nephy.penicillin.endpoints.lists
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

@@ -7,6 +7,7 @@ import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import android.widget.ProgressBar
+import jp.nephy.penicillin.endpoints.statuses
 import kotlinx.android.synthetic.main.fragment_retweeters.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

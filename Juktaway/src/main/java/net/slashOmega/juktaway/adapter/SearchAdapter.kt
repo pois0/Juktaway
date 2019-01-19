@@ -6,6 +6,7 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.Filter
 import android.widget.Filterable
+import jp.nephy.penicillin.endpoints.savedSearches
 import jp.nephy.penicillin.models.SavedSearch
 import kotlinx.android.synthetic.main.row_auto_complete.view.*
 import kotlinx.coroutines.*

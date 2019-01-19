@@ -7,6 +7,7 @@ import android.view.Menu
 import android.view.MenuItem
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.models.TwitterList
 import net.slashOmega.juktaway.adapter.SimplePagerAdapter
 import net.slashOmega.juktaway.fragment.list.UserListStatusesFragment

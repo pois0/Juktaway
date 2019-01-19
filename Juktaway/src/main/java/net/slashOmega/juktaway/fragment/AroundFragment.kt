@@ -8,6 +8,7 @@ import android.view.WindowManager
 import android.widget.ProgressBar
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.fragment_around.*
 import kotlinx.coroutines.Dispatchers
