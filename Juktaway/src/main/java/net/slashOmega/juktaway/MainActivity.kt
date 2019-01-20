@@ -181,6 +181,7 @@ class MainActivity: FragmentActivity() {
                             toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
                             else R.string.toast_update_status_failure)
                         }
+                        MessageUtil.dismissProgressDialog()
                     }
                 }
             }
