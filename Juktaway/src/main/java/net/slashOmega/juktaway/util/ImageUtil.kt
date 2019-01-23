@@ -51,7 +51,6 @@ object ImageUtil {
     internal val sRoundedDisplayImageOptions by lazy {
         DisplayImageOptions.Builder()
                 .cacheInMemory(true)
-                .cacheOnDisc(true)
                 .resetViewBeforeLoading(true)
                 .displayer(FadeInBitmapDisplayer(5))
                 .build()
@@ -60,7 +59,6 @@ object ImageUtil {
     init {
         val defaultOptions = DisplayImageOptions.Builder()
                 .cacheInMemory(true)
-                .cacheOnDisc(true)
                 .resetViewBeforeLoading(true)
                 .build()
 

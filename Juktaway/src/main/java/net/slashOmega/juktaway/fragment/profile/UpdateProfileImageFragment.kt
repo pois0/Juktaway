@@ -11,6 +11,7 @@ import android.widget.ImageView
 import android.widget.ImageView.ScaleType
 import android.widget.LinearLayout
 import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.account.updateProfileImage
 import kotlinx.coroutines.*
 import net.slashOmega.juktaway.R
 import net.slashOmega.juktaway.twitter.currentClient

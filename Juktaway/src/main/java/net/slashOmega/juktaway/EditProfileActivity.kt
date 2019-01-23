@@ -6,6 +6,8 @@ import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.MenuItem
 import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.account.updateProfile
+import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import net.slashOmega.juktaway.fragment.profile.UpdateProfileImageFragment

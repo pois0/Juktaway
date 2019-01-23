@@ -9,7 +9,9 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.emulation.EmulationMode
+import jp.nephy.penicillin.core.session.config.account
 import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.oauth
 import jp.nephy.penicillin.models.RequestTokenResponse
 import net.slashOmega.juktaway.model.UserIconManager
@@ -158,7 +160,6 @@ class SignInActivity: Activity() {
                     account {
                         application(consumer!!.ck, consumer!!.cs)
                     }
-                    emulationMode = EmulationMode.TwitterForiPhone
                 }.use { client ->
                     client.oauth.accessToken(rtTemp, rtsTemp, param)
                 }
@@ -187,7 +188,6 @@ class SignInActivity: Activity() {
                     account {
                         application(consumer!!.ck, consumer!!.cs)
                     }
-                    emulationMode = EmulationMode.TwitterForiPhone
                 }.use { client ->
                     val (rt, rts) = client.oauth.requestToken()
                     rtTemp = rt

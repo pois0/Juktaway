@@ -2,7 +2,6 @@ package net.slashOmega.juktaway
 
 import android.app.Activity
 import android.content.Context
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.Menu
@@ -31,6 +30,7 @@ import net.slashOmega.juktaway.settings.BasicSettings
 import net.slashOmega.juktaway.twitter.currentClient
 import net.slashOmega.juktaway.util.KeyboardUtil
 import net.slashOmega.juktaway.util.ThemeUtil
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
 /**
@@ -83,11 +83,7 @@ class SearchActivity: FragmentActivity() {
 
         search_button.setOnClickListener { search() }
         tweet_button.setOnClickListener { v ->
-            searchWords.text?.let {
-                startActivity(Intent(this, PostActivity::class.java).apply {
-                    putExtra("status", " " + v.toString())
-                })
-            }
+            if (searchWords.text != null) startActivity<PostActivity>("status" to v.toString())
         }
     }
 
@@ -171,7 +167,9 @@ class SearchActivity: FragmentActivity() {
             nextAction = null
             GlobalScope.launch(Dispatchers.Main) {
                 val result = runCatching {
-                    currentClient.search.search(text.toString() + " exclude:retweets", count = BasicSettings.pageCount).await()
+                    currentClient.search.search(text.toString() + " exclude:retweets",
+                            count = BasicSettings.pageCount,
+                            options = * kotlin.arrayOf("tweet_mode" to "extended")).await()
                 }.getOrNull()
                 if (result != null) {
                     val statuses = result.result.statuses

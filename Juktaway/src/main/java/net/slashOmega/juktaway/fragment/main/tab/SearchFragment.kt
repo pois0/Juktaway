@@ -25,8 +25,10 @@ class SearchFragment: BaseFragment() {
 
     override suspend fun taskExecute() {
         runCatching {
-            (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets"))
-                    .await()
+            (action?.takeUnless { mReloading } ?: currentClient.search.search("$mSearchWord exclude:retweets",
+                    options = *arrayOf("tweet_mode" to "extended"))
+            ).await()
+
         }.onSuccess { qr ->
             if(mReloading) {
                 clear()

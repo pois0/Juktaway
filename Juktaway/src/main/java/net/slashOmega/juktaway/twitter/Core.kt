@@ -3,8 +3,10 @@ package net.slashOmega.juktaway.twitter
 import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
-import jp.nephy.penicillin.core.emulation.EmulationMode
 import jp.nephy.penicillin.core.emulation.OfficialClient
+import jp.nephy.penicillin.core.session.config.account
+import jp.nephy.penicillin.core.session.config.api
+import jp.nephy.penicillin.core.session.config.dispatcher
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -194,10 +196,11 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
                 token(at, ats)
             }
             dispatcher { coroutineContext = Dispatchers.Default }
-            emulationMode = EmulationMode.TwitterForiPhone
 
-            maxRetries = 3
-            retry(1, TimeUnit.SECONDS)
+            api {
+                maxRetries = 3
+                retryInterval(1, TimeUnit.SECONDS)
+            }
         }
     }
 
