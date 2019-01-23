@@ -2,6 +2,7 @@ package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.endpoints.timeline
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

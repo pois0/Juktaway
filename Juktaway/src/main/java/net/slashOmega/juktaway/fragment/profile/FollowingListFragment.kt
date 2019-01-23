@@ -2,6 +2,7 @@ package net.slashOmega.juktaway.fragment.profile
 
 import android.view.View
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
+import jp.nephy.penicillin.endpoints.friends
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.CursorUsers

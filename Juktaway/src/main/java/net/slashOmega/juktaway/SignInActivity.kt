@@ -9,6 +9,8 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.emulation.EmulationMode
+import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.oauth
 import jp.nephy.penicillin.models.RequestTokenResponse
 import net.slashOmega.juktaway.model.UserIconManager
 import net.slashOmega.juktaway.util.MessageUtil
@@ -196,6 +198,7 @@ class SignInActivity: Activity() {
                 isPinPublished = true
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
             }.onFailure {
+                it.printStackTrace()
                 toast(R.string.toast_sign_in_failure)
             }
             MessageUtil.dismissProgressDialog()

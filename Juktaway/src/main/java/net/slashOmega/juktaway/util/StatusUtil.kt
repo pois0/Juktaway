@@ -3,7 +3,6 @@ package net.slashOmega.juktaway.util
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
-import android.util.Log
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.models.Status
 import net.slashOmega.juktaway.twitter.currentIdentifier

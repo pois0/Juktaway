@@ -10,6 +10,8 @@ import android.view.View
 import android.view.ViewGroup
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.endpoints.blocks
+import jp.nephy.penicillin.endpoints.friendships
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import jp.nephy.penicillin.models.Relationship

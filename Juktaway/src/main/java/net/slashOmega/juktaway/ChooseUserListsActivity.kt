@@ -6,6 +6,7 @@ import android.support.v4.app.FragmentActivity
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.models.TwitterList
 import net.slashOmega.juktaway.adapter.SubscribeUserListAdapter
 import net.slashOmega.juktaway.event.AlertDialogEvent

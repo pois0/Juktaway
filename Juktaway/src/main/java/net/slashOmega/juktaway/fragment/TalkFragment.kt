@@ -14,6 +14,8 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.parameters.SearchResultType
+import jp.nephy.penicillin.endpoints.search
+import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Status

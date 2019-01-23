@@ -1,5 +1,6 @@
 package net.slashOmega.juktaway.fragment.main.tab
 
+import jp.nephy.penicillin.endpoints.directMessages
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

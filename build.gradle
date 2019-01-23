@@ -55,7 +55,7 @@ project.ext {
     ktor_version = '1.1.1'
     jsonkt_version = '4.2'
     kotlin_serialization_version = '0.9.1'
-    penicillin_version = '4.0.1'
+    penicillin_version = '4.0.4'
 }
 
 task wrapper(type: Wrapper) {

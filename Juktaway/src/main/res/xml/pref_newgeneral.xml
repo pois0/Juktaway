@@ -4,6 +4,10 @@
             android:key="pref_layout_category"
             android:title="@string/pref_layout_title"
             android:persistent="false">
+        <PreferenceCategory
+                android:key="pref_layout_general"
+                android:title="" />
+
         <ListPreference
                 android:key="font_size"
                 android:title="@string/pref_title_font_size"

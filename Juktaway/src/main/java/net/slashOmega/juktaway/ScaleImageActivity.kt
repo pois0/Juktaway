@@ -17,6 +17,7 @@ import android.view.View
 import android.view.Window
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers

@@ -1,6 +1,9 @@
 package net.slashOmega.juktaway.model
 
 import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.endpoints.blocks
+import jp.nephy.penicillin.endpoints.friendships
+import jp.nephy.penicillin.endpoints.mutes
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
