@@ -40,7 +40,6 @@ class ScaleImageActivity: FragmentActivity() {
         const val REQUEST_PERMISSIONS_STORAGE = 1
     }
 
-    private lateinit var status: Status
     private val imageUrls = mutableListOf<String>()
     private lateinit var simplePagerAdapter: SimplePagerAdapter
 
@@ -58,8 +57,9 @@ class ScaleImageActivity: FragmentActivity() {
             intent.data?.toString()
         } else {
             intent.extras?.run {
-                status = getString("status")?.toJsonObject()?.parse<Status>() ?: return@run null
-                showStatus(status, getInt("index", 0))
+                getString("status")?.toJsonObject()?.parse<Status>()?.also {
+                    showStatus(it, getInt("index", 0))
+                }
                 getString("url")
             }
         } ?: return
@@ -116,8 +116,9 @@ class ScaleImageActivity: FragmentActivity() {
                 val url = URL(imageUrls[pager.currentItem])
                 withContext(Dispatchers.Default) {
                     (getSystemService(Context.DOWNLOAD_SERVICE) as DownloadManager).enqueue(DownloadManager.Request(Uri.parse(url.toString())).apply {
-                        setTitle("Download ${status.user.name}'s image")
-                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, url.path.split("/").last())
+                        val fileName = url.path.split("/").last()
+                        setTitle(fileName)
+                        setDestinationInExternalPublicDir(Environment.DIRECTORY_DOWNLOADS, fileName)
                         allowScanningByMediaScanner()
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     })

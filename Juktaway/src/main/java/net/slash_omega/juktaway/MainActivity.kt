@@ -172,7 +172,11 @@ class MainActivity: FragmentActivity() {
                         runCatching {
                             currentClient.statuses.run {
                                 mInReplyToStatus?.let { s ->
-                                    update(msg, inReplyToStatusId = s.id)
+                                    update(msg.apply {
+                                        s.entities.userMentions.map { "@${it.screenName}" }.forEach {
+                                            replace(it, "")
+                                        }
+                                    }, inReplyToStatusId = s.id)
                                 } ?: update(msg)
                             }.await()
                         }.onSuccess {
@@ -207,7 +211,9 @@ class MainActivity: FragmentActivity() {
         }
 
         post_button.setOnLongClickListener {
-            QuickPostMenuFragment().show(supportFragmentManager, "dialog")
+            if (quick_tweet_layout.visibility == View.VISIBLE) {
+                QuickPostMenuFragment().show(supportFragmentManager, "dialog")
+            }
             true
         }
 

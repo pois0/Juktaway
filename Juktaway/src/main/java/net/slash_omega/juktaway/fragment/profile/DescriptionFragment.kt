@@ -9,7 +9,7 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.models.User
-import kotlinx.android.synthetic.main.fragment_profile_description.*
+import kotlinx.android.synthetic.main.fragment_profile_description.view.*
 import net.slash_omega.juktaway.R
 import java.text.SimpleDateFormat
 import java.util.*

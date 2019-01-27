@@ -10,7 +10,7 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
-import kotlinx.android.synthetic.main.pull_to_refresh_list.*
+import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

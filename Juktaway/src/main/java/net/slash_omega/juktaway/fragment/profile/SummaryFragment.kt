@@ -27,6 +27,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
+import org.jetbrains.anko.support.v4.startActivity
 
 class SummaryFragment: Fragment() {
     private var mFollowFlg = false
@@ -53,9 +54,7 @@ class SummaryFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         icon.setOnClickListener {
-            startActivity(Intent(view.context, ScaleImageActivity::class.java).apply {
-                putExtra("url", mUser.profileImageUrlWithVariantSize(ProfileImageSize.Original))
-            })
+            startActivity<ScaleImageActivity>("url" to mUser.profileImageUrlWithVariantSize(ProfileImageSize.Original))
         }
 
         ImageUtil.displayRoundedImage(mUser.profileImageUrlWithVariantSize(ProfileImageSize.Bigger), icon)
