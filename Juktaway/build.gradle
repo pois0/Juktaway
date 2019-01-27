@@ -10,6 +10,7 @@ dependencies {
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-core:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-coroutines-android:$kotlin_coroutines_version"
     implementation "org.jetbrains.kotlinx:kotlinx-serialization-runtime:$kotlin_serialization_version"
+    implementation 'com.android.support:multidex:1.0.3'
     implementation "org.jetbrains.anko:anko:$anko_version"
     implementation "io.ktor:ktor-client-android:$ktor_version"
     implementation 'com.google.code.gson:gson:2.8.5'
@@ -18,7 +19,6 @@ dependencies {
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation 'com.github.chrisbanes.actionbarpulltorefresh:library:0.9.9'
     implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation 'com.android.support:multidex:1.0.3'
     implementation "jp.nephy:jsonkt:${jsonkt_version}"
     implementation "jp.nephy:penicillin:${penicillin_version}"
     implementation 'com.android.support.constraint:constraint-layout:1.1.3'

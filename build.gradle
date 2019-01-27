@@ -5,12 +5,7 @@ buildscript {
     ext.build_tool_version = '3.3.0'
     repositories {
         mavenCentral()
-        jcenter()
         google()
-        maven { url "https://dl.bintray.com/kotlin/ktor" }
-        maven { url "https://maven.google.com" }
-        maven { url "https://kotlin.bintray.com/kotlinx" }
-        maven { url "https://dl.bintray.com/nephyproject/penicillin" }
     }
     dependencies {
         classpath "com.android.tools.build:gradle:$build_tool_version"
@@ -23,10 +18,7 @@ subprojects {
     repositories {
 //https://plus.google.com/109385828142935151413/posts/hF7W59uZ7rX
 //        mavenLocal()
-        maven {
-            // url "${System.env.HOME}/.m2/repository"
-            url "http://dl.bintray.com/populov/maven"
-        }
+        maven { url "http://dl.bintray.com/populov/maven" }
         maven { url 'https://maven.google.com' }
         maven { url "https://kotlin.bintray.com/kotlinx" }
         maven { url "https://dl.bintray.com/kotlin/ktor" }
