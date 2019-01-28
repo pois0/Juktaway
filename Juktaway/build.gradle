@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlinx-serialization'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlinx-serialization'
+    id 'com.github.triplet.play' version '2.1.0'
+}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
@@ -25,10 +28,10 @@ dependencies {
     implementation 'io.github.microutils:kotlin-logging:1.6.22'
 }
 
-android {
-    def properties = new Properties()
-    properties.load(project.rootProject.file('local.properties').newDataInputStream())
+def properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
 
+android {
     //noinspection GroovyAssignabilityCheck
     compileSdkVersion rootProject.ext.compileSdkVersion
     //noinspection GroovyAssignabilityCheck
@@ -108,6 +111,13 @@ android {
     }
 }
 
+play {
+    serviceAccountCredentials = file(properties.getProperty("SERVICE_CREDENTIAL_LOCATION"))
+    track = "internal"
+    userFraction = 1.0
+    defaultToAppBundles = true
+}
+
 allprojects {
     gradle.projectsEvaluated {
         tasks.withType(JavaCompile) {
@@ -128,4 +138,3 @@ repositories {
     maven { url "https://kotlin.bintray.com/kotlinx" }
     maven { url "https://dl.bintray.com/kotlin/ktor" }
 }
-
