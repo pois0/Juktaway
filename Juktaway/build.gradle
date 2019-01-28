@@ -44,8 +44,8 @@ android {
 
         multiDexEnabled true
         
-        versionCode 122
-        versionName '3.0-Beta6c'
+        versionCode 123
+        versionName 'InternalTest'
         applicationId "net.slashOmega.juktaway"
     }
 
