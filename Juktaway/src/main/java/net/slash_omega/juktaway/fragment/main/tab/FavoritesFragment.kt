@@ -4,7 +4,8 @@ import android.view.View
 import jp.nephy.penicillin.endpoints.favorites
 import jp.nephy.penicillin.endpoints.favorites.list
 import jp.nephy.penicillin.extensions.await
-import net.slash_omega.juktaway.model.*
+import net.slash_omega.juktaway.model.FavRetweetManager
+import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
 
@@ -15,8 +16,7 @@ class FavoritesFragment: BaseFragment() {
         val statuses = runCatching {
             currentClient.favorites.list(
                     maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                    count = BasicSettings.pageCount,
-                    options = *arrayOf("tweet_mode" to "extended")
+                    count = BasicSettings.pageCount
             ).await()
         }.getOrNull()
 

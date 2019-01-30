@@ -9,7 +9,6 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentActivity
 import android.support.v4.util.LongSparseArray
 import android.widget.ListView
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.models.fullText

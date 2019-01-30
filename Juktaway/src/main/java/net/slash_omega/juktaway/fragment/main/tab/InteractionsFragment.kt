@@ -15,8 +15,7 @@ class InteractionsFragment: BaseFragment() {
         runCatching {
             currentClient.timeline.mentionsTimeline(
                     count = BasicSettings.pageCount,
-                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                    options = *arrayOf("tweet_mode" to "extended")
+                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1)
             ).await()
         }.onSuccess { statuses ->
             statuses.forEach { if (mMaxId <= 0L || mMaxId > it.id) mMaxId = it.id }

@@ -20,7 +20,9 @@ import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
 import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
@@ -170,9 +172,8 @@ class SearchActivity: FragmentActivity() {
             nextAction = null
             GlobalScope.launch(Dispatchers.Main) {
                 val result = runCatching {
-                    currentClient.search.search(text.toString() + " exclude:retweets",
-                            count = BasicSettings.pageCount,
-                            options = * kotlin.arrayOf("tweet_mode" to "extended")).await()
+                    currentClient.search.search("$text exclude:retweets",
+                            count = BasicSettings.pageCount).await()
                 }.getOrNull()
                 if (result != null) {
                     val statuses = result.result.statuses

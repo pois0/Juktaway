@@ -15,8 +15,7 @@ class TimelineFragment: BaseFragment() {
         runCatching {
             currentClient.timeline.homeTimeline (
                     count = BasicSettings.pageCount,
-                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                    options = *arrayOf("tweet_mode" to "extended")
+                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1)
             ).await()
         }.onSuccess { statuses ->
             if (mReloading) {
