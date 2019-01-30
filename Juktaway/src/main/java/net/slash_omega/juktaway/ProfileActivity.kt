@@ -16,11 +16,23 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.blocks
+import jp.nephy.penicillin.endpoints.blocks.createByUserId
+import jp.nephy.penicillin.endpoints.blocks.destroyByUserId
 import jp.nephy.penicillin.endpoints.friendships
+import jp.nephy.penicillin.endpoints.friendships.showByScreenName
+import jp.nephy.penicillin.endpoints.friendships.showByUserId
+import jp.nephy.penicillin.endpoints.friendships.updateByUserId
 import jp.nephy.penicillin.endpoints.mutes
+import jp.nephy.penicillin.endpoints.mutes.createByUserId
+import jp.nephy.penicillin.endpoints.mutes.destroyByUserId
 import jp.nephy.penicillin.endpoints.users
+import jp.nephy.penicillin.endpoints.users.reportSpamByUserId
+import jp.nephy.penicillin.endpoints.users.showByScreenName
+import jp.nephy.penicillin.endpoints.users.showByUserId
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileBannerSize
 import jp.nephy.penicillin.extensions.models.profileBannerUrlWithVariantSize
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
@@ -82,8 +94,8 @@ class ProfileActivity: FragmentActivity() {
             runCatching {
                 intent.getStringExtra("userJson")?.takeIf { it.isNotEmpty() }?.let {
                     loadJob = async(Dispatchers.Default) {
-                        val user = it.toJsonObject().parse<User>()
-                        user to currentClient.friendships.show(sourceId = currentIdentifier.userId, targetId = user.id).await().result.relationship
+                        val user = it.toJsonObject().parseModel<User>()
+                        user to currentClient.friendships.showByUserId(currentIdentifier.userId, user.id).await().result.relationship
                     }
                     return@runCatching loadJob?.await() ?: throw Exception("")
                 }
@@ -100,14 +112,14 @@ class ProfileActivity: FragmentActivity() {
                 loadJob = async(Dispatchers.Default) {
                     screenName?.let {
                         currentClient.run {
-                            val userJob = users.show(screenName = it)
-                            val relJob = friendships.show(sourceScreenName = currentIdentifier.screenName, targetScreenName = it)
+                            val userJob = users.showByScreenName(it)
+                            val relJob = friendships.showByScreenName(currentIdentifier.screenName, it)
                             userJob.await().result to relJob.await().result.relationship
                         }
                     } ?: userId.takeUnless { it == -1L }?.let {
                         currentClient.run {
-                            val userJob = users.show(userId = it)
-                            val relJob = friendships.show(sourceId = currentIdentifier.userId, targetId = it)
+                            val userJob = users.showByUserId(it)
+                            val relJob = friendships.showByUserId(currentIdentifier.userId, it)
                             userJob.await().result to relJob.await().result.relationship
                         }
                     } ?: throw IllegalArgumentException("Both of screen name and userId are null.")
@@ -163,7 +175,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.blocks.create(userId = mUser.id).await()
+                                        currentClient.blocks.createByUserId(mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -185,7 +197,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.mutes.create(userId = mUser.id).await()
+                                        currentClient.mutes.createByUserId(mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -208,7 +220,7 @@ class ProfileActivity: FragmentActivity() {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
-                                        currentClient.friendships.update(userId = mUser.id, retweets = false).await()
+                                        currentClient.friendships.updateByUserId(mUser.id, retweets = false).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -230,7 +242,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.blocks.destroy(userId = mUser.id).await()
+                                        currentClient.blocks.destroyByUserId(mUser.id).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -252,7 +264,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.mutes.destroy(userId = mUser.id).await()
+                                        currentClient.mutes.destroyByUserId(mUser.id).await()
                                     }.isSuccess
 
 
@@ -276,7 +288,7 @@ class ProfileActivity: FragmentActivity() {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
 
                                     val res = runCatching {
-                                        currentClient.friendships.update(userId = mUser.id, retweets = true).await()
+                                        currentClient.friendships.updateByUserId(mUser.id, retweets = true).await()
                                     }.isSuccess
 
                                     MessageUtil.dismissProgressDialog()
@@ -330,7 +342,7 @@ class ProfileActivity: FragmentActivity() {
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(this@ProfileActivity, getString(R.string.progress_process))
                                     val res = runCatching {
-                                        currentClient.users.reportSpam(userId = mUser.id)
+                                        currentClient.users.reportSpamByUserId(mUser.id)
                                     }.isSuccess
 
 

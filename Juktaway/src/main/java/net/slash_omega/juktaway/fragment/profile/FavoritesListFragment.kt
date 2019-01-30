@@ -3,6 +3,9 @@ package net.slash_omega.juktaway.fragment.profile
 import android.view.View
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.favorites
+import jp.nephy.penicillin.endpoints.favorites.list
+import jp.nephy.penicillin.endpoints.favorites.listByUserId
+import jp.nephy.penicillin.extensions.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,8 +30,8 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
                 currentClient.favorites.run {
-                    if (mMaxId > 0) list(userId = user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                    else list(userId = user.id, count = BasicSettings.pageCount)
+                    if (mMaxId > 0) listByUserId(user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                    else listByUserId(user.id, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
 

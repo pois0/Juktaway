@@ -9,6 +9,8 @@ import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.view.Window
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.show
+import jp.nephy.penicillin.extensions.await
 import kotlinx.android.synthetic.main.activity_video.*
 import kotlinx.coroutines.*
 import net.slash_omega.juktaway.twitter.currentClient

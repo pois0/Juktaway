@@ -13,6 +13,7 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
@@ -67,9 +68,9 @@ class StatusMenuFragment: DialogFragment() {
                         adapter.getItem(i)?.callback?.run()
                     }
                 }).let {
-                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parse<DirectMessage>()
+                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parseModel<DirectMessage>()
                     if (message != null) onDirectMessage(message, adapter, it)
-                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parse(), adapter, it)
+                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parseModel(), adapter, it)
                 }
                 .create()
     }
@@ -304,7 +305,7 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * ふぁぼした人
          */
-        val favoriteSourceUser = arguments!!.getString("favoriteSourceUser")?.toJsonObject()?.parse<User>()
+        val favoriteSourceUser = arguments!!.getString("favoriteSourceUser")?.toJsonObject()?.parseModel<User>()
         if (favoriteSourceUser != null) {
             users.put(favoriteSourceUser.id, true)
             add("@" + favoriteSourceUser.screenName) {

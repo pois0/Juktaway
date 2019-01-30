@@ -10,8 +10,10 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.members
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.next
-import jp.nephy.penicillin.models.CursorUsers
+import jp.nephy.penicillin.models.cursor.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope

@@ -13,11 +13,16 @@ import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.endpoints.parameters.SearchResultType
 import jp.nephy.penicillin.endpoints.search
+import jp.nephy.penicillin.endpoints.search.SearchResultType
+import jp.nephy.penicillin.endpoints.search.search
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.lookup
+import jp.nephy.penicillin.endpoints.statuses.show
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
@@ -65,7 +70,7 @@ class TalkFragment: DialogFragment() {
 
         setContentView(R.layout.list_talk)
 
-        arguments?.getString("status")?.toJsonObject()?.parse(Status::class)?.let { status ->
+        arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let { status ->
             val inReplyToAreaPixels = if (status.inReplyToStatusId != null) resources.displayMetrics.heightPixels else 0
             val (headerH, footerH) = if (BasicSettings.talkOrderNewest) Pair(100, inReplyToAreaPixels)
             else Pair(inReplyToAreaPixels, 100)

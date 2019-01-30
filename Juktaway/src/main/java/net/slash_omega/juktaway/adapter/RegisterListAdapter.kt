@@ -4,6 +4,9 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.addMembersByUserIds
+import jp.nephy.penicillin.endpoints.lists.removeMembersByUserIds
+import jp.nephy.penicillin.extensions.await
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -34,7 +37,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                         MessageUtil.showProgressDialog(context, context.getString(R.string.progress_process))
                         if (isChecked) {
                             val res = runCatching {
-                                currentClient.lists.addMembersByIds(registered.userList!!.id, mUserId.toList()).await()
+                                currentClient.lists.addMembersByUserIds(registered.userList!!.id, mUserId.toList()).await()
                             }.isSuccess
 
                             MessageUtil.dismissProgressDialog()
@@ -47,7 +50,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                             }
                         } else {
                             val res = runCatching {
-                                currentClient.lists.removeMembersByIds(registered.userList!!.id, mUserId.toList()).await()
+                                currentClient.lists.removeMembersByUserIds(registered.userList!!.id, mUserId.toList()).await()
                             }.isSuccess
 
                             MessageUtil.dismissProgressDialog()

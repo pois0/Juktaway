@@ -9,10 +9,12 @@ import android.widget.AdapterView
 import android.widget.ArrayAdapter
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.session.config.account
+import jp.nephy.penicillin.core.session.config.application
 import jp.nephy.penicillin.endpoints.account
 import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.oauth
-import jp.nephy.penicillin.models.RequestTokenResponse
+import jp.nephy.penicillin.endpoints.oauth.*
+import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.ThemeUtil
@@ -195,7 +197,7 @@ class SignInActivity: Activity() {
                 }
             }.onSuccess {
                 isPinPublished = true
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it)))
+                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.toString())))
             }.onFailure {
                 it.printStackTrace()
                 toast(R.string.toast_sign_in_failure)

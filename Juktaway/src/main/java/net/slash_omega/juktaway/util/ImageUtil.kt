@@ -13,7 +13,7 @@ import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.endpoints.parameters.MediaType
+import jp.nephy.penicillin.endpoints.media.MediaType
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.VideoActivity

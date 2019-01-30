@@ -5,6 +5,10 @@ import android.support.v4.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.memberships
+import jp.nephy.penicillin.endpoints.lists.membershipsByUserId
+import jp.nephy.penicillin.endpoints.lists.ownerships
+import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.adapter.RegisterListAdapter
 import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.util.ThemeUtil
@@ -27,7 +31,7 @@ class RegisterUserListActivity : FragmentActivity() {
         job = GlobalScope.launch(Dispatchers.Main) {
             currentClient.runCatching {
                 lists.ownerships(count = 200).await().result.lists to
-                        lists.memberships(intent.getLongExtra("userId", -1)).await().result.lists
+                        lists.membershipsByUserId(intent.getLongExtra("userId", -1)).await().result.lists
             }.getOrNull()?.let { (own, member) ->
                 val registeredMap = member.associateBy({it.id}, {true})
                 own.forEach {

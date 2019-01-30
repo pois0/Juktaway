@@ -7,6 +7,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.AbsListView
 import jp.nephy.penicillin.endpoints.users
+import jp.nephy.penicillin.endpoints.users.search
+import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.adapter.UserAdapter
 import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil

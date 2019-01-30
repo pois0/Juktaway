@@ -18,6 +18,9 @@ import android.view.Window
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.show
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
@@ -57,7 +60,7 @@ class ScaleImageActivity: FragmentActivity() {
             intent.data?.toString()
         } else {
             intent.extras?.run {
-                getString("status")?.toJsonObject()?.parse<Status>()?.also {
+                getString("status")?.toJsonObject()?.parseModel<Status>()?.also {
                     showStatus(it, getInt("index", 0))
                 }
                 getString("url")

@@ -9,6 +9,7 @@ import android.view.ViewGroup
 import android.widget.*
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.User
 import net.slash_omega.juktaway.R
 
@@ -18,7 +19,7 @@ import net.slash_omega.juktaway.R
 internal abstract class ProfileListFragmentBase: Fragment() {
     protected abstract val mAdapter: ArrayAdapter<*>
     protected abstract val layout: Int
-    protected val user by lazy { arguments!!.getString("user")!!.toJsonObject().parse(User::class) }
+    protected val user by lazy { arguments!!.getString("user")!!.toJsonObject().parseModel<User>() }
     protected lateinit var mListView: ListView
     protected var mAutoLoader = false
     protected lateinit var mFooter: ProgressBar

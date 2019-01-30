@@ -6,9 +6,11 @@ import android.support.v4.app.DialogFragment
 import android.view.View
 import android.view.WindowManager
 import android.widget.ProgressBar
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.timeline
+import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.fragment_around.*
 import kotlinx.coroutines.Dispatchers
@@ -42,11 +44,11 @@ class AroundFragment: DialogFragment() {
                 onItemClickListener = StatusClickListener(a)
                 onItemLongClickListener = StatusLongClickListener(a)
             }
-            arguments?.getString("status")?.toJsonObject()?.parse<Status>()?.let { origin ->
+            arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let { origin ->
                 mAdapter.add(Row.newStatus(origin))
                 GlobalScope.launch(Dispatchers.Main) {
                     val beforeList = runCatching {
-                        currentClient.timeline.user(origin.user.id, count = 3, maxId = origin.id - 1, options = *arrayOf("tweet_mode" to "extended")).await()
+                        currentClient.timeline.userTimelineByUserId(origin.user.id, count = 3, maxId = origin.id - 1, options = *arrayOf("tweet_mode" to "extended")).await()
                     }.getOrNull() ?: run {
                         MessageUtil.showToast(R.string.toast_load_data_failure)
                         return@launch
@@ -59,7 +61,7 @@ class AroundFragment: DialogFragment() {
                     val afterList = runCatching {
                         var lastId = beforeList[0].id - 1
                         for(i in 0 until 5) {
-                            val statuses = currentClient.timeline.user(origin.user.id, count = 200, maxId = lastId, options = *arrayOf("tweet_mode" to "extended")).await()
+                            val statuses = currentClient.timeline.userTimelineByUserId(origin.user.id, count = 200, maxId = lastId, options = *arrayOf("tweet_mode" to "extended")).await()
                             for ((j, row) in statuses.withIndex()) {
                                 if (row.id == origin.id && j > 0) return@runCatching statuses.subList(Math.max(0, j - 4), j - 1)
                             }

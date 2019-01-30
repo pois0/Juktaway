@@ -1,6 +1,9 @@
 package net.slash_omega.juktaway.fragment.main.tab
 
 import jp.nephy.penicillin.endpoints.directMessages
+import jp.nephy.penicillin.endpoints.directmessages.list
+import jp.nephy.penicillin.endpoints.directmessages.sentMessages
+import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.event.model.StreamingDestroyMessageEvent
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings

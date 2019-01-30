@@ -10,6 +10,10 @@ import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.unsubscribe
+import jp.nephy.penicillin.endpoints.timeline
+import jp.nephy.penicillin.endpoints.timeline.listTimeline
+import jp.nephy.penicillin.extensions.await
 import kotlinx.android.synthetic.main.list_guruguru.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -82,8 +86,8 @@ class UserListStatusesFragment : Fragment() {
     private fun applyUserList() {
         GlobalScope.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                (if (mMaxId > 0) currentClient.lists.timeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                else currentClient.lists.timeline(mListId)).await()
+                (if (mMaxId > 0) currentClient.timeline.listTimeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                else currentClient.timeline.listTimeline(mListId)).await()
             }.getOrNull()
             mFooter.visibility = View.GONE
 

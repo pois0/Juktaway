@@ -3,15 +3,24 @@ package net.slash_omega.juktaway.util
 import android.content.Context
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.directMessages
+import jp.nephy.penicillin.endpoints.directmessages.create
+import jp.nephy.penicillin.endpoints.directmessages.delete
 import jp.nephy.penicillin.endpoints.favorites
-import jp.nephy.penicillin.endpoints.parameters.MediaCategory
-import jp.nephy.penicillin.endpoints.parameters.MediaFileComponent
-import jp.nephy.penicillin.endpoints.parameters.MediaType
+import jp.nephy.penicillin.endpoints.favorites.create
+import jp.nephy.penicillin.endpoints.favorites.destroy
+import jp.nephy.penicillin.endpoints.media.MediaCategory
+import jp.nephy.penicillin.endpoints.media.MediaComponent
+import jp.nephy.penicillin.endpoints.media.MediaType
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.create
+import jp.nephy.penicillin.endpoints.statuses.delete
+import jp.nephy.penicillin.endpoints.statuses.retweet
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.endpoints.createWithMedia
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
@@ -41,16 +50,15 @@ suspend fun Status.destroyRetweet() = ActionUtil.doDestroyRetweet(this)
 
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
-            (if (imageList.isNotEmpty()) statuses.updateWithMediaFile(str,
-                    imageList.map { MediaFileComponent(
+            (if (imageList.isNotEmpty()) statuses.createWithMedia(str,
+                    imageList.map { MediaComponent(
                             file = it,
                             type = it.mediaType(),
                             category = if (it.mediaType() == MediaType.GIF) MediaCategory.TweetGif else MediaCategory.TweetImage
                     ) },
-                    null,
                     "inReplyToStatusId" to inReplyToStatusId
                 )
-            else statuses.update(status = str, inReplyToStatusId = inReplyToStatusId)).await().result
+            else statuses.create(status = str, inReplyToStatusId = inReplyToStatusId)).await().result
         }
     }.onSuccess { s ->
         s.entities.hashtags.forEach { PostStockSettings.addHashtag("#${it.text}") }
@@ -58,7 +66,7 @@ suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null
 
 suspend fun Identifier.sendDirectMessage(rawMessage: String) = asClient { sendDirectMessage(rawMessage) }
 
-suspend fun PenicillinClient.sendDirectMessage(rawMessage: String) = runCatching {
+suspend fun ApiClient.sendDirectMessage(rawMessage: String) = runCatching {
     val message = rawMessage.split(" ".toRegex(), 3)
     directMessages.create(message[2], screenName = message[1]).await()
 }.exceptionOrNull()

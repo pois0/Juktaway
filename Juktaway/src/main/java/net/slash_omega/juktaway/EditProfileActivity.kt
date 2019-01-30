@@ -8,6 +8,7 @@ import android.view.MenuItem
 import jp.nephy.penicillin.endpoints.account
 import jp.nephy.penicillin.endpoints.account.updateProfile
 import jp.nephy.penicillin.endpoints.account.verifyCredentials
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import net.slash_omega.juktaway.fragment.profile.UpdateProfileImageFragment

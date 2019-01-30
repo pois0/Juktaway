@@ -3,9 +3,11 @@ package net.slash_omega.juktaway.fragment.profile
 import android.view.View
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
 import jp.nephy.penicillin.endpoints.followers
+import jp.nephy.penicillin.endpoints.followers.listUsersByScreenName
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
-import jp.nephy.penicillin.models.CursorUsers
+import jp.nephy.penicillin.models.cursor.CursorUsers
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -21,7 +23,7 @@ internal class FollowersListFragment: ProfileListFragmentBase() {
 
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
-            val action = cursor ?: currentClient.followers.list(user.screenName)
+            val action = cursor ?: currentClient.followers.listUsersByScreenName(user.screenName)
             val resp = tryAndTraceGet {
                 action.await().apply {
                     cursor = next

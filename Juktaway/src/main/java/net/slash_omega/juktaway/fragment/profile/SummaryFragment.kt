@@ -8,12 +8,16 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.blocks
+import jp.nephy.penicillin.endpoints.blocks.destroyByUserId
 import jp.nephy.penicillin.endpoints.friendships
+import jp.nephy.penicillin.endpoints.friendships.createByUserId
+import jp.nephy.penicillin.endpoints.friendships.destroyByUserId
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import net.slash_omega.juktaway.EditProfileActivity
@@ -39,8 +43,8 @@ class SummaryFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return arguments?.let { arg ->
-            mUser = arg.getString("user")?.toJsonObject()?.parse() ?: return null
-            relationship = arg.getString("relationship")?.toJsonObject()?.parse() ?: return null
+            mUser = arg.getString("user")?.toJsonObject()?.parseModel() ?: return null
+            relationship = arg.getString("relationship")?.toJsonObject()?.parseModel() ?: return null
             isMyProfile = mUser.id == currentIdentifier.userId
 
             mFollowFlg = relationship.source.following
@@ -81,7 +85,7 @@ class SummaryFragment: Fragment() {
                                 mRuntimeFlg = true
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.friendships.destroy(mUser.id).await() }.isSuccess
+                                    val res = runCatching { currentClient.friendships.destroyByUserId(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_destroy_friendship_success)
@@ -103,7 +107,7 @@ class SummaryFragment: Fragment() {
                                 mRuntimeFlg = true
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.blocks.destroy(mUser.id).await() }.isSuccess
+                                    val res = runCatching { currentClient.blocks.destroyByUserId(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_destroy_block_success)
@@ -125,7 +129,7 @@ class SummaryFragment: Fragment() {
                                 mRuntimeFlg = true
                                 GlobalScope.launch(Dispatchers.Main) {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.friendships.create(mUser.id).await() }.isSuccess
+                                    val res = runCatching { currentClient.friendships.createByUserId(mUser.id).await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_follow_success)

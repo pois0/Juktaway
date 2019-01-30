@@ -2,6 +2,8 @@ package net.slash_omega.juktaway.model
 
 import android.widget.ImageView
 import jp.nephy.penicillin.endpoints.users
+import jp.nephy.penicillin.endpoints.users.lookupByIds
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlHttpsWithVariantSize
 import jp.nephy.penicillin.models.CommonUser

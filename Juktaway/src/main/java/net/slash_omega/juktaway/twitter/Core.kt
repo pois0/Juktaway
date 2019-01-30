@@ -4,9 +4,9 @@ import android.util.Log
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.emulation.OfficialClient
-import jp.nephy.penicillin.core.session.config.account
-import jp.nephy.penicillin.core.session.config.api
-import jp.nephy.penicillin.core.session.config.dispatcher
+import jp.nephy.penicillin.core.session.ApiClient
+import jp.nephy.penicillin.core.session.config.*
+import jp.nephy.penicillin.endpoints.common.TweetMode.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -27,7 +27,7 @@ import java.util.concurrent.TimeUnit
  * Created on 2018/12/23.
  */
 
-lateinit var currentClient: PenicillinClient
+lateinit var currentClient: ApiClient
     private set
 
 lateinit var currentIdentifier: Identifier
@@ -183,7 +183,7 @@ object Core {
 data class Identifier(val consumerId: Long, val at: String, val ats: String, val userId: Long, val screenName: String): Serializable {
     override fun hashCode(): Int = at.hashCode()
     override fun equals(other: Any?): Boolean = other is Identifier && this.at == other.at
-    suspend fun toClient(): PenicillinClient = withContext(Dispatchers.Default) {
+    suspend fun toClient(): ApiClient = withContext(Dispatchers.Default) {
         Log.d("toClient", consumerId.toString())
         val consumer = dbUse {
             select(consumerTable, "id", "name", "ck", "cs")
@@ -200,11 +200,12 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
             api {
                 maxRetries = 3
                 retryInterval(1, TimeUnit.SECONDS)
+                defaultTweetMode(Extended)
             }
         }
     }
 
-    suspend inline fun <T> asClient(block: PenicillinClient.() -> T) = toClient().use(block)
+    suspend inline fun <T> asClient(block: ApiClient.() -> T) = toClient().use(block)
 }
 
 data class Consumer(val id: Long, val name: String, val ck: String, val cs: String) {

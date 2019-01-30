@@ -12,6 +12,10 @@ import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.delete
+import jp.nephy.penicillin.endpoints.lists.unsubscribe
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
 import kotlinx.coroutines.Dispatchers
@@ -61,13 +65,13 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
 
     class DestroyUserListDialogFragment:DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-            val userList = arguments?.getString("userList")?.toJsonObject()?.parse(TwitterList::class) ?: return Dialog(activity!!)
+            val userList = arguments?.getString("userList")?.toJsonObject()?.parseModel<TwitterList>() ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)
                     .setTitle(R.string.confirm_destroy_user_list)
                     .setMessage(userList.name)
                     .setPositiveButton(R.string.button_yes) { _, _ ->
                         GlobalScope.launch(Dispatchers.Main) {
-                            runCatching { currentClient.lists.destroy(userList.id).await() }
+                            runCatching { currentClient.lists.delete(userList.id).await() }
                                     .onSuccess {
                                         toast(R.string.toast_destroy_user_list_success)
                                         EventBus.getDefault().post(DestroyUserListEvent(userList.id))
@@ -86,7 +90,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
 
     class DestroyUserListSubscriptionDialogFragment:DialogFragment() {
         override fun onCreateDialog(savedInstanceState:Bundle?):Dialog {
-            val userList = arguments?.getString("userList")?.toJsonObject()?.parse(TwitterList::class) ?: return Dialog(activity!!)
+            val userList = arguments?.getString("userList")?.toJsonObject()?.parseModel<TwitterList>() ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)
                     .setTitle(R.string.confirm_destroy_user_list_subscribe)
                     .setMessage(userList.name)

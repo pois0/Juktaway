@@ -8,6 +8,10 @@ import android.view.MenuItem
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.subscribe
+import jp.nephy.penicillin.endpoints.lists.unsubscribe
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.fragment.list.UserListStatusesFragment
@@ -33,7 +37,7 @@ class UserListActivity: FragmentActivity() {
         private const val MENU_DESTROY = 2
     }
 
-    private val mUserList by lazy { intent.getStringExtra("userList").toJsonObject().parse(TwitterList::class)}
+    private val mUserList by lazy { intent.getStringExtra("userList").toJsonObject().parseModel<TwitterList>()}
     private var mIsFollowing: Boolean = false
 
 

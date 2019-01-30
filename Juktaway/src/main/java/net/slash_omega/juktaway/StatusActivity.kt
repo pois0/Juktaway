@@ -11,6 +11,9 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.show
+import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_status.*
 import kotlinx.coroutines.Dispatchers
@@ -80,7 +83,7 @@ class StatusActivity: FragmentActivity() {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
             load(statusId)
         } else {
-            intent.getStringExtra("status")?.toJsonObject()?.parse<Status>()?.let {
+            intent.getStringExtra("status")?.toJsonObject()?.parseModel<Status>()?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
                 if (inReplyToStatusId != null) {

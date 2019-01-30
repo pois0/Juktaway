@@ -2,6 +2,8 @@ package net.slash_omega.juktaway.fragment.main.tab
 
 import android.view.View
 import jp.nephy.penicillin.endpoints.favorites
+import jp.nephy.penicillin.endpoints.favorites.list
+import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient

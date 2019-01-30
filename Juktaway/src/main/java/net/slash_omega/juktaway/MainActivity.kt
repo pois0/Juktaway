@@ -24,7 +24,10 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.endpoints.directMessages
 import jp.nephy.penicillin.endpoints.statuses
+import jp.nephy.penicillin.endpoints.statuses.create
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
@@ -172,12 +175,12 @@ class MainActivity: FragmentActivity() {
                         runCatching {
                             currentClient.statuses.run {
                                 mInReplyToStatus?.let { s ->
-                                    update(msg.apply {
+                                    create(msg.apply {
                                         s.entities.userMentions.map { "@${it.screenName}" }.forEach {
                                             replace(it, "")
                                         }
                                     }, inReplyToStatusId = s.id)
-                                } ?: update(msg)
+                                } ?: create(msg)
                             }.await()
                         }.onSuccess {
                             mInReplyToStatus = null

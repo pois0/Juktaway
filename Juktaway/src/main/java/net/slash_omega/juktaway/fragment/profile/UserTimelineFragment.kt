@@ -3,6 +3,8 @@ package net.slash_omega.juktaway.fragment.profile
 import android.view.View
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.timeline
+import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
+import jp.nephy.penicillin.extensions.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -31,8 +33,8 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) {
             val timeline = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0) user(user.id, maxId = mMaxId, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
-                    else user(user.id, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
+                    if (mMaxId > 0) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
+                    else userTimelineByUserId(user.id, count = BasicSettings.pageCount, options = *arrayOf("tweet_mode" to "extended"))
                 }.await()
             }.getOrNull()
 

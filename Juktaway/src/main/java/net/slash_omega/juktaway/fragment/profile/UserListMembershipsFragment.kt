@@ -6,9 +6,11 @@ import android.view.View
 import android.view.ViewGroup
 import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
 import jp.nephy.penicillin.endpoints.lists
+import jp.nephy.penicillin.endpoints.lists.membershipsByUserId
+import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
-import jp.nephy.penicillin.models.CursorLists
+import jp.nephy.penicillin.models.cursor.CursorLists
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -26,7 +28,7 @@ internal class UserListMembershipsFragment: ProfileListFragmentBase() {
     override fun showList() {
         GlobalScope.launch(Dispatchers.Main) {
             val action = runCatching {
-                (nextCursor ?: currentClient.lists.memberships(user.id)).await()
+                (nextCursor ?: currentClient.lists.membershipsByUserId(user.id)).await()
             }.getOrNull()
 
             if (action?.hasNext == true) {
