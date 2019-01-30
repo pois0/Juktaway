@@ -34,10 +34,10 @@ android {
     //noinspection GroovyAssignabilityCheck
     compileSdkVersion rootProject.ext.compileSdkVersion
     //noinspection GroovyAssignabilityCheck
-    buildToolsVersion '28.0.3'
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 24
+        minSdkVersion 26
         //noinspection OldTargetApi
         targetSdkVersion 26
 
