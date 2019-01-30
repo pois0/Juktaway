@@ -12,7 +12,6 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.blocks
@@ -48,7 +47,6 @@ import net.slash_omega.juktaway.util.ThemeUtil
 import net.slash_omega.juktaway.util.displayImage
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
-import java.lang.Exception
 
 class ProfileActivity: FragmentActivity() {
     companion object {
@@ -327,11 +325,6 @@ class ProfileActivity: FragmentActivity() {
                 R.id.open_twitter ->
                     startActivity(Intent(Intent.ACTION_VIEW,
                             Uri.parse("https://twitter.com/" + mUser.screenName)))
-                R.id.open_favstar ->
-                    MessageUtil.showToast("This item is unavailable.")
-                R.id.open_aclog ->
-                    startActivity(Intent(Intent.ACTION_VIEW,
-                            Uri.parse("http://aclog.koba789.com/" + mUser.screenName + "/timeline")))
                 R.id.open_twilog ->
                     startActivity(Intent(Intent.ACTION_VIEW,
                             Uri.parse("http://twilog.org/" + mUser.screenName)))
