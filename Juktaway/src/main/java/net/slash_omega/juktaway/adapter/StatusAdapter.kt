@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.util.TimingLogger
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -94,17 +95,25 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
     suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
+        val logger = TimingLogger("Juktaway", "extension")
+
         val statuses = withContext(Dispatchers.Default) {
-            Mute.filterAll(statusesParam).map { Row.newStatus(it) }.filter { !exists(it) }
+            statusesParam.filter(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
         }
+        logger.addSplit("mute filter")
 
         Dispatchers.Default.doAsync {
             mIdSet.addAll(statuses.map { it.status!!.id })
         }
 
+        logger.addSplit("doAsync")
+
         filterAll(statuses)
         super.addAll(statuses)
         mLimit += statuses.size
+
+        logger.addSplit("add list")
+        logger.dumpToLog()
     }
 
     override fun add(row: Row) {
@@ -141,7 +150,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
-            Mute.filterAll(statusesParam).map { Row.newStatus(it) }.filter { !exists(it) }
+            statusesParam.filter(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
         }
         Dispatchers.Default.doAsync { mIdSet.addAll(statuses.map { it.status!!.id }) }
 

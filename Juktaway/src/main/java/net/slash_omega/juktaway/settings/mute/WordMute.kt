@@ -30,6 +30,7 @@ object WordMute: MuteBase<String>() {
 
     override fun plusAssign(t: String) {
         addUniqueRecord(tableName, dbWord, t)
+        Mute.clearMutedIds()
     }
 
     override fun minusAssign(t: String) {

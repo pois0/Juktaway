@@ -14,7 +14,7 @@ import jp.nephy.penicillin.endpoints.lists.members
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.cursor.CursorUsers
-import kotlinx.android.synthetic.main.list_guruguru.*
+import kotlinx.android.synthetic.main.list_guruguru.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch

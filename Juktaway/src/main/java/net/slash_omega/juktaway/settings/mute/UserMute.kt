@@ -32,6 +32,7 @@ object UserMute: MuteBase<Pair<Long, String>>() {
                 insert(tableName, dbUserId to t.first, dbScreenName to t.second)
             }
         }
+        Mute.clearMutedIds()
     }
 
     operator fun plusAssign(u: User) {

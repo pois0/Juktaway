@@ -9,12 +9,10 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
-import jp.nephy.penicillin.endpoints.lists
-import jp.nephy.penicillin.endpoints.lists.unsubscribe
 import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.listTimeline
 import jp.nephy.penicillin.extensions.await
-import kotlinx.android.synthetic.main.list_guruguru.*
+import kotlinx.android.synthetic.main.list_guruguru.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
