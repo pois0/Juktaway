@@ -3,6 +3,7 @@ package net.slash_omega.juktaway.fragment.main.tab
 import android.os.Bundle
 import android.os.Handler
 import android.support.v4.app.Fragment
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -10,6 +11,7 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
+import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
@@ -28,12 +30,9 @@ import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import uk.co.senab.actionbarpulltorefresh.library.ActionBarPullToRefresh
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
-import uk.co.senab.actionbarpulltorefresh.library.listeners.OnRefreshListener
 import kotlin.collections.ArrayList
 
-abstract class BaseFragment: Fragment(), OnRefreshListener {
+abstract class BaseFragment: Fragment() {
     protected var mAdapter: StatusAdapter? = null
 
     protected var mAutoLoader = false
@@ -52,7 +51,7 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
 
     protected lateinit var mListView: ListView
     private lateinit var mFooter: ProgressBar
-    protected lateinit var mPullToRefreshLayout: PullToRefreshLayout
+    protected lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
 
     abstract var tabId: Long
         protected set
@@ -100,14 +99,11 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
             setOnScrollListener(mOnScrollListener)
         }
         mFooter = guruguru.apply { visibility = View.GONE }
-        mPullToRefreshLayout = ptr_layout
 
-        ActionBarPullToRefresh.from(act)
-                .theseChildrenArePullable(mListView)
-                .listener(this@BaseFragment)
-                .setup(mPullToRefreshLayout)
+        mSwipeRefreshLayout = sr_layout.apply {
+            setOnRefreshListener { reload() }
         }
-    }
+    } }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -137,12 +133,10 @@ abstract class BaseFragment: Fragment(), OnRefreshListener {
         super.onPause()
     }
 
-    override fun onRefreshStarted(view: View) { reload() }
-
     fun reload() {
         GlobalScope.launch(Dispatchers.Main) {
             mReloading = true
-            mPullToRefreshLayout.isRefreshing = true
+            mSwipeRefreshLayout.isRefreshing = true
             taskExecute()
         }
     }

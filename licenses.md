@@ -105,11 +105,4 @@ Author: Sergey Tarasevich
 
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-* ActionBar-PullToRefresh
-
-Author: Chris Banes
-
-License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-
 **This app is originated from Justaway developped by s-aska. I appliciate it a lot.**

@@ -23,7 +23,7 @@ class TimelineFragment: BaseFragment() {
                 mMaxId = statuses.last().id
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
             } else {
                 mMaxId = statuses.last().id
                 mAdapter?.extensionAddAllFromStatuses(statuses)
@@ -32,7 +32,7 @@ class TimelineFragment: BaseFragment() {
             }
         }.onFailure {
             mReloading = false
-            mPullToRefreshLayout.setRefreshComplete()
+            mSwipeRefreshLayout.isRefreshing = false
             mListView.visibility = View.VISIBLE
         }
 

@@ -42,7 +42,7 @@ class SearchFragment: BaseFragment() {
                     action = null
                     mAutoLoader = false
                 }
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
             } else {
                 mAdapter?.extensionAddAllFromStatuses(qr.result.statuses)
                 mAutoLoader = true
@@ -52,7 +52,7 @@ class SearchFragment: BaseFragment() {
         }.onFailure {
             it.printStackTrace()
             mReloading = false
-            mPullToRefreshLayout.setRefreshComplete()
+            mSwipeRefreshLayout.isRefreshing = false
             mListView.visibility = View.VISIBLE
             action = null
         }

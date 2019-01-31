@@ -27,7 +27,7 @@ class UserListFragment: BaseFragment() {
         when {
             statuses.isNullOrEmpty() -> {
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
                 mListView.visibility = View.VISIBLE
             }
             mReloading -> {
@@ -35,7 +35,7 @@ class UserListFragment: BaseFragment() {
                 statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
             }
             else -> {
                 for (status in statuses) {

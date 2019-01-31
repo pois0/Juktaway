@@ -23,7 +23,7 @@ class FavoritesFragment: BaseFragment() {
         when {
             statuses.isNullOrEmpty() -> {
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
                 mListView.visibility = View.VISIBLE
             }
             mReloading -> {
@@ -34,7 +34,7 @@ class FavoritesFragment: BaseFragment() {
                 mMaxId = statuses.last().id
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
             }
             else -> {
                 for (status in statuses) {

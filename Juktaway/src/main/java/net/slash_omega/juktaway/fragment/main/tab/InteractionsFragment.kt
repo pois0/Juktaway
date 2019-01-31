@@ -23,7 +23,7 @@ class InteractionsFragment: BaseFragment() {
                 clear()
                 mAdapter?.addAllFromStatuses(statuses)
                 mReloading = false
-                mPullToRefreshLayout.setRefreshComplete()
+                mSwipeRefreshLayout.isRefreshing = false
             } else {
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
@@ -32,7 +32,7 @@ class InteractionsFragment: BaseFragment() {
         }.onFailure {
             it.printStackTrace()
             mReloading = false
-            mPullToRefreshLayout.setRefreshComplete()
+            mSwipeRefreshLayout.isRefreshing = false
             mListView.visibility = View.VISIBLE
         }
 

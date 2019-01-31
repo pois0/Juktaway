@@ -1,10 +1,12 @@
 package net.slash_omega.juktaway.fragment.profile
 
+import android.support.v4.widget.SwipeRefreshLayout
 import android.view.View
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
 import jp.nephy.penicillin.extensions.await
+import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -16,7 +18,6 @@ import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
-import uk.co.senab.actionbarpulltorefresh.library.PullToRefreshLayout
 
 
 /**
@@ -27,13 +28,15 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override val layout = R.layout.pull_to_refresh_list
     private var mMaxId = 0L
     private var mReload = false
-    private lateinit var mPullToRefreshLayout: PullToRefreshLayout
+    private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
 
     override fun showList() {
+        mFooter.visibility = View.GONE
+        mSwipeRefreshLayout.isRefreshing = true
         GlobalScope.launch(Dispatchers.Main) {
             val timeline = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
+                    if (mMaxId > 0 && mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
                     else userTimelineByUserId(user.id, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
@@ -44,7 +47,6 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                     mAdapter.addAllFromStatusesSuspend(this)
                     mReload = false
-                    mPullToRefreshLayout.setRefreshComplete()
                 } else {
                     lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                     mAdapter.extensionAddAllFromStatuses(this)
@@ -52,6 +54,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                     mListView.visibility = View.VISIBLE
                 }
             }
+            mSwipeRefreshLayout.isRefreshing = false
             finishLoading()
         }
     }
@@ -75,7 +78,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
     }
 
-    fun onRefreshStarted() {
+    private fun reload() {
         mReload = true
         mMaxId = 0
         showList()
@@ -84,6 +87,8 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun View.init() {
         mListView.onItemClickListener = StatusClickListener(activity!!)
         mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
-        mPullToRefreshLayout = findViewById(R.id.ptr_layout)
+        mSwipeRefreshLayout = sr_layout.apply {
+            setOnRefreshListener { reload() }
+        }
     }
 }
