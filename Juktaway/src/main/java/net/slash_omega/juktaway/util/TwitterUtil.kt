@@ -7,11 +7,17 @@ import android.graphics.Paint
 import android.net.Uri
 import android.os.BatteryManager
 import android.os.Build
+import jp.nephy.jsonkt.JsonElement
+import jp.nephy.penicillin.extensions.parseModel
+import jp.nephy.penicillin.models.PenicillinModel
 import jp.nephy.penicillin.models.Status
+import net.slash_omega.juktaway.twitter.currentClient
 import java.util.regex.Pattern
 
 val Status.uri: Uri
     get() =  Uri.parse("https://twitter.com/" + user.screenName + "/status/" + id.toString())
+
+inline fun <reified M: PenicillinModel> JsonElement.parseWithClient() = parseModel<M>(currentClient)
 
 object TwitterUtil {
 

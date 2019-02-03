@@ -17,7 +17,6 @@ import jp.nephy.penicillin.endpoints.friendships.destroyByUserId
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import net.slash_omega.juktaway.EditProfileActivity
@@ -31,6 +30,7 @@ import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
+import net.slash_omega.juktaway.util.parseWithClient
 import org.jetbrains.anko.support.v4.startActivity
 
 class SummaryFragment: Fragment() {
@@ -43,8 +43,8 @@ class SummaryFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
         return arguments?.let { arg ->
-            mUser = arg.getString("user")?.toJsonObject()?.parseModel() ?: return null
-            relationship = arg.getString("relationship")?.toJsonObject()?.parseModel() ?: return null
+            mUser = arg.getString("user")?.toJsonObject()?.parseWithClient() ?: return null
+            relationship = arg.getString("relationship")?.toJsonObject()?.parseWithClient() ?: return null
             isMyProfile = mUser.id == currentIdentifier.userId
 
             mFollowFlg = relationship.source.following

@@ -25,12 +25,10 @@ import android.text.method.ScrollingMovementMethod
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
 import jp.nephy.penicillin.extensions.models.fullText
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
@@ -45,7 +43,10 @@ import net.slash_omega.juktaway.model.UserIconManager.displayUserIcon
 import net.slash_omega.juktaway.settings.PostStockSettings
 import net.slash_omega.juktaway.settings.PostStockSettings.drafts
 import net.slash_omega.juktaway.settings.PostStockSettings.hashtags
-import net.slash_omega.juktaway.twitter.*
+import net.slash_omega.juktaway.twitter.Core
+import net.slash_omega.juktaway.twitter.Identifier
+import net.slash_omega.juktaway.twitter.currentIdentifier
+import net.slash_omega.juktaway.twitter.identifierList
 import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.wrapContent
@@ -79,7 +80,7 @@ class PostActivity: FragmentActivity() {
 
         // Wear からリプライを返す
         RemoteInput.getResultsFromIntent(intent)?.run {
-            var inReplyToStatus = intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseModel<Status>() ?: return@run
+            var inReplyToStatus = intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>() ?: return@run
             mInReplyToStatusId = inReplyToStatus.id
             var inReplyToUserScreenName = inReplyToStatus.user.screenName
             if (inReplyToStatus.retweetedStatus != null) {
@@ -114,11 +115,10 @@ class PostActivity: FragmentActivity() {
         // アカウント切り替え
         switch_account_spinner.adapter = IdentifierAdapter(this, R.layout.spinner_switch_account).apply {
             setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
-            identifierList.forEachIndexed { i, token ->
-                add(token)
-                if (currentIdentifier == token) switch_account_spinner.setSelection(i)
-            }
+            addAll(identifierList)
         }
+
+        switch_account_spinner.setSelection(identifierList.indexOfFirst { currentIdentifier == it })
 
         if (intent.getBooleanExtra("notification", false)) {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
@@ -143,7 +143,7 @@ class PostActivity: FragmentActivity() {
             } ?: status_text.setSelection(start)
         }
 
-        intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseModel<Status>()?.run {retweetedStatus?:this}?.run {
+        intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>()?.run {retweetedStatus?:this}?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
             in_reply_to_status.text = fullText()

@@ -12,7 +12,6 @@ import android.widget.ListView
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.models.fullText
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
@@ -67,9 +66,9 @@ class StatusMenuFragment: DialogFragment() {
                         adapter.getItem(i)?.callback?.run()
                     }
                 }).let {
-                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parseModel<DirectMessage>()
+                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parseWithClient<DirectMessage>()
                     if (message != null) onDirectMessage(message, adapter, it)
-                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parseModel(), adapter, it)
+                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parseWithClient(), adapter, it)
                 }
                 .create()
     }
@@ -164,7 +163,7 @@ class StatusMenuFragment: DialogFragment() {
         } else {
             add(R.string.context_menu_create_favorite) {
                 GlobalScope.launch(Dispatchers.Main) {
-                    ActionUtil.doFavorite(status.id)
+                    status.favorite()
                     dismiss()
                 }
             }
@@ -304,7 +303,7 @@ class StatusMenuFragment: DialogFragment() {
         /*
          * ふぁぼした人
          */
-        val favoriteSourceUser = arguments!!.getString("favoriteSourceUser")?.toJsonObject()?.parseModel<User>()
+        val favoriteSourceUser = arguments!!.getString("favoriteSourceUser")?.toJsonObject()?.parseWithClient<User>()
         if (favoriteSourceUser != null) {
             users.put(favoriteSourceUser.id, true)
             add("@" + favoriteSourceUser.screenName) {

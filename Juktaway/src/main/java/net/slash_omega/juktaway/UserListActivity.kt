@@ -5,13 +5,11 @@ import android.support.v4.app.FragmentActivity
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.subscribe
 import jp.nephy.penicillin.endpoints.lists.unsubscribe
 import jp.nephy.penicillin.extensions.await
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.fragment.list.UserListStatusesFragment
@@ -23,6 +21,7 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
+import net.slash_omega.juktaway.util.parseWithClient
 import org.jetbrains.anko.toast
 
 /**
@@ -37,7 +36,9 @@ class UserListActivity: FragmentActivity() {
         private const val MENU_DESTROY = 2
     }
 
-    private val mUserList by lazy { intent.getStringExtra("userList").toJsonObject().parseModel<TwitterList>()}
+    private val mUserList by lazy {
+        intent.getStringExtra("userList").toJsonObject().parseWithClient<TwitterList>()
+    }
     private var mIsFollowing: Boolean = false
 
 

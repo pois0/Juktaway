@@ -22,7 +22,6 @@ import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
 import kotlinx.coroutines.Dispatchers
@@ -38,6 +37,7 @@ import net.slash_omega.juktaway.listener.HeaderStatusLongClickListener
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
+import net.slash_omega.juktaway.util.parseWithClient
 import java.util.*
 import kotlin.collections.ArrayList
 
@@ -70,7 +70,7 @@ class TalkFragment: DialogFragment() {
 
         setContentView(R.layout.list_talk)
 
-        arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let { status ->
+        arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { status ->
             val inReplyToAreaPixels = if (status.inReplyToStatusId != null) resources.displayMetrics.heightPixels else 0
             val (headerH, footerH) = if (BasicSettings.talkOrderNewest) Pair(100, inReplyToAreaPixels)
             else Pair(inReplyToAreaPixels, 100)
@@ -137,6 +137,7 @@ class TalkFragment: DialogFragment() {
     }
 
     private fun loadTalkReply(source: Status) {
+
         GlobalScope.launch(Dispatchers.Main) {
             runCatching {
                 withContext(Dispatchers.Default) {

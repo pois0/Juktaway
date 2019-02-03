@@ -5,15 +5,15 @@ import android.content.Context
 import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
+import android.util.Log
+import android.view.View
 import android.view.Window
 import android.view.WindowManager
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_status.*
 import kotlinx.coroutines.Dispatchers
@@ -28,7 +28,8 @@ import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
-import org.jetbrains.anko.intentFor
+import net.slash_omega.juktaway.util.parseWithClient
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
 /**
@@ -52,14 +53,12 @@ class StatusActivity: FragmentActivity() {
             if (uri == null || uri.path == null) return
             when {
                 uri.path!!.contains("photo") -> {
-                    startActivity(Intent(this, ScaleImageActivity::class.java).apply {
-                        putExtra("url", uri.toString())
-                    })
+                    startActivity<ScaleImageActivity>("url" to uri.toString())
                     finish()
                     return
                 }
                 uri.path!!.contains("video") -> {
-                    startActivity(intentFor<VideoActivity>("statusUrl" to uri.toString()))
+                    startActivity<VideoActivity>("statusUrl" to uri.toString())
                     finish()
                     return
                 }
@@ -83,15 +82,17 @@ class StatusActivity: FragmentActivity() {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
             load(statusId)
         } else {
-            intent.getStringExtra("status")?.toJsonObject()?.parseModel<Status>()?.let {
+            intent.getStringExtra("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
                 mAdapter.add(Row.newStatus(it))
                 val inReplyToStatusId = it.inReplyToStatusId
                 if (inReplyToStatusId != null) {
                     MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
                     load(inReplyToStatusId)
                 }
+                mAdapter.notifyDataSetChanged()
             }
         }
+        list.visibility = View.VISIBLE
     }
 
     override fun onResume() {

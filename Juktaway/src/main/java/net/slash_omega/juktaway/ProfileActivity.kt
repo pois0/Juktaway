@@ -31,7 +31,6 @@ import jp.nephy.penicillin.endpoints.users.showByUserId
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.models.ProfileBannerSize
 import jp.nephy.penicillin.extensions.models.profileBannerUrlWithVariantSize
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
@@ -41,10 +40,7 @@ import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.fragment.profile.*
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import net.slash_omega.juktaway.util.KusoripuUtil
-import net.slash_omega.juktaway.util.MessageUtil
-import net.slash_omega.juktaway.util.ThemeUtil
-import net.slash_omega.juktaway.util.displayImage
+import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
@@ -92,7 +88,7 @@ class ProfileActivity: FragmentActivity() {
             runCatching {
                 intent.getStringExtra("userJson")?.takeIf { it.isNotEmpty() }?.let {
                     loadJob = async(Dispatchers.Default) {
-                        val user = it.toJsonObject().parseModel<User>()
+                        val user = it.toJsonObject().parseWithClient<User>()
                         user to currentClient.friendships.showByUserId(currentIdentifier.userId, user.id).await().result.relationship
                     }
                     return@runCatching loadJob?.await() ?: throw Exception("")

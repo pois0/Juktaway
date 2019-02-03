@@ -15,6 +15,7 @@ import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
+import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
@@ -24,7 +25,8 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
-import jp.nephy.penicillin.endpoints.directMessages
+import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.create
 import jp.nephy.penicillin.extensions.await
@@ -52,6 +54,7 @@ import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
 import net.slash_omega.juktaway.widget.FontelloButton
 import org.jetbrains.anko.startActivity
+import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
@@ -150,13 +153,16 @@ class MainActivity: FragmentActivity() {
         account_list.adapter = mAccessTokenAdapter
         account_list.setOnItemClickListener { _, _, position, _ ->
             if (mAccessTokenAdapter.count <= position) {
-                startActivityForResult(Intent(this, AccountSettingActivity::class.java), REQUEST_ACCOUNT_SETTING)
+                startActivityForResult<AccountSettingActivity>(REQUEST_ACCOUNT_SETTING)
                 return@setOnItemClickListener
             }
             mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }?.let {
                 GlobalScope.launch(Dispatchers.Main) {
+                    Log.d("current", currentClient.account.verifyCredentials.await().result.screenName)
                     Core.switchToken(it)
+                    Log.d("currentScree", currentIdentifier.screenName)
                     mAccessTokenAdapter.notifyDataSetChanged()
+                    Log.d("current", currentClient.account.verifyCredentials.await().result.screenName)
                 }
             }
             drawer_layout.closeDrawer(left_drawer)
@@ -252,9 +258,7 @@ class MainActivity: FragmentActivity() {
                 if (resultCode == Activity.RESULT_OK)
                     mSwitchIdentifier = data?.getSerializableExtra("identifier") as Identifier
                 mAccessTokenAdapter.clear()
-                identifierList.forEach {
-                    mAccessTokenAdapter.add(it)
-                }
+                mAccessTokenAdapter.addAll(identifierList)
             }
             REQUEST_SETTINGS -> {
                 if (resultCode == Activity.RESULT_OK) {

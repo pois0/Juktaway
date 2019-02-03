@@ -10,7 +10,6 @@ import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
 import jp.nephy.penicillin.extensions.await
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.fragment_around.*
 import kotlinx.coroutines.Dispatchers
@@ -23,6 +22,7 @@ import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
+import net.slash_omega.juktaway.util.parseWithClient
 
 class AroundFragment: DialogFragment() {
     private lateinit var mProgressBarTop: ProgressBar
@@ -44,7 +44,7 @@ class AroundFragment: DialogFragment() {
                 onItemClickListener = StatusClickListener(a)
                 onItemLongClickListener = StatusLongClickListener(a)
             }
-            arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let { origin ->
+            arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { origin ->
                 mAdapter.add(Row.newStatus(origin))
                 GlobalScope.launch(Dispatchers.Main) {
                     val beforeList = runCatching {

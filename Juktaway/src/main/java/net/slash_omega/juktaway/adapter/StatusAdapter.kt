@@ -22,7 +22,6 @@ import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.extensions.idObj
 import jp.nephy.penicillin.extensions.models.fullText
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
@@ -53,7 +52,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
-                    = arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let {
+                    = arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_destroy_retweet)
                         .setMessage(it.fullText())
@@ -70,7 +69,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
         class RetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
-                    = arguments?.getString("status")?.toJsonObject()?.parseModel<Status>()?.let {
+                    = arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_retweet)
                         .setMessage(it.fullText())

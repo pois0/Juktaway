@@ -6,7 +6,10 @@ import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.emulation.OfficialClient
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.core.session.config.*
-import jp.nephy.penicillin.endpoints.common.TweetMode.*
+import jp.nephy.penicillin.endpoints.account
+import jp.nephy.penicillin.endpoints.account.verifyCredentials
+import jp.nephy.penicillin.endpoints.common.TweetMode.Extended
+import jp.nephy.penicillin.extensions.await
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
@@ -102,9 +105,14 @@ object Core {
     }
 
     suspend fun switchToken(acc: Identifier) {
+        Log.d("switching", "start")
         withContext(Dispatchers.Default) {
+            Log.d("switching", "start$this")
             println(acc.toString())
-            if (identifierList.size > 1) currentClient.close()
+            runCatching { currentClient.close()
+                currentClient.account.verifyCredentials.await().result.let { Log.d("switchingSUCC", it.screenName) }
+            }.onFailure { Log.d("switching", "failed${this@withContext}") }
+            Log.d("switching", "runcatching finished")
             currentIdentifier = acc
             currentClient = acc.toClient()
             lastIdentifierAts = currentIdentifier.ats
@@ -184,7 +192,6 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
     override fun hashCode(): Int = at.hashCode()
     override fun equals(other: Any?): Boolean = other is Identifier && this.at == other.at
     suspend fun toClient(): ApiClient = withContext(Dispatchers.Default) {
-        Log.d("toClient", consumerId.toString())
         val consumer = dbUse {
             select(consumerTable, "id", "name", "ck", "cs")
                     .whereArgs("id = {id}", "id" to consumerId)
@@ -195,7 +202,10 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
                 application(consumer.ck, consumer.cs)
                 token(at, ats)
             }
-            dispatcher { coroutineContext = Dispatchers.Default }
+            dispatcher {
+                coroutineContext = Dispatchers.Default
+                shouldClose()
+            }
 
             api {
                 maxRetries = 3

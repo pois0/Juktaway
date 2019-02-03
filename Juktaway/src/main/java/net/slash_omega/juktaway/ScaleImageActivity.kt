@@ -15,12 +15,10 @@ import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.view.Window
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
-import jp.nephy.penicillin.extensions.parseModel
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
@@ -32,6 +30,7 @@ import net.slash_omega.juktaway.fragment.ScaleImageFragment
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.StatusUtil
+import net.slash_omega.juktaway.util.parseWithClient
 import net.slash_omega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
 import java.net.URL
@@ -60,7 +59,7 @@ class ScaleImageActivity: FragmentActivity() {
             intent.data?.toString()
         } else {
             intent.extras?.run {
-                getString("status")?.toJsonObject()?.parseModel<Status>()?.also {
+                getString("status")?.toJsonObject()?.parseWithClient<Status>()?.also {
                     showStatus(it, getInt("index", 0))
                 }
                 getString("url")
