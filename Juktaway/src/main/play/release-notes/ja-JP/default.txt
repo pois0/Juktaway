@@ -1,2 +1,4 @@
-不具合修正
-- ワードミュートが有効でない不具合を修正しました
+変更点
+- PullToRefreshからSwipeRefreshLayoutに変更しました
+修正点
+- Activityが終了したときにJobも終了するように変更しました。
