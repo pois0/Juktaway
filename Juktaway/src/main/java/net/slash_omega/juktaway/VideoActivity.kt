@@ -5,7 +5,6 @@ import android.content.Intent
 import android.media.AudioManager
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.view.Window
 import jp.nephy.penicillin.endpoints.statuses
@@ -21,7 +20,7 @@ import java.util.regex.Pattern
 
 private val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/video/(\\d+)/?.*")!!
 
-class VideoActivity: FragmentActivity() {
+class VideoActivity: DividedFragmentActivity() {
     private var musicWasPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -41,7 +40,7 @@ class VideoActivity: FragmentActivity() {
         if (statusUrl.isNullOrEmpty().not()) {
             pattern.matcher(statusUrl)?.let { m ->
                 if (m.find()) {
-                    GlobalScope.launch(Dispatchers.Main) {
+                    launch {
                         // TODO 画質を選べるように
                         val status = tryAndTraceGet {
                             currentClient.statuses.show(m.group(1).toLong()).await()

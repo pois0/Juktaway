@@ -21,6 +21,7 @@ import jp.nephy.penicillin.endpoints.statuses.delete
 import jp.nephy.penicillin.endpoints.statuses.retweet
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.endpoints.createWithMedia
+import jp.nephy.penicillin.extensions.models.favorite
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
@@ -40,7 +41,23 @@ import net.slash_omega.juktaway.twitter.currentIdentifier
 import org.jetbrains.anko.startActivity
 import java.io.File
 
-suspend fun Status.favorite() = ActionUtil.doFavorite(id)
+suspend inline fun Status.favorite() {
+    withContext(Dispatchers.Default) {
+        FavRetweetManager.setFav(id)
+        EventBus.getDefault().post(StatusActionEvent())
+    }
+
+    val e = runCatching { favorite().await() }.exceptionOrNull() as? PenicillinException
+    when {
+        e == null -> MessageUtil.showToast(R.string.toast_favorite_success)
+        e.error?.code == 139 -> MessageUtil.showToast(R.string.toast_favorite_already)
+        else -> {
+            FavRetweetManager.removeFav(id)
+            EventBus.getDefault().post(StatusActionEvent())
+            MessageUtil.showToast(R.string.toast_favorite_failure)
+        }
+    }
+}
 
 suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
 
@@ -72,24 +89,6 @@ suspend fun ApiClient.sendDirectMessage(rawMessage: String) = runCatching {
 }.exceptionOrNull()
 
 object ActionUtil {
-    suspend fun doFavorite(statusId: Long) {
-        withContext(Dispatchers.Default) {
-            FavRetweetManager.setFav(statusId)
-            EventBus.getDefault().post(StatusActionEvent())
-        }
-
-        val e = runCatching { currentClient.favorites.create(statusId).await() }.exceptionOrNull() as? PenicillinException
-        when {
-            e == null -> MessageUtil.showToast(R.string.toast_favorite_success)
-            e.error?.code == 139 -> MessageUtil.showToast(R.string.toast_favorite_already)
-            else -> {
-                FavRetweetManager.removeFav(statusId)
-                EventBus.getDefault().post(StatusActionEvent())
-                MessageUtil.showToast(R.string.toast_favorite_failure)
-            }
-        }
-    }
-
     suspend fun doDestroyFavorite(statusId: Long) {
         withContext(Dispatchers.Default) {
             FavRetweetManager.removeFav(statusId)

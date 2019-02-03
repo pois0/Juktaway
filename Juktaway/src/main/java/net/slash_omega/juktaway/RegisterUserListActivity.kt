@@ -1,11 +1,9 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
 import jp.nephy.penicillin.endpoints.lists
-import jp.nephy.penicillin.endpoints.lists.memberships
 import jp.nephy.penicillin.endpoints.lists.membershipsByUserId
 import jp.nephy.penicillin.endpoints.lists.ownerships
 import jp.nephy.penicillin.extensions.await
@@ -13,22 +11,16 @@ import net.slash_omega.juktaway.adapter.RegisterListAdapter
 import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.list.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
 import org.jetbrains.anko.startActivity
 
-class RegisterUserListActivity : FragmentActivity() {
-    companion object {
-        private var job: Job? = null
-    }
-
+class RegisterUserListActivity: DividedFragmentActivity() {
     private lateinit var mAdapter: RegisterListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             currentClient.runCatching {
                 lists.ownerships(count = 200).await().result.lists to
                         lists.membershipsByUserId(intent.getLongExtra("userId", -1)).await().result.lists
@@ -56,12 +48,6 @@ class RegisterUserListActivity : FragmentActivity() {
                 R.layout.row_subscribe_user_list, intent.getLongExtra("userId", -1))
 
         list_list.adapter = mAdapter
-    }
-
-    override fun onStop() {
-        job?.cancel()
-        job = null
-        super.onStop()
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {

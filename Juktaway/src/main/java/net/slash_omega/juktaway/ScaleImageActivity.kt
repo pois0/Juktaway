@@ -9,7 +9,6 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.view.Menu
 import android.view.MenuItem
@@ -22,7 +21,6 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_scale_image.*
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
@@ -36,7 +34,7 @@ import org.jetbrains.anko.toast
 import java.net.URL
 import java.util.regex.Pattern
 
-class ScaleImageActivity: FragmentActivity() {
+class ScaleImageActivity: DividedFragmentActivity() {
     companion object {
         val pattern: Pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/photo/(\\d+)/?.*")
         const val REQUEST_PERMISSIONS_STORAGE = 1
@@ -113,7 +111,7 @@ class ScaleImageActivity: FragmentActivity() {
     }
 
     private fun saveImage() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             runCatching {
                 val url = URL(imageUrls[pager.currentItem])
                 withContext(Dispatchers.Default) {
@@ -133,7 +131,7 @@ class ScaleImageActivity: FragmentActivity() {
     }
 
     private fun showStatus(id: Long) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             tryAndTraceGet { currentClient.statuses.show(id).await() }?.result?.let { showStatus(it, 0) }
         }
     }

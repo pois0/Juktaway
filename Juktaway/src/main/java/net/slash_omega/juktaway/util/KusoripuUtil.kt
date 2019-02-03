@@ -8,16 +8,18 @@ import jp.nephy.jsonkt.delegation.int
 import jp.nephy.jsonkt.delegation.model
 import jp.nephy.jsonkt.delegation.string
 import jp.nephy.jsonkt.parse
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
 
 /**
  * Created on 2018/11/18.
  */
 object KusoripuUtil {
-    suspend fun getKusoripu(screenName: String) =
-        HttpClient().use { client ->
-            val response = client.get<String>(scheme = "https", host = "api.nephy.jp", path = "/v1/kusoripu/random?screen_name=$screenName")
-            response.parse<RepooplyModel>().text.raw
-        }
+    suspend fun getKusoripu(screenName: String) = withContext(Dispatchers.Default) {
+        HttpClient().use {
+            it.get<String>(scheme = "https", host = "api.nephy.jp", path = "/v1/kusoripu/random?screen_name=$screenName")
+        }.parse<RepooplyModel>().text.raw
+    }
 
     class RepooplyModel(override val json: JsonObject): JsonModel {
         val count by int

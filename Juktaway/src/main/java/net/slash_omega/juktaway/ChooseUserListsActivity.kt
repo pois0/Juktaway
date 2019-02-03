@@ -2,7 +2,6 @@ package net.slash_omega.juktaway
 
 import android.app.Activity
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
@@ -18,9 +17,6 @@ import net.slash_omega.juktaway.model.UserListCache
 import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_choose_user_lists.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.Job
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -29,15 +25,11 @@ import java.util.*
 /**
  * Created on 2018/08/29.
  */
-class ChooseUserListsActivity: FragmentActivity() {
-    companion object {
-        var job: Job? = null
-    }
-
+class ChooseUserListsActivity: DividedFragmentActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val lists = currentClient.lists.list().await()
             lists.forEach {
                 mAdapter.add(UserListWithRegistered().apply {
@@ -110,12 +102,6 @@ class ChooseUserListsActivity: FragmentActivity() {
     override fun onPause() {
         EventBus.getDefault().unregister(this)
         super.onPause()
-    }
-
-    override fun onStop() {
-        job?.cancel()
-        job = null
-        super.onStop()
     }
 
     fun onEventMainThread(event: AlertDialogEvent) { event.dialogFragment.show(supportFragmentManager, "dialog") }

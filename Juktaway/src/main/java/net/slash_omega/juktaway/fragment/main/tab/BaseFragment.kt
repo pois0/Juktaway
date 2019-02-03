@@ -11,10 +11,8 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
-import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
@@ -32,7 +30,8 @@ import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import kotlin.collections.ArrayList
 
-abstract class BaseFragment: Fragment() {
+abstract class BaseFragment: Fragment(), CoroutineScope {
+    override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
     protected var mAdapter: StatusAdapter? = null
 
     protected var mAutoLoader = false
@@ -117,7 +116,7 @@ abstract class BaseFragment: Fragment() {
             // Status(ツイート)をViewに描写するアダプター
             mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
-            GlobalScope.launch(Dispatchers.Main) { taskExecute() }
+            launch { taskExecute() }
         }
 
         mListView.adapter = mAdapter
@@ -134,7 +133,7 @@ abstract class BaseFragment: Fragment() {
     }
 
     fun reload() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             mReloading = true
             mSwipeRefreshLayout.isRefreshing = true
             taskExecute()
@@ -150,7 +149,7 @@ abstract class BaseFragment: Fragment() {
 
     protected fun additionalReading() {
         if (!mAutoLoader || mReloading) return
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             mFooter.visibility = View.VISIBLE
             mAutoLoader = false
             taskExecute()
@@ -160,7 +159,7 @@ abstract class BaseFragment: Fragment() {
     internal fun goToTop(): Boolean {
         mListView.setSelection(0)
         return if (mStackRows.size > 0) {
-            GlobalScope.launch(Dispatchers.Main) { showStack() }
+            launch { showStack() }
             false
         } else true
     }
@@ -279,7 +278,7 @@ abstract class BaseFragment: Fragment() {
      * @param event ツイート
      */
     open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val removePositions = mAdapter?.removeStatus(event.statusId!!) ?: ArrayList(0)
             for (removePosition in removePositions) {
                 if (removePosition >= 0) {

@@ -16,7 +16,6 @@ import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
 import android.support.v4.app.ActivityCompat
-import android.support.v4.app.FragmentActivity
 import android.support.v4.app.RemoteInput
 import android.support.v4.content.ContextCompat
 import android.text.Editable
@@ -35,8 +34,6 @@ import kotlinx.android.synthetic.main.activity_post.*
 import kotlinx.android.synthetic.main.list.view.*
 import kotlinx.android.synthetic.main.row_word.view.*
 import kotlinx.android.synthetic.main.spinner_switch_account.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.model.UserIconManager.displayUserIcon
@@ -54,7 +51,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 @SuppressLint("SetTextI18n", "InflateParams")
-class PostActivity: FragmentActivity() {
+class PostActivity: DividedFragmentActivity() {
     companion object {
         private const val REQUEST_GALLERY = 1
         private const val REQUEST_CAMERA = 2
@@ -143,7 +140,7 @@ class PostActivity: FragmentActivity() {
             } ?: status_text.setSelection(start)
         }
 
-        intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>()?.run {retweetedStatus?:this}?.run {
+        intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>()?.run { retweetedStatus ?: this }?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
             in_reply_to_status.text = fullText()
@@ -169,7 +166,8 @@ class PostActivity: FragmentActivity() {
         if (Intent.ACTION_SEND == intent.action) {
             intent.getParcelableExtra<Uri>(Intent.EXTRA_STREAM)?.let { setImage(it) }
             ?: intent.extras?.run {
-                val text = (getString(Intent.EXTRA_TEXT) ?: "") + (getString(Intent.EXTRA_SUBJECT)?.let { " $it" } ?: "")
+                val text = (getString(Intent.EXTRA_TEXT).nullToBlank()) +
+                        (getString(Intent.EXTRA_SUBJECT)?.let { " $it" }.nullToBlank())
                 status_text.setText(text)
             }
         }
@@ -423,7 +421,7 @@ class PostActivity: FragmentActivity() {
     }
 
     private fun tweet() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             MessageUtil.showProgressDialog(this@PostActivity, getString(R.string.progress_sending))
             val text = status_text.text.toString()
             if (text.startsWith("D ")) {
@@ -502,8 +500,8 @@ class PostActivity: FragmentActivity() {
         }
     }
 
-    private class IdentifierAdapter(context: Context, val mLayout: Int)
-            : ArrayAdapter<Identifier>(context, mLayout) {
+    private class IdentifierAdapter(private val activity: PostActivity, val mLayout: Int)
+            : ArrayAdapter<Identifier>(activity, mLayout) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -514,7 +512,7 @@ class PostActivity: FragmentActivity() {
 
                 spinner_switch_account_icon.displayUserIcon(identifier.userId)
                 spinner_switch_account_screen_name.text = identifier.screenName
-                GlobalScope.launch(Dispatchers.Main) {
+                activity.launch {
                     spinner_switch_account_consumer_name.text = Core.getConsumer(identifier.consumerId)?.name
                     spinner_switch_account_consumer_name.width = wrapContent
                 }
@@ -527,7 +525,7 @@ class PostActivity: FragmentActivity() {
             return (convertView ?: mInflater.inflate(mLayout, null)).apply {
                 spinner_switch_account_icon?.displayUserIcon(identifier.userId)
                 spinner_switch_account_screen_name.text = identifier.screenName
-                GlobalScope.launch(Dispatchers.Main) {
+                activity.launch {
                     spinner_switch_account_consumer_name.text = Core.getConsumer(identifier.consumerId)?.name
                     spinner_switch_account_consumer_name.width = wrapContent
                     spinner_switch_account_layout.minimumWidth = wrapContent

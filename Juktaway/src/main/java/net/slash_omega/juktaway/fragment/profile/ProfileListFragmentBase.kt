@@ -9,13 +9,17 @@ import android.view.ViewGroup
 import android.widget.*
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.User
+import kotlinx.coroutines.CoroutineScope
 import net.slash_omega.juktaway.R
+import net.slash_omega.juktaway.settings.BasicSettings.init
 import net.slash_omega.juktaway.util.parseWithClient
 
 /**
  * Created on 2018/09/01.
  */
-internal abstract class ProfileListFragmentBase: Fragment() {
+internal abstract class ProfileListFragmentBase: Fragment(), CoroutineScope {
+    override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
+
     protected abstract val mAdapter: ArrayAdapter<*>
     protected abstract val layout: Int
     protected val user by lazy { arguments!!.getString("user")!!.toJsonObject().parseWithClient<User>() }

@@ -33,9 +33,7 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
@@ -58,8 +56,9 @@ import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
+import kotlin.coroutines.CoroutineContext
 
-class MainActivity: FragmentActivity() {
+class MainActivity: DividedFragmentActivity() {
     companion object {
         private const val REQUEST_ACCOUNT_SETTING = 200
         private const val REQUEST_SETTINGS = 300
@@ -157,7 +156,7 @@ class MainActivity: FragmentActivity() {
                 return@setOnItemClickListener
             }
             mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }?.let {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     Log.d("current", currentClient.account.verifyCredentials.await().result.screenName)
                     Core.switchToken(it)
                     Log.d("currentScree", currentIdentifier.screenName)
@@ -169,7 +168,7 @@ class MainActivity: FragmentActivity() {
         }
 
         send_button.setOnClickListener {
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 val msg = quick_tweet_edit.string
                 if (msg.isNotEmpty()) {
                     MessageUtil.showProgressDialog(this@MainActivity, getString(R.string.progress_sending))
@@ -309,7 +308,7 @@ class MainActivity: FragmentActivity() {
         }, 1000)
 
         mSwitchIdentifier?.let {
-            GlobalScope.launch(Dispatchers.Main) { Core.switchToken(it) }
+            launch { Core.switchToken(it) }
         }
         mSwitchIdentifier = null
     }
@@ -344,11 +343,11 @@ class MainActivity: FragmentActivity() {
             R.id.profile ->
                 startActivity<ProfileActivity>("screenName" to currentIdentifier.screenName)
             R.id.tab_settings ->
-                startActivityForResult(getIntent(TabSettingsActivity::class.java), REQUEST_TAB_SETTINGS)
+                startActivityForResult<TabSettingsActivity>(REQUEST_TAB_SETTINGS)
             R.id.action_bar_search_button ->
                 startActivity<SearchActivity>()
             R.id.settings ->
-                startActivityForResult(getIntent(SettingsActivity::class.java), REQUEST_SETTINGS)
+                startActivityForResult<SettingsActivity>(REQUEST_SETTINGS)
             R.id.official_website ->
                 startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(getString(R.string.official_website))))
             R.id.feedback ->
@@ -389,7 +388,7 @@ class MainActivity: FragmentActivity() {
 
     @SuppressLint("SetTextI18n")
     override fun setTitle(title: CharSequence?) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
             if (matcher.find()) {
                 action_bar_title.text = matcher.group(2)

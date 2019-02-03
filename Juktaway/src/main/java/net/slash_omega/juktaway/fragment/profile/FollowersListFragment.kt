@@ -8,8 +8,6 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.cursor.CursorUsers
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.UserAdapter
@@ -22,7 +20,7 @@ internal class FollowersListFragment: ProfileListFragmentBase() {
     var cursor: CursorJsonObjectApiAction<CursorUsers>? = null
 
     override fun showList() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val action = cursor ?: currentClient.followers.listUsersByScreenName(user.screenName)
             val resp = tryAndTraceGet {
                 action.await().apply {

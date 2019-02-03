@@ -2,21 +2,14 @@ package net.slash_omega.juktaway.fragment.profile
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Intent
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.endpoints.blocks
-import jp.nephy.penicillin.endpoints.blocks.destroyByUserId
-import jp.nephy.penicillin.endpoints.friendships
-import jp.nephy.penicillin.endpoints.friendships.createByUserId
-import jp.nephy.penicillin.endpoints.friendships.destroyByUserId
 import jp.nephy.penicillin.extensions.await
-import jp.nephy.penicillin.extensions.models.ProfileImageSize
-import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
+import jp.nephy.penicillin.extensions.models.*
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import net.slash_omega.juktaway.EditProfileActivity
@@ -25,12 +18,12 @@ import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.util.ImageUtil
 import net.slash_omega.juktaway.util.MessageUtil
 import kotlinx.android.synthetic.main.fragment_profile_summary.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.twitter.currentClient
+import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.parseWithClient
+import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.support.v4.startActivity
 
 class SummaryFragment: Fragment() {
@@ -40,8 +33,10 @@ class SummaryFragment: Fragment() {
     private var isMyProfile = false
     private lateinit var mUser: User
     private lateinit var relationship: Relationship
+    private lateinit var coroutineScope: CoroutineScope
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? {
+        coroutineScope = (activity as ProfileActivity)
         return arguments?.let { arg ->
             mUser = arg.getString("user")?.toJsonObject()?.parseWithClient() ?: return null
             relationship = arg.getString("relationship")?.toJsonObject()?.parseWithClient() ?: return null
@@ -77,15 +72,15 @@ class SummaryFragment: Fragment() {
             if (mRuntimeFlg) return@setOnClickListener
             when {
                 isMyProfile ->
-                    startActivity(Intent(activity, EditProfileActivity::class.java))
+                    activity?.startActivity<EditProfileActivity>()
                 mFollowFlg -> {
                     AlertDialog.Builder(activity)
                             .setMessage(R.string.confirm_unfollow)
                             .setPositiveButton(R.string.button_unfollow) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch(Dispatchers.Main) {
+                                coroutineScope.launch {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.friendships.destroyByUserId(mUser.id).await() }.isSuccess
+                                    val res = runCatching { mUser.unfollow().await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_destroy_friendship_success)
@@ -105,9 +100,9 @@ class SummaryFragment: Fragment() {
                             .setMessage(R.string.confirm_destroy_block)
                             .setPositiveButton(R.string.button_destroy_block) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch(Dispatchers.Main) {
+                                coroutineScope.launch {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.blocks.destroyByUserId(mUser.id).await() }.isSuccess
+                                    val res = runCatching { mUser.unblock().await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_destroy_block_success)
@@ -127,9 +122,9 @@ class SummaryFragment: Fragment() {
                             .setMessage(R.string.confirm_follow)
                             .setPositiveButton(R.string.button_follow) { _, _ ->
                                 mRuntimeFlg = true
-                                GlobalScope.launch(Dispatchers.Main) {
+                                coroutineScope.launch {
                                     MessageUtil.showProgressDialog(activity!!, getString(R.string.progress_process))
-                                    val res = runCatching { currentClient.friendships.createByUserId(mUser.id).await() }.isSuccess
+                                    val res = runCatching { mUser.follow().await() }.isSuccess
                                     MessageUtil.dismissProgressDialog()
                                     if (res) {
                                         MessageUtil.showToast(R.string.toast_follow_success)

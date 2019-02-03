@@ -3,7 +3,6 @@ package net.slash_omega.juktaway
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.MenuItem
 import jp.nephy.penicillin.endpoints.account
 import jp.nephy.penicillin.endpoints.account.updateProfile
@@ -20,13 +19,9 @@ import org.jetbrains.anko.toast
 
 private const val REQ_PICK_PROFILE_IMAGE = 1
 
-class EditProfileActivity: FragmentActivity(){
-    companion object {
-        private var job: Job? = null
-    }
-
+class EditProfileActivity: DividedFragmentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
-        job = GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val user = currentClient.account.verifyCredentials().await().result
             name.setText(user.name)
             location.setText(user.location)
@@ -50,7 +45,7 @@ class EditProfileActivity: FragmentActivity(){
 
         save_button.setOnClickListener {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 runCatching {
                     currentClient.account.updateProfile(
                             name.text.toString(),
@@ -64,11 +59,6 @@ class EditProfileActivity: FragmentActivity(){
                 finish()
             }
         }
-    }
-
-    override fun onStop() {
-        job?.cancel()
-        super.onStop()
     }
 
     override fun onOptionsItemSelected(item: MenuItem): Boolean {

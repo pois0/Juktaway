@@ -20,9 +20,7 @@ import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
 import kotlinx.android.synthetic.main.activity_search.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
@@ -37,11 +35,12 @@ import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Created on 2018/08/24.
  */
-class SearchActivity: FragmentActivity() {
+class SearchActivity: DividedFragmentActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
     }
@@ -112,7 +111,7 @@ class SearchActivity: FragmentActivity() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
+        launch { mAdapter.removeStatus(event.statusId!!) }
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -143,7 +142,7 @@ class SearchActivity: FragmentActivity() {
 
     private fun additionalReading() {
         nextAction?.let { action ->
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 guruguru.visibility = View.VISIBLE
                 val result = action.await()
                 val statuses = result.result.statuses
@@ -170,7 +169,7 @@ class SearchActivity: FragmentActivity() {
             search_list.visibility = View.GONE
             guruguru.visibility = View.VISIBLE
             nextAction = null
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 val result = runCatching {
                     currentClient.search.search("$text exclude:retweets",
                             count = BasicSettings.pageCount).await()
@@ -197,8 +196,8 @@ class SearchActivity: FragmentActivity() {
     }
 
     private fun createSavedSearch(word: String) {
-        GlobalScope.launch(Dispatchers.Main) {
-            val res = runCatching { currentClient.savedSearches.create(word) }.isSuccess
+        launch {
+            val res = runCatching { currentClient.savedSearches.create(word).await() }.isSuccess
 
             if (res) {
                 setResult(RESULT_CREATE_SAVED_SEARCH)

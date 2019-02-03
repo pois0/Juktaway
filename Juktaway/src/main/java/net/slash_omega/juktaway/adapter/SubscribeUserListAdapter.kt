@@ -2,7 +2,6 @@ package net.slash_omega.juktaway.adapter
 
 import android.app.AlertDialog
 import android.app.Dialog
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.view.View
@@ -16,9 +15,11 @@ import jp.nephy.penicillin.endpoints.lists.unsubscribe
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import net.slash_omega.juktaway.ChooseUserListsActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.model.DestroyUserListEvent
@@ -32,7 +33,8 @@ import org.jetbrains.anko.support.v4.toast
 /**
  * Created on 2018/10/28.
  */
-class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWithRegistered>(c, id) {
+class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
+        : ArrayAdapterBase<UserListWithRegistered>(activity, id), CoroutineScope by activity {
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ ->
             val list = getItem(pos)
@@ -62,7 +64,7 @@ class SubscribeUserListAdapter(c: Context, id: Int): ArrayAdapterBase<UserListWi
         return null
     }
 
-    class DestroyUserListDialogFragment:DialogFragment() {
+    class DestroyUserListDialogFragment: DialogFragment() {
         override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
             val userList = arguments?.getString("userList")?.toJsonObject()?.parseWithClient<TwitterList>() ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)

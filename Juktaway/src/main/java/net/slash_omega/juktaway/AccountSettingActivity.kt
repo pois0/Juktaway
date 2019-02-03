@@ -3,7 +3,6 @@ package net.slash_omega.juktaway
 import android.app.Activity
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
 import net.slash_omega.juktaway.adapter.account.IdentifierAdapter
@@ -12,8 +11,6 @@ import net.slash_omega.juktaway.listener.OnTrashListener
 import net.slash_omega.juktaway.listener.RemoveAccountListener
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.Core
 import net.slash_omega.juktaway.twitter.Identifier
@@ -24,7 +21,7 @@ import org.jetbrains.anko.startActivity
 /**
  * Created on 2018/08/23.
  */
-class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
+class AccountSettingActivity: DividedFragmentActivity(), RemoveAccountListener {
     private lateinit var mAccountAdapter: IdentifierAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -76,6 +73,6 @@ class AccountSettingActivity: FragmentActivity(), RemoveAccountListener {
 
     override fun removeIdentifier(identifier: Identifier) {
         mAccountAdapter.remove(identifier)
-        GlobalScope.launch(Dispatchers.Main) { Core.removeIdentifier(identifier) }
+        launch { Core.removeIdentifier(identifier) }
     }
 }

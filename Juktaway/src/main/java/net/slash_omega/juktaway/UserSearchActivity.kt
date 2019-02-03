@@ -1,7 +1,6 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.KeyEvent
 import android.view.MenuItem
 import android.view.View
@@ -21,7 +20,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/29.
  */
-class UserSearchActivity: FragmentActivity() {
+class UserSearchActivity: DividedFragmentActivity() {
     private lateinit var mSearchWord: String
     private var mPage = 1
     private lateinit var mAdapter: UserAdapter
@@ -92,7 +91,7 @@ class UserSearchActivity: FragmentActivity() {
     }
 
     private fun userSearch(word: String) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val res = tryAndTraceGet {
                 currentClient.users.search(word, mPage, 20).await()
             }

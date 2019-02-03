@@ -7,8 +7,6 @@ import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
 import jp.nephy.penicillin.extensions.await
 import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
@@ -33,7 +31,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun showList() {
         mFooter.visibility = View.GONE
         mSwipeRefreshLayout.isRefreshing = true
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val timeline = runCatching {
                 currentClient.timeline.run {
                     if (mMaxId > 0 && mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
@@ -75,7 +73,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
+        launch { mAdapter.removeStatus(event.statusId!!) }
     }
 
     private fun reload() {

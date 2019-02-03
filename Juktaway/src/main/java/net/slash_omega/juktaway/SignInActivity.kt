@@ -25,6 +25,7 @@ import net.slash_omega.juktaway.util.SharedPreference
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
+import kotlin.coroutines.CoroutineContext
 
 /**
  * Created on 2018/08/29.
@@ -36,7 +37,10 @@ private var consumerIdTemp by SharedPreference("twitter", "consumertemp", -1L)
 private var rtTemp by SharedPreference("twitter", "rtTemp", "")
 private var rtsTemp by SharedPreference("twitter", "rtTemp", "")
 
-class SignInActivity: Activity() {
+class SignInActivity: Activity(), CoroutineScope {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
 
     private var isPinPublished: Boolean = false
     private var mRequestToken: RequestTokenResponse? = null
@@ -68,7 +72,7 @@ class SignInActivity: Activity() {
                 val str = (consumer_spinner.getItemAtPosition(position) as String)
                 if (str == addConsumerString) {
                     consumer_layout.visibility = View.VISIBLE
-                } else if (consumerList.isNotEmpty()) GlobalScope.launch(Dispatchers.Main) {
+                } else if (consumerList.isNotEmpty()) launch {
                     consumer_layout.visibility = View.GONE
                     consumer = Core.getConsumer(str).also {
                         consumerIdTemp = it.id
@@ -79,7 +83,7 @@ class SignInActivity: Activity() {
         }
 
         add_consumer_button.onClick {
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 val consumerName = consumer_name.text.toString()
                 if (Core.addConsumer(consumerName, consumer_key.text.toString(), consumer_secret.text.toString())) {
                     consumer = Core.getConsumer(consumerName).also { c ->
@@ -123,6 +127,11 @@ class SignInActivity: Activity() {
         }
     }
 
+    override fun onStop() {
+        job.cancelChildren()
+        super.onStop()
+    }
+
     override fun onSaveInstanceState(outState: Bundle) {
         super.onSaveInstanceState(outState)
 
@@ -135,7 +144,7 @@ class SignInActivity: Activity() {
         super.onRestoreInstanceState(savedInstanceState)
 
         isPinPublished = savedInstanceState.getBoolean(pinPublishedKey)
-        GlobalScope.launch {
+        launch {
             if (consumerIdTemp != -1L) {
                 consumer = Core.getConsumer(consumerIdTemp)
             }
@@ -143,7 +152,7 @@ class SignInActivity: Activity() {
     }
 
     private fun startOAuth() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             clearTemps()
             if (consumer_spinner.selectedItem as? String == addConsumerString) {
                 toast(R.string.not_select_consumer)
@@ -155,7 +164,7 @@ class SignInActivity: Activity() {
     }
 
     private fun verifyOAuth(param: String) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             runCatching {
                 PenicillinClient {
                     account {
@@ -183,7 +192,7 @@ class SignInActivity: Activity() {
     }
 
     private fun addUserOAuth() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             runCatching {
                 PenicillinClient {
                     account {

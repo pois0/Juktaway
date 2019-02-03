@@ -24,10 +24,7 @@ import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.list_talk.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.action.StatusActionEvent
@@ -40,8 +37,13 @@ import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.parseWithClient
 import java.util.*
 import kotlin.collections.ArrayList
+import kotlin.coroutines.CoroutineContext
 
-class TalkFragment: DialogFragment() {
+class TalkFragment: DialogFragment(), CoroutineScope {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     private val mAdapter by lazy { StatusAdapter(activity!!) }
     private lateinit var mListView: ListView
     private val mHeaderView by lazy { View(activity) }
@@ -106,6 +108,11 @@ class TalkFragment: DialogFragment() {
         super.onPause()
     }
 
+    override fun onStop() {
+        job.cancelChildren()
+        super.onStop()
+    }
+
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 
@@ -115,7 +122,7 @@ class TalkFragment: DialogFragment() {
 
     private fun loadTalk(idParam: Long) {
         var statusId = idParam
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             while (statusId > 0) {
                 val status = runCatching { currentClient.statuses.show(statusId).await().result }.getOrNull() ?: break
 
@@ -137,8 +144,7 @@ class TalkFragment: DialogFragment() {
     }
 
     private fun loadTalkReply(source: Status) {
-
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             runCatching {
                 withContext(Dispatchers.Default) {
                     val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",

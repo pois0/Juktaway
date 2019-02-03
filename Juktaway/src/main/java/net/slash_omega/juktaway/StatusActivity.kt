@@ -4,8 +4,6 @@ import android.app.NotificationManager
 import android.content.Context
 import android.content.Intent
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.util.Log
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -16,8 +14,6 @@ import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_status.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
@@ -35,7 +31,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/29.
  */
-class StatusActivity: FragmentActivity() {
+class StatusActivity: DividedFragmentActivity() {
     private lateinit var mAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -115,12 +111,12 @@ class StatusActivity: FragmentActivity() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
+        launch { mAdapter.removeStatus(event.statusId!!) }
     }
 
     private fun load(idParam: Long) {
         var statusId = idParam.takeIf { it > 0 }
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             while (statusId != null) {
                 val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
                 MessageUtil.dismissProgressDialog()

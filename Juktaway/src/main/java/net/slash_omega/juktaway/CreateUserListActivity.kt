@@ -12,15 +12,18 @@ import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_create_user_list.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.twitter.currentClient
 import org.jetbrains.anko.toast
+import kotlin.coroutines.CoroutineContext
 
 private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
-class CreateUserListActivity: Activity() {
+class CreateUserListActivity: Activity(), CoroutineScope {
+    private val job = Job()
+    override val coroutineContext: CoroutineContext
+        get() = Dispatchers.Main + job
+
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
@@ -33,7 +36,7 @@ class CreateUserListActivity: Activity() {
 
         save.setOnClickListener {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 val listName = list_name.text.toString()
                 val privacy = if (privacy_radio_group.checkedRadioButtonId == R.id.public_radio) ListCreationMode.Public
                         else ListCreationMode.Private
@@ -51,6 +54,11 @@ class CreateUserListActivity: Activity() {
                 }
             }
         }
+    }
+
+    override fun onStop() {
+        job.cancelChildren()
+        super.onStop()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?) = item?.run {

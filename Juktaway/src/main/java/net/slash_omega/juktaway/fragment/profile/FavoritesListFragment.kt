@@ -3,11 +3,8 @@ package net.slash_omega.juktaway.fragment.profile
 import android.view.View
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.favorites
-import jp.nephy.penicillin.endpoints.favorites.list
 import jp.nephy.penicillin.endpoints.favorites.listByUserId
 import jp.nephy.penicillin.extensions.await
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
@@ -27,7 +24,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
     private var mMaxId = 0L
 
     override fun showList() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val statuses = runCatching {
                 currentClient.favorites.run {
                     if (mMaxId > 0) listByUserId(user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
@@ -62,7 +59,7 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
     }
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) }
+        launch { mAdapter.removeStatus(event.statusId!!) }
     }
 
     private fun additionalReading() {

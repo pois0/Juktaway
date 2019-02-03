@@ -24,10 +24,7 @@ import jp.nephy.penicillin.extensions.idObj
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.StatusActivity
@@ -48,7 +45,7 @@ import java.util.*
  * Created on 2018/11/13.
  */
 
-class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext, 0) {
+class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext, 0), CoroutineScope by mContext.scope {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
@@ -57,7 +54,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                         .setTitle(R.string.confirm_destroy_retweet)
                         .setMessage(it.fullText())
                         .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
-                            GlobalScope.launch(Dispatchers.Main) {
+                            activity!!.scope.launch {
                                 it.destroyRetweet()
                                 dismiss()
                             }
@@ -78,7 +75,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             dismiss()
                         }
                         .setPositiveButton(R.string.button_retweet) { _, _ ->
-                            GlobalScope.launch(Dispatchers.Main) {
+                            activity!!.scope.launch {
                                 it.retweet()
                                 dismiss()
                             }
@@ -116,7 +113,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     override fun add(row: Row) {
-        GlobalScope.launch(Dispatchers.Main) { addSuspend(row) }
+        launch { addSuspend(row) }
     }
 
     suspend fun addSuspend(row:Row) {
@@ -142,7 +139,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     fun addAllFromStatuses(statusesParam: List<Status>) {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             addAllFromStatusesSuspend(statusesParam)
         }
     }
@@ -160,9 +157,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     override fun insert(row: Row, index: Int) {
-        GlobalScope.launch(Dispatchers.Main) {
-            insertSuspend(row, index)
-        }
+        launch { insertSuspend(row, index) }
     }
 
     suspend fun insertSuspend(row: Row, index: Int) {
@@ -572,11 +567,11 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 if (tag == "is_fav") {
                                     tag = "no_fav"
                                     textColor = Color.parseColor("#666666")
-                                    GlobalScope.launch(Dispatchers.Main) { s.unfavorite() }
+                                    launch { s.unfavorite() }
                                 } else {
                                     tag = "is_fav"
                                     textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
-                                    GlobalScope.launch(Dispatchers.Main) { s.favorite() }
+                                    launch { s.favorite() }
                                 }
                             }
                         }.lparams {

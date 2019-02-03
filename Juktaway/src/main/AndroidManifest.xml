@@ -155,11 +155,6 @@
             android:name="net.slash_omega.juktaway.CreateUserListActivity"
             android:label="@string/title_create_user_list"/>
         <activity
-            android:name="net.slash_omega.juktaway.FavoriteActivity"
-            android:label="@string/title_main"
-            android:taskAffinity=".favorite"
-            android:excludeFromRecents="true"/>
-        <activity
             android:name="net.slash_omega.juktaway.UserSearchActivity"
             android:label="@string/title_user_search"/>
         <activity

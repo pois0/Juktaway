@@ -1,7 +1,6 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
@@ -17,8 +16,6 @@ import net.slash_omega.juktaway.fragment.list.UserMemberFragment
 import net.slash_omega.juktaway.model.UserListCache
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_user_list.*
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.parseWithClient
@@ -27,7 +24,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/27.
  */
-class UserListActivity: FragmentActivity() {
+class UserListActivity: DividedFragmentActivity() {
     companion object {
         private var mCurrentPosition = 0
         private var mColorBlue: Int = 0
@@ -100,7 +97,7 @@ class UserListActivity: FragmentActivity() {
                 true
             }
             MENU_CREATE -> {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     val res = runCatching { currentClient.lists.subscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_create_user_list_subscription_success)
@@ -113,7 +110,7 @@ class UserListActivity: FragmentActivity() {
                 true
             }
             MENU_DESTROY -> {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     val res = runCatching { currentClient.lists.unsubscribe(mUserList.id).await() }.isSuccess
                     if (res) {
                         toast(R.string.toast_destroy_user_list_subscription_success)

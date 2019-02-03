@@ -6,7 +6,6 @@ import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentActivity
 import android.support.v4.util.LongSparseArray
 import android.widget.ListView
 import jp.nephy.jsonkt.toJsonObject
@@ -16,9 +15,9 @@ import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
+import net.slash_omega.juktaway.DividedFragmentActivity
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.SearchActivity
@@ -37,7 +36,7 @@ import org.jetbrains.anko.startActivity
 /**
  * Created on 2018/10/27.
  */
-class StatusMenuFragment: DialogFragment() {
+class StatusMenuFragment: DialogFragment(), CoroutineScope {
     companion object {
         fun newInstance(row: Row) = StatusMenuFragment().apply {
             arguments = Bundle().apply {
@@ -53,10 +52,12 @@ class StatusMenuFragment: DialogFragment() {
         }
     }
 
-    private lateinit var mActivity: FragmentActivity
+    override val coroutineContext by lazy { mActivity.coroutineContext }
+
+    private lateinit var mActivity: DividedFragmentActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        mActivity = activity!!
+        mActivity = (activity as DividedFragmentActivity?)!!
         ThemeUtil.setTheme(activity!!)
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)
@@ -89,7 +90,7 @@ class StatusMenuFragment: DialogFragment() {
          * ツイ消し(DM)
          */
         add(R.string.context_menu_destroy_direct_message) {
-            GlobalScope.launch(Dispatchers.Main) {
+            launch {
                 ActionUtil.destroyDirectMessage(message.id)
                 dismiss()
             }
@@ -155,14 +156,14 @@ class StatusMenuFragment: DialogFragment() {
          */
         if (FavRetweetManager.isFav(status)) {
             add(R.string.context_menu_destroy_favorite) {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     ActionUtil.doDestroyFavorite(status.id)
                     dismiss()
                 }
             }
         } else {
             add(R.string.context_menu_create_favorite) {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     status.favorite()
                     dismiss()
                 }
@@ -178,7 +179,7 @@ class StatusMenuFragment: DialogFragment() {
              * ツイ消し
              */
             add(R.string.context_menu_destroy_status) {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     ActionUtil.doDestroyStatus(status.id)
                     dismiss()
                 }
@@ -194,7 +195,7 @@ class StatusMenuFragment: DialogFragment() {
              * RT解除
              */
             add(R.string.context_menu_destroy_retweet) {
-                GlobalScope.launch(Dispatchers.Main) {
+                launch {
                     ActionUtil.doDestroyRetweet(status)
                     dismiss()
                 }
@@ -215,8 +216,8 @@ class StatusMenuFragment: DialogFragment() {
                      * ふぁぼ＆RT
                      */
                     add(R.string.context_menu_favorite_and_retweet) {
-                        GlobalScope.launch(Dispatchers.Main) {
-                            ActionUtil.doFavorite(status.id)
+                        launch {
+                            status.favorite()
                             ActionUtil.doRetweet(status.id)
                             dismiss()
                         }
@@ -227,7 +228,7 @@ class StatusMenuFragment: DialogFragment() {
                  * RT
                  */
                 add(R.string.context_menu_retweet) {
-                    GlobalScope.launch(Dispatchers.Main) {
+                    launch {
                         ActionUtil.doRetweet(status.id)
                         dismiss()
                     }

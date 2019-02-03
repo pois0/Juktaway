@@ -11,8 +11,6 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.cursor.CursorLists
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.UserListAdapter
@@ -26,7 +24,7 @@ internal class UserListMembershipsFragment: ProfileListFragmentBase() {
     override val layout = R.layout.list_guruguru
     private var nextCursor: CursorJsonObjectApiAction<CursorLists>? = null
     override fun showList() {
-        GlobalScope.launch(Dispatchers.Main) {
+        launch {
             val action = runCatching {
                 (nextCursor ?: currentClient.lists.membershipsByUserId(user.id)).await()
             }.getOrNull()
