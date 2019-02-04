@@ -9,6 +9,7 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.util.Log
 import android.util.TimingLogger
 import android.util.TypedValue
 import android.view.Gravity
@@ -94,7 +95,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         val logger = TimingLogger("Juktaway", "extension")
 
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.filter(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
+            statusesParam.filterNot(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
         }
         logger.addSplit("mute filter")
 
@@ -146,7 +147,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
     suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.filter(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
+            statusesParam.filterNot(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
         }
         Dispatchers.Default.doAsync { mIdSet.addAll(statuses.map { it.status!!.id }) }
 

@@ -74,21 +74,23 @@ class StatusActivity: DividedFragmentActivity() {
             onItemClickListener = StatusClickListener(this@StatusActivity)
             onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
         }
-        if (statusId > 0) {
-            MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
-            load(statusId)
-        } else {
-            intent.getStringExtra("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
-                mAdapter.add(Row.newStatus(it))
-                val inReplyToStatusId = it.inReplyToStatusId
-                if (inReplyToStatusId != null) {
-                    MessageUtil.showProgressDialog(this, getString(R.string.progress_loading))
-                    load(inReplyToStatusId)
+        launch {
+            if (statusId > 0) {
+                MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
+                load(statusId)
+            } else {
+                intent.getStringExtra("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
+                    mAdapter.addSuspend(Row.newStatus(it))
+                    val inReplyToStatusId = it.inReplyToStatusId
+                    if (inReplyToStatusId != null) {
+                        MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
+                        load(inReplyToStatusId)
+                    }
+                    mAdapter.notifyDataSetChanged()
                 }
-                mAdapter.notifyDataSetChanged()
             }
+            list.visibility = View.VISIBLE
         }
-        list.visibility = View.VISIBLE
     }
 
     override fun onResume() {

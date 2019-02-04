@@ -23,7 +23,7 @@ object Mute {
         wordMute = WordMute.getAllItems()
     }
 
-    fun isMute(row: Row): Boolean = row.takeIf { it.isStatus }?.status?.let(this::isMute) ?: false
+    fun isMute(row: Row): Boolean = row.takeIf { it.isStatus }?.status?.let { isMute(it) } ?: false
 
     fun isMute(status: Status): Boolean = mutedIds[status.id] ?: run {
             val source = status.retweetedStatus ?: status
@@ -32,7 +32,7 @@ object Mute {
                     status.retweetedStatus?.user?.id in userMute ||
                     source.via.name in sourceMute ||
                     wordMute.any { source.fullText().contains(it) }
-        }.not().also { mutedIds.put(status.id, it) }
+        }.also { mutedIds.put(status.id, it) }
 
     operator fun contains(status: Status) = isMute(status)
 

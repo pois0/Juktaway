@@ -1,4 +1,2 @@
-変更点
-- PullToRefreshからSwipeRefreshLayoutに変更しました
 修正点
-- Activityが終了したときにJobも終了するように変更しました。
+- ツイート単体表示および会話の表示がされない不具合の修正
