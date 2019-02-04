@@ -11,7 +11,6 @@ import android.widget.AbsListView
 import android.widget.AbsListView.LayoutParams
 import android.widget.ListView
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.parse
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.search
 import jp.nephy.penicillin.endpoints.search.SearchResultType
@@ -90,11 +89,13 @@ class TalkFragment: DialogFragment(), CoroutineScope {
                 }
             }
 
-            mAdapter.add(Row.newStatus(status))
+            launch {
+                mAdapter.addSuspend(Row.newStatus(status))
 
-            if (!BasicSettings.talkOrderNewest) mListView.setSelectionFromTop(1, 0)
-            status.inReplyToStatusId?.let { loadTalk(it) }
-            loadTalkReply(status)
+                if (!BasicSettings.talkOrderNewest) mListView.setSelectionFromTop(1, 0)
+                status.inReplyToStatusId?.let { loadTalk(it) }
+                loadTalkReply(status)
+            }
         }
     }
 
@@ -120,102 +121,96 @@ class TalkFragment: DialogFragment(), CoroutineScope {
 
     private fun Dialog.removeGuruGuru() { (if (BasicSettings.talkOrderNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
 
-    private fun loadTalk(idParam: Long) {
+    private suspend fun loadTalk(idParam: Long) {
         var statusId = idParam
-        launch {
-            while (statusId > 0) {
-                val status = runCatching { currentClient.statuses.show(statusId).await().result }.getOrNull() ?: break
-
-                if (BasicSettings.talkOrderNewest) {
-                    mAdapter.addSuspend(Row.newStatus(status))
-                } else {
-                    val pos = mListView.lastVisiblePosition
-                    mAdapter.insertSuspend(Row.newStatus(status), 0)
-                    mListView.setSelectionFromTop(pos + 1, mListView.getChildAt(pos)?.top ?: 0)
-                    if (mListView.firstVisiblePosition > 0) {
-                        mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
-                    }
-                }
-
-                status.inReplyToStatusId?.let { statusId = it }
-            }
-            dialog?.removeGuruGuru()
+        val statusList = mutableListOf<Status>()
+        while (statusId > 0) {
+            val status = runCatching { currentClient.statuses.show(statusId).await().result }.getOrNull() ?: break
+            statusList.add(status)
+            statusId = status.inReplyToStatusId ?: -1
         }
+        if (BasicSettings.talkOrderNewest) {
+            mAdapter.addAllFromStatusesSuspend(statusList)
+        } else {
+            statusList.map { Row.newStatus(it) }.forEach { mAdapter.insertSuspend(it, 0) }
+            val pos = mListView.lastVisiblePosition + statusList.size
+            mListView.setSelectionFromTop(pos, 0)
+        }
+
+        dialog?.removeGuruGuru()
     }
 
-    private fun loadTalkReply(source: Status) {
-        launch {
-            runCatching {
-                withContext(Dispatchers.Default) {
-                    val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",
-                            count = 200,
-                            sinceId = source.id,
-                            resultType = SearchResultType.Recent).await()
-                    val searchedStatuses = toResult.result.statuses.toMutableList()
-                    if (toResult.hasNext) searchedStatuses.addAll(toResult.next.await().result.statuses)
+    private suspend fun loadTalkReply(source: Status) {
+        runCatching {
+            withContext(Dispatchers.Default) {
+                val toResult = currentClient.search.search("to:" + source.user.screenName + " AND filter:replies",
+                        count = 200,
+                        sinceId = source.id,
+                        resultType = SearchResultType.Recent).await()
+                val searchedStatuses = toResult.result.statuses.toMutableList()
+                if (toResult.hasNext) searchedStatuses.addAll(toResult.next.await().result.statuses)
 
-                    val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
-                            count = 200,
-                            sinceId = source.id,
-                            resultType = SearchResultType.Recent).await()
-                    searchedStatuses.addAll(fromResult.result.statuses)
-                    val isLoadMap = LongSparseArray<Boolean>().apply { searchedStatuses.forEach { put(it.id, true) } }
-                    val lookupStatuses = ArrayList<Status>()
-                    val statusIds = mutableListOf<Long>()
+                val fromResult = currentClient.search.search("from:" + source.user.screenName + " AND filter:replies",
+                        count = 200,
+                        sinceId = source.id,
+                        resultType = SearchResultType.Recent).await()
+                searchedStatuses.addAll(fromResult.result.statuses)
+                val isLoadMap = LongSparseArray<Boolean>().apply { searchedStatuses.forEach { put(it.id, true) } }
+                val lookupStatuses = ArrayList<Status>()
+                val statusIds = mutableListOf<Long>()
+                searchedStatuses.forEach { status ->
+                    if (status.inReplyToStatusId != null &&
+                            status.inReplyToStatusId?.let { isLoadMap.get(it, false) } == true) {
+                        statusIds.add(status.inReplyToStatusId!!)
+                        isLoadMap.put(status.inReplyToStatusId!!, true)
+                        if (statusIds.size == 200) {
+                            lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
+                            statusIds.clear()
+                        }
+                    }
+                }
+
+                if (statusIds.size > 0) lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
+
+                searchedStatuses.addAll(lookupStatuses)
+
+                searchedStatuses.sortWith(Comparator { a0, a1 ->
+                    when {
+                        a0.id > a1.id -> 1
+                        a0.id == a1.id -> 0
+                        else -> -1
+                    }
+                })
+
+                val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
+                mutableListOf<Status>().apply {
                     searchedStatuses.forEach { status ->
-                        if (status.inReplyToStatusId != null &&
-                                status.inReplyToStatusId?.let { isLoadMap.get(it, false) } == true) {
-                            statusIds.add(status.inReplyToStatusId!!)
-                            isLoadMap.put(status.inReplyToStatusId!!, true)
-                            if (statusIds.size == 200) {
-                                lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
-                                statusIds.clear()
-                            }
-                        }
-                    }
-
-                    if (statusIds.size > 0) lookupStatuses.addAll(currentClient.statuses.lookup(statusIds).await())
-
-                    searchedStatuses.addAll(lookupStatuses)
-
-                    searchedStatuses.sortWith(Comparator { a0, a1 ->
-                        when {
-                            a0.id > a1.id -> 1
-                            a0.id == a1.id -> 0
-                            else -> -1
-                        }
-                    })
-
-                    val isReplyMap = LongSparseArray<Boolean>().apply { put(source.id, true) }
-                    mutableListOf<Status>().apply {
-                        searchedStatuses.forEach { status ->
-                            if (status.inReplyToStatusId?.let { isReplyMap.get(it, false) } == true) {
-                                add(status)
-                                isReplyMap.put(status.id, true)
-                            }
+                        if (status.inReplyToStatusId?.let { isReplyMap.get(it, false) } == true) {
+                            add(status)
+                            isReplyMap.put(status.id, true)
                         }
                     }
                 }
-            }.onSuccess { statuses ->
-                if (dialog == null) return@launch
-                dialog.run {
-                    if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
-                }.visibility = View.GONE
+            }
+        }.onSuccess { statuses ->
+            if (dialog == null) return
+            dialog.run {
+                if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
+            }.visibility = View.GONE
 
-                if (BasicSettings.talkOrderNewest) {
-                    val lastPos = mListView.lastVisiblePosition
+            if (BasicSettings.talkOrderNewest) {
+                val lastPos = mListView.lastVisiblePosition
 
-                    val y = mListView.getChildAt(lastPos)?.top ?: 0
+                val y = mListView.getChildAt(lastPos)?.top ?: 0
 
-                    statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
-                    mListView.setSelectionFromTop(lastPos + statuses.size, y)
+                statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
+                mListView.setSelectionFromTop(lastPos + statuses.size, y)
 
-                    if (mListView.firstVisiblePosition > 0) {
-                        mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
-                    }
-                } else {
-                    mAdapter.addAllFromStatuses(statuses)
+                if (mListView.firstVisiblePosition > 0) {
+                    mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
                 }
+            } else {
+                mAdapter.addAllFromStatuses(statuses)
             }
         }
     }
