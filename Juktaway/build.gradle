@@ -1,7 +1,10 @@
-apply plugin: 'com.android.application'
-apply plugin: 'kotlin-android'
-apply plugin: 'kotlin-android-extensions'
-apply plugin: 'kotlinx-serialization'
+plugins {
+    id 'com.android.application'
+    id 'kotlin-android'
+    id 'kotlin-android-extensions'
+    id 'kotlinx-serialization'
+    id 'com.github.triplet.play' version '2.1.0'
+}
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib-jdk8:$kotlin_version"
@@ -25,21 +28,24 @@ dependencies {
     implementation "jp.nephy:jsonkt:${jsonkt_version}"
 }
 
+def properties = new Properties()
+properties.load(project.rootProject.file('local.properties').newDataInputStream())
+
 android {
     //noinspection GroovyAssignabilityCheck
     compileSdkVersion rootProject.ext.compileSdkVersion
     //noinspection GroovyAssignabilityCheck
-    buildToolsVersion '28.0.3'
+    buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 15
+        minSdkVersion 26
         //noinspection OldTargetApi
         targetSdkVersion 26
 
         multiDexEnabled true
         
-        versionCode 109
-        versionName '2.0.3'
+        versionCode 128
+        versionName '3.0-Beta8c'
         applicationId "net.slashOmega.juktaway"
     }
 
@@ -47,7 +53,12 @@ android {
         // debug {
         //     storeFile file("debug.keystore")
         // }
-        release
+        config {
+            storeFile file(properties.getProperty("RELEASE_STORE_LOCATION"))
+            storePassword  properties.getProperty("RELEASE_STORE_PASSWORD")
+            keyAlias properties.getProperty("RELEASE_KEY_ALIAS")
+            keyPassword properties.getProperty("RELEASE_KEY_PASSWORD")
+        }
     }
 
     buildTypes {
@@ -67,11 +78,9 @@ android {
             shrinkResources false
 
             // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
-
-            if (project.hasProperty('storeFile')) {
-                //noinspection GroovyAssignabilityCheck
-                signingConfig signingConfigs.release
-            }
+            
+            signingConfig signingConfigs.config
+            
             return true
         }
     }
@@ -96,20 +105,17 @@ android {
         exclude 'META-INF/NOTICE.txt'
         exclude 'META-INF/notice.txt'
         exclude 'META-INF/ASL2.0'
+        exclude 'META-INF/kotlinx-io.kotlin_module'
+        exclude 'META-INF/atomicfu.kotlin_module'
+        exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
     }
 }
 
-if (project.hasProperty('storeFile')) {
-    android.signingConfigs.release.storeFile = file(storeFile)
-}
-if (project.hasProperty('storePassword')) {
-    android.signingConfigs.release.storePassword = storePassword
-}
-if (project.hasProperty('keyAlias')) {
-    android.signingConfigs.release.keyAlias = keyAlias
-}
-if (project.hasProperty('keyPassword')) {
-    android.signingConfigs.release.keyPassword = keyPassword
+play {
+    serviceAccountCredentials = file(properties.getProperty("SERVICE_CREDENTIAL_LOCATION"))
+    track = "internal"
+    userFraction = 1.0
+    defaultToAppBundles = true
 }
 
 allprojects {
@@ -132,4 +138,3 @@ repositories {
     maven { url "https://kotlin.bintray.com/kotlinx" }
     maven { url "https://dl.bintray.com/kotlin/ktor" }
 }
-
