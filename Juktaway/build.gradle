@@ -38,14 +38,14 @@ android {
     buildToolsVersion rootProject.ext.buildToolsVersion
 
     defaultConfig {
-        minSdkVersion 26
+        minSdkVersion 15
         //noinspection OldTargetApi
         targetSdkVersion 26
 
         multiDexEnabled true
         
-        versionCode 128
-        versionName '3.0-Beta8c'
+        versionCode 110
+        versionName '2.0.4'
         applicationId "net.slashOmega.juktaway"
     }
 
