@@ -21,6 +21,7 @@ object SourceMute: MuteBase<String>() {
         dbUse {
             delete(tableName, "$dbSource = {source}", "source" to t)
         }
+        Mute.clearMutedIds()
     }
 
     override fun plusAssign(t: String) {

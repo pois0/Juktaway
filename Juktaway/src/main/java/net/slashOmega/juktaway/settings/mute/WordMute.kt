@@ -36,5 +36,6 @@ object WordMute: MuteBase<String>() {
         dbUse {
             delete(tableName, "$dbWord = {word}", "word" to t)
         }
+        Mute.clearMutedIds()
     }
 }

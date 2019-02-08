@@ -32,6 +32,7 @@ object UserMute: MuteBase<Pair<Long, String>>() {
                 insert(tableName, dbUserId to t.first, dbScreenName to t.second)
             }
         }
+        Mute.clearMutedIds()
     }
 
     operator fun plusAssign(u: User) {
@@ -46,6 +47,7 @@ object UserMute: MuteBase<Pair<Long, String>>() {
         dbUse {
             delete(tableName, "$dbUserId = {id}", "id" to id)
         }
+        Mute.clearMutedIds()
     }
 
     operator fun minusAssign(u: User) {
