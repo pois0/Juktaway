@@ -26,6 +26,7 @@ abstract class MuteBase<T>: Stock<T>() {
                     insert(tableName, column to value)
                 }
             }
+            Mute.clearMutedIds()
         }
     }
 }
