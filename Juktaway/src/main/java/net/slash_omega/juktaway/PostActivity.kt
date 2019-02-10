@@ -446,14 +446,18 @@ class PostActivity: DividedFragmentActivity() {
                     }
                 }
 
-                val e = (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
-                        mInReplyToStatusId.takeIf { it > 0 },
-                        mImagePathList)
+                val e = runCatching {
+                    (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
+                            mInReplyToStatusId.takeIf { it > 0 }, mImagePathList)
+                }.run { getOrNull() ?: exceptionOrNull() }
                 e?.printStackTrace()
                 MessageUtil.dismissProgressDialog()
                 (e as? PenicillinException)?.let {
-                    if (e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
-                    else R.string.toast_update_status_failure
+                    val message = when (e.error) {
+                        TwitterErrorMessage.StatusIsADuplicate -> R.string.toast_update_status_already
+                        else -> R.string.toast_update_status_failure
+                    }
+                    toast(message)
                 } ?: run {
                     status_text.setText("")
                     if (!mWidgetMode) {
