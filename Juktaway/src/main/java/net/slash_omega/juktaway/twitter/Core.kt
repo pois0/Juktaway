@@ -1,19 +1,13 @@
 package net.slash_omega.juktaway.twitter
 
-import android.util.Log
 import de.greenrobot.event.EventBus
+import io.ktor.client.engine.android.Android
 import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.emulation.OfficialClient
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.core.session.config.*
-import jp.nephy.penicillin.endpoints.account
-import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.common.TweetMode.Extended
-import jp.nephy.penicillin.extensions.await
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
-import kotlinx.coroutines.launch
-import kotlinx.coroutines.withContext
+import kotlinx.coroutines.*
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
@@ -104,18 +98,12 @@ object Core {
         }
     }
 
-    suspend fun switchToken(acc: Identifier) {
-        Log.d("switching", "start")
+    suspend fun switchToken(id: Identifier) {
         withContext(Dispatchers.Default) {
-            Log.d("switching", "start$this")
-            println(acc.toString())
-            runCatching { currentClient.close()
-                currentClient.account.verifyCredentials.await().result.let { Log.d("switchingSUCC", it.screenName) }
-            }.onFailure { Log.d("switching", "failed${this@withContext}") }
-            Log.d("switching", "runcatching finished")
-            currentIdentifier = acc
-            currentClient = acc.toClient()
-            lastIdentifierAts = currentIdentifier.ats
+            println(id.toString())
+            currentIdentifier = id
+            currentClient = id.toClient()
+            lastIdentifierAts = id.ats
             EventBus.getDefault().post(AccountChangeEvent())
         }
     }
@@ -202,10 +190,8 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
                 application(consumer.ck, consumer.cs)
                 token(at, ats)
             }
-            dispatcher {
-                coroutineContext = Dispatchers.Default
-                shouldClose()
-            }
+
+            httpClient(Android)
 
             api {
                 maxRetries = 3

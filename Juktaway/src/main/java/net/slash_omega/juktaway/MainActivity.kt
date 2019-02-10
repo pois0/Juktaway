@@ -8,14 +8,12 @@ import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
 import android.os.Handler
-import android.support.v4.app.FragmentActivity
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
 import android.support.v7.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
-import android.util.Log
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
@@ -25,8 +23,6 @@ import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
-import jp.nephy.penicillin.endpoints.account
-import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.create
 import jp.nephy.penicillin.extensions.await
@@ -56,7 +52,6 @@ import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
-import kotlin.coroutines.CoroutineContext
 
 class MainActivity: DividedFragmentActivity() {
     companion object {
@@ -156,13 +151,7 @@ class MainActivity: DividedFragmentActivity() {
                 return@setOnItemClickListener
             }
             mAccessTokenAdapter.getItem(position).takeIf { currentIdentifier != it }?.let {
-                launch {
-                    Log.d("current", currentClient.account.verifyCredentials.await().result.screenName)
-                    Core.switchToken(it)
-                    Log.d("currentScree", currentIdentifier.screenName)
-                    mAccessTokenAdapter.notifyDataSetChanged()
-                    Log.d("current", currentClient.account.verifyCredentials.await().result.screenName)
-                }
+                launch { Core.switchToken(it) }
             }
             drawer_layout.closeDrawer(left_drawer)
         }
@@ -650,6 +639,7 @@ class MainActivity: DividedFragmentActivity() {
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(e: AccountChangeEvent) {
         setupTab()
+        mAccessTokenAdapter.notifyDataSetChanged()
         EventBus.getDefault().post(PostAccountChangeEvent(mMainPagerAdapter.getItemId(mViewPager.currentItem)))
     }
 
