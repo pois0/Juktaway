@@ -1,3 +1,1 @@
-本リリースはバージョン3.0のRelease Candidateです。
-修正点
-- RT, Favの表示が正確でない不具合を修正しました。
+rebuild

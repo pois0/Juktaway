@@ -198,7 +198,7 @@ data class Identifier(val consumerId: Long, val at: String, val ats: String, val
             api {
                 maxRetries = 3
                 retryInterval(1, TimeUnit.SECONDS)
-                defaultTweetMode(Extended)
+                defaultTweetMode = Extended
             }
         }
     }
