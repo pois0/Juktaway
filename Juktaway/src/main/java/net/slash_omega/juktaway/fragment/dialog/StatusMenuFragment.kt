@@ -24,8 +24,9 @@ import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.RetweetersFragment
 import net.slash_omega.juktaway.fragment.TalkFragment
-import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.model.Row
+import net.slash_omega.juktaway.model.isFavorited
+import net.slash_omega.juktaway.model.isRetweeted
 import net.slash_omega.juktaway.settings.mute.SourceMute
 import net.slash_omega.juktaway.settings.mute.UserMute
 import net.slash_omega.juktaway.settings.mute.WordMute
@@ -154,10 +155,10 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         /*
          * ふぁぼ / あんふぁぼ
          */
-        if (FavRetweetManager.isFav(status)) {
+        if (status.isFavorited()) {
             add(R.string.context_menu_destroy_favorite) {
                 launch {
-                    ActionUtil.doDestroyFavorite(status.id)
+                    status.unfavorite()
                     dismiss()
                 }
             }
@@ -189,47 +190,28 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         /*
          * 自分がRTした事があるツイート
          */
-        if (FavRetweetManager.getRtId(status) != null) {
-
-            /*
-             * RT解除
-             */
+        if (status.isRetweeted()) {
             add(R.string.context_menu_destroy_retweet) {
                 launch {
-                    ActionUtil.doDestroyRetweet(status)
+                    status.destroyRetweet()
                     dismiss()
                 }
             }
         } else {
-
-            /*
-             * 非鍵垢
-             */
             if (isPublic) {
-
-                /*
-                 * 未ふぁぼ
-                 */
-                if (!FavRetweetManager.isFav(status)) {
-
-                    /*
-                     * ふぁぼ＆RT
-                     */
+                if (!status.isFavorited()) {
                     add(R.string.context_menu_favorite_and_retweet) {
                         launch {
                             status.favorite()
-                            ActionUtil.doRetweet(status.id)
+                            status.retweet()
                             dismiss()
                         }
                     }
                 }
 
-                /*
-                 * RT
-                 */
                 add(R.string.context_menu_retweet) {
                     launch {
-                        ActionUtil.doRetweet(status.id)
+                        status.retweet()
                         dismiss()
                     }
                 }

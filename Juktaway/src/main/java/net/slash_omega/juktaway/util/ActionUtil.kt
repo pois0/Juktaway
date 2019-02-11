@@ -9,9 +9,6 @@ import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.directMessages
 import jp.nephy.penicillin.endpoints.directmessages.create
 import jp.nephy.penicillin.endpoints.directmessages.delete
-import jp.nephy.penicillin.endpoints.favorites
-import jp.nephy.penicillin.endpoints.favorites.create
-import jp.nephy.penicillin.endpoints.favorites.destroy
 import jp.nephy.penicillin.endpoints.media.MediaCategory
 import jp.nephy.penicillin.endpoints.media.MediaComponent
 import jp.nephy.penicillin.endpoints.media.MediaType
@@ -19,13 +16,13 @@ import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.create
 import jp.nephy.penicillin.endpoints.statuses.delete
 import jp.nephy.penicillin.endpoints.statuses.retweet
+import jp.nephy.penicillin.endpoints.statuses.unretweet
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.endpoints.createWithMedia
 import jp.nephy.penicillin.extensions.models.favorite
+import jp.nephy.penicillin.extensions.models.unfavorite
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
-import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.PostActivity
 import net.slash_omega.juktaway.R
@@ -41,29 +38,77 @@ import net.slash_omega.juktaway.twitter.currentIdentifier
 import org.jetbrains.anko.startActivity
 import java.io.File
 
-suspend inline fun Status.favorite() {
-    withContext(Dispatchers.Default) {
-        FavRetweetManager.setFav(id)
-        EventBus.getDefault().post(StatusActionEvent())
-    }
-
-    val e = runCatching { favorite().await() }.exceptionOrNull() as? PenicillinException
-    when {
-        e == null -> MessageUtil.showToast(R.string.toast_favorite_success)
-        e.error?.code == 139 -> MessageUtil.showToast(R.string.toast_favorite_already)
-        else -> {
-            FavRetweetManager.removeFav(id)
+inline val Status.original
+    get() = retweetedStatus ?: this
+suspend inline fun Status.favorite() = original.runCatching { favorite().await() }
+        .onSuccess {
+            showToast(R.string.toast_favorite_success)
+            FavRetweetManager.setFav(original.id)
             EventBus.getDefault().post(StatusActionEvent())
-            MessageUtil.showToast(R.string.toast_favorite_failure)
         }
-    }
-}
+        .onFailure { e ->
+            when {
+                e is PenicillinException && e.error?.code == 139 -> {
+                    showToast(R.string.toast_favorite_already)
+                    FavRetweetManager.setFav(id)
+                }
+                else -> showToast(R.string.toast_favorite_failure)
+            }
+        }
+        .isSuccess
 
-suspend fun Status.unfavorite() = ActionUtil.doDestroyFavorite(id)
+suspend fun Status.unfavorite() = original.runCatching { unfavorite().await() }
+        .onSuccess {
+            showToast(R.string.toast_destroy_favorite_success)
+            FavRetweetManager.removeFav(original.id)
+            EventBus.getDefault().post(StatusActionEvent())
+        }
+        .onFailure { e ->
+            when {
+                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                    showToast(R.string.toast_destroy_favorite_already)
+                    FavRetweetManager.removeFav(original.id)
+                }
+                else -> showToast(R.string.toast_destroy_favorite_failure)
+            }
+        }
+        .isSuccess
 
-suspend fun Status.retweet() = ActionUtil.doRetweet(id)
+suspend fun Status.retweet() = runCatching { currentClient.statuses.retweet(original.id).await() }
+        .onSuccess {
+            showToast(R.string.toast_retweet_success)
+            FavRetweetManager.setRetweet(original.id)
+            EventBus.getDefault().post(StatusActionEvent())
+        }
+        .onFailure { e ->
+            when {
+                e is PenicillinException && e.error?.code == 37 -> {
+                    showToast(R.string.toast_retweet_already)
+                    FavRetweetManager.setRetweet(original.id)
+                    EventBus.getDefault().post(StatusActionEvent())
+                }
+                else -> MessageUtil.showToast(R.string.toast_retweet_already)
+            }
+        }
+        .isSuccess
 
-suspend fun Status.destroyRetweet() = ActionUtil.doDestroyRetweet(this)
+suspend fun Status.destroyRetweet() = runCatching { currentClient.statuses.unretweet(original.id).await() }
+        .onSuccess {
+            showToast(R.string.toast_destroy_retweet_success)
+            FavRetweetManager.removeRetweet(original.id)
+            EventBus.getDefault().post(StatusActionEvent())
+        }
+        .onFailure { e ->
+            when {
+                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                    showToast(R.string.toast_destroy_retweet_already)
+                    FavRetweetManager.removeRetweet(original.id)
+                    EventBus.getDefault().post(StatusActionEvent())
+                }
+                else -> MessageUtil.showToast(R.string.toast_destroy_retweet_failure)
+            }
+        }
+        .isSuccess
 
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
@@ -89,24 +134,6 @@ suspend fun ApiClient.sendDirectMessage(rawMessage: String) = runCatching {
 }.exceptionOrNull()
 
 object ActionUtil {
-    suspend fun doDestroyFavorite(statusId: Long) {
-        withContext(Dispatchers.Default) {
-            FavRetweetManager.removeFav(statusId)
-            EventBus.getDefault().post(StatusActionEvent())
-        }
-
-        val e = runCatching { currentClient.favorites.destroy(statusId).await() }.exceptionOrNull() as? PenicillinException
-        when {
-            e == null -> MessageUtil.showToast(R.string.toast_destroy_favorite_success)
-            e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> MessageUtil.showToast(R.string.toast_destroy_favorite_already)
-            else -> {
-                FavRetweetManager.setFav(statusId)
-                EventBus.getDefault().post(StatusActionEvent())
-                MessageUtil.showToast(R.string.toast_destroy_favorite_failure)
-            }
-        }
-    }
-
     suspend fun doDestroyStatus(statusId: Long) {
         val res = runCatching {
             currentClient.statuses.delete(statusId).await()
@@ -116,78 +143,6 @@ object ActionUtil {
             EventBus.getDefault().post(StreamingDestroyStatusEvent(statusId))
         } else {
             MessageUtil.showToast(R.string.toast_destroy_status_failure)
-        }
-    }
-
-    suspend fun doRetweet(statusId: Long) {
-        FavRetweetManager.setRtId(statusId, 0.toLong())
-        EventBus.getDefault().post(StatusActionEvent())
-
-        runCatching {
-            currentClient.statuses.retweet(statusId).await().result
-        }.onSuccess {
-            FavRetweetManager.setRtId(it.retweetedStatus!!.id, it.id)
-            MessageUtil.showToast(R.string.toast_retweet_success)
-        }.onFailure {
-            FavRetweetManager.setRtId(statusId, null)
-            val e = it as? PenicillinException
-            if (e?.error?.code == 37) MessageUtil.showToast(R.string.toast_retweet_already)
-            else {
-                EventBus.getDefault().post(StatusActionEvent())
-                MessageUtil.showToast(R.string.toast_retweet_failure)
-            }
-        }
-    }
-
-    suspend fun doDestroyRetweet(status: Status) {
-        val retweet = status.retweetedStatus
-        val (rtId, statusId) = if (status.user.id == currentIdentifier.userId && retweet != null) {
-            retweet.id to status.id
-        } else {
-            // 被リツイート
-            var retweetedStatusId: Long = -1L
-
-            // リツイート
-            var statusId = FavRetweetManager.getRtId(status.id)
-            if (statusId != null && statusId > 0) {
-                // そのStatusそのものをRTしている
-                retweetedStatusId = status.id
-            } else if (retweet != null) {
-                statusId = FavRetweetManager.getRtId(retweet.id)
-                if (statusId != null && statusId > 0) {
-                    // そのStatusがRTした元StatusをRTしている
-                    retweetedStatusId = retweet.id
-                }
-            }
-
-            if (statusId == null) return
-
-            if (statusId == 0L) {
-                // 処理中は 0
-                MessageUtil.showToast(R.string.toast_destroy_retweet_progress)
-                return
-            } else if (statusId > 0 && retweetedStatusId > 0) {
-                retweetedStatusId to statusId
-            } else return
-        }
-
-        FavRetweetManager.setRtId(rtId, null)
-        EventBus.getDefault().post(StatusActionEvent())
-
-        runCatching {
-            currentClient.statuses.delete(statusId).await()
-        }.onSuccess {
-            MessageUtil.showToast(R.string.toast_destroy_retweet_success)
-            EventBus.getDefault().post(StreamingDestroyStatusEvent(statusId))
-        }.onFailure {
-            if (it !is PenicillinException) return
-            if (it.error == TwitterErrorMessage.SorryThatPageDoesNotExist) {
-                MessageUtil.showToast(R.string.toast_destroy_retweet_already)
-            } else {
-                FavRetweetManager.setRtId(rtId, statusId)
-                EventBus.getDefault().post(StatusActionEvent())
-                MessageUtil.showToast(R.string.toast_destroy_retweet_failure)
-            }
         }
     }
 

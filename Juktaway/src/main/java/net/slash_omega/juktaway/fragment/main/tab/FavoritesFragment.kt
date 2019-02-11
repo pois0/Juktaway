@@ -4,7 +4,6 @@ import android.view.View
 import jp.nephy.penicillin.endpoints.favorites
 import jp.nephy.penicillin.endpoints.favorites.list
 import jp.nephy.penicillin.extensions.await
-import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
@@ -28,18 +27,12 @@ class FavoritesFragment: BaseFragment() {
             }
             mReloading -> {
                 clear()
-                for (status in statuses) {
-                    FavRetweetManager.setFav(status.id)
-                }
                 mMaxId = statuses.last().id
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
                 mSwipeRefreshLayout.isRefreshing = false
             }
             else -> {
-                for (status in statuses) {
-                    FavRetweetManager.setFav(status.id)
-                }
                 mMaxId = statuses.last().id
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true

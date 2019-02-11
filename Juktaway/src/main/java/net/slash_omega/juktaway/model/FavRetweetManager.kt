@@ -2,32 +2,36 @@ package net.slash_omega.juktaway.model
 
 import android.support.v4.util.LongSparseArray
 import jp.nephy.penicillin.models.Status
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.withContext
+import net.slash_omega.juktaway.util.original
 
 /**
  * どのツイートをふぁぼ又はRTしているかを管理する
  */
+
+internal fun Status.isFavorited() = FavRetweetManager.isFavorited(this)
+
+internal fun Status.isRetweeted() = FavRetweetManager.isRetweeted(this)
+
 object FavRetweetManager {
-    private val mIsFavMap = LongSparseArray<Boolean>()
-    private val mRtIdMap = LongSparseArray<Long>()
+    private val favMap = LongSparseArray<Boolean>()
+    private val rtMap = LongSparseArray<Boolean>()
 
-    fun setFav(id: Long) { mIsFavMap.put(id, true) }
-
-    fun removeFav(id: Long?) { mIsFavMap.remove(id!!) }
-
-    fun isFav(status: Status): Boolean
-            = mIsFavMap.get(status.id, false)
-            || status.retweetedStatus?.let { mIsFavMap.get(it.id, false) } ?: false
-
-    fun setRtId(sourceId: Long?, retweetId: Long?) {
-        if (retweetId != null) {
-            mRtIdMap.put(sourceId!!, retweetId)
-        } else {
-            mRtIdMap.remove(sourceId!!)
-        }
+    suspend fun clear() = withContext(Dispatchers.Default) {
+        favMap.clear()
+        rtMap.clear()
     }
 
-    fun getRtId(status: Status): Long?
-            = mRtIdMap.get(status.id) ?: status.retweetedStatus?.let { mRtIdMap.get(it.id) }
+    fun setFav(id: Long) { favMap.put(id, true) }
 
-    fun getRtId(id: Long): Long? = mRtIdMap.get(id)
+    fun removeFav(id: Long) { favMap.put(id, false); println("aaaaaaaaa $id") }
+
+    fun isFavorited(status: Status) = status.original.run { favMap.get(id) ?: favorited }
+
+    fun setRetweet(id: Long) { rtMap.put(id, true) }
+
+    fun removeRetweet(id: Long) { rtMap.put(id, false) }
+
+    fun isRetweeted(status: Status) = status.original.run { rtMap.get(id) ?: retweeted }
 }

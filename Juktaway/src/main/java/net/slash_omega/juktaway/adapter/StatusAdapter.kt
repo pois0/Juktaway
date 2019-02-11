@@ -2,14 +2,13 @@ package net.slash_omega.juktaway.adapter
 
 import android.annotation.SuppressLint
 import android.app.AlertDialog
-import android.content.Context
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
 import android.support.v4.app.DialogFragment
+import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.util.Log
 import android.util.TimingLogger
 import android.util.TypedValue
 import android.view.Gravity
@@ -17,7 +16,6 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
-import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
@@ -29,11 +27,11 @@ import kotlinx.coroutines.*
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.StatusActivity
-import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.layouts.fontelloTextView
-import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.model.displayUserIcon
+import net.slash_omega.juktaway.model.isFavorited
+import net.slash_omega.juktaway.model.isRetweeted
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.mute.Mute
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -46,7 +44,7 @@ import java.util.*
  * Created on 2018/11/13.
  */
 
-class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext, 0), CoroutineScope by mContext.scope {
+class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapter<Row>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
@@ -105,7 +103,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
         logger.addSplit("doAsync")
 
-        filterAll(statuses)
         super.addAll(statuses)
         mLimit += statuses.size
 
@@ -121,7 +118,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return
         super.add(row)
         if (row.isStatus) mIdSet.add(row.status!!.id)
-        filter(row)
         limitation()
     }
 
@@ -133,7 +129,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
             mIdSet.addAll(statuses.filter { it.isStatus }.map { it.status!!.id })
         }
 
-        filterAll(statuses)
         super.addAll(statuses)
 
         limitation()
@@ -151,7 +146,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         }
         Dispatchers.Default.doAsync { mIdSet.addAll(statuses.map { it.status!!.id }) }
 
-        filterAll(statuses)
         super.addAll(statuses)
 
         // limitation()
@@ -165,7 +159,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
         if (withContext(Dispatchers.Default) { row in Mute || exists(row) }) return
         super.insert(row, index)
         if (row.isStatus) mIdSet.add(row.status!!.id)
-        filter(row)
         // limitation()
     }
 
@@ -175,26 +168,6 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
     }
 
     private fun exists(row: Row) = row.isStatus && row.status!!.id in mIdSet
-
-    private suspend fun filter(row: Row) {
-        withContext(Dispatchers.Default) {
-            row.status?.takeIf { it.retweeted }?.let { status ->
-                status.retweetedStatus?.takeIf { status.user.id == currentIdentifier.userId }?.let { retweet ->
-                    FavRetweetManager.setRtId(retweet.id, status.id)
-                }
-            }
-        }
-    }
-
-    private fun filterAll(rows: Collection<Row>) {
-        Dispatchers.Default.doAsync {
-            rows.filter { it.status?.retweetedStatus?.user?.id == currentIdentifier.userId }
-                    .map { it.status!! to it.status!!.retweetedStatus!! }
-                    .forEach { (status, retweet) ->
-                        FavRetweetManager.setRtId(retweet.id, status.id)
-                    }
-        }
-    }
 
     @Suppress("Unused")
     fun replaceStatus(status: Status) {
@@ -266,10 +239,10 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
 
 
                     val data = s.retweetedStatus?.run {
-                        RowData(R.string.fontello_retweet, ContextCompat.getColor(mContext, R.color.holo_green_light),
+                        RowData(R.string.fontello_retweet, ContextCompat.getColor(fragmentActivity, R.color.holo_green_light),
                                 user.name, user.screenName)
 
-                    } ?: RowData(R.string.fontello_at, ContextCompat.getColor(mContext, R.color.holo_red_light),
+                    } ?: RowData(R.string.fontello_at, ContextCompat.getColor(fragmentActivity, R.color.holo_red_light),
                             s.user.name, s.user.screenName)
 
                     val actionContainer = relativeLayout {
@@ -434,7 +407,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                     }
 
                                     qs.let {
-                                        ImageUtil.displayThumbnailImages(mContext, container, this, play, it)
+                                        ImageUtil.displayThumbnailImages(fragmentActivity, container, this, play, it)
                                     }
                                 }.lparams {
                                     below(R.id.quoted_status)
@@ -473,7 +446,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                 gravity = Gravity.CENTER
                             }
 
-                            ImageUtil.displayThumbnailImages(mContext, container, this, play, s)
+                            ImageUtil.displayThumbnailImages(fragmentActivity, container, this, play, s)
                         }
                     }.lparams {
                         below(R.id.quoted_tweet)
@@ -492,7 +465,7 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             textColor = Color.parseColor("#666666")
                             textSize = 14f
                             setOnClickListener {
-                                ActionUtil.doReplyAll(s, mContext)
+                                ActionUtil.doReplyAll(s, fragmentActivity)
                             }
                         }
 
@@ -503,9 +476,8 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             bottomPadding = dip(6)
                             leftPadding = dip(6)
                             text = resources.getString(R.string.fontello_retweet)
-                            textColor = if (FavRetweetManager.getRtId(s) != null)
-                                ContextCompat.getColor(mContext, R.color.holo_green_light)
-                            else Color.parseColor("#666666")
+                            textColor = if (s.isRetweeted()) ContextCompat.getColor(fragmentActivity, R.color.holo_green_light)
+                                    else Color.parseColor("#666666")
                             textSize = 14f
                             setOnClickListener {
                                 if (s.user.protected && s.user.id != currentIdentifier.userId) {
@@ -513,23 +485,15 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                                     return@setOnClickListener
                                 }
 
-                                FavRetweetManager.getRtId(s)?.let { id ->
-                                    if (id == 0L) {
-                                        toast(R.string.toast_destroy_retweet_progress)
-                                    } else {
-                                        val dialog = DestroyRetweetDialogFragment().apply {
-                                            arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
-                                        }
-                                        EventBus.getDefault().post(AlertDialogEvent(dialog))
+                                (if (s.isRetweeted()) {
+                                    DestroyRetweetDialogFragment().apply {
+                                        arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
                                     }
-                                } ?: run {
-                                    val dialog = RetweetDialogFragment().apply {
-                                        arguments = Bundle(1).apply {
-                                            putString("status", s.toJsonString())
-                                        }
+                                } else {
+                                    RetweetDialogFragment().apply {
+                                        arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
                                     }
-                                    EventBus.getDefault().post(AlertDialogEvent(dialog))
-                                }
+                                }).show(fragmentActivity.supportFragmentManager, "dialog")
                             }
                         }.lparams {
                             rightOf(R.id.do_reply)
@@ -556,23 +520,19 @@ class StatusAdapter(private val mContext: Context) : ArrayAdapter<Row>(mContext,
                             bottomPadding = dip(6)
                             leftPadding = dip(2)
                             text = resources.getString(R.string.fontello_star)
-                            if (FavRetweetManager.isFav(s)) {
-                                tag = "is_fav"
-                                textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
+                            textColor = if (s.isFavorited()) {
+                                ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light)
                             } else {
-                                tag = "no_fav"
-                                textColor = Color.parseColor("#666666")
+                                Color.parseColor("#666666")
                             }
                             textSize = 14f
                             setOnClickListener {
-                                if (tag == "is_fav") {
-                                    tag = "no_fav"
-                                    textColor = Color.parseColor("#666666")
-                                    launch { s.unfavorite() }
-                                } else {
-                                    tag = "is_fav"
-                                    textColor = ContextCompat.getColor(mContext, R.color.holo_orange_light)
-                                    launch { s.favorite() }
+                                launch {
+                                    if (s.isFavorited()) {
+                                        s.unfavorite()
+                                    } else {
+                                        s.favorite()
+                                    }
                                 }
                             }
                         }.lparams {

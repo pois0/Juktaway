@@ -6,6 +6,10 @@ import android.widget.Toast
 import net.slash_omega.juktaway.app
 import org.jetbrains.anko.toast
 
+fun showToast(text: String) = app.toast(text)
+
+fun showToast(id: Int) = app.toast(id)
+
 object MessageUtil {
     private var sProgressDialog: ProgressDialog? = null
 

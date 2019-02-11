@@ -11,6 +11,7 @@ import kotlinx.coroutines.*
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
+import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.twitter.Core.consumerParser
 import net.slash_omega.juktaway.twitter.Core.consumerTable
 import net.slash_omega.juktaway.twitter.Core.identifierParser
@@ -104,6 +105,7 @@ object Core {
             currentIdentifier = id
             currentClient = id.toClient()
             lastIdentifierAts = id.ats
+            FavRetweetManager.clear()
             EventBus.getDefault().post(AccountChangeEvent())
         }
     }
