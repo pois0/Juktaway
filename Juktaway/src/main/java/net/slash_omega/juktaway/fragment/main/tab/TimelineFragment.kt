@@ -18,17 +18,21 @@ class TimelineFragment: BaseFragment() {
                     maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1)
             ).await()
         }.onSuccess { statuses ->
-            if (mReloading) {
-                clear()
-                mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatuses(statuses)
-                mReloading = false
-                mSwipeRefreshLayout.isRefreshing = false
-            } else {
-                mMaxId = statuses.last().id
-                mAdapter?.extensionAddAllFromStatuses(statuses)
-                mAutoLoader = true
-                mListView.visibility = View.VISIBLE
+            when {
+                statuses.isEmpty() -> mReloading = false
+                mReloading -> {
+                    clear()
+                    mMaxId = statuses.last().id
+                    mAdapter?.extensionAddAllFromStatuses(statuses)
+                    mReloading = false
+                    mSwipeRefreshLayout.isRefreshing = false
+                }
+                else -> {
+                    mMaxId = statuses.last().id
+                    mAdapter?.extensionAddAllFromStatuses(statuses)
+                    mAutoLoader = true
+                    mListView.visibility = View.VISIBLE
+                }
             }
         }.onFailure {
             mReloading = false
