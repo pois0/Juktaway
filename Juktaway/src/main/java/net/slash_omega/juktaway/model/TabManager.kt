@@ -22,9 +22,9 @@ object TabManager {
 
     fun loadTabs(): ArrayList<Tab> {
         sTabs.clear()
-        getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let {
+        getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let { raw ->
             val gson = Gson()
-            val tabData = gson.fromJson<TabData>(it, TabData::class.java)
+            val tabData = gson.fromJson<TabData>(raw, TabData::class.java)
             sTabs = (tabData?.tabs ?: arrayListOf()).apply {
                 removeAll { it.id == DIRECT_MESSAGES_TAB_ID }
             }

@@ -20,7 +20,7 @@ class SearchFragment: BaseFragment() {
     override var mSearchWord: String = ""
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (mSearchWord.isEmpty()) mSearchWord = arguments?.getString("searchWord")?.removeRange(0, 7) ?: ""
+        if (mSearchWord.isEmpty()) mSearchWord = runCatching { arguments?.getString("searchWord")?.split(":")?.get(1) }.getOrNull() ?: ""
         tabId = TabManager.SEARCH_TAB_ID - Math.abs(mSearchWord.hashCode())
         super.onActivityCreated(savedInstanceState)
     }

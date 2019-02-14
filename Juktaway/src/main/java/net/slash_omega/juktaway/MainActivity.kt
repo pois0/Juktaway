@@ -227,8 +227,6 @@ class MainActivity: DividedFragmentActivity() {
     override fun onStart() {
         super.onStart()
 
-        //MyUncaughtExceptionHandler.showBugReportDialogIfExist(this)
-
         with (window) {
             if (BasicSettings.keepScreenOn) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
             else clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
