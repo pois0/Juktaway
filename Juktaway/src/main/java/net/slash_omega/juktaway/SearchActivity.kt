@@ -3,7 +3,6 @@ package net.slash_omega.juktaway
 import android.app.Activity
 import android.content.Context
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -35,7 +34,6 @@ import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
-import kotlin.coroutines.CoroutineContext
 
 /**
  * Created on 2018/08/24.
@@ -146,7 +144,7 @@ class SearchActivity: DividedFragmentActivity() {
                 guruguru.visibility = View.VISIBLE
                 val result = action.await()
                 val statuses = result.result.statuses
-                if (result.hasNext) nextAction = result.next
+                nextAction = if (result.hasNext) result.next else null
 
                 val count = mAdapter.count
                 mAdapter.extensionAddAllFromStatuses(statuses)
