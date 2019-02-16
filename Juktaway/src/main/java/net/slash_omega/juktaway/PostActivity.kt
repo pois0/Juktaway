@@ -208,9 +208,10 @@ class PostActivity: DividedFragmentActivity() {
 
         hashtag_button.setOnClickListener {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
-            val adapter = HashtagAdapter(this, R.layout.row_word)
-            hashtags.forEach { tag -> adapter.add(tag) }
-            it.list_list.apply {
+
+            view.list_list.apply {
+                val adapter = HashtagAdapter(this@PostActivity, R.layout.row_word)
+                hashtags.forEach { tag -> adapter.add(tag) }
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
@@ -226,12 +227,12 @@ class PostActivity: DividedFragmentActivity() {
                     .show()
         }
 
-        draft_button.setOnClickListener {
+        draft_button.setOnClickListener { _ ->
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
-            val adapter = DraftAdapter(this, R.layout.row_word)
-            drafts.forEach { tag -> adapter.add(tag) }
 
-            it.list_list.apply {
+            view.list_list.apply {
+                val adapter = DraftAdapter(this@PostActivity, R.layout.row_word)
+                drafts.forEach { tag -> adapter.add(tag) }
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
@@ -242,6 +243,7 @@ class PostActivity: DividedFragmentActivity() {
                         PostStockSettings.removeDraft(draft)
                     }
                 }
+
             }
 
             mDraftDialog = AlertDialog.Builder(this)

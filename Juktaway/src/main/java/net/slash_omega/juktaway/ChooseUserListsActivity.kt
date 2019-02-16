@@ -1,5 +1,6 @@
 package net.slash_omega.juktaway
 
+import android.annotation.SuppressLint
 import android.app.Activity
 import android.os.Bundle
 import android.view.MenuItem
@@ -28,6 +29,7 @@ import java.util.*
 class ChooseUserListsActivity: DividedFragmentActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
 
+    @SuppressLint("UseSparseArrays")
     override fun onCreate(savedInstanceState: Bundle?) {
         launch {
             val lists = currentClient.lists.list().await()

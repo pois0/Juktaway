@@ -17,8 +17,10 @@ object PostStockSettings {
     } ?: PostStockSettingsData()
 
     //TODO +=などのoperatorを実装したい
-    val hashtags = stocks.hashtags.reversed()
-    val drafts = stocks.drafts.reversed()
+    val hashtags
+        get() = stocks.hashtags.reversed()
+    val drafts
+        get() = stocks.drafts.reversed()
 
     private fun savePostStockSettings() {
         GlobalScope.launch(Dispatchers.Default) {
