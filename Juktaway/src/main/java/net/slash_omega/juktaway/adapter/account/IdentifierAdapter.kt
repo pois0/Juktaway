@@ -4,7 +4,6 @@ import android.content.Context
 import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.row_account.view.*
-import net.slash_omega.juktaway.listener.OnTrashListener
 import net.slash_omega.juktaway.model.UserIconManager.displayUserIcon
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.ArrayAdapterBase
@@ -15,8 +14,7 @@ import net.slash_omega.juktaway.util.ThemeUtil
 /**
  * Created on 2018/10/20.
  */
-class IdentifierAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Identifier>(context, mLayout) {
-    var mOnTrashListener: OnTrashListener? = null
+class IdentifierAdapter(context: Context, mLayout: Int, private val onTrashListener: (Identifier) -> Unit): ArrayAdapterBase<Identifier>(context, mLayout) {
     private val mColorBlue by lazy { ThemeUtil.getThemeTextColor(R.attr.holo_blue) }
 
     override val View.mView: (Int, ViewGroup?) -> Unit
@@ -29,7 +27,7 @@ class IdentifierAdapter(context: Context, mLayout: Int): ArrayAdapterBase<Identi
                     screen_name.setTextColor(mColorBlue)
                     trash.visibility = View.GONE
                 }
-                trash.setOnClickListener { mOnTrashListener?.onTrash(position) }
+                trash.setOnClickListener { onTrashListener(token) }
             }
         }
 }

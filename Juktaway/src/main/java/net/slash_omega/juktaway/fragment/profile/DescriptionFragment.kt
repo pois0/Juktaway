@@ -6,6 +6,7 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.fragment_profile_description.view.*
@@ -28,6 +29,7 @@ class DescriptionFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_profile_description, container, false)?.apply {
+            println(user)
             if (!user.description.isNullOrEmpty()) {
                 var descStr = user.description
                 user.entities?.description?.urls?.forEach {

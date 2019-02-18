@@ -34,10 +34,7 @@ class ChooseUserListsActivity: DividedFragmentActivity() {
         launch {
             val lists = currentClient.lists.list().await()
             lists.forEach {
-                mAdapter.add(UserListWithRegistered().apply {
-                    isRegistered = TabManager.hasTabId(it.id)
-                    userList = it
-                })
+                mAdapter.add(UserListWithRegistered(it, TabManager.hasTabId(it.id)))
             }
             UserListCache.userLists = lists.toMutableList()
         }

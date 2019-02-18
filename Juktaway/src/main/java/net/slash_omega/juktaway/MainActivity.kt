@@ -420,7 +420,7 @@ class MainActivity: DividedFragmentActivity() {
 
     private fun setupTab() {
         val tabs = TabManager.loadTabs()
-        if (!tabs.isEmpty()) {
+        if (tabs.isNotEmpty()) {
             val outValueTextColor = TypedValue()
             val outValueBackground = TypedValue()
             theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
@@ -465,8 +465,7 @@ class MainActivity: DividedFragmentActivity() {
                 mMainPagerAdapter.notifyDataSetChanged()
 
                 val currentPos = mViewPager.currentItem
-                val tmp = tab_menus.getChildAt(currentPos)
-                if (tmp != null) (tmp as Button).isSelected = true
+                (tab_menus.getChildAt(currentPos) as? Button)?.isSelected = true
                 title = mMainPagerAdapter.getPageTitle(currentPos)
             }
         }
@@ -476,23 +475,17 @@ class MainActivity: DividedFragmentActivity() {
         val pos = it.tag as Int
         mMainPagerAdapter.findFragmentByPosition(pos).run {
             if (mViewPager.currentItem == pos) {
-                if (goToTop()) {
-                    showTopView()
-                }
+                if (goToTop()) showTopView()
             } else {
                 mViewPager.currentItem = pos
-                if (isTop) {
-                    showTopView()
-                }
+                if (isTop) showTopView()
             }
         }
     }
 
     private val mMenuOnLongClickListener = View.OnLongClickListener {
-        mMainPagerAdapter.findFragmentByPosition(it.tag as Int).run {
-            reload()
-            true
-        }
+        mMainPagerAdapter.findFragmentByPosition(it.tag as Int).reload()
+        true
     }
 
     private fun setup() {
@@ -504,9 +497,7 @@ class MainActivity: DividedFragmentActivity() {
 
         mViewPager.addOnPageChangeListener(object : ViewPager.SimpleOnPageChangeListener() {
             override fun onPageSelected(position: Int) {
-                if (mMainPagerAdapter.findFragmentByPosition(position).isTop) {
-                    showTopView()
-                }
+                if (mMainPagerAdapter.findFragmentByPosition(position).isTop) showTopView()
                 with (tab_menus) {
                     for (i in 0 until childCount) {
                         (getChildAt(i) as Button?)?.isSelected = i == position

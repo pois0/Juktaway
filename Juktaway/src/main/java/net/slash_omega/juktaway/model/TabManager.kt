@@ -19,12 +19,11 @@ object TabManager {
 
     private fun getSharedPreferences() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
-
     fun loadTabs(): ArrayList<Tab> {
         sTabs.clear()
         getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let { raw ->
             val gson = Gson()
-            val tabData = gson.fromJson<TabData>(raw, TabData::class.java)
+            val tabData = gson.fromJson(raw, TabData::class.java)
             sTabs = (tabData?.tabs ?: arrayListOf()).apply {
                 removeAll { it.id == DIRECT_MESSAGES_TAB_ID }
             }
@@ -34,7 +33,7 @@ object TabManager {
                 }
             }
         }
-        if (sTabs.size == 0) sTabs = generalTabs()
+        if (sTabs.size == 0) sTabs = generalTabs
         return sTabs
     }
 
@@ -49,25 +48,17 @@ object TabManager {
         sTabs = tabs
     }
 
-    private fun generalTabs() = ArrayList<Tab>().apply {
-        add(Tab(TIMELINE_TAB_ID))
-        add(Tab(INTERACTIONS_TAB_ID))
-        add(Tab(FAVORITES_TAB_ID))
-    }
+    private val generalTabs
+        get() = arrayListOf(Tab(TIMELINE_TAB_ID), Tab(INTERACTIONS_TAB_ID), Tab(FAVORITES_TAB_ID))
 
-    fun hasTabId(findTab: Long?): Boolean {
-        for (tab in sTabs) {
-            if (tab.id == findTab) return true
-        }
-        return false
-    }
+    fun hasTabId(findTab: Long) = sTabs.any { it.id == findTab }
 
     class TabData {
         internal var tabs = arrayListOf<Tab>()
     }
 
     class Tab(var id: Long) {
-        fun getString(id: Int): String =app.getString(id)
+        fun getString(id: Int): String = app.getString(id)
 
         var name = ""
             get() = when {

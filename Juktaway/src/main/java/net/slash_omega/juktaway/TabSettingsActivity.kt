@@ -45,14 +45,11 @@ class TabSettingsActivity: FragmentActivity() {
 
         mListView = findViewById(R.id.list)
 
-        mAdapter = TabAdapter(this, R.layout.row_tag).apply {
-            TabManager.loadTabs().forEach { add(it) }
-        }
+        mAdapter = TabAdapter(this, R.layout.row_tag, TabManager.loadTabs())
 
         mListView.adapter = mAdapter
         mListView.setOnTouchListener { _, e ->
-            if (!mSortable) false
-            else when (e.action) {
+            mSortable && when (e.action) {
                 MotionEvent.ACTION_MOVE ->
                     mListView.pointToPosition(e.x.toInt(), e.y.toInt()).takeIf { it >= 0 && it != mToPosition }?.let {
                         mToPosition = it
@@ -139,7 +136,7 @@ class TabSettingsActivity: FragmentActivity() {
         }
     }
 
-    inner class TabAdapter(context: Context, private val mLayout: Int): ArrayAdapter<TabManager.Tab>(context, mLayout) {
+    inner class TabAdapter(context: Context, private val mLayout: Int, list: List<TabManager.Tab>): ArrayAdapter<TabManager.Tab>(context, mLayout, list) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         private var mCurrentTab: TabManager.Tab? = null
         val tabs = ArrayList<TabManager.Tab>()

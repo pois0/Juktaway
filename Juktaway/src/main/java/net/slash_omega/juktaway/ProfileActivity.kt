@@ -453,10 +453,12 @@ class ProfileActivity: DividedFragmentActivity() {
     }
 
     private fun restart() {
-        startActivity(Intent().apply {
-            setClass(this@ProfileActivity, ProfileActivity::class.java)
-            putExtra("userId", mUser.id)
-        })
+        runCatching {
+            startActivity<ProfileActivity>("userJson" to mUser.toJsonString())
+        }.onFailure {
+            startActivity<ProfileActivity>("userId" to mUser.id)
+        }
+
         finish()
     }
 }

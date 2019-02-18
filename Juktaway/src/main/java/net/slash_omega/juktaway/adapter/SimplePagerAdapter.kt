@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway.adapter
 
-import android.content.Context
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.app.FragmentActivity
@@ -13,8 +12,7 @@ import kotlin.reflect.KClass
 /**
  * タブの切替毎に必要なFragmentを取得するためのAdapterクラス
  */
-class SimplePagerAdapter(context: FragmentActivity, viewPager: ViewPager) : FragmentPagerAdapter(context.supportFragmentManager) {
-    private val mContext: Context
+class SimplePagerAdapter(private val context: FragmentActivity, viewPager: ViewPager): FragmentPagerAdapter(context.supportFragmentManager) {
     private val mTabs = ArrayList<TabInfo>()
 
     private class TabInfo
@@ -28,13 +26,9 @@ class SimplePagerAdapter(context: FragmentActivity, viewPager: ViewPager) : Frag
 
     init {
         viewPager.adapter = this
-        mContext = context
     }
 
-    override fun getItem(position: Int): Fragment {
-        val info = mTabs[position]
-        return Fragment.instantiate(mContext, info.clazz.qualifiedName, info.args)
-    }
+    override fun getItem(position: Int) = mTabs[position].let { Fragment.instantiate(context, it.clazz.qualifiedName, it.args) }!!
 
     /**
      * タブ内に起動するActivity、引数、タイトルを設定する
@@ -43,12 +37,8 @@ class SimplePagerAdapter(context: FragmentActivity, viewPager: ViewPager) : Frag
      * @param args  v4.Fragmentに対する引数
      */
     fun <T: Fragment> addTab(clazz: KClass<T>, args: Bundle?) {
-        val info = TabInfo(clazz, args)
-        mTabs.add(info)
+        mTabs.add(TabInfo(clazz, args))
     }
 
-    override fun getCount(): Int {
-        // タブ数
-        return mTabs.size
-    }
+    override fun getCount() = mTabs.size
 }

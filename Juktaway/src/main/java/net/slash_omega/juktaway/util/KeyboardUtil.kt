@@ -25,9 +25,7 @@ object KeyboardUtil {
              */
             val listener = view.onFocusChangeListener
             view.onFocusChangeListener = View.OnFocusChangeListener { v, has_focus ->
-                if (!has_focus) {
-                    return@OnFocusChangeListener
-                }
+                if (!has_focus) return@OnFocusChangeListener
                 inputMethodManager.showSoftInput(v, InputMethodManager.SHOW_FORCED)
                 v.onFocusChangeListener = listener
             }

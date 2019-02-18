@@ -30,13 +30,15 @@ class VideoActivity: DividedFragmentActivity() {
 
         setContentView(R.layout.activity_video)
 
-        if (intent.extras == null) {
+        val extra = intent.extras
+
+        if (extra == null) {
             toast("Missing Bundle in Intent")
             finish()
             return
         }
 
-        val statusUrl = intent?.extras?.getString("statusUrl")
+        val statusUrl = extra.getString("statusUrl")
         if (statusUrl.isNullOrEmpty().not()) {
             pattern.matcher(statusUrl)?.let { m ->
                 if (m.find()) {
@@ -53,7 +55,7 @@ class VideoActivity: DividedFragmentActivity() {
             }
         }
 
-        intent?.extras?.getString("videoUrl")?.let {
+        extra.getString("videoUrl")?.let {
             setVideoURI(it)
         } ?: run {
             MessageUtil.showToast("Missing videoUrl in Bundle")

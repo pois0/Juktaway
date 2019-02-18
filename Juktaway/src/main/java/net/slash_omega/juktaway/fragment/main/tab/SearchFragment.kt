@@ -34,13 +34,8 @@ class SearchFragment: BaseFragment() {
                 clear()
                 mAdapter?.extensionAddAllFromStatuses(qr.result.statuses)
                 mReloading = false
-                if (qr.hasNext) {
-                    action = qr.next
-                    mAutoLoader = true
-                } else {
-                    action = null
-                    mAutoLoader = false
-                }
+                mAutoLoader = qr.hasNext
+                action = qr.takeIf { it.hasNext }?.next
                 mSwipeRefreshLayout.isRefreshing = false
             } else {
                 mAdapter?.extensionAddAllFromStatuses(qr.result.statuses)

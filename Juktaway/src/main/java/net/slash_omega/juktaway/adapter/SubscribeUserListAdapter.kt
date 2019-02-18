@@ -41,12 +41,11 @@ class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
             val userList = list?.userList
             trash.setOnClickListener {
                 val dialog = if (currentIdentifier.userId == userList?.user?.id) DestroyUserListDialogFragment()
-                else DestroyUserListSubscriptionDialogFragment()
+                        else DestroyUserListSubscriptionDialogFragment()
                 dialog.arguments = Bundle(1).apply {
                     putString("userList", userList?.toJsonString())
                 }
                 EventBus.getDefault().post(AlertDialogEvent(dialog))
-
             }
             checkbox.apply {
                 text = if (currentIdentifier.userId == userList?.user?.id) userList.name else userList?.fullName

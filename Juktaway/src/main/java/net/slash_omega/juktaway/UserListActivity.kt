@@ -98,12 +98,13 @@ class UserListActivity: DividedFragmentActivity() {
             }
             MENU_CREATE -> {
                 launch {
-                    val res = runCatching { currentClient.lists.subscribe(mUserList.id).await() }.isSuccess
-                    if (res) {
+                    runCatching {
+                        currentClient.lists.subscribe(mUserList.id).await()
+                    }.onSuccess {
                         toast(R.string.toast_create_user_list_subscription_success)
                         mIsFollowing = true
                         UserListCache.userLists.add(0, mUserList)
-                    } else {
+                    }.onFailure {
                         toast(R.string.toast_create_user_list_subscription_failure)
                     }
                 }
@@ -111,12 +112,13 @@ class UserListActivity: DividedFragmentActivity() {
             }
             MENU_DESTROY -> {
                 launch {
-                    val res = runCatching { currentClient.lists.unsubscribe(mUserList.id).await() }.isSuccess
-                    if (res) {
+                    runCatching {
+                        currentClient.lists.unsubscribe(mUserList.id).await()
+                    }.onSuccess {
                         toast(R.string.toast_destroy_user_list_subscription_success)
                         mIsFollowing = false
                         UserListCache.userLists.remove(mUserList)
-                    } else {
+                    }.onFailure {
                         toast(R.string.toast_destroy_user_list_subscription_failure)
                     }
                 }

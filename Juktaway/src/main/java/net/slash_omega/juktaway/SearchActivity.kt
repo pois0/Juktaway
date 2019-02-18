@@ -168,18 +168,15 @@ class SearchActivity: DividedFragmentActivity() {
             guruguru.visibility = View.VISIBLE
             nextAction = null
             launch {
-                val result = runCatching {
-                    currentClient.search.search("$text exclude:retweets",
-                            count = BasicSettings.pageCount).await()
-                }.getOrNull()
-                if (result != null) {
+                runCatching {
+                    currentClient.search.search("$text exclude:retweets", count = BasicSettings.pageCount).await()
+                }.onSuccess { result ->
                     val statuses = result.result.statuses
                     if (result.hasNext) nextAction = result.next
 
                     val count = mAdapter.count
                     mAdapter.addAllFromStatusesSuspend(statuses)
                     mAdapter.notifyDataSetChanged()
-
 
                     search_list.visibility = View.VISIBLE
                     if (count == 0) search_list.setSelection(0)
@@ -188,19 +185,14 @@ class SearchActivity: DividedFragmentActivity() {
 
                 (getSystemService(Context.INPUT_METHOD_SERVICE) as InputMethodManager)
                         .hideSoftInputFromWindow(searchWords.windowToken, 0)
-
             }
         }
     }
 
-    private fun createSavedSearch(word: String) {
-        launch {
-            val res = runCatching { currentClient.savedSearches.create(word).await() }.isSuccess
-
-            if (res) {
-                setResult(RESULT_CREATE_SAVED_SEARCH)
-                toast(getString(R.string.toast_save_success))
-            }
+    private fun createSavedSearch(word: String) = launch {
+        runCatching { currentClient.savedSearches.create(word).await() }.onSuccess {
+            setResult(RESULT_CREATE_SAVED_SEARCH)
+            toast(getString(R.string.toast_save_success))
         }
     }
 }

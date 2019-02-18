@@ -90,11 +90,7 @@ class UserListStatusesFragment : Fragment() {
             mFooter.visibility = View.GONE
 
             if (statuses.isNullOrEmpty()) return@launch
-            for (status in statuses) {
-                if (mMaxId == 0L || mMaxId > status.id) {
-                    mMaxId = status.id
-                }
-            }
+            mMaxId = statuses.first().id
             mAdapter.addAllFromStatuses(statuses)
             mAutoLoader = true
             mListView.visibility = View.VISIBLE

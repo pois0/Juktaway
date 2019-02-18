@@ -110,9 +110,8 @@ class PostActivity: DividedFragmentActivity() {
         registerForContextMenu(img_button)
 
         // アカウント切り替え
-        switch_account_spinner.adapter = IdentifierAdapter(this, R.layout.spinner_switch_account).apply {
+        switch_account_spinner.adapter = IdentifierAdapter(this, R.layout.spinner_switch_account, identifierList).apply {
             setDropDownViewResource(R.layout.support_simple_spinner_dropdown_item)
-            addAll(identifierList)
         }
 
         switch_account_spinner.setSelection(identifierList.indexOfFirst { currentIdentifier == it })
@@ -210,8 +209,7 @@ class PostActivity: DividedFragmentActivity() {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
 
             view.list_list.apply {
-                val adapter = HashtagAdapter(this@PostActivity, R.layout.row_word)
-                hashtags.forEach { tag -> adapter.add(tag) }
+                val adapter = HashtagAdapter(this@PostActivity, R.layout.row_word, hashtags)
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
@@ -231,8 +229,7 @@ class PostActivity: DividedFragmentActivity() {
             val view = (getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater).inflate(R.layout.list, null)
 
             view.list_list.apply {
-                val adapter = DraftAdapter(this@PostActivity, R.layout.row_word)
-                drafts.forEach { tag -> adapter.add(tag) }
+                val adapter = DraftAdapter(this@PostActivity, R.layout.row_word, drafts)
                 this.adapter = adapter
                 setOnItemClickListener { _, _, i, _ ->
                     status_text?.run {
@@ -473,7 +470,7 @@ class PostActivity: DividedFragmentActivity() {
         }
     }
 
-    private class DraftAdapter(context: PostActivity, val mLayout: Int): ArrayAdapter<String>(context, mLayout) {
+    private class DraftAdapter(context: PostActivity, val mLayout: Int, list: List<String>): ArrayAdapter<String>(context, mLayout, list) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -490,7 +487,8 @@ class PostActivity: DividedFragmentActivity() {
     }
 
 
-    private class HashtagAdapter(context: PostActivity, val mLayout: Int): ArrayAdapter<String>(context, mLayout) {
+    private class HashtagAdapter(context: PostActivity, val mLayout: Int, list: List<String>)
+            : ArrayAdapter<String>(context, mLayout, list) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {
@@ -506,8 +504,9 @@ class PostActivity: DividedFragmentActivity() {
         }
     }
 
-    private class IdentifierAdapter(private val activity: PostActivity, val mLayout: Int)
-            : ArrayAdapter<Identifier>(activity, mLayout) {
+    private class IdentifierAdapter(private val activity: PostActivity, val mLayout: Int, list: List<Identifier>)
+            : ArrayAdapter<Identifier>(activity, mLayout, list) {
+
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
 
         override fun getView(position: Int, convertView: View?, parent: ViewGroup?): View {

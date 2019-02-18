@@ -7,7 +7,6 @@ import android.view.Menu
 import android.view.MenuItem
 import net.slash_omega.juktaway.adapter.account.IdentifierAdapter
 import net.slash_omega.juktaway.fragment.dialog.AccountSwitchDialogFragment
-import net.slash_omega.juktaway.listener.OnTrashListener
 import net.slash_omega.juktaway.listener.RemoveAccountListener
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_account_setting.*
@@ -34,16 +33,13 @@ class AccountSettingActivity: DividedFragmentActivity(), RemoveAccountListener {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        mAccountAdapter = IdentifierAdapter(this, R.layout.row_account) .apply {
+        mAccountAdapter = IdentifierAdapter(this, R.layout.row_account) { identifier ->
+            AccountSwitchDialogFragment.newInstance(identifier).show(supportFragmentManager, "dialog")
+        }.apply {
             identifierList.forEach { add(it) }
-            mOnTrashListener = object: OnTrashListener {
-                override fun onTrash(position: Int) { getItem(position)?.let {
-                    AccountSwitchDialogFragment.newInstance(it).show(supportFragmentManager, "dialog")
-                }}
-            }
         }
 
-        with (list_view) {
+        with(list_view) {
             adapter = mAccountAdapter
             setOnItemClickListener { _, _, i, _ ->
                 mAccountAdapter.getItem(i).also {

@@ -25,12 +25,9 @@ class RegisterUserListActivity: DividedFragmentActivity() {
                 lists.ownerships(count = 200).await().result.lists to
                         lists.membershipsByUserId(intent.getLongExtra("userId", -1)).await().result.lists
             }.getOrNull()?.let { (own, member) ->
-                val registeredMap = member.associateBy({it.id}, {true})
+                val registeredMap = member.associateBy({ it.id }, { true })
                 own.forEach {
-                    mAdapter.add(UserListWithRegistered().apply {
-                        isRegistered = registeredMap[it.id] != null
-                        userList = it
-                    })
+                    mAdapter.add(UserListWithRegistered(it, registeredMap[it.id] != null))
                 }
             }
         }

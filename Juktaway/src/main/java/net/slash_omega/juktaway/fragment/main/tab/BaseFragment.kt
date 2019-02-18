@@ -158,6 +158,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     internal fun goToTop(): Boolean {
         mListView.setSelection(0)
+        mListView.smoothScrollToPosition(0)
         return if (mStackRows.size > 0) {
             launch { showStack() }
             false

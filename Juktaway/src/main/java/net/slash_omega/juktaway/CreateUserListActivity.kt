@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway
 
-import android.app.Activity
 import android.os.Bundle
 import android.view.MenuItem
 import io.ktor.http.HttpStatusCode
@@ -15,14 +14,10 @@ import kotlinx.android.synthetic.main.activity_create_user_list.*
 import kotlinx.coroutines.*
 import net.slash_omega.juktaway.twitter.currentClient
 import org.jetbrains.anko.toast
-import kotlin.coroutines.CoroutineContext
 
 private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
-class CreateUserListActivity: Activity(), CoroutineScope {
-    private val job = Job()
-    override val coroutineContext: CoroutineContext
-        get() = Dispatchers.Main + job
+class CreateUserListActivity: DividedFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -54,11 +49,6 @@ class CreateUserListActivity: Activity(), CoroutineScope {
                 }
             }
         }
-    }
-
-    override fun onStop() {
-        job.cancelChildren()
-        super.onStop()
     }
 
     override fun onOptionsItemSelected(item: MenuItem?) = item?.run {

@@ -90,22 +90,20 @@ class UserSearchActivity: DividedFragmentActivity() {
         userSearch(mSearchWord)
     }
 
-    private fun userSearch(word: String) {
-        launch {
-            val res = tryAndTraceGet {
-                currentClient.users.search(word, mPage, 20).await()
-            }
-            guruguru.visibility = View.GONE
-            if (res == null) {
-                toast(R.string.toast_load_data_failure)
-                return@launch
-            }
-            res.forEach { mAdapter.add(it) }
+    private fun userSearch(word: String) = launch {
+        runCatching {
+            currentClient.users.search(word, mPage, 20).await()
+        }.onSuccess { res ->
+            mAdapter.addAll(res)
             if (res.size == 20) {
                 mAutoLoading = true
                 mPage++
             }
             list_view.visibility = View.VISIBLE
+        }.onFailure {
+            toast(R.string.toast_load_data_failure)
         }
+
+        guruguru.visibility = View.GONE
     }
 }
