@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway.model
 
-import jp.nephy.penicillin.PenicillinClient
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.blocks
 import jp.nephy.penicillin.endpoints.blocks.listIds

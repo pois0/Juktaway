@@ -54,7 +54,7 @@ class StatusActivity: DividedFragmentActivity() {
                     return
                 }
                 uri.path!!.contains("video") -> {
-                    startActivity<VideoActivity>("statusUrl" to uri.toString())
+                    startActivity<VideoActivity>("statusUrl" to uri.toString(), "arg" to "statusUrl")
                     finish()
                     return
                 }

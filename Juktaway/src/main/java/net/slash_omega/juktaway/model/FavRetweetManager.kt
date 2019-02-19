@@ -25,7 +25,7 @@ object FavRetweetManager {
 
     fun setFav(id: Long) { favMap.put(id, true) }
 
-    fun removeFav(id: Long) { favMap.put(id, false); println("aaaaaaaaa $id") }
+    fun removeFav(id: Long) { favMap.put(id, false) }
 
     fun isFavorited(status: Status) = status.original.run { favMap.get(id) ?: favorited }
 

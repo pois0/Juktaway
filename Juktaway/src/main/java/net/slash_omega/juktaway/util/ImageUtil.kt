@@ -19,6 +19,7 @@ import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.VideoActivity
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.settings.BasicSettings
+import org.jetbrains.anko.startActivity
 import java.io.File
 
 /**
@@ -103,9 +104,7 @@ object ImageUtil {
                             putExtra("index", i)
                         })
                     } else {
-                        context.startActivity(Intent(it.context, VideoActivity::class.java). apply {
-                            putExtra("videoUrl", status.videoUrl)
-                        })
+                        context.startActivity<VideoActivity>("arg" to "statusJson", "statusJson" to status.toJsonString())
                     }
                 }
             }

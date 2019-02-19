@@ -7,14 +7,16 @@ import android.net.Uri
 import android.os.Bundle
 import android.view.View
 import android.view.Window
+import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_video.*
 import kotlinx.coroutines.*
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
-import net.slash_omega.juktaway.util.tryAndTraceGet
+import net.slash_omega.juktaway.util.parseWithClient
 import org.jetbrains.anko.toast
 import java.util.regex.Pattern
 
@@ -30,36 +32,29 @@ class VideoActivity: DividedFragmentActivity() {
 
         setContentView(R.layout.activity_video)
 
-        val extra = intent.extras
-
-        if (extra == null) {
+        val extra = intent.extras ?: run {
             toast("Missing Bundle in Intent")
             finish()
-            return
+            return@onCreate
         }
 
-        val statusUrl = extra.getString("statusUrl")
-        if (statusUrl.isNullOrEmpty().not()) {
-            pattern.matcher(statusUrl)?.let { m ->
-                if (m.find()) {
-                    launch {
-                        // TODO 画質を選べるように
-                        val status = tryAndTraceGet {
-                            currentClient.statuses.show(m.group(1).toLong()).await()
-                        }?.result ?: return@launch
-                        status.extendedEntities?.media?.first { it.type == "video" }?.videoInfo?.variants?.get(1)?.url
-                                ?.let { setVideoURI(it) }
+        // TODO 画質を選べるように
+        when (extra.getString("arg")) {
+            "statusJson" -> setVideoURI(extra.getString("statusJson")!!.toJsonObject().parseWithClient<Status>())
+            "statusUrl" -> pattern.matcher(extra.getString("statusUrl"))?.takeIf { it.find() }?.let { m ->
+                launch {
+                    runCatching {
+                        currentClient.statuses.show(m.group(1).toLong()).await()
+                    }.onSuccess {
+                        setVideoURI(it.result)
                     }
                 }
-                return
             }
-        }
-
-        extra.getString("videoUrl")?.let {
-            setVideoURI(it)
-        } ?: run {
-            MessageUtil.showToast("Missing videoUrl in Bundle")
-            finish()
+            "videoUrl" -> setVideoURI(extra.getString("videoUrl")!!)
+            else -> {
+                MessageUtil.showToast("Missing videoUrl in Bundle")
+                finish()
+            }
         }
     }
 
@@ -73,6 +68,10 @@ class VideoActivity: DividedFragmentActivity() {
             sendBroadcast(Intent("com.android.music.musicservicecommand")
                     .apply { putExtra("command", "play") })
         super.onDestroy()
+    }
+
+    private fun setVideoURI(status: Status) = status.extendedEntities?.let { entities ->
+        entities.media.first { it.type == "video" }.videoInfo?.variants?.get(1)?.url?.let { setVideoURI(it) }
     }
 
     private fun setVideoURI(url: String) {
