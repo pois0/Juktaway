@@ -29,7 +29,6 @@ class DescriptionFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_profile_description, container, false)?.apply {
-            println(user)
             if (!user.description.isNullOrEmpty()) {
                 var descStr = user.description
                 user.entities?.description?.urls?.forEach {

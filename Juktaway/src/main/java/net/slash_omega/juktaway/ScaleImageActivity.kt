@@ -138,8 +138,7 @@ class ScaleImageActivity: DividedFragmentActivity() {
 
     private fun showStatus(status: Status, index: Int) {
         val urls = StatusUtil.getImageUrls(status)
-        if (urls.size == 1)
-            symbol.visibility = View.GONE
+        if (urls.size == 1) symbol.visibility = View.GONE
         for (url in urls) {
             imageUrls.add(url)
             simplePagerAdapter.addTab(ScaleImageFragment::class, Bundle().apply {

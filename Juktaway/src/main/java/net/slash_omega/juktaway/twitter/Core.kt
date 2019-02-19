@@ -101,7 +101,6 @@ object Core {
 
     suspend fun switchToken(id: Identifier) {
         withContext(Dispatchers.Default) {
-            println(id.toString())
             currentIdentifier = id
             currentClient = id.toClient()
             lastIdentifierAts = id.ats

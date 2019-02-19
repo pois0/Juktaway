@@ -26,10 +26,10 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
         get() = { pos, _ ->
             val registered = getItem(pos)!!
             checkbox.apply {
-                text = registered.userList?.name ?: ""
+                text = registered.userList.name
                 setOnCheckedChangeListener(null)
                 isChecked = registered.isRegistered
-                tag = registered.userList?.id
+                tag = registered.userList.id
                 setOnCheckedChangeListener { _, isChecked ->
                     if (isChecked == registered.isRegistered) return@setOnCheckedChangeListener
                     registered.isRegistered = isChecked

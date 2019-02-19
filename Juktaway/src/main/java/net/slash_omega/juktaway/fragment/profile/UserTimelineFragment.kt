@@ -72,9 +72,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         mAdapter.notifyDataSetChanged()
     }
 
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        launch { mAdapter.removeStatus(event.statusId!!) }
-    }
+    fun onEventMainThread(event: StreamingDestroyStatusEvent) = launch { mAdapter.removeStatus(event.statusId!!) }
 
     private fun reload() {
         mReload = true

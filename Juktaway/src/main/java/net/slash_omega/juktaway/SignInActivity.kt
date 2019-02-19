@@ -89,7 +89,6 @@ class SignInActivity: Activity(), CoroutineScope {
                     consumer = Core.getConsumer(consumerName).also { c ->
                         consumer = c
                         consumerIdTemp = c.id
-                        println(c.id)
                     }
                     consumer_spinner.visibility = View.VISIBLE
                     toast(R.string.add_consumer_succeeded)
