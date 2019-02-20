@@ -12,6 +12,7 @@ import jp.nephy.penicillin.core.request.action.CursorJsonObjectApiAction
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.members
 import jp.nephy.penicillin.extensions.await
+import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.cursor.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.view.*
@@ -74,7 +75,7 @@ class UserMemberFragment : Fragment() {
             }.getOrNull()
             mFooter.visibility = View.GONE
             if (resp == null) return@launch
-            mCursor = resp.next
+            if (resp.hasNext) mCursor = resp.next
             mAdapter.addAll(resp.result.users)
             if (resp.result.nextCursor < 0) mAutoLoader = true
             mListView.visibility = View.VISIBLE
