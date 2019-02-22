@@ -1,7 +1,7 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources xmlns:tools="http://schemas.android.com/tools">
 
-    <string name="android_package_name" translatable="false">net.slashOmega.juktaway</string>
+    <string name="android_package_name" translatable="false">net.slash_omega.juktaway</string>
     <string name="app_name" translatable="false">Juktaway</string>
     <string name="button_add">Add</string>
     <string name="button_apply">Apply</string>

@@ -43,8 +43,8 @@ android {
         multiDexEnabled true
         
         versionCode 1
-        versionName '3.0-RC3b'
-        applicationId "net.slashOmega.juktaway"
+        versionName '3.0-RC3d'
+        applicationId "net.slash_omega.juktaway"
     }
 
     signingConfigs {
