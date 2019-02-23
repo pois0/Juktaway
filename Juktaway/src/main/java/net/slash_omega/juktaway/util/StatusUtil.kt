@@ -43,8 +43,9 @@ val Status.imageUrls: List<String>
     }
 
 object StatusUtil {
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w\\.\\-/:#\\?=&;%~\\+]+")
+    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
     private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
+    @Suppress("SpellCheckingInspection")
     private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
 
     /**

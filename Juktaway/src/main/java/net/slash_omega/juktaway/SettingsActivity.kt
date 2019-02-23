@@ -52,7 +52,7 @@ class SettingsActivity: Activity() {
             (findPreference("font_size") as? ListPreference)?.apply {
                 summary = "$value pt"
                 setOnPreferenceChangeListener { pref, newValue ->
-                    pref.summary = newValue.toString() + " pt"
+                    pref.summary = "$newValue pt"
                     true
                 }
             } ?: return

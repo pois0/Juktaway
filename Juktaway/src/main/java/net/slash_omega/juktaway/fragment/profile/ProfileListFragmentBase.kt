@@ -6,12 +6,14 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.*
+import android.widget.AbsListView
+import android.widget.ArrayAdapter
+import android.widget.ListView
+import android.widget.ProgressBar
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.CoroutineScope
 import net.slash_omega.juktaway.R
-import net.slash_omega.juktaway.settings.BasicSettings.init
 import net.slash_omega.juktaway.util.parseWithClient
 
 /**

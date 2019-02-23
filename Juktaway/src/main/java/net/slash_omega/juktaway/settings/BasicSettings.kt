@@ -39,19 +39,6 @@ object BasicSettings {
     val quickMode: Boolean
         get() = sharedPreferences.getBoolean(QUICK_MODE, false)
 
-    private val notificationOn: Boolean
-        get() = sharedPreferences.getBoolean("notification_on", true)
-
-    var streamingMode: Boolean
-        get() = mStreamingMode
-        set(streamingMode) {
-            sharedPreferences.edit().run {
-                putBoolean(STREAMING_MODE, streamingMode)
-                apply()
-            }
-            mStreamingMode = streamingMode
-        }
-
     val keepScreenOn: Boolean
         get() = sharedPreferences.getBoolean("keep_screen_on", true)
 

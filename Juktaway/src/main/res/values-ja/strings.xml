@@ -125,7 +125,6 @@
     <string name="notification_retweet">"リツイート: "</string>
     <string name="notification_favorite_ticker">"さんがお気に入りに登録しました: "</string>
     <string name="notification_retweet_ticker">"さんがリツイート: "</string>
-    <string name="official_website">http://juktaway.slash-omega.net/</string>
     <string name="open">open</string>
     <string name="progress_loading">読み込み中</string>
     <string name="progress_process">処理中</string>
@@ -251,4 +250,16 @@
     <string name="pref_description_talk_order_newest">会話を表示時、新しいツイートを上に表示</string>
     <string name="quick_posting_menu_fix_initial_tweet">現在のテキストを初期テキストにする</string>
     <string name="quick_posting_menu_unfixed_success">初期テキストを無効にしました</string>
+    <string name="pref_layout_title">レイアウト</string>
+    <string name="repooply_version">クソリプを送るにはAndroid5.0以上である必要があります。</string>
+    <string name="menu_license">ライセンスを表示</string>
+    <string name="title_license">ライセンス</string>
+    <string name="add_consumer">コンシューマの追加</string>
+    <string name="add_consumer_failed">コンシューマの追加に失敗しました</string>
+    <string name="add_consumer_succeeded">コンシューマを追加しました</string>
+    <string name="select_consumer">コンシューマの選択</string>
+    <string name="not_select_consumer">コンシューマの選択</string>
+    <string name="pref_operation_title">操作</string>
+    <string name="signin_csck_blank">コンシューマキーまたはコンシューマシークレットが未記入です</string>
+    <string name="quick_posting_menu_title">クイック投稿メニュー</string>
 </resources>

@@ -8,13 +8,12 @@ import android.widget.AbsListView
 import jp.nephy.penicillin.endpoints.users
 import jp.nephy.penicillin.endpoints.users.search
 import jp.nephy.penicillin.extensions.await
+import kotlinx.android.synthetic.main.activity_user_search.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.UserAdapter
+import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
-import kotlinx.android.synthetic.main.activity_user_search.*
-import kotlinx.coroutines.*
-import net.slash_omega.juktaway.twitter.currentClient
-import net.slash_omega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
 
 /**

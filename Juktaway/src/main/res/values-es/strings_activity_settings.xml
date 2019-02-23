@@ -1,4 +1,4 @@
-<resources xmlns:tools="http://schemas.android.com/tools">
+<resources>
     <string name="title_activity_settings">Configuración</string>
 
     <string name="pref_title_display_account_name">Nombre de la cuenta de la barra de herramientas</string>

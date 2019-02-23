@@ -9,8 +9,8 @@ import com.nostra13.universalimageloader.core.ImageLoader
 import net.slash_omega.juktaway.widget.ScaleImageView
 
 class ScaleImageFragment : Fragment() {
-    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = activity?.let {
-        ScaleImageView(it).apply {
+    override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? = activity?.let { activity ->
+        ScaleImageView(activity).apply {
             mActivity = this@ScaleImageFragment.activity
             arguments?.getString("url")?.let {
                 ImageLoader.getInstance().displayImage(it, this)

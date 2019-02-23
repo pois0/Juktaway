@@ -9,7 +9,7 @@ class JuktawayDBOpenHelper(c: Context): ManagedSQLiteOpenHelper(c, "justaway.db"
     companion object {
         private var instance :JuktawayDBOpenHelper? = null
 
-        fun getInstance() = instance ?: JuktawayDBOpenHelper(app)
+        private fun getInstance() = instance ?: JuktawayDBOpenHelper(app)
 
         fun <T> dbUse(f: SQLiteDatabase.() -> T): T {
             return getInstance().use(f)

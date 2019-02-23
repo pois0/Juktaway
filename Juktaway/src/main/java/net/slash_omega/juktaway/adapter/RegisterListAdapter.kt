@@ -37,7 +37,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                         MessageUtil.showProgressDialog(context, context.getString(R.string.progress_process))
                         if (isChecked) {
                             val res = runCatching {
-                                currentClient.lists.addMembersByUserIds(registered.userList!!.id, mUserId.toList()).await()
+                                currentClient.lists.addMembersByUserIds(registered.userList.id, mUserId.toList()).await()
                             }.isSuccess
 
                             MessageUtil.dismissProgressDialog()
@@ -50,7 +50,7 @@ class RegisterListAdapter(c: Context, id: Int, userId: Long): ArrayAdapterBase<U
                             }
                         } else {
                             val res = runCatching {
-                                currentClient.lists.removeMembersByUserIds(registered.userList!!.id, mUserId.toList()).await()
+                                currentClient.lists.removeMembersByUserIds(registered.userList.id, mUserId.toList()).await()
                             }.isSuccess
 
                             MessageUtil.dismissProgressDialog()

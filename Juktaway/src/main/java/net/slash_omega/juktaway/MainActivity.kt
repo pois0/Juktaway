@@ -7,7 +7,6 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.view.GravityCompat
 import android.support.v4.view.ViewPager
 import android.support.v7.app.ActionBarDrawerToggle
@@ -47,6 +46,7 @@ import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
 import net.slash_omega.juktaway.widget.FontelloButton
+import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.startActivityForResult
 import org.jetbrains.anko.toast
@@ -159,38 +159,37 @@ class MainActivity: DividedFragmentActivity() {
         send_button.setOnClickListener {
             launch {
                 val msg = quick_tweet_edit.string
-                if (msg.isNotEmpty()) {
-                    MessageUtil.showProgressDialog(this@MainActivity, getString(R.string.progress_sending))
-                    if (msg.startsWith("D ")) {
-                        val res = currentClient.sendDirectMessage(msg)
-                        MessageUtil.dismissProgressDialog()
-                        res?.run { toast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText(statusInitialText)
-                    } else {
-                        runCatching {
-                            currentClient.statuses.run {
-                                mInReplyToStatus?.let { s ->
-                                    create(msg.apply {
-                                        s.entities.userMentions.map { "@${it.screenName}" }.forEach {
-                                            replace(it, "")
-                                        }
-                                    }, inReplyToStatusId = s.id)
-                                } ?: create(msg)
-                            }.await()
-                        }.onSuccess {
-                            mInReplyToStatus = null
-                            quick_tweet_edit.setText(statusInitialText)
-                        }.onFailure { e ->
-                            toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
-                            else R.string.toast_update_status_failure)
-                        }
-                        MessageUtil.dismissProgressDialog()
+                if (msg.isEmpty()) return@launch
+                MessageUtil.showProgressDialog(this@MainActivity, getString(R.string.progress_sending))
+                if (msg.startsWith("D ")) {
+                    val res = currentClient.sendDirectMessage(msg)
+                    MessageUtil.dismissProgressDialog()
+                    res?.run { toast(R.string.toast_update_status_failure) } ?: quick_tweet_edit.setText(statusInitialText)
+                } else {
+                    runCatching {
+                        currentClient.statuses.run {
+                            mInReplyToStatus?.let { s ->
+                                create(msg.apply {
+                                    s.entities.userMentions.map { "@${it.screenName}" }.forEach {
+                                        replace(it, "")
+                                    }
+                                }, inReplyToStatusId = s.id)
+                            } ?: create(msg)
+                        }.await()
+                    }.onSuccess {
+                        mInReplyToStatus = null
+                        quick_tweet_edit.setText(statusInitialText)
+                    }.onFailure { e ->
+                        toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                        else R.string.toast_update_status_failure)
                     }
+                    MessageUtil.dismissProgressDialog()
                 }
             }
         }
 
         post_button.setOnClickListener {
-            startActivity(getIntent(PostActivity::class.java).also { intent ->
+            startActivity(intentFor<PostActivity>().also { intent ->
                 if (quick_tweet_layout.visibility == View.VISIBLE) {
                     with (quick_tweet_edit) {
                         if (string.isNotEmpty()) {
@@ -282,17 +281,7 @@ class MainActivity: DividedFragmentActivity() {
         EventBus.getDefault().post(BasicSettingsChangeEvent())
 
         title = mMainPagerAdapter.getPageTitle(mViewPager.currentItem)
-        if (BasicSettings.quickMode) showQuickPanel()
-        else hideQuickPanel()
-
-
-        Handler().postDelayed ({
-            try {
-                mMainPagerAdapter.notifyDataSetChanged()
-            } catch (e: Exception) {
-                e.printStackTrace()
-            }
-        }, 1000)
+        if (BasicSettings.quickMode) showQuickPanel() else hideQuickPanel()
 
         mSwitchIdentifier?.let {
             launch { Core.switchToken(it) }
@@ -512,7 +501,7 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun showTopView() {
-        (tab_menus.getChildAt(mViewPager.currentItem) as Button?)?.let {
+        (tab_menus.getChildAt(mViewPager.currentItem) as? Button)?.let {
             ThemeUtil.setThemeTextColor(it, R.attr.menu_text_color)
         }
     }
@@ -560,7 +549,7 @@ class MainActivity: DividedFragmentActivity() {
         KeyboardUtil.hideKeyboard(action_bar_search_text)
         mSearchAdapter?.let {
             if (it.savedMode) {
-                startActivityForResult(getIntent(SearchActivity::class.java).apply{
+                startActivityForResult(intentFor<SearchActivity>().apply{
                     putExtra("query", searchWord)
                 }, REQUEST_SEARCH)
                 return@OnItemClickListener
@@ -568,30 +557,20 @@ class MainActivity: DividedFragmentActivity() {
         }
         when (i) {
             0 ->
-                startActivityForResult(getIntent(SearchActivity::class.java).apply {
-                    putExtra("query", searchWord)
-                }, REQUEST_SEARCH)
+                startActivityForResult<SearchActivity>(REQUEST_SEARCH, "query" to searchWord)
             1 ->
-                startActivityForResult(getIntent(UserSearchActivity::class.java).apply {
-                    putExtra("query", searchWord)
-                }, REQUEST_SEARCH)
+                startActivityForResult<UserSearchActivity>(REQUEST_SEARCH, "query" to searchWord)
             2 ->
-                startActivity(getIntent(ProfileActivity::class.java).apply {
-                    putExtra("screenName", searchWord)
-                })
+                startActivity<ProfileActivity>("screenName" to searchWord)
         }
     }
 
     private val onKeyListener = View.OnKeyListener { _, keyCode, event ->
-        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER) {
-            if (action_bar_search_text.text == null) return@OnKeyListener false
+        if (event.action == KeyEvent.ACTION_DOWN && keyCode == KeyEvent.KEYCODE_ENTER && action_bar_search_text.text.isNullOrBlank().not()) {
             KeyboardUtil.hideKeyboard(action_bar_search_text)
-            startActivityForResult(getIntent(SearchActivity::class.java).apply {
-                putExtra("query", action_bar_search_text.string)
-            }, REQUEST_SEARCH)
-            return@OnKeyListener true
-        }
-        false
+            startActivityForResult<SearchActivity>(REQUEST_SEARCH, "query" to action_bar_search_text.string)
+            true
+        } else false
     }
 
     fun onEventMainThread(e: AlertDialogEvent) {
@@ -616,7 +595,7 @@ class MainActivity: DividedFragmentActivity() {
                 KeyboardUtil.showKeyboard(this)
             }
         } else {
-            startActivity(getIntent(PostActivity::class.java).apply {
+            startActivity(intentFor<PostActivity>().apply {
                 putExtra("status", e.text)
                 e.selectionStart?.let { putExtra("selection", it) }
                 e.selectionStop?.let { putExtra("selection_stop", it) }
@@ -639,10 +618,6 @@ class MainActivity: DividedFragmentActivity() {
         (tab_menus.getChildAt(pos) as Button?)?.let {
             ThemeUtil.setThemeTextColor(it, if (mViewPager.currentItem == pos && e.autoScroll) R.attr.menu_text_color else R.attr.holo_blue)
         }
-    }
-
-    private fun <T> getIntent(cls: Class<T>): Intent {
-        return Intent(this, cls)
     }
 
     fun fixStatusInitialText() { statusInitialText = quick_tweet_edit.text.toString() }

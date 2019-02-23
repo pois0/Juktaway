@@ -7,13 +7,12 @@ import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.membershipsByUserId
 import jp.nephy.penicillin.endpoints.lists.ownerships
 import jp.nephy.penicillin.extensions.await
+import kotlinx.android.synthetic.main.list.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.RegisterListAdapter
 import net.slash_omega.juktaway.model.UserListWithRegistered
-import net.slash_omega.juktaway.util.ThemeUtil
-import kotlinx.android.synthetic.main.list.*
-import kotlinx.coroutines.Job
-import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.twitter.currentClient
+import net.slash_omega.juktaway.util.ThemeUtil
 import org.jetbrains.anko.startActivity
 
 class RegisterUserListActivity: DividedFragmentActivity() {

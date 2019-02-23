@@ -56,9 +56,6 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
     fun findPositionBySearchWord(str: String)
             = mTabs.indexOfFirst { it.id <= TabManager.SEARCH_TAB_ID && it.searchWord == str }
 
-    fun findFragmentById(id: Long)
-            = mTabs.indexOfFirst { it.id == id }.takeIf { it == -1 }?.let { instantiateItem(mViewPager, it) }
-
     fun addTab(clazz : KClass<out Fragment>, args: Bundle?, tabTitle: String, id: Long, searchWord: String? = null) {
         mTabs.add(TabInfo(clazz, args, tabTitle, id, searchWord))
     }

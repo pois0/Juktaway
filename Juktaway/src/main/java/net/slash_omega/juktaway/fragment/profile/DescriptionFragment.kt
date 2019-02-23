@@ -6,7 +6,6 @@ import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.fragment_profile_description.view.*

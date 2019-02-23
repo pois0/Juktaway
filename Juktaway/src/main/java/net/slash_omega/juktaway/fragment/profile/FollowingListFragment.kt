@@ -17,7 +17,7 @@ import net.slash_omega.juktaway.util.tryAndTraceGet
 internal class FollowingListFragment: ProfileListFragmentBase() {
     override val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
     override val layout = R.layout.list_guruguru
-    var cursor: CursorJsonObjectApiAction<CursorUsers>? = null
+    private var cursor: CursorJsonObjectApiAction<CursorUsers>? = null
 
     override fun showList() {
         launch {

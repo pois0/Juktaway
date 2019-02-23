@@ -18,8 +18,8 @@ import java.io.PrintWriter
  */
 class MyUncaughtExceptionHandler(private val context: Context): Thread.UncaughtExceptionHandler {
     companion object {
-        private val BUG_FILE = "BUG"
-        private val MAIL_TO = "mailto:s.aska.org@gmail.com,teshi04@gmail.com"
+        private const val BUG_FILE = "BUG"
+        private const val MAIL_TO = "mailto:s.aska.org@gmail.com,teshi04@gmail.com"
 
         private var sPackageInfo: PackageInfo? = null
         private val sMemoryInfo = ActivityManager.MemoryInfo()

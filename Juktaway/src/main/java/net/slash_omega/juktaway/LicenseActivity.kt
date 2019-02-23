@@ -25,8 +25,7 @@ class LicenseActivity: FragmentActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        license_text.text = if (Build.VERSION.SDK_INT >= Build.VERSION_CODES.N) Html.fromHtml(getString(R.string.license), Html.FROM_HTML_MODE_COMPACT)
-                else Html.fromHtml(getString(R.string.license))
+        license_text.text = Html.fromHtml(getString(R.string.license), Html.FROM_HTML_MODE_COMPACT)
         license_text.movementMethod = ScrollingMovementMethod()
     }
 
