@@ -13,9 +13,7 @@ import kotlin.reflect.KProperty
 
 @Suppress("UNCHECKED_CAST", "IMPLICIT_CAST_TO_ANY")
 open class SharedPreference<T>(prefName: String, private val key: String, private val default: T) {
-    private val pref by lazy {
-        app.getSharedPreferences(prefName, Context.MODE_PRIVATE)!!
-    }
+    private val pref by lazy { app.getSharedPreferences(prefName, Context.MODE_PRIVATE)!! }
 
     private var raw: T
 
@@ -30,8 +28,6 @@ open class SharedPreference<T>(prefName: String, private val key: String, privat
                 else -> throw IllegalTypeException()
             } as T
         }
-        if (default !is Int && default !is Long && default !is Float && default !is String && default !is Boolean)
-            throw IllegalTypeException()
     }
 
     operator fun getValue(thisRef: Any?, property: KProperty<*>): T = raw

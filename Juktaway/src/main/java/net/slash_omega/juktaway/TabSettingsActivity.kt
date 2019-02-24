@@ -10,10 +10,16 @@ import android.support.v4.app.FragmentActivity
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import net.slash_omega.juktaway.model.TabManager
+import jp.nephy.jsonkt.parseListOrEmpty
+import jp.nephy.jsonkt.toJsonArrayOrNull
+import jp.nephy.jsonkt.toJsonObject
+import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_tab_settings.*
 import kotlinx.android.synthetic.main.row_tag.view.*
+import net.slash_omega.juktaway.model.*
+import net.slash_omega.juktaway.util.parseWithClient
+import org.jetbrains.anko.startActivityForResult
 
 /**
  * Created on 2018/08/29.
@@ -27,7 +33,7 @@ class TabSettingsActivity: FragmentActivity() {
 
     private lateinit var mAdapter: TabAdapter
     private lateinit var mListView: ListView
-    private lateinit var mDragTab: TabManager.Tab
+    private lateinit var mDragTab: Tab
     private var mSortable = false
     private var mToPosition: Int = 0
     private var mRemoveMode = false
@@ -58,7 +64,7 @@ class TabSettingsActivity: FragmentActivity() {
                         true
                     } ?: false
                 MotionEvent.ACTION_UP, MotionEvent.ACTION_CANCEL, MotionEvent.ACTION_OUTSIDE -> {
-                    mAdapter.setCurrentTab(null)
+                    mAdapter.currentTab = null
                     mSortable = false
                     true
                 }
@@ -77,17 +83,22 @@ class TabSettingsActivity: FragmentActivity() {
         }
 
         button_save.setOnClickListener {
-            TabManager.saveTabs(mAdapter.tabs)
+            TabManager.reinitialize(mAdapter.tabs)
             setResult(Activity.RESULT_OK)
             finish()
         }
     }
 
-    fun startDrag(tab: TabManager.Tab) {
+    override fun onPostResume() {
+        super.onPostResume()
+
+    }
+
+    fun startDrag(tab: Tab) {
         mDragTab = tab
         mToPosition = 0
         mSortable = true
-        mAdapter.setCurrentTab(mDragTab)
+        mAdapter.currentTab = mDragTab
     }
 
     override fun onCreateOptionsMenu(menu: Menu): Boolean {
@@ -97,10 +108,10 @@ class TabSettingsActivity: FragmentActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_add_home_tab)?.isVisible = !mAdapter.hasTabId(TabManager.TIMELINE_TAB_ID)
-        menu.findItem(R.id.menu_add_interactions_tab)?.isVisible = !mAdapter.hasTabId(TabManager.INTERACTIONS_TAB_ID)
-        menu.findItem(R.id.menu_add_direct_messages_tab)?.isVisible = !mAdapter.hasTabId(TabManager.DIRECT_MESSAGES_TAB_ID)
-        menu.findItem(R.id.menu_add_favorites_tab)?.isVisible = !mAdapter.hasTabId(TabManager.FAVORITES_TAB_ID)
+        menu.findItem(R.id.menu_add_home_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_TIMELINE_TAB_ID)
+        menu.findItem(R.id.menu_add_interactions_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_INTERACTIONS_TAB_ID)
+        menu.findItem(R.id.menu_add_direct_messages_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_DIRECT_MESSAGES_TAB_ID)
+        menu.findItem(R.id.menu_add_favorites_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_FAVORITES_TAB_ID)
         return true
     }
 
@@ -108,16 +119,11 @@ class TabSettingsActivity: FragmentActivity() {
         with(mAdapter) {
             when (item.itemId) {
                 android.R.id.home -> finish()
-                R.id.menu_add_home_tab -> insert(TabManager.Tab(TabManager.TIMELINE_TAB_ID), 0)
-                R.id.menu_add_interactions_tab -> insert(TabManager.Tab(TabManager.INTERACTIONS_TAB_ID), 0)
-                R.id.menu_add_direct_messages_tab -> insert(TabManager.Tab(TabManager.DIRECT_MESSAGES_TAB_ID), 0)
-                R.id.menu_add_favorites_tab -> insert(TabManager.Tab(TabManager.FAVORITES_TAB_ID), 0)
-                R.id.menu_user_list_tab -> {
-                    TabManager.saveTabs(tabs)
-                    val intent = Intent(this@TabSettingsActivity, ChooseUserListsActivity::class.java)
-                    setResult(Activity.RESULT_OK)
-                    startActivityForResult(intent, REQUEST_CHOOSE_USER_LIST)
-                }
+                R.id.menu_add_home_tab -> insert(homeTab, 0)
+                R.id.menu_add_interactions_tab -> insert(mentionTab, 0)
+                R.id.menu_add_direct_messages_tab -> insert(dmTab, 0)
+                R.id.menu_add_favorites_tab -> insert(favoriteTab, 0)
+                R.id.menu_user_list_tab -> startActivityForResult<ChooseUserListsActivity>(REQUEST_CHOOSE_USER_LIST)
             }
         }
         return true
@@ -127,40 +133,61 @@ class TabSettingsActivity: FragmentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
         when (requestCode) {
             REQUEST_CHOOSE_USER_LIST -> if (resultCode == Activity.RESULT_OK) {
-                mAdapter.clear()
-                TabManager.loadTabs().forEach { mAdapter.add(it) }
+                val add = data?.getStringArrayExtra("add")
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.map { it.toJsonObject().parseWithClient<TwitterList>() } ?: emptyList()
+                val remove = data?.getStringArrayExtra("remove")
+                        ?.takeIf { it.isNotEmpty() }
+                        ?.map { it.toJsonObject().parseWithClient<TwitterList>() } ?: emptyList()
+
+                mAdapter.addAll(add.map { it.toTab() })
+                mAdapter.removeAll(remove.map { it.toTab() })
                 mAdapter.notifyDataSetChanged()
-                mListView.invalidateViews()
+                println(mAdapter.count)
+                //mListView.invalidateViews()
                 setResult(Activity.RESULT_OK)
             }
         }
     }
 
-    inner class TabAdapter(context: Context, private val mLayout: Int, list: List<TabManager.Tab>): ArrayAdapter<TabManager.Tab>(context, mLayout, list) {
+    inner class TabAdapter(context: Context, private val mLayout: Int, list: List<Tab>): ArrayAdapter<Tab>(context, mLayout, list) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
-        private var mCurrentTab: TabManager.Tab? = null
-        val tabs = ArrayList<TabManager.Tab>()
+        internal var currentTab: Tab? = null
+            set(value) {
+                field = value
+                notifyDataSetChanged()
+            }
 
+        val tabs = list.toMutableList()
 
-        fun setCurrentTab(tab: TabManager.Tab?) {
-            mCurrentTab = tab
-            notifyDataSetChanged()
-        }
-
-
-        override fun add(tab: TabManager.Tab?) {
+        override fun add(tab: Tab) {
             super.add(tab)
-            tab?.let { tabs.add(it) }
+            tabs.add(tab)
         }
 
-        override fun insert(tab: TabManager.Tab?, position: Int) {
+        override fun addAll(collection: Collection<Tab>) {
+            super.addAll(collection)
+            tabs.addAll(collection)
+        }
+
+        override fun addAll(vararg items: Tab) {
+            super.addAll(*items)
+            tabs.addAll(items.toList())
+        }
+
+        override fun insert(tab: Tab, position: Int) {
             super.insert(tab, position)
-            tab?.let { tabs.add(position, it) }
+            tabs.add(position, tab)
         }
 
-        override fun remove(tab: TabManager.Tab?) {
+        override fun remove(tab: Tab) {
             super.remove(tab)
             tabs.remove(tab)
+        }
+
+        fun removeAll(collection: Collection<Tab>) {
+            collection.forEach { super.remove(it) }
+            tabs.removeAll(collection)
         }
 
         override fun clear() {
@@ -173,8 +200,8 @@ class TabSettingsActivity: FragmentActivity() {
         override fun getView(position: Int, view: View?, parent: ViewGroup?): View? {
             return (view ?: mInflater.inflate(this.mLayout, null))?.apply {
                 val tab = tabs[position]
-                tab_icon.setText(tab.getIcon())
-                name.text = tab.name
+                tab_icon.setText(tab.icon)
+                name.text = tab.displayString
 
                 handle.apply {
                     if (mRemoveMode) {
@@ -193,7 +220,7 @@ class TabSettingsActivity: FragmentActivity() {
                     }
                 }
 
-                setBackgroundColor(if (mCurrentTab == tab) HIGH_LIGHT_COLOR else DEFAULT_COLOR)
+                setBackgroundColor(if (currentTab == tab) HIGH_LIGHT_COLOR else DEFAULT_COLOR)
             }
         }
     }

@@ -1,84 +1,132 @@
 package net.slash_omega.juktaway.model
 
-import android.content.Context
 import com.google.gson.Gson
+import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentIdentifier
+import net.slash_omega.juktaway.util.SharedPreference
 import java.util.ArrayList
 
+const val HOME_TAB_ID = 0
+const val MENTION_TAB_ID = 1
+const val FAVORITE_TAB_ID = 2
+const val DM_TAB_ID = 3
+const val SEARCH_TAB_ID = 4
+const val LIST_TAB_ID = 5
+const val USER_TAB_ID = 6
+
 object TabManager {
-    const val TIMELINE_TAB_ID = -1L
-    const val INTERACTIONS_TAB_ID = -2L
-    const val DIRECT_MESSAGES_TAB_ID = -3L
-    const val FAVORITES_TAB_ID = -4L
-    const val SEARCH_TAB_ID = -5L
+    const val OLD_TIMELINE_TAB_ID = -1L
+    const val OLD_INTERACTIONS_TAB_ID = -2L
+    const val OLD_DIRECT_MESSAGES_TAB_ID = -3L
+    const val OLD_FAVORITES_TAB_ID = -4L
+    const val OLD_SEARCH_TAB_ID = -5L
 
-    private const val TABS = "tabs-"
-    private var sTabs = arrayListOf<Tab>()
+    private const val TABS = "mTabs-"
+    private var mTabs = mutableListOf<Tab>()
+    private var tabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v3", "")
+    private var oldTabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v2", "")
 
-    private fun getSharedPreferences() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
-
-    fun loadTabs(): ArrayList<Tab> {
-        sTabs.clear()
-        getSharedPreferences().getString(TABS + currentIdentifier.userId.toString() + "/v2", null).let { raw ->
-            val gson = Gson()
-            val tabData = gson.fromJson(raw, TabData::class.java)
-            sTabs = (tabData?.tabs ?: arrayListOf()).apply {
-                removeAll { it.id == DIRECT_MESSAGES_TAB_ID }
-            }
-            for (tab in sTabs) {
-                if (tab.id <= SEARCH_TAB_ID) {
-                    tab.id = SEARCH_TAB_ID - Math.abs(tab.name.hashCode())
-                }
-            }
-        }
-        if (sTabs.size == 0) sTabs = generalTabs
-        return sTabs
+    fun loadTabs() = mTabs.also { list ->
+        list.clear()
+        list.addAll(
+                oldTabPreference.takeIf { it.isNotBlank() }?.let { oldJson ->
+                    Gson().fromJson(oldJson, OldTabData::class.java)?.tabs?.let { data ->
+                        data.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
+                        translateTab(data)
+                    }
+                } ?: tabPreference.takeIf { it.isNotBlank() }?.let { json ->
+                    Gson().fromJson(json, TabData::class.java)?.tabs
+                } ?: generalTabs
+        )
     }
 
-    fun saveTabs(tabs: ArrayList<Tab>) {
-        val tabData = TabData()
-        tabData.tabs = tabs
-        val json = Gson().toJson(tabData)
-        getSharedPreferences().edit().apply {
-            remove(TABS + currentIdentifier.userId.toString())
-            putString(TABS + currentIdentifier.userId.toString() + "/v2", json)
-        }.apply()
-        sTabs = tabs
+    fun reinitialize(tabs: List<Tab>) {
+        mTabs.clear()
+        mTabs.addAll(tabs.filterNot { it.type == DM_TAB_ID })
+        saveTabs()
+    }
+
+    fun addTab(tab: Tab) {
+        mTabs.add(tab)
+        saveTabs()
+    }
+
+    fun addSearchTab(searchWord: String) = addTab(Tab(SEARCH_TAB_ID, 0, searchWord, -1))
+
+    private fun saveTabs() {
+        tabPreference = Gson().toJson(TabData(ArrayList(mTabs)))
+    }
+
+    private fun translateTab(list: List<OldTab>) = list.map {
+        when {
+            it.id == TabManager.OLD_TIMELINE_TAB_ID -> homeTab
+            it.id == TabManager.OLD_INTERACTIONS_TAB_ID -> mentionTab
+            it.id == TabManager.OLD_DIRECT_MESSAGES_TAB_ID -> favoriteTab
+            it.id == TabManager.OLD_FAVORITES_TAB_ID -> dmTab
+            it.id <= TabManager.OLD_SEARCH_TAB_ID ->Tab(SEARCH_TAB_ID, 0, it.name, -1)
+            else -> Tab(LIST_TAB_ID, it.id, it.name, -1)
+        }
     }
 
     private val generalTabs
-        get() = arrayListOf(Tab(TIMELINE_TAB_ID), Tab(INTERACTIONS_TAB_ID), Tab(FAVORITES_TAB_ID))
+        get() = listOf(homeTab, mentionTab, favoriteTab)
 
-    fun hasTabId(findTab: Long) = sTabs.any { it.id == findTab }
+    fun isUserListRegistered(id: Long) = mTabs.any { it.type == LIST_TAB_ID && it.id == id }
+}
 
-    class TabData {
-        internal var tabs = arrayListOf<Tab>()
-    }
+private data class OldTabData(val tabs: ArrayList<OldTab>)
 
-    class Tab(var id: Long) {
-        fun getString(id: Int): String = app.getString(id)
+private data class TabData(val tabs: ArrayList<Tab>)
 
-        var name = ""
-            get() = when {
-                id == TIMELINE_TAB_ID ->app.getString(R.string.title_main)
-                id == INTERACTIONS_TAB_ID ->app.getString(R.string.title_interactions)
-                id == DIRECT_MESSAGES_TAB_ID ->app.getString(R.string.title_direct_messages)
-                id == FAVORITES_TAB_ID ->app.getString(R.string.title_favorites)
-                id <= SEARCH_TAB_ID ->app.getString(R.string.title_search) + ":" + field
-                else -> field
-            }
+class OldTab(var id: Long) {
+    fun getString(id: Int): String = app.getString(id)
 
-        fun getIcon(): Int {
-            return when {
-                id == TIMELINE_TAB_ID -> R.string.fontello_home
-                id == INTERACTIONS_TAB_ID -> R.string.fontello_at
-                id == DIRECT_MESSAGES_TAB_ID -> R.string.fontello_mail
-                id == FAVORITES_TAB_ID -> R.string.fontello_star
-                id <= SEARCH_TAB_ID -> R.string.fontello_search
-                else -> R.string.fontello_list
-            }
-        }
+    var name = ""
+}
+
+data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Int) {
+    override fun equals(other: Any?) = other is Tab && type == other.type && when (type) {
+        4 -> word == other.word
+        5, 6 -> id == other.id
+        else -> true
     }
 }
+
+val Tab.icon: Int
+    get() = when (type) {
+        HOME_TAB_ID -> R.string.fontello_home
+        MENTION_TAB_ID -> R.string.fontello_at
+        DM_TAB_ID -> R.string.fontello_mail
+        FAVORITE_TAB_ID -> R.string.fontello_star
+        SEARCH_TAB_ID -> R.string.fontello_search
+        LIST_TAB_ID -> R.string.fontello_list
+        else -> 0
+    }
+
+val Tab.displayString: String
+    get() = when (type) {
+        HOME_TAB_ID ->app.getString(R.string.title_main)
+        MENTION_TAB_ID ->app.getString(R.string.title_interactions)
+        DM_TAB_ID ->app.getString(R.string.title_direct_messages)
+        FAVORITE_TAB_ID ->app.getString(R.string.title_favorites)
+        SEARCH_TAB_ID ->app.getString(R.string.title_search) + ": " + word
+        LIST_TAB_ID -> word
+        USER_TAB_ID -> app.getString(R.string.title_user) + ": " + word
+        else -> ""
+    }
+
+val homeTab: Tab
+    get() = Tab(HOME_TAB_ID, 0, "", -1)
+
+val mentionTab: Tab
+    get() = Tab(MENTION_TAB_ID, 0, "", -1)
+
+val favoriteTab: Tab
+    get() = Tab(FAVORITE_TAB_ID, 0, "", -1)
+
+val dmTab: Tab
+    get() = Tab(DM_TAB_ID, 0, "", -1)
+
+fun TwitterList.toTab() = Tab(LIST_TAB_ID, id, if (user.id == currentIdentifier.userId) name else fullName, -1)

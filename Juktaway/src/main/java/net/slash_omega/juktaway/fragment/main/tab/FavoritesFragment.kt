@@ -9,8 +9,6 @@ import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
 
 class FavoritesFragment: BaseFragment() {
-    override var tabId = TabManager.FAVORITES_TAB_ID
-
     override suspend fun taskExecute() {
         val statuses = runCatching {
             currentClient.favorites.list(

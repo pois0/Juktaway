@@ -52,9 +52,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private lateinit var mFooter: ProgressBar
     protected lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
 
-    abstract var tabId: Long
-        protected set
-
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
      * 2. スクロールが終わった瞬間に表示位置がトップだったらボタンのハイライトを消すためにイベント発行
@@ -203,7 +200,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
         val autoScroll = position == 0 && y == 0 && mStackRows.size < 3
 
-        if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
+        //if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
 
         if (autoScroll) {
             mListView.setSelection(0)
@@ -240,7 +237,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         if (!mScrolling && isTop) {
             showStack()
         } else {
-            EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
+            //EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
         }
     }
 
@@ -310,6 +307,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      * @param event アプリが表示しているタブのID
      */
     fun onEventMainThread(event: PostAccountChangeEvent) {
-        if (event.tabId == tabId) reload() else clear()
+        reload()
     }
 }

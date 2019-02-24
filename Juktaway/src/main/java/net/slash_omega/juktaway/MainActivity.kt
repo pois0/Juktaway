@@ -39,9 +39,9 @@ import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.fragment.dialog.QuickPostMenuFragment
-import net.slash_omega.juktaway.fragment.main.tab.*
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.model.UserIconManager
+import net.slash_omega.juktaway.model.icon
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
@@ -409,55 +409,37 @@ class MainActivity: DividedFragmentActivity() {
 
     private fun setupTab() {
         val tabs = TabManager.loadTabs()
-        if (tabs.isNotEmpty()) {
-            val outValueTextColor = TypedValue()
-            val outValueBackground = TypedValue()
-            theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
-            theme?.resolveAttribute(R.attr.button_stateful, outValueBackground, true)
+        val outValueTextColor = TypedValue()
+        val outValueBackground = TypedValue()
+        theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
+        theme?.resolveAttribute(R.attr.button_stateful, outValueBackground, true)
 
-            tab_menus.removeAllViews()
-            mMainPagerAdapter.clearTab()
+        tab_menus.removeAllViews()
+        mMainPagerAdapter.clearTab()
 
-            var pos = 0
-            for (tab in tabs) {
-                tab_menus.addView(FontelloButton(this).apply {
-                    layoutParams = LinearLayout.LayoutParams(
-                            (60 * resources.displayMetrics.density + 0.5f).toInt(),
-                            LinearLayout.LayoutParams.WRAP_CONTENT
-                    )
-                    setText(tab.getIcon())
-                    textSize = 22f
-                    setTextColor(outValueTextColor.data)
-                    setBackgroundResource(outValueBackground.resourceId)
-                    tag = pos++
-                    setOnClickListener(mMenuOnClickListener)
-                    setOnLongClickListener(mMenuOnLongClickListener)
-                })
-                when (tab.id) {
-                    TabManager.TIMELINE_TAB_ID ->
-                        mMainPagerAdapter.addTab(TimelineFragment::class, null, tab.name, tab.id)
-                    TabManager.INTERACTIONS_TAB_ID ->
-                        mMainPagerAdapter.addTab(InteractionsFragment::class, null, tab.name, tab.id)
-                    TabManager.DIRECT_MESSAGES_TAB_ID ->
-                        mMainPagerAdapter.addTab(DirectMessagesFragment::class, null, tab.name, tab.id)
-                    TabManager.FAVORITES_TAB_ID ->
-                        mMainPagerAdapter.addTab(FavoritesFragment::class, null, tab.name, tab.id)
-                    in Long.MIN_VALUE..TabManager.SEARCH_TAB_ID ->
-                        mMainPagerAdapter.addTab(SearchFragment::class,
-                                Bundle().apply { putString("searchWord", tab.name) },
-                                tab.name, tab.id, tab.name)
-                    else ->
-                        mMainPagerAdapter.addTab(UserListFragment::class,
-                                Bundle().apply { putLong("userListId", tab.id) },
-                                tab.name, tab.id)
-                }
-                mMainPagerAdapter.notifyDataSetChanged()
-
-                val currentPos = mViewPager.currentItem
-                (tab_menus.getChildAt(currentPos) as? Button)?.isSelected = true
-                title = mMainPagerAdapter.getPageTitle(currentPos)
-            }
+        var pos = 0
+        for (tab in tabs) {
+            tab_menus.addView(FontelloButton(this).apply {
+                layoutParams = LinearLayout.LayoutParams(
+                        (60 * resources.displayMetrics.density + 0.5f).toInt(),
+                        LinearLayout.LayoutParams.WRAP_CONTENT
+                )
+                setText(tab.icon)
+                textSize = 22f
+                setTextColor(outValueTextColor.data)
+                setBackgroundResource(outValueBackground.resourceId)
+                tag = pos++
+                setOnClickListener(mMenuOnClickListener)
+                setOnLongClickListener(mMenuOnLongClickListener)
+            })
+            mMainPagerAdapter.addTab(tab)
         }
+
+        mMainPagerAdapter.notifyDataSetChanged()
+
+        mViewPager.currentItem = 0
+        (tab_menus.getChildAt(0) as? Button)?.isSelected = true
+        title = mMainPagerAdapter.getPageTitle(0)
     }
 
     private val mMenuOnClickListener = View.OnClickListener {
@@ -608,17 +590,17 @@ class MainActivity: DividedFragmentActivity() {
     fun onEventMainThread(e: AccountChangeEvent) {
         setupTab()
         mAccessTokenAdapter.notifyDataSetChanged()
-        EventBus.getDefault().post(PostAccountChangeEvent(mMainPagerAdapter.getItemId(mViewPager.currentItem)))
+        EventBus.getDefault().post(PostAccountChangeEvent())
     }
 
-    fun onEventMainThread(e: NewRecordEvent) {
-        val pos = if (e.tabId > TabManager.SEARCH_TAB_ID) mMainPagerAdapter.findPositionById(e.tabId)
-                else mMainPagerAdapter.findPositionBySearchWord(e.searchWord)
-        if (pos < 0) return
-        (tab_menus.getChildAt(pos) as Button?)?.let {
-            ThemeUtil.setThemeTextColor(it, if (mViewPager.currentItem == pos && e.autoScroll) R.attr.menu_text_color else R.attr.holo_blue)
-        }
-    }
+//    fun onEventMainThread(e: NewRecordEvent) {
+//        val pos = if (e.tabId > TabManager.OLD_SEARCH_TAB_ID) mMainPagerAdapter.findPositionById(e.tabId)
+//                else mMainPagerAdapter.findPositionBySearchWord(e.searchWord)
+//        if (pos < 0) return
+//        (tab_menus.getChildAt(pos) as Button?)?.let {
+//            ThemeUtil.setThemeTextColor(it, if (mViewPager.currentItem == pos && e.autoScroll) R.attr.menu_text_color else R.attr.holo_blue)
+//        }
+//    }
 
     fun fixStatusInitialText() { statusInitialText = quick_tweet_edit.text.toString() }
 
