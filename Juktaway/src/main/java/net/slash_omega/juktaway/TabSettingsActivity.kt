@@ -10,8 +10,6 @@ import android.support.v4.app.FragmentActivity
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ListView
-import jp.nephy.jsonkt.parseListOrEmpty
-import jp.nephy.jsonkt.toJsonArrayOrNull
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.util.ThemeUtil
@@ -89,11 +87,6 @@ class TabSettingsActivity: FragmentActivity() {
         }
     }
 
-    override fun onPostResume() {
-        super.onPostResume()
-
-    }
-
     fun startDrag(tab: Tab) {
         mDragTab = tab
         mToPosition = 0
@@ -108,10 +101,10 @@ class TabSettingsActivity: FragmentActivity() {
 
     override fun onPrepareOptionsMenu(menu: Menu): Boolean {
         super.onPrepareOptionsMenu(menu)
-        menu.findItem(R.id.menu_add_home_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_TIMELINE_TAB_ID)
-        menu.findItem(R.id.menu_add_interactions_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_INTERACTIONS_TAB_ID)
-        menu.findItem(R.id.menu_add_direct_messages_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_DIRECT_MESSAGES_TAB_ID)
-        menu.findItem(R.id.menu_add_favorites_tab)?.isVisible = !mAdapter.hasTabId(TabManager.OLD_FAVORITES_TAB_ID)
+        menu.findItem(R.id.menu_add_home_tab)?.isVisible = !mAdapter.hasTab(HOME_TAB_ID)
+        menu.findItem(R.id.menu_add_interactions_tab)?.isVisible = !mAdapter.hasTab(MENTION_TAB_ID)
+        menu.findItem(R.id.menu_add_direct_messages_tab)?.isVisible = false //mAdapter.hasTab(DM_TAB_ID)
+        menu.findItem(R.id.menu_add_favorites_tab)?.isVisible = !mAdapter.hasTab(FAVORITE_TAB_ID)
         return true
     }
 
@@ -195,7 +188,7 @@ class TabSettingsActivity: FragmentActivity() {
             tabs.clear()
         }
 
-        fun hasTabId(tabId: Long?): Boolean = tabs.any { it.id == tabId }
+        fun hasTab(type: Int): Boolean = tabs.any { it.type == type }
 
         override fun getView(position: Int, view: View?, parent: ViewGroup?): View? {
             return (view ?: mInflater.inflate(this.mLayout, null))?.apply {
