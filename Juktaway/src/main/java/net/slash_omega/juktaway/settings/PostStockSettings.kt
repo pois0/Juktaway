@@ -1,9 +1,10 @@
 package net.slash_omega.juktaway.settings
 
-import com.google.gson.Gson
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
+import kotlinx.serialization.*
+import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.util.SharedPreference
 
 /**
@@ -12,19 +13,22 @@ import net.slash_omega.juktaway.util.SharedPreference
 
 object PostStockSettings {
     private var json by SharedPreference("post_settings", "data", "")
+
+    @UseExperimental(ImplicitReflectionSerializer::class)
     private val stocks = json.takeIf { it.isNotBlank() }?.let {
-        Gson().fromJson(it, PostStockSettingsData::class.java)
+        Json.parse<PostStockSettingsData>(it)
     } ?: PostStockSettingsData()
 
     //TODO +=などのoperatorを実装したい
     val hashtags
-        get() = stocks.hashtags.reversed()
+        get() = stocks.hashtags.reversed().toMutableList()
     val drafts
-        get() = stocks.drafts.reversed()
+        get() = stocks.drafts.reversed().toMutableList()
 
+    @UseExperimental(ImplicitReflectionSerializer::class)
     private fun savePostStockSettings() {
         GlobalScope.launch(Dispatchers.Default) {
-            json = Gson().toJson(stocks)
+            json = Json.stringify(stocks)
         }
     }
 
@@ -49,8 +53,9 @@ object PostStockSettings {
         savePostStockSettings()
     }
 
-    class PostStockSettingsData {
-        internal val hashtags: MutableList<String> = mutableListOf()
-        internal val drafts: MutableList<String> = mutableListOf()
-    }
+    @Serializable
+    data class PostStockSettingsData(
+            @Optional internal val hashtags: MutableList<String> = mutableListOf(),
+            @Optional internal val drafts: MutableList<String> = mutableListOf()
+    )
 }

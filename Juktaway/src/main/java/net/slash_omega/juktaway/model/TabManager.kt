@@ -1,7 +1,8 @@
 package net.slash_omega.juktaway.model
 
-import com.google.gson.Gson
 import jp.nephy.penicillin.models.TwitterList
+import kotlinx.serialization.*
+import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -17,27 +18,29 @@ const val LIST_TAB_ID = 5
 const val USER_TAB_ID = 6
 
 object TabManager {
-    const val OLD_TIMELINE_TAB_ID = -1L
-    const val OLD_INTERACTIONS_TAB_ID = -2L
-    const val OLD_DIRECT_MESSAGES_TAB_ID = -3L
-    const val OLD_FAVORITES_TAB_ID = -4L
-    const val OLD_SEARCH_TAB_ID = -5L
+    private const val OLD_TIMELINE_TAB_ID = -1L
+    private const val OLD_INTERACTIONS_TAB_ID = -2L
+    private const val OLD_DIRECT_MESSAGES_TAB_ID = -3L
+    private const val OLD_FAVORITES_TAB_ID = -4L
+    private const val OLD_SEARCH_TAB_ID = -5L
 
     private const val TABS = "mTabs-"
     private var mTabs = mutableListOf<Tab>()
     private var tabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v3", "")
     private var oldTabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v2", "")
 
+    @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs() = mTabs.also { list ->
         list.clear()
         list.addAll(
                 oldTabPreference.takeIf { it.isNotBlank() }?.let { oldJson ->
-                    Gson().fromJson(oldJson, OldTabData::class.java)?.tabs?.let { data ->
-                        data.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
-                        translateTab(data)
+                    Json.parse<OldTabData>(oldJson).let { data ->
+                        data.tabs.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
+                        translateTab(data.tabs)
                     }
                 } ?: tabPreference.takeIf { it.isNotBlank() }?.let { json ->
-                    Gson().fromJson(json, TabData::class.java)?.tabs
+                    println(json)
+                    Json.parseList<Tab>(json)
                 } ?: generalTabs
         )
     }
@@ -55,8 +58,9 @@ object TabManager {
 
     fun addSearchTab(searchWord: String) = addTab(Tab(SEARCH_TAB_ID, 0, searchWord, -1))
 
+    @UseExperimental(ImplicitReflectionSerializer::class)
     private fun saveTabs() {
-        tabPreference = Gson().toJson(TabData(ArrayList(mTabs)))
+        tabPreference = Json.stringify(mTabs)
     }
 
     private fun translateTab(list: List<OldTab>) = list.map {
@@ -76,22 +80,21 @@ object TabManager {
     fun isUserListRegistered(id: Long) = mTabs.any { it.type == LIST_TAB_ID && it.id == id }
 }
 
+@Serializable
 private data class OldTabData(val tabs: ArrayList<OldTab>)
 
-private data class TabData(val tabs: ArrayList<Tab>)
+@Serializable
+class OldTab(var id: Long, @Optional var name: String = "")
 
-class OldTab(var id: Long) {
-    fun getString(id: Int): String = app.getString(id)
-
-    var name = ""
-}
-
+@Serializable
 data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Int) {
     override fun equals(other: Any?) = other is Tab && type == other.type && when (type) {
         4 -> word == other.word
         5, 6 -> id == other.id
         else -> true
     }
+
+    override fun hashCode() = type + 29 * word.hashCode() + id.hashCode()
 }
 
 val Tab.icon: Int
