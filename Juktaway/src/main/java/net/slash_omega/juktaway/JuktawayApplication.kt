@@ -1,10 +1,8 @@
 package net.slash_omega.juktaway
 
-import android.content.Context
+import android.app.Application
 import android.graphics.Typeface
 import android.os.StrictMode
-import android.support.multidex.MultiDex
-import android.support.multidex.MultiDexApplication
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.Core
@@ -14,12 +12,7 @@ internal lateinit var app: JuktawayApplication
 
 internal lateinit var font: Typeface
 
-class JuktawayApplication: MultiDexApplication() {
-    override fun attachBaseContext(base: Context?) {
-        super.attachBaseContext(base)
-        MultiDex.install(this)
-    }
-
+class JuktawayApplication: Application() {
     override fun onCreate() {
         super.onCreate()
         app = this
