@@ -11,12 +11,11 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
-import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
+import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
-import net.slash_omega.juktaway.event.NewRecordEvent
 import net.slash_omega.juktaway.event.action.GoToTopEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
@@ -88,7 +87,10 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-        = inflater.inflate(R.layout.pull_to_refresh_list, container, false)?.apply { activity?.let { act ->
+        = inflater.inflate(R.layout.pull_to_refresh_list, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val act = activity ?: return
         mListView = list_view.apply {
             onItemClickListener = StatusClickListener(act)
             onItemLongClickListener = StatusLongClickListener(act)
@@ -99,7 +101,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mSwipeRefreshLayout = sr_layout.apply {
             setOnRefreshListener { reload() }
         }
-    } }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
