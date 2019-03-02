@@ -22,7 +22,7 @@ import net.slash_omega.juktaway.util.nullToBlank
 /**
  * Created on 2018/11/17.
  */
-class SearchAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<String>(mContext, mLayout), Filterable {
+class SearchAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<String>(mContext, mLayout), Filterable {
     private val mStrings = mutableListOf<String>()
     private val mSavedSearches = mutableListOf<SavedSearch>()
     private lateinit var mSearchWord: String

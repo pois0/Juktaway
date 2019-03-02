@@ -24,7 +24,7 @@ import net.slash_omega.juktaway.adapter.UserAdapter
 import net.slash_omega.juktaway.twitter.currentClient
 
 class UserMemberFragment : Fragment() {
-    private lateinit var mAdapter: UserAdapter
+    private val mAdapter by lazy { UserAdapter(activity!!, R.layout.row_user) }
     private var mListId: Long = 0L
     private var mCursor: CursorJsonObjectApiAction<CursorUsers>? = null
     private lateinit var mListView: ListView
@@ -34,8 +34,6 @@ class UserMemberFragment : Fragment() {
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
             = inflater.inflate(R.layout.list_guruguru, container, false)?.apply {
         arguments?.getLong("listId")?.let { mListId = it }
-
-        mAdapter = UserAdapter(activity, R.layout.row_user)
 
         // リストビューの設定
         mListView = list_view.apply {
