@@ -42,11 +42,11 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
             timeline?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
-                    lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                    mMaxId = lastOrNull()?.id ?: 0
                     mAdapter.addAllFromStatusesSuspend(this)
                     mReload = false
                 } else {
-                    lastOrNull { mMaxId == 0L || mMaxId > it.id }?.let { mMaxId = it.id }
+                    mMaxId = lastOrNull()?.id ?: 0
                     mAdapter.extensionAddAllFromStatuses(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
