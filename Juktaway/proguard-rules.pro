@@ -17,8 +17,8 @@
 }
 
 # http://qiita.com/petitviolet/items/1b709f3f0db2659a271a
--keepnames class net.slashOmega.juktaway.model.** { *; }
--keepnames class net.slashOmega.juktaway.settings.** { *; }
+-keepnames class net.slash_omega.juktaway.model.** { *; }
+-keepnames class net.slash_omega.juktaway.settings.** { *; }
 
 # *** Debug ***
 # -renamesourcefileattribute SourceFile
