@@ -1,0 +1,3 @@
+package net.slash_omega.juktaway.event.settings
+
+class BasicSettingsChangeEvent

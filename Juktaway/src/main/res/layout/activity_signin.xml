@@ -11,18 +11,41 @@
               android:screenOrientation="portrait"
               tools:context=".MainActivity">
 
-    <EditText
+    <Spinner
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/consumer_key" android:hint="Consumer Key"/>
-    <EditText
+            android:layout_height="wrap_content" android:id="@+id/consumer_spinner"/>
+    <LinearLayout
+            android:orientation="horizontal"
             android:layout_width="match_parent"
-            android:layout_height="wrap_content"
-            android:inputType="textPersonName"
-            android:ems="10"
-            android:id="@+id/consumer_secret" android:hint="Consumer Secret"/>
+            android:layout_height="wrap_content" android:id="@+id/consumer_layout">
+        <LinearLayout
+                android:orientation="vertical"
+                android:layout_width="0dp"
+                android:layout_height="wrap_content" android:layout_weight="5">
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_name" android:hint="Consumer Name"/>
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_key" android:hint="Consumer Key"/>
+            <EditText
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:inputType="textPersonName"
+                    android:ems="10"
+                    android:id="@+id/consumer_secret" android:hint="Consumer Secret"/>
+        </LinearLayout>
+        <Button
+                android:text="@string/add_consumer_button_text"
+                android:layout_width="0dp"
+                android:layout_height="match_parent" android:id="@+id/add_consumer_button" android:layout_weight="1"/>
+    </LinearLayout>
     <EditText
             android:layout_width="match_parent"
             android:layout_height="wrap_content"
@@ -30,19 +53,19 @@
             android:ems="10"
             android:maxLength="7"
             android:id="@+id/pin_code" android:hint="PIN Code" android:singleLine="true"/>
-    <net.slashOmega.juktaway.widget.FontelloButton
-        android:id="@+id/start_oauth_button"
-        android:layout_width="128dp"
-        android:layout_height="128dp"
-        android:textSize="64sp"
-        android:text="@string/fontello_twitter"/>
+    <net.slash_omega.juktaway.widget.FontelloButton
+            android:id="@+id/start_oauth_button"
+            android:layout_width="128dp"
+            android:layout_height="128dp"
+            android:textSize="64sp"
+            android:text="@string/fontello_twitter"/>
 
     <TextView
-        android:id="@+id/connect_with_twitter"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_marginTop="10dp"
-        android:textSize="18sp"
-        android:text="@string/label_connect_with_twitter"/>
+            android:id="@+id/connect_with_twitter"
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:layout_marginTop="10dp"
+            android:textSize="18sp"
+            android:text="@string/label_connect_with_twitter"/>
 
 </LinearLayout>

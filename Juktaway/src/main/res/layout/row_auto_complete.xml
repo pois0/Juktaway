@@ -13,7 +13,7 @@
         android:layout_gravity="center"
         android:textSize="14sp"/>
 
-    <net.slashOmega.juktaway.widget.FontelloTextView
+    <net.slash_omega.juktaway.widget.FontelloTextView
         android:id="@+id/trash"
         android:paddingTop="6dp"
         android:paddingRight="6dp"

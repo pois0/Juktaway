@@ -1,18 +1,5 @@
 -dontwarn sun.misc.Unsafe
 
-# for Butter Knife
--keep class butterknife.** { *; }
--dontwarn butterknife.internal.**
--keep class **$$ViewBinder { *; }
-
--keepclasseswithmembernames class * {
-    @butterknife.* <fields>;
-}
-
--keepclasseswithmembernames class * {
-    @butterknife.* <methods>;
-}
-
 # for EventBus
 -keepclassmembers class ** {
     public void onEvent*(**);
@@ -25,13 +12,19 @@
 -keep class sun.misc.Unsafe { *; }
 -keep class com.google.gson.examples.android.model.** { *; }
 
-# http://qiita.com/petitviolet/items/1b709f3f0db2659a271a
--keepnames class net.slashOmega.juktaway.model.** { *; }
--keepnames class net.slashOmega.juktaway.settings.** { *; }
+# for Ktor
+-keep class io.ktor.** { *; }
+-keep class kotlinx.coroutines.** { *; }
+-dontwarn kotlinx.atomicfu.**
+-dontwarn io.netty.**
+-dontwarn com.typesafe.**
+-dontwarn org.slf4j.**
 
-# for Twitter4j
--dontwarn twitter4j.**
--keep class twitter4j.** { *; }
+# http://qiita.com/petitviolet/items/1b709f3f0db2659a271a
+-keepnames class net.slash_omega.juktaway.model.** { *; }
+-keepnames class net.slash_omega.juktaway.settings.** { *; }
+-keepnames class net.slash_omega.juktaway.fragment.** { *; }
+-dontwarn net.slash_omega.juktaway.fragment.**
 
 # *** Debug ***
 # -renamesourcefileattribute SourceFile

@@ -16,7 +16,8 @@
 * Android AppCompat Library v7
 * Android Multi-Dex Library
 
-Author: The Android Open Source Project \
+Author: The Android Open Source Project
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * kotlinx.serialization
@@ -31,76 +32,77 @@ License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0
 * Anko
 * IntelliJ IDEA Annotations
 
-Author: JetBrains \
+Author: JetBrains
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * ktor
 
-Author: ktor.io \
-License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
+Author: ktor.io
 
-* twitter4j
-
-Author: Yusuke Yamamoto \
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * config
 
-Author: lightbend \
+Author: lightbend
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * PageIndicatorView
 
-Author: Roman Danylyk \
+Author: Roman Danylyk
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-* Guava
 * Gson
 * J2ObjC Annotations
 * error-prone annotations
 
-Author: Google Inc. \
+Author: Google Inc.
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * FindBugs-jsr305
 
-Author: Google \
+Author: Google
+
 License: [The 2-Clause BSD License](https://opensource.org/licenses/bsd-license.php)
 
 * EventBus
 
-Author: Markus Junginger, greenrobot \
+Author: Markus Junginger, greenrobot
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * SmoothProgressBar
 
-Author: Antoine Merle \
+Author: Antoine Merle
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
 * SLF4J
 
-Author: QOS.ch \
+Author: QOS.ch
+
 License: [MIT License](https://opensource.org/licenses/mit-license.php)
 
 * Animal Sniffer Annotations
 
-Author: mojohaus \
+Author: mojohaus
+
 License: [MIT License](https://opensource.org/licenses/mit-license.php)
 
 * The Checker Framework
 
-Author: The Checker Framework developers \
+Author: The Checker Framework developers
+
 License: [GNU General Public
 License, version 2 (GPL2), with the classpath exception](https://www.gnu.org/licenses/old-licenses/gpl-2.0.html.en)
 
 * Universal Image Loader Library
 
-Author: Sergey Tarasevich \
+Author: Sergey Tarasevich
+
 License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
 
-* ActionBar-PullToRefresh
-
-Author: Chris Banes \
-License: [Apache License Version 2.0](http://www.apache.org/licenses/LICENSE-2.0.txt)
-
-**This app is originated from Justaway developped by s-aska. I appreciate it a lot.**
+**This app is originated from Justaway developped by s-aska. I appliciate it a lot.**

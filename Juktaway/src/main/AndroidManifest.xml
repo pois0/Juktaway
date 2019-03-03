@@ -1,19 +1,22 @@
 <?xml version="1.0" encoding="utf-8"?>
 <manifest xmlns:android="http://schemas.android.com/apk/res/android"
-          package="net.slashOmega.juktaway">
+          package="net.slash_omega.juktaway">
 
     <uses-permission android:name="android.permission.INTERNET"/>
     <uses-permission android:name="android.permission.WRITE_EXTERNAL_STORAGE"/>
+    <uses-permission android:name="android.permission.READ_EXTERNAL_STORAGE"/>
     <uses-permission android:name="android.permission.CAMERA"/>
 
+    <uses-feature android:name="android.hardware.camera" android:required="false" />
+
     <application
-        android:name="net.slashOmega.juktaway.JuktawayApplication"
-        android:allowBackup="true"
-        android:icon="@drawable/ic_launcher"
+        android:name="net.slash_omega.juktaway.JuktawayApplication"
+        android:allowBackup="false"
+        android:icon="@mipmap/ic_launcher"
         android:label="@string/app_name"
         android:theme="@style/AppTheme">
         <receiver
-            android:name="net.slashOmega.juktaway.appwidget.PostWidget"
+            android:name="net.slash_omega.juktaway.appwidget.PostWidget"
             android:exported="false"
             android:label="@string/widget_title_post_mode">
             <intent-filter>
@@ -23,9 +26,8 @@
                 android:name="android.appwidget.provider"
                 android:resource="@xml/post_widget"/>
         </receiver>
-        <service android:name=".NotificationService" android:exported="false" />
         <activity
-            android:name="net.slashOmega.juktaway.MainActivity"
+            android:name="net.slash_omega.juktaway.MainActivity"
             android:label="@string/app_name"
             android:launchMode="singleTask">
             <intent-filter>
@@ -35,7 +37,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".SignInActivity"
+            android:name="net.slash_omega.juktaway.SignInActivity"
             android:launchMode="singleTask">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -52,7 +54,7 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".PostActivity"
+            android:name="net.slash_omega.juktaway.PostActivity"
             android:label="@string/title_post"
             android:windowSoftInputMode="stateVisible|adjustResize"
             android:taskAffinity=".post">
@@ -89,10 +91,10 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".ProfileActivity"
+            android:name="net.slash_omega.juktaway.ProfileActivity"
             android:label="@string/title_profile"/>
         <activity
-            android:name=".StatusActivity"
+            android:name="net.slash_omega.juktaway.StatusActivity"
             android:theme="@style/Theme.MyTrans">
             <intent-filter>
                 <action android:name="android.intent.action.VIEW"/>
@@ -119,55 +121,50 @@
             </intent-filter>
         </activity>
         <activity
-            android:name=".TabSettingsActivity"
+            android:name="net.slash_omega.juktaway.TabSettingsActivity"
             android:label="@string/title_tab_settings"/>
         <activity
-            android:name=".ChooseUserListsActivity"
+            android:name="net.slash_omega.juktaway.ChooseUserListsActivity"
             android:label="@string/title_choose_user_lists"/>
         <activity
-            android:name=".ScaleImageActivity"
+            android:name="net.slash_omega.juktaway.ScaleImageActivity"
             android:theme="@style/Theme.MyTrans"/>
         <activity
-            android:name=".VideoActivity"
+            android:name="net.slash_omega.juktaway.VideoActivity"
             android:theme="@style/Theme.MyTrans"/>
         <activity
-            android:name=".SearchActivity"
+            android:name="net.slash_omega.juktaway.SearchActivity"
             android:label="@string/title_search"/>
         <activity
-            android:name=".EditProfileActivity"
+            android:name="net.slash_omega.juktaway.EditProfileActivity"
             android:label="@string/title_edit_profile"/>
-        <activity android:name=".UserListActivity" />
+        <activity android:name="net.slash_omega.juktaway.UserListActivity" />
         <activity
-            android:name=".AccountSettingActivity"
+            android:name="net.slash_omega.juktaway.AccountSettingActivity"
             android:label="@string/title_account_setting" />
         <activity
-            android:name=".SettingsActivity"
+            android:name="net.slash_omega.juktaway.SettingsActivity"
             android:label="@string/title_activity_settings"/>
         <activity
-            android:name=".NotificationSettingsActivity"
+            android:name="net.slash_omega.juktaway.NotificationSettingsActivity"
             android:label="@string/title_notification"/>
         <activity
-            android:name=".PerformanceActivity"
+            android:name="net.slash_omega.juktaway.PerformanceActivity"
             android:label="@string/title_performance"/>
         <activity
-            android:name=".RegisterUserListActivity"
+            android:name="net.slash_omega.juktaway.RegisterUserListActivity"
             android:label="@string/title_register_list"/>
         <activity
-            android:name=".CreateUserListActivity"
+            android:name="net.slash_omega.juktaway.CreateUserListActivity"
             android:label="@string/title_create_user_list"/>
         <activity
-            android:name=".FavoriteActivity"
-            android:label="@string/title_main"
-            android:taskAffinity=".favorite"
-            android:excludeFromRecents="true"/>
-        <activity
-            android:name=".UserSearchActivity"
+            android:name="net.slash_omega.juktaway.UserSearchActivity"
             android:label="@string/title_user_search"/>
         <activity
-            android:name=".MuteActivity"
+            android:name="net.slash_omega.juktaway.MuteActivity"
             android:label="@string/title_mute" />
         <activity
-            android:name=".LicenseActivity"
+            android:name="net.slash_omega.juktaway.LicenseActivity"
             android:label="@string/title_license" />
     </application>
 

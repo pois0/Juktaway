@@ -1,33 +1,28 @@
-<menu xmlns:android="http://schemas.android.com/apk/res/android">
+<menu xmlns:app="http://schemas.android.com/apk/res-auto" xmlns:android="http://schemas.android.com/apk/res/android">
 
     <item
-        android:id="@+id/menu_add_home_tab"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_add_home_tab"/>
+            android:id="@+id/menu_add_home_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_add_home_tab" app:showAsAction="never"/>
 
     <item
-        android:id="@+id/menu_add_interactions_tab"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_add_interactions_tab"/>
+            android:id="@+id/menu_add_interactions_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_add_interactions_tab" app:showAsAction="never"/>
 
     <item
-        android:id="@+id/menu_add_direct_messages_tab"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_add_direct_messages_tab"/>
+            android:id="@+id/menu_add_direct_messages_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_add_direct_messages_tab" app:showAsAction="never"/>
 
     <item
-        android:id="@+id/menu_add_favorites_tab"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_add_favorites_tab"/>
+            android:id="@+id/menu_add_favorites_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_add_favorites_tab" app:showAsAction="never"/>
 
     <item
-        android:id="@+id/menu_user_list_tab"
-        android:orderInCategory="100"
-        android:showAsAction="never"
-        android:title="@string/menu_user_list_tab"/>
+            android:id="@+id/menu_user_list_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_user_list_tab" app:showAsAction="never"/>
 
 </menu>

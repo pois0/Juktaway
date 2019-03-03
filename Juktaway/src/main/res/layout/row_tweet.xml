@@ -14,7 +14,7 @@
         android:layout_width="match_parent"
         android:layout_height="wrap_content">
 
-        <net.slashOmega.juktaway.widget.FontelloTextView
+        <net.slash_omega.juktaway.widget.FontelloTextView
             android:id="@+id/action_icon"
             android:layout_width="48dp"
             android:layout_height="wrap_content"
@@ -83,7 +83,7 @@
         tools:ignore="SmallSp"
         tools:text="\@justawayfactory"/>
 
-    <net.slashOmega.juktaway.widget.FontelloTextView
+    <net.slash_omega.juktaway.widget.FontelloTextView
         android:id="@+id/lock"
         android:layout_width="wrap_content"
         android:layout_height="wrap_content"
@@ -169,7 +169,7 @@
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
                 android:orientation="vertical"/>
-            <net.slashOmega.juktaway.widget.FontelloTextView
+            <net.slash_omega.juktaway.widget.FontelloTextView
                 android:id="@+id/quoted_play"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
@@ -194,7 +194,7 @@
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
             android:orientation="vertical"/>
-        <net.slashOmega.juktaway.widget.FontelloTextView
+        <net.slash_omega.juktaway.widget.FontelloTextView
             android:id="@+id/play"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -211,7 +211,7 @@
         android:layout_width="wrap_content"
         android:layout_height="wrap_content">
 
-        <net.slashOmega.juktaway.widget.FontelloTextView
+        <net.slash_omega.juktaway.widget.FontelloTextView
             android:id="@+id/do_reply"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -221,7 +221,7 @@
             android:textSize="14dp"
             tools:ignore="SpUsage"/>
 
-        <net.slashOmega.juktaway.widget.FontelloTextView
+        <net.slash_omega.juktaway.widget.FontelloTextView
             android:id="@+id/do_retweet"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
@@ -248,7 +248,7 @@
             tools:ignore="SmallSp,SpUsage"
             tools:text="12345"/>
 
-        <net.slashOmega.juktaway.widget.FontelloTextView
+        <net.slash_omega.juktaway.widget.FontelloTextView
             android:id="@+id/do_fav"
             android:layout_width="wrap_content"
             android:layout_height="wrap_content"
