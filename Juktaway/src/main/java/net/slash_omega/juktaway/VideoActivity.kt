@@ -22,6 +22,9 @@ import java.util.regex.Pattern
 
 private val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/video/(\\d+)/?.*")!!
 
+private const val videoType = "video"
+private const val animatedGifType = "animated_gif"
+
 class VideoActivity: DividedFragmentActivity() {
     private var musicWasPlaying = false
 
@@ -71,8 +74,12 @@ class VideoActivity: DividedFragmentActivity() {
     }
 
     private fun setVideoURI(status: Status) = status.extendedEntities?.let { entities ->
-        entities.media.first { it.type == "video" }.videoInfo?.variants?.get(1)?.url?.let { setVideoURI(it) }
-    }
+        if (entities.media.any { it.type == videoType }) {
+            entities.media.first { it.type == videoType }.videoInfo?.variants?.get(1)
+        } else {
+            entities.media.first { it.type == animatedGifType }.videoInfo?.variants?.get(0)
+        }
+    }?.url?.let { setVideoURI(it) }
 
     private fun setVideoURI(url: String) {
         musicWasPlaying = (getSystemService(Context.AUDIO_SERVICE) as AudioManager).isMusicActive
