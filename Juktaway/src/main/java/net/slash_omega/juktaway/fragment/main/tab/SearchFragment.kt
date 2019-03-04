@@ -15,13 +15,10 @@ import net.slash_omega.juktaway.twitter.currentClient
 class SearchFragment: BaseFragment() {
     private var action: JsonObjectApiAction<Search>? = null
 
-    override var tabId = 0L
-
     override var mSearchWord: String = ""
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         if (mSearchWord.isEmpty()) mSearchWord = runCatching { arguments?.getString("searchWord")?.split(":")?.get(1) }.getOrNull() ?: ""
-        tabId = TabManager.SEARCH_TAB_ID - Math.abs(mSearchWord.hashCode())
         super.onActivityCreated(savedInstanceState)
     }
 

@@ -2,4 +2,6 @@ package net.slash_omega.juktaway.model
 
 import jp.nephy.penicillin.models.TwitterList
 
-class UserListWithRegistered(val userList: TwitterList, var isRegistered: Boolean)
+data class UserListWithRegistered(val userList: TwitterList, var isRegistered: Boolean) {
+    constructor(userList: TwitterList): this(userList, TabManager.isUserListRegistered(userList.id))
+}

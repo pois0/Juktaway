@@ -11,12 +11,11 @@ import android.widget.AbsListView
 import android.widget.ListView
 import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
-import kotlinx.android.synthetic.main.pull_to_refresh_list.view.*
+import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
-import net.slash_omega.juktaway.event.NewRecordEvent
 import net.slash_omega.juktaway.event.action.GoToTopEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
@@ -51,9 +50,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected lateinit var mListView: ListView
     private lateinit var mFooter: ProgressBar
     protected lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
-
-    abstract var tabId: Long
-        protected set
 
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
@@ -91,7 +87,10 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-        = inflater.inflate(R.layout.pull_to_refresh_list, container, false)?.apply { activity?.let { act ->
+        = inflater.inflate(R.layout.pull_to_refresh_list, container, false)
+
+    override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
+        val act = activity ?: return
         mListView = list_view.apply {
             onItemClickListener = StatusClickListener(act)
             onItemLongClickListener = StatusLongClickListener(act)
@@ -102,7 +101,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mSwipeRefreshLayout = sr_layout.apply {
             setOnRefreshListener { reload() }
         }
-    } }
+    }
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
         super.onActivityCreated(savedInstanceState)
@@ -203,7 +202,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
         val autoScroll = position == 0 && y == 0 && mStackRows.size < 3
 
-        if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
+        //if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
 
         if (autoScroll) {
             mListView.setSelection(0)
@@ -240,7 +239,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         if (!mScrolling && isTop) {
             showStack()
         } else {
-            EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
+            //EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
         }
     }
 
@@ -310,6 +309,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      * @param event アプリが表示しているタブのID
      */
     fun onEventMainThread(event: PostAccountChangeEvent) {
-        if (event.tabId == tabId) reload() else clear()
+        reload()
     }
 }

@@ -21,7 +21,7 @@ import org.jetbrains.anko.support.v4.toast
 
 class RetweetersFragment: DialogFragment() {
     private lateinit var mProgressBar: ProgressBar
-    private val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
+    private val mAdapter by lazy { UserAdapter(activity!!, R.layout.row_user) }
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog = Dialog(activity!!).apply {
         window?.requestFeature(Window.FEATURE_NO_TITLE)

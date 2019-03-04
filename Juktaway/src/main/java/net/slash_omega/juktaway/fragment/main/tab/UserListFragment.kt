@@ -9,18 +9,18 @@ import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
 
 class UserListFragment: BaseFragment() {
-    override var tabId = 0L
+    var userListId = 0L
 
     override fun onActivityCreated(savedInstanceState: Bundle?) {
-        if (tabId == 0L) tabId = arguments?.getLong("userListId") ?: 0
+        if (userListId == 0L) userListId = arguments?.getLong("userListId") ?: 0
         super.onActivityCreated(savedInstanceState)
     }
 
     override suspend fun taskExecute() {
         val statuses = runCatching {
             currentClient.timeline.run {
-                if (mMaxId > 0 && !mReloading) listTimeline(tabId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                else listTimeline(tabId, count = BasicSettings.pageCount)
+                if (mMaxId > 0 && !mReloading) listTimeline(userListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                else listTimeline(userListId, count = BasicSettings.pageCount)
             }.await()
         }.getOrNull()
 

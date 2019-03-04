@@ -113,7 +113,7 @@ class ProfileActivity: DividedFragmentActivity() {
                             val relJob = friendships.showByUserId(currentIdentifier.userId, it)
                             userJob.await().result to relJob.await().result.relationship
                         }
-                    } ?: throw IllegalArgumentException("Both of screen name and userId are null.")
+                    } ?: throw IllegalArgumentException("Both of screen word and userId are null.")
                 }
             }.onSuccess {
                 mUser = it.first

@@ -4,13 +4,10 @@ import android.view.View
 import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.mentionsTimeline
 import jp.nephy.penicillin.extensions.await
-import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
 
 class InteractionsFragment: BaseFragment() {
-    override var tabId = TabManager.INTERACTIONS_TAB_ID
-
     override suspend fun taskExecute() {
         runCatching {
             currentClient.timeline.mentionsTimeline(

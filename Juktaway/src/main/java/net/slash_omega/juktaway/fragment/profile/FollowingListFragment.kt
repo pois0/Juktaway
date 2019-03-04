@@ -15,7 +15,7 @@ import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.tryAndTraceGet
 
 internal class FollowingListFragment: ProfileListFragmentBase() {
-    override val mAdapter by lazy { UserAdapter(activity, R.layout.row_user) }
+    override val mAdapter by lazy { UserAdapter(activity!!, R.layout.row_user) }
     override val layout = R.layout.list_guruguru
     private var cursor: CursorJsonObjectApiAction<CursorUsers>? = null
 

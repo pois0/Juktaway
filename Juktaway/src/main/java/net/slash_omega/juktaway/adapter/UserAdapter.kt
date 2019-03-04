@@ -16,7 +16,7 @@ import net.slash_omega.juktaway.util.ImageUtil
 /**
  * Created on 2018/10/21.
  */
-class UserAdapter(mContext: Context?, mLayout: Int) : ArrayAdapterBase<User>(mContext, mLayout) {
+class UserAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<User>(mContext, mLayout) {
     override val View.mView: (Int, ViewGroup?) -> Unit
         @SuppressLint("SetTextI18n")
         get() = { position, _ ->

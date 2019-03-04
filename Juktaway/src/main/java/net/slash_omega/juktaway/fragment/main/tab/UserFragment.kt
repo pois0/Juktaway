@@ -1,20 +1,27 @@
 package net.slash_omega.juktaway.fragment.main.tab
 
+import android.os.Bundle
 import android.view.View
-import jp.nephy.penicillin.endpoints.favorites
-import jp.nephy.penicillin.endpoints.favorites.list
+import jp.nephy.penicillin.endpoints.timeline
+import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
 import jp.nephy.penicillin.extensions.await
-import net.slash_omega.juktaway.model.TabManager
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
 
-class FavoritesFragment: BaseFragment() {
+/**
+ * Created on 2019/02/25.
+ */
+
+class UserFragment: BaseFragment() {
+    private var userId = 0L
+
+    override fun onActivityCreated(savedInstanceState: Bundle?) {
+        if (userId == 0L) userId = arguments?.getLong("userId") ?: 0
+        super.onActivityCreated(savedInstanceState)
+    }
+
     override suspend fun taskExecute() {
         val statuses = runCatching {
-            currentClient.favorites.list(
-                    maxId = mMaxId.takeIf { it > 0 && !mReloading }?.minus(1),
-                    count = BasicSettings.pageCount
-            ).await()
+            currentClient.timeline.userTimelineByUserId(userId).await()
         }.getOrNull()
 
         when {
@@ -25,19 +32,19 @@ class FavoritesFragment: BaseFragment() {
             }
             mReloading -> {
                 clear()
-                mMaxId = statuses.last().id
+                statuses.lastOrNull { mMaxId <= 0L || mMaxId > it.id }?.let { mMaxId = it.id }
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mReloading = false
                 mSwipeRefreshLayout.isRefreshing = false
             }
             else -> {
-                mMaxId = statuses.last().id
+                for (status in statuses) {
+                    if (mMaxId <= 0L || mMaxId > status.id) mMaxId = status.id
+                }
                 mAdapter?.extensionAddAllFromStatuses(statuses)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }
         }
-
-        finishLoad()
     }
 }
