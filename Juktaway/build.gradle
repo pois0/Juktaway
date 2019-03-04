@@ -2,10 +2,10 @@ plugins {
     id 'com.android.application'
     id 'kotlin-android'
     id 'kotlin-android-extensions'
+    id 'kotlinx-serialization'
+    id 'com.cookpad.android.licensetools'
     id 'com.github.triplet.play' version '2.1.0'
 }
-
-apply plugin: 'kotlinx-serialization'
 
 dependencies {
     implementation "org.jetbrains.kotlin:kotlin-stdlib:$kotlin_version"
