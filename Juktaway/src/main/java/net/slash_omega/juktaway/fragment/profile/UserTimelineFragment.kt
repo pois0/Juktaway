@@ -34,7 +34,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         launch {
             val timeline = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0 && mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
+                    if (mMaxId > 0 && !mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
                     else userTimelineByUserId(user.id, count = BasicSettings.pageCount)
                 }.await()
             }.getOrNull()
@@ -42,11 +42,11 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
             timeline?.takeIf { it.isNotEmpty() }?.run {
                 if (mReload) {
                     mAdapter.clear()
-                    mMaxId = lastOrNull()?.id ?: 0
+                    mMaxId = last().id - 1
                     mAdapter.addAllFromStatusesSuspend(this)
                     mReload = false
                 } else {
-                    mMaxId = lastOrNull()?.id ?: 0
+                    mMaxId = last().id - 1
                     mAdapter.extensionAddAllFromStatuses(this)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
