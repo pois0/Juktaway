@@ -43,6 +43,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private val mStackRows = ArrayList<Row>()
 
     protected fun finishLoad() {
+        mSwipeRefreshLayout.isRefreshing = false
         mFooter.visibility = View.GONE
         Handler().postDelayed({ isLoading = false }, 200)
     }
@@ -115,7 +116,11 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             // Status(ツイート)をViewに描写するアダプター
             mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
-            launch { taskExecute() }
+            if (!isLoading) {
+                mSwipeRefreshLayout.isRefreshing = true
+                isLoading = true
+                launch { taskExecute() }
+            }
         }
 
         mListView.adapter = mAdapter
@@ -132,9 +137,11 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     fun reload() {
+        if (isLoading) return
         launch {
             mReloading = true
             mSwipeRefreshLayout.isRefreshing = true
+            isLoading = true
             taskExecute()
         }
     }
@@ -147,10 +154,11 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     protected fun additionalReading() {
-        if (!mAutoLoader || mReloading) return
+        if (!mAutoLoader || mReloading || isLoading) return
         launch {
             mFooter.visibility = View.VISIBLE
             mAutoLoader = false
+            isLoading = true
             taskExecute()
         }
     }
