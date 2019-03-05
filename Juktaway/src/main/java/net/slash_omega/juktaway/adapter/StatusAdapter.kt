@@ -288,11 +288,14 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapt
                         }
 
                         displayUserIcon(s.user)
-                    }.lparams(width = dip(48), height = dip(48)) {
-                        below(R.id.action_container)
-                        bottomMargin = dip(6)
-                        rightMargin = dip(6)
-                        topMargin = dip(1)
+                    }.run {
+                        val iconSize = if (BasicSettings.userIconSize == BasicSettings.UserIconSize.NONE) 0 else 48
+                        lparams(width = dip(iconSize), height = dip(iconSize)) {
+                            below(R.id.action_container)
+                            bottomMargin = dip(6)
+                            rightMargin = dip(6)
+                            topMargin = dip(1)
+                        }
                     }
 
                     textView {
