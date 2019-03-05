@@ -11,11 +11,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/ktorio/ktor
 - artifact: org.jetbrains.anko:anko-appcompat-v7-commons:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.kotlinx:kotlinx-coroutines-core-common:+
   name: kotlinx-coroutines-core-common
   copyrightHolder: JetBrains
@@ -23,17 +19,9 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/Kotlin/kotlinx.coroutines
 - artifact: org.jetbrains.anko:anko-sdk27-coroutines:+
-  name: anko
-  copyrightHolder: Jet
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.anko:anko-appcompat-v7:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: io.ktor:ktor-utils-jvm:+
   name: ktor-utils
   copyrightHolder: JetBrains
@@ -53,11 +41,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/topic/libraries/architecture/index.html
 - artifact: org.jetbrains.anko:anko-support-v4:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: io.github.microutils:kotlin-logging:+
   name: kotlin-logging
   copyrightHolder: MicroUtils
@@ -65,11 +49,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/MicroUtils/kotlin-logging
 - artifact: org.jetbrains.anko:supportV4-base:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: io.github.microutils:kotlin-logging-common:+
   name: kotlin-logging
   copyrightHolder: MicroUtils
@@ -77,11 +57,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/MicroUtils/kotlin-logging
 - artifact: org.jetbrains.anko:anko-appcompat-v7-coroutines:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: com.android.support:support-media-compat:+
   name: Android Support Library media compat
   copyrightHolder: The Android Open Source Project
@@ -95,11 +71,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/topic/libraries/architecture/index.html
 - artifact: org.jetbrains.anko:platform-base:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: com.android.support:support-core-ui:+
   name: Android Support Library core UI
   copyrightHolder: The Android Open Source Project
@@ -131,11 +103,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/Kotlin/kotlinx-io
 - artifact: org.jetbrains.anko:anko-commons:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: android.arch.lifecycle:common:+
   name: Android Lifecycle-Common
   copyrightHolder: The Android Open Source Project
@@ -143,17 +111,9 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://developer.android.com/topic/libraries/architecture/index.html
 - artifact: org.jetbrains.anko:anko-support-v4-commons:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.anko:anko-coroutines:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.kotlinx:kotlinx-coroutines-jdk8:+
   name: kotlinx-coroutines-jdk8
   copyrightHolder: JetBrains
@@ -185,11 +145,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://kotlinlang.org/
 - artifact: org.jetbrains.anko:appcompatV7-base:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.kotlinx:kotlinx-io:+
   name: kotlinx-io
   copyrightHolder: JetBrains
@@ -233,11 +189,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/ktorio/ktor
 - artifact: org.jetbrains.anko:sqlite-base:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.anko:anko:+
   name: anko
   copyrightHolder: JetBrains
@@ -305,11 +257,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://kotlinlang.org/
 - artifact: org.jetbrains.anko:commons-base:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: com.android.support:animated-vector-drawable:+
   name: Android Support AnimatedVectorDrawable
   copyrightHolder: The Android Open Source Project
@@ -329,11 +277,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: https://github.com/Kotlin/atomicfu
 - artifact: org.jetbrains.anko:anko-sqlite:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: com.android.support:support-fragment:+
   name: Android Support Library fragment
   copyrightHolder: The Android Open Source Project
@@ -347,11 +291,7 @@
   licenseUrl: http://www.apache.org/licenses/LICENSE-2.0.txt
   url: http://developer.android.com/tools/extras/support-library.html
 - artifact: org.jetbrains.anko:anko-sdk27:+
-  name: anko
-  copyrightHolder: JetBrains
-  license: The Apache Software License, Version 2.0
-  licenseUrl: http://www.apache.org/license/LICENSE-2.0.txt
-  url: https://github.com/JetBrains/anko
+  skip: true
 - artifact: org.jetbrains.kotlin:kotlin-stdlib-common:+
   name: org.jetbrains.kotlin:kotlin-stdlib-common
   copyrightHolder: JetBrains
