@@ -38,9 +38,11 @@ android {
 
         multiDexEnabled true
         
-        versionCode 3
-        versionName '3.0.1-Beta2'
+        versionCode 4
+        versionName '3.0.1-Beta3'
         applicationId "net.slash_omega.juktaway"
+
+        proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
     }
 
     signingConfigs {
@@ -60,15 +62,13 @@ android {
             minifyEnabled false
             shrinkResources false
 
-            // proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+
             return true
         }
 
         release {
-            minifyEnabled true
-            shrinkResources true
-
-            proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
+            minifyEnabled false
+            shrinkResources false
             
             signingConfig signingConfigs.config
             
