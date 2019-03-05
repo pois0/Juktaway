@@ -30,19 +30,21 @@ object TabManager {
     private var oldTabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v2", "")
 
     @UseExperimental(ImplicitReflectionSerializer::class)
-    fun loadTabs() = mTabs.also { list ->
-        list.clear()
-        list.addAll(
-                oldTabPreference.takeIf { it.isNotBlank() }?.let { oldJson ->
+    fun loadTabs(): MutableList<Tab> {
+        mTabs.clear()
+        mTabs.addAll(
+                tabPreference.takeIf { it.isNotBlank() }?.let { json ->
+                    println(json)
+                    Json.parseList<Tab>(json)
+                } ?: oldTabPreference.takeIf { it.isNotBlank() }?.let { oldJson ->
                     Json.parse<OldTabData>(oldJson).let { data ->
+                        oldTabPreference = ""
                         data.tabs.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
                         translateTab(data.tabs)
                     }
-                } ?: tabPreference.takeIf { it.isNotBlank() }?.let { json ->
-                    println(json)
-                    Json.parseList<Tab>(json)
                 } ?: generalTabs
         )
+        return mTabs
     }
 
     fun reinitialize(tabs: List<Tab>) {
