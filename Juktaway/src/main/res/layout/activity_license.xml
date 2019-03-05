@@ -7,7 +7,7 @@
         android:layout_height="match_parent"
         tools:background="@android:color/background_dark">
 
-    <TextView
+    <WebView
             android:layout_width="match_parent"
             android:layout_height="match_parent"
             android:scrollbars = "vertical"
