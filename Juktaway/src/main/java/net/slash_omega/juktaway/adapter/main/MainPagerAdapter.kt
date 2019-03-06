@@ -60,7 +60,7 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
         val info = when (tab.type) {
             HOME_TAB_ID -> TabInfo(TimelineFragment::class, null, tab.displayString)
             MENTION_TAB_ID -> TabInfo(InteractionsFragment::class, null, tab.displayString)
-            DM_TAB_ID -> TabInfo(DirectMessagesFragment::class, null, tab.displayString)
+            //DM_TAB_ID -> TabInfo(DirectMessagesFragment::class, null, tab.displayString)
             FAVORITE_TAB_ID -> TabInfo(FavoritesFragment::class, null, tab.displayString)
             SEARCH_TAB_ID -> TabInfo(SearchFragment::class, Bundle().apply {
                     putString("searchWord", tab.word)
