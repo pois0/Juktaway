@@ -45,6 +45,7 @@ import net.slash_omega.juktaway.twitter.Identifier
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.twitter.identifierList
 import net.slash_omega.juktaway.util.*
+import org.jetbrains.anko.startService
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.wrapContent
 import java.io.File
@@ -421,7 +422,6 @@ class PostActivity: DividedFragmentActivity() {
 
     private fun tweet() {
         launch {
-            MessageUtil.showProgressDialog(this@PostActivity, getString(R.string.progress_sending))
             val text = status_text.text.toString()
             if (text.startsWith("D ")) {
                 val e = (switch_account_spinner.selectedItem as Identifier).sendDirectMessage(text)
@@ -437,34 +437,22 @@ class PostActivity: DividedFragmentActivity() {
                     if (!mWidgetMode) finish()
                 }
             } else {
-                val mImagePathList = arrayListOf<File>().apply {
-                    image_preview_container.let { container ->
-                        for (i in 0 until container.childCount) {
-                            add(container.getChildAt(i).tag as File)
-                        }
-                    }
+                val mImagePathList = (0 until image_preview_container.childCount).map {
+                    image_preview_container.getChildAt(it).tag as File
                 }
 
-                val e = runCatching {
-                    (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
-                            mInReplyToStatusId.takeIf { it > 0 }, mImagePathList)
-                }.run { getOrNull() ?: exceptionOrNull() }
-                e?.printStackTrace()
-                MessageUtil.dismissProgressDialog()
-                (e as? PenicillinException)?.let {
-                    val message = when (e.error) {
-                        TwitterErrorMessage.StatusIsADuplicate -> R.string.toast_update_status_already
-                        else -> R.string.toast_update_status_failure
-                    }
-                    toast(message)
-                } ?: run {
+                startService<PostService>("text" to text,
+                        "replyStatusId" to mInReplyToStatusId,
+                        "imagePathList" to mImagePathList,
+                        "identifier" to switch_account_spinner.selectedItem as Identifier
+                )
+
+                if (!mWidgetMode) {
+                    finish()
+                } else {
                     status_text.setText("")
-                    if (!mWidgetMode) {
-                        finish()
-                    } else {
-                        image_preview_container.removeAllViews()
-                        tweet_button.isEnabled = false
-                    }
+                    image_preview_container.removeAllViews()
+                    tweet_button.isEnabled = false
                 }
             }
         }

@@ -270,4 +270,5 @@
     <string name="quick_posting_menu_fix_initial_tweet">Fix current text to initial text</string>
     <string name="quick_posting_menu_unfixed_success">Unfixed initial text.</string>
     <string name="title_user">User</string>
+    <string name="update_status_success">Succeeded to tweet.</string>
 </resources>
