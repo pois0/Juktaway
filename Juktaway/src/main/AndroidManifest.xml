@@ -166,7 +166,9 @@
         <activity
             android:name="net.slash_omega.juktaway.LicenseActivity"
             android:label="@string/title_license" />
-        <service android:name="net.slash_omega.juktaway.PostService" />
+        <service
+                android:name="net.slash_omega.juktaway.PostService"
+                android:exported="false" />
     </application>
 
 </manifest>
