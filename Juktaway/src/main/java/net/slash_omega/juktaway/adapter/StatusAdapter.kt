@@ -566,7 +566,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapt
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = TimeUtil.getAbsoluteTime(s.idObj.toDate())
+                            text = s.idObj.toDate().absoluteTime
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()
