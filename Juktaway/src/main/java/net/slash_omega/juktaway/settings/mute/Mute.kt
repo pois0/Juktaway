@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway.settings.mute
 
-import android.support.v4.util.LongSparseArray
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
@@ -11,7 +10,7 @@ import net.slash_omega.juktaway.model.Row
  */
 
 object Mute {
-    private val mutedIds = LongSparseArray<Boolean>()
+    private val mutedIds = HashMap<Long, Boolean>()
     private var userMute = UserMute.getAllItems().map { it.first }
     private var sourceMute = SourceMute.getAllItems()
     private var wordMute = WordMute.getAllItems()
@@ -32,7 +31,7 @@ object Mute {
                     status.retweetedStatus?.user?.id in userMute ||
                     source.via.name in sourceMute ||
                     wordMute.any { source.fullText().contains(it) }
-        }.also { mutedIds.put(status.id, it) }
+        }.also { mutedIds[status.id] = it }
 
     operator fun contains(status: Status) = isMute(status)
 
