@@ -1,12 +1,13 @@
 package net.slash_omega.juktaway.model
 
+import android.content.Context
+import android.content.SharedPreferences
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import net.slash_omega.juktaway.util.SharedPreference
 import java.util.ArrayList
 
 const val HOME_TAB_ID = 0
@@ -26,19 +27,21 @@ object TabManager {
 
     private const val TABS = "mTabs-"
     private var mTabs = mutableListOf<Tab>()
-    private var tabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v3", "")
-    private var oldTabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v2", "")
+    private val keyName: String
+        get() = TABS + currentIdentifier.userId.toString()
+    private val preference: SharedPreferences
+        get() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs(): MutableList<Tab> {
         mTabs.clear()
         mTabs.addAll(
-                tabPreference.takeIf { it.isNotBlank() }?.let { json ->
+                preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
                     println(json)
                     Json.parseList<Tab>(json)
-                } ?: oldTabPreference.takeIf { it.isNotBlank() }?.let { oldJson ->
+                } ?: preference.getString("$keyName/v2", "")?.takeIf { it.isNotBlank() }?.let { oldJson ->
                     Json.parse<OldTabData>(oldJson).let { data ->
-                        oldTabPreference = ""
+                        preference.edit().putString(keyName, "").apply()
                         data.tabs.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
                         translateTab(data.tabs)
                     }
@@ -62,7 +65,7 @@ object TabManager {
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     private fun saveTabs() {
-        tabPreference = Json.stringify(mTabs)
+        preference.edit().putString("$keyName/v3", Json.stringify(mTabs)).apply()
     }
 
     private fun translateTab(list: List<OldTab>) = list.map {
