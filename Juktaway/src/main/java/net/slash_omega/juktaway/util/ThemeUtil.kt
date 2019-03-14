@@ -3,6 +3,7 @@ package net.slash_omega.juktaway.util
 import android.app.Activity
 import android.content.res.Resources
 import android.util.TypedValue
+import android.widget.ImageButton
 import android.widget.TextView
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.settings.BasicSettings
@@ -23,6 +24,14 @@ object ThemeUtil {
             val outValue = TypedValue()
             resolveAttribute(resourceId, outValue, true)
             view.setTextColor(outValue.data)
+        }
+    }
+
+    fun setThemeTextColor(view: ImageButton, resourceId: Int) {
+        sTheme?.run {
+            view.setColorFilter(TypedValue().also {
+                resolveAttribute(resourceId, it, true)
+            }.data)
         }
     }
 

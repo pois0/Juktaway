@@ -19,7 +19,7 @@ dependencies {
     implementation 'com.nostra13.universalimageloader:universal-image-loader:1.9.5'
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation fileTree(include: '*.jar', dir: 'libs')
-    implementation "jp.nephy:penicillin:${penicillin_version}"
+    implementation "jp.nephy:penicillin:$penicillin_version"
 }
 
 def properties = new Properties()

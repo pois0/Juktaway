@@ -101,12 +101,13 @@ data class Tab(val type: Int, val id: Long, val word: String, val autoReload: In
 
 val Tab.icon: Int
     get() = when (type) {
-        HOME_TAB_ID -> R.string.fontello_home
-        MENTION_TAB_ID -> R.string.fontello_at
-        DM_TAB_ID -> R.string.fontello_mail
-        FAVORITE_TAB_ID -> R.string.fontello_star
-        SEARCH_TAB_ID -> R.string.fontello_search
-        LIST_TAB_ID -> R.string.fontello_list
+        HOME_TAB_ID -> R.drawable.ic_home
+        MENTION_TAB_ID -> R.drawable.ic_atmark
+        DM_TAB_ID -> R.drawable.ic_email
+        FAVORITE_TAB_ID -> R.drawable.ic_star
+        SEARCH_TAB_ID -> R.drawable.ic_search
+        LIST_TAB_ID -> R.drawable.ic_list_bulleted
+        USER_TAB_ID -> R.drawable.ic_person
         else -> 0
     }
 

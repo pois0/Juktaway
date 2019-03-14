@@ -5,6 +5,8 @@ import android.app.ActionBar
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
+import android.graphics.PorterDuff
+import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
@@ -17,6 +19,7 @@ import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
 import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
@@ -33,7 +36,6 @@ import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
-import net.slash_omega.juktaway.event.NewRecordEvent
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
@@ -337,29 +339,29 @@ class MainActivity: DividedFragmentActivity() {
     override fun onSaveInstanceState(outState: Bundle?) {
         super.onSaveInstanceState(outState)
 
-        tab_menus.run {
-            val tabColors = IntArray(childCount)
-            for (i in 0 until childCount) {
-                (getChildAt(i) as? Button)?.run {
-                    tabColors[i] = currentTextColor
-                }
-            }
-            outState?.putIntArray("tabColors", tabColors)
-        }
+//        tab_menus.run {
+//            val tabColors = IntArray(childCount)
+//            for (i in 0 until childCount) {
+//                (getChildAt(i) as? ImageButton)?.run {
+//                    tabColors[i] = (colorFilter as PorterDuffColorFilter).getColor()
+//                }
+//            }
+//            outState?.putIntArray("tabColors", tabColors)
+//        }
     }
 
     override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
         super.onRestoreInstanceState(savedInstanceState)
 
-        savedInstanceState?.let {
-            with (tab_menus) {
-                it.getIntArray("tabColors")?.let { colors ->
-                    for (i in 0 until Math.min(childCount, colors.size)) {
-                        (getChildAt(i) as? Button)?.setTextColor(colors[i])
-                    }
-                }
-            }
-        }
+//        savedInstanceState?.let {
+//            with (tab_menus) {
+//                it.getIntArray("tabColors")?.let { colors ->
+//                    for (i in 0 until Math.min(childCount, colors.size)) {
+//                        (getChildAt(i) as? ImageButton)?.setColorFilter(colors[i])
+//                    }
+//                }
+//            }
+//        }
     }
 
     @SuppressLint("SetTextI18n")
@@ -419,14 +421,13 @@ class MainActivity: DividedFragmentActivity() {
 
         var pos = 0
         for (tab in tabs) {
-            tab_menus.addView(FontelloButton(this).apply {
+            tab_menus.addView(ImageButton(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                         (60 * resources.displayMetrics.density + 0.5f).toInt(),
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        (48 * resources.displayMetrics.density + 0.5f).toInt()
                 )
-                setText(tab.icon)
-                textSize = 22f
-                setTextColor(outValueTextColor.data)
+                setImageResource(tab.icon)
+                setColorFilter(outValueTextColor.data)
                 setBackgroundResource(outValueBackground.resourceId)
                 tag = pos++
                 setOnClickListener(mMenuOnClickListener)
@@ -438,7 +439,7 @@ class MainActivity: DividedFragmentActivity() {
         mMainPagerAdapter.notifyDataSetChanged()
 
         mViewPager.currentItem = 0
-        (tab_menus.getChildAt(0) as? Button)?.isSelected = true
+        (tab_menus.getChildAt(0) as? ImageButton)?.isSelected = true
         title = mMainPagerAdapter.getPageTitle(0)
     }
 
@@ -471,7 +472,7 @@ class MainActivity: DividedFragmentActivity() {
                 if (mMainPagerAdapter.findFragmentByPosition(position).isTop) showTopView()
                 with (tab_menus) {
                     for (i in 0 until childCount) {
-                        (getChildAt(i) as Button?)?.isSelected = i == position
+                        (getChildAt(i) as ImageButton?)?.isSelected = i == position
                     }
                 }
                 title = mMainPagerAdapter.getPageTitle(position)
@@ -483,7 +484,7 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun showTopView() {
-        (tab_menus.getChildAt(mViewPager.currentItem) as? Button)?.let {
+        (tab_menus.getChildAt(mViewPager.currentItem) as? ImageButton)?.let {
             ThemeUtil.setThemeTextColor(it, R.attr.menu_text_color)
         }
     }
