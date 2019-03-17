@@ -5,8 +5,6 @@ import android.app.ActionBar
 import android.app.Activity
 import android.content.Intent
 import android.graphics.Color
-import android.graphics.PorterDuff
-import android.graphics.PorterDuffColorFilter
 import android.net.Uri
 import android.os.Bundle
 import android.support.v4.view.GravityCompat
@@ -18,7 +16,6 @@ import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
-import android.widget.Button
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
@@ -41,13 +38,13 @@ import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.fragment.dialog.QuickPostMenuFragment
+import net.slash_omega.juktaway.model.Tab
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.model.icon
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
-import net.slash_omega.juktaway.widget.FontelloButton
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.startActivityForResult
@@ -87,6 +84,7 @@ class MainActivity: DividedFragmentActivity() {
     }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
+    private var currentTabs: List<Tab>? = null
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
@@ -238,9 +236,6 @@ class MainActivity: DividedFragmentActivity() {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            REQUEST_TAB_SETTINGS -> {
-                if (resultCode == Activity.RESULT_OK) setupTab()
-            }
             REQUEST_ACCOUNT_SETTING -> {
                 if (resultCode == Activity.RESULT_OK)
                     mSwitchIdentifier = data?.getSerializableExtra("identifier") as Identifier
@@ -255,9 +250,7 @@ class MainActivity: DividedFragmentActivity() {
                 }
             }
             REQUEST_SEARCH -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    setupTab()
-                } else if (resultCode == SearchActivity.RESULT_CREATE_SAVED_SEARCH) {
+                if (resultCode == SearchActivity.RESULT_CREATE_SAVED_SEARCH) {
                     mSearchAdapter?.reload()
                 }
                 cancelSearch()
@@ -267,6 +260,7 @@ class MainActivity: DividedFragmentActivity() {
 
     override fun onResume() {
         super.onResume()
+        setupTab()
         EventBus.getDefault().register(this)
     }
 
@@ -336,34 +330,6 @@ class MainActivity: DividedFragmentActivity() {
         return true
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-
-//        tab_menus.run {
-//            val tabColors = IntArray(childCount)
-//            for (i in 0 until childCount) {
-//                (getChildAt(i) as? ImageButton)?.run {
-//                    tabColors[i] = (colorFilter as PorterDuffColorFilter).getColor()
-//                }
-//            }
-//            outState?.putIntArray("tabColors", tabColors)
-//        }
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-//        savedInstanceState?.let {
-//            with (tab_menus) {
-//                it.getIntArray("tabColors")?.let { colors ->
-//                    for (i in 0 until Math.min(childCount, colors.size)) {
-//                        (getChildAt(i) as? ImageButton)?.setColorFilter(colors[i])
-//                    }
-//                }
-//            }
-//        }
-    }
-
     @SuppressLint("SetTextI18n")
     override fun setTitle(title: CharSequence?) {
         launch {
@@ -410,7 +376,7 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun setupTab() {
-        val tabs = TabManager.loadTabs()
+        currentTabs = TabManager.loadTabs().takeIf { it != currentTabs } ?: return
         val outValueTextColor = TypedValue()
         val outValueBackground = TypedValue()
         theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
@@ -420,7 +386,7 @@ class MainActivity: DividedFragmentActivity() {
         mMainPagerAdapter.clearTab()
 
         var pos = 0
-        for (tab in tabs) {
+        for (tab in currentTabs!!) {
             tab_menus.addView(ImageButton(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                         (60 * resources.displayMetrics.density + 0.5f).toInt(),
@@ -461,8 +427,6 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun setup() {
-        setupTab()
-
         footer.visibility = View.VISIBLE
 
         mViewPager.offscreenPageLimit = 10
@@ -593,6 +557,8 @@ class MainActivity: DividedFragmentActivity() {
         mAccessTokenAdapter.notifyDataSetChanged()
         EventBus.getDefault().post(PostAccountChangeEvent())
     }
+
+
 
 //    fun onEventMainThread(e: NewRecordEvent) {
 //        val pos = if (e.tabId > TabManager.OLD_SEARCH_TAB_ID) mMainPagerAdapter.findPositionById(e.tabId)

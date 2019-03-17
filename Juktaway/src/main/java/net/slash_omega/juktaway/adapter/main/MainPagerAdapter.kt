@@ -47,15 +47,6 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
 
     fun findFragmentByPosition(pos: Int) = instantiateItem(mViewPager, pos) as BaseFragment
 
-//    fun findPositionById(id: Long) = mTabs.indexOfFirst { it.id == id }
-//
-//    fun findPositionBySearchWord(str: String)
-//            = mTabs.indexOfFirst { it.id <= TabManager.OLD_SEARCH_TAB_ID && it.searchWord == str }
-//
-//    fun addTab(clazz : KClass<out Fragment>, args: Bundle?, tabTitle: String, id: Long, searchWord: String? = null) {
-//        mTabs.add(TabInfo(clazz, args, tabTitle, id, searchWord))
-//    }
-
     fun addTab(tab: Tab) {
         val info = when (tab.type) {
             HOME_TAB_ID -> TabInfo(TimelineFragment::class, null, tab.displayString)
@@ -67,6 +58,9 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
                 }, tab.displayString)
             LIST_TAB_ID -> TabInfo(UserListFragment::class, Bundle().apply {
                 putLong("userListId", tab.id)
+            }, tab.displayString)
+            USER_TAB_ID -> TabInfo(UserFragment::class, Bundle().apply {
+                putLong("userId", tab.id)
             }, tab.displayString)
             else -> return
         }

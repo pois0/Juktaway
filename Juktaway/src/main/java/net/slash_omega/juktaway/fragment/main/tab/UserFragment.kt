@@ -4,6 +4,7 @@ import android.os.Bundle
 import jp.nephy.penicillin.endpoints.timeline
 import jp.nephy.penicillin.endpoints.timeline.userTimelineByUserId
 import jp.nephy.penicillin.extensions.await
+import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.twitter.currentClient
 
 /**
@@ -20,5 +21,7 @@ class UserFragment: BaseFragment() {
 
     override suspend fun getNewStatuses(additional: Boolean) = runCatching {
         currentClient.timeline.userTimelineByUserId(userId).await()
-    }.getOrNull()
+    }.getOrNull()?.also { res ->
+        res.firstOrNull()?.let { TabManager.refreshUserTab(it.user) }
+    }
 }

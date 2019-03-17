@@ -263,4 +263,5 @@
     <string name="signin_csck_blank">コンシューマキーまたはコンシューマシークレットが未記入です</string>
     <string name="quick_posting_menu_title">クイック投稿メニュー</string>
     <string name="title_user">ユーザ</string>
+    <string name="menu_user_to_tab">ユーザをタブにする</string>
 </resources>

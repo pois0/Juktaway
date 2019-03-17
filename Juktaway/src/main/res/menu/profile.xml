@@ -29,5 +29,9 @@
             android:id="@+id/report_spam"
             android:orderInCategory="100"
             android:title="@string/menu_report_spam" compat:showAsAction="never"/>
-
+    <item
+            android:id="@+id/user_to_tab"
+            android:orderInCategory="100"
+            android:title="@string/menu_user_to_tab"
+            compat:showAsAction="never" />
 </menu>

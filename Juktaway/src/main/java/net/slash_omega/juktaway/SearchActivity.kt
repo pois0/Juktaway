@@ -27,9 +27,6 @@ import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.PressEnterListener
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.OldTab
-import net.slash_omega.juktaway.model.SEARCH_TAB_ID
-import net.slash_omega.juktaway.model.Tab
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.twitter.currentClient
@@ -127,10 +124,7 @@ class SearchActivity: DividedFragmentActivity() {
                 searchWords.text?.let {
                     createSavedSearch(it.toString())
                 }
-            R.id.search_to_tab -> {
-                TabManager.addSearchTab(searchWords.text.toString())
-                setResult(Activity.RESULT_OK)
-            }
+            R.id.search_to_tab -> TabManager.addSearchTab(searchWords.text.toString())
         }
         return true
     }

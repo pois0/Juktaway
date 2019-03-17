@@ -1,6 +1,7 @@
 package net.slash_omega.juktaway.model
 
 import jp.nephy.penicillin.models.TwitterList
+import jp.nephy.penicillin.models.User
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
@@ -30,9 +31,7 @@ object TabManager {
     private var oldTabPreference by SharedPreference("settings", TABS + currentIdentifier.userId.toString() + "/v2", "")
 
     @UseExperimental(ImplicitReflectionSerializer::class)
-    fun loadTabs(): MutableList<Tab> {
-        mTabs.clear()
-        mTabs.addAll(
+    fun loadTabs(): List<Tab> = mTabs.takeIf { it.isNotEmpty() } ?: run {
                 tabPreference.takeIf { it.isNotBlank() }?.let { json ->
                     println(json)
                     Json.parseList<Tab>(json)
@@ -43,9 +42,7 @@ object TabManager {
                         translateTab(data.tabs)
                     }
                 } ?: generalTabs
-        )
-        return mTabs
-    }
+            }.also { mTabs = it.toMutableList() }
 
     fun reinitialize(tabs: List<Tab>) {
         mTabs.clear()
@@ -59,6 +56,20 @@ object TabManager {
     }
 
     fun addSearchTab(searchWord: String) = addTab(Tab(SEARCH_TAB_ID, 0, searchWord, -1))
+
+    fun addUserTab(user: User) = addTab(Tab(USER_TAB_ID, user.id, user.screenName, -1))
+
+    fun refreshUserTab(user: User) {
+        var i = 0
+        for (tab in mTabs) {
+            if (tab.type == USER_TAB_ID && tab.id == user.id) {
+                if (tab.word == user.screenName) return else break
+            }
+            i++
+        }
+        mTabs[i] = Tab(USER_TAB_ID, user.id, user.screenName, -1)
+        saveTabs()
+    }
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     private fun saveTabs() {

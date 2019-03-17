@@ -37,6 +37,7 @@ import kotlinx.coroutines.*
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.fragment.profile.*
+import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.*
@@ -314,6 +315,7 @@ class ProfileActivity: DividedFragmentActivity() {
                 R.id.open_twilog ->
                     startActivity(Intent(Intent.ACTION_VIEW,
                             Uri.parse("http://twilog.org/" + mUser.screenName)))
+                R.id.user_to_tab -> TabManager.addUserTab(mUser)
                 R.id.report_spam ->
                     AlertDialog.Builder(this@ProfileActivity)
                             .setMessage(R.string.confirm_report_spam)
