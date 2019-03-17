@@ -1,7 +1,6 @@
 package net.slash_omega.juktaway.fragment.main.tab
 
 import android.os.Bundle
-import android.os.Handler
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
@@ -9,8 +8,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.AbsListView
 import android.widget.ListView
-import android.widget.ProgressBar
 import de.greenrobot.event.EventBus
+import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
@@ -31,26 +30,19 @@ import kotlin.collections.ArrayList
 
 abstract class BaseFragment: Fragment(), CoroutineScope {
     override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
-    protected var mAdapter: StatusAdapter? = null
-
-    protected var mAutoLoader = false
-    protected var mReloading = false
+    protected lateinit var mAdapter: StatusAdapter
     protected var isLoading = false
+        set(value) {
+            mSwipeRefreshLayout.isRefreshing = value
+            field = value
+        }
+    protected var hasNext = true
     private var mScrolling = false
-    protected var mMaxId = 0L // 読み込んだ最新のツイートID
-    protected var mDirectMessagesMaxId = 0L // 読み込んだ最新の受信メッセージID
-    protected var mSentDirectMessagesMaxId = 0L // 読み込んだ最新の送信メッセージID
+    private var mMaxId = 0L // 読み込んだ最新のツイートID
     private val mStackRows = ArrayList<Row>()
 
-    protected fun finishLoad() {
-        mSwipeRefreshLayout.isRefreshing = false
-        mFooter.visibility = View.GONE
-        Handler().postDelayed({ isLoading = false }, 200)
-    }
-
     protected lateinit var mListView: ListView
-    private lateinit var mFooter: ProgressBar
-    protected lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
+    private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
 
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
@@ -76,8 +68,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
             // 最後までスクロールされたかどうかの判定
             if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
-                isLoading = true
-                additionalReading()
+                launch { load(true) }
             }
         }
     }
@@ -88,7 +79,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
-        = inflater.inflate(R.layout.pull_to_refresh_list, container, false)
+        = inflater.inflate(R.layout.pull_to_refresh_without_guruguru, container, false)
 
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         val act = activity ?: return
@@ -97,10 +88,9 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             onItemLongClickListener = StatusLongClickListener(act)
             setOnScrollListener(mOnScrollListener)
         }
-        mFooter = guruguru.apply { visibility = View.GONE }
 
         mSwipeRefreshLayout = sr_layout.apply {
-            setOnRefreshListener { reload() }
+            setOnRefreshListener { launch { load(false) } }
         }
     }
 
@@ -112,15 +102,11 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
          * onCreateView と onActivityCreated がインスタンスが生きたまま呼ばれる
          * 多重に初期化処理を実行しないように変数チェックを行う
          */
-        if (mAdapter == null) {
+        if (::mAdapter.isInitialized.not()) {
             // Status(ツイート)をViewに描写するアダプター
             mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
-            if (!isLoading) {
-                mSwipeRefreshLayout.isRefreshing = true
-                isLoading = true
-                launch { taskExecute() }
-            }
+            launch { load(false) }
         }
 
         mListView.adapter = mAdapter
@@ -137,30 +123,11 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     fun reload() {
-        if (isLoading) return
-        launch {
-            mReloading = true
-            mSwipeRefreshLayout.isRefreshing = true
-            isLoading = true
-            taskExecute()
-        }
+        launch { load(false) }
     }
 
     protected fun clear() {
-        mMaxId = 0L
-        mDirectMessagesMaxId = 0L
-        mSentDirectMessagesMaxId = 0L
-        mAdapter?.clear()
-    }
-
-    protected fun additionalReading() {
-        if (!mAutoLoader || mReloading || isLoading) return
-        launch {
-            mFooter.visibility = View.VISIBLE
-            mAutoLoader = false
-            isLoading = true
-            taskExecute()
-        }
+        mAdapter.clear()
     }
 
     internal fun goToTop(): Boolean {
@@ -178,7 +145,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      * ツイートの表示処理、画面のスクロール位置によって適切な処理を行う、まだバグがある
      */
     private val mRender = Runnable {
-        if (mScrolling || mAdapter == null) return@Runnable
+        if (mScrolling) return@Runnable
 
         // 表示している要素の位置
         val position = mListView.firstVisiblePosition
@@ -190,7 +157,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         // 要素を上に追加（ addだと下に追加されてしまう ）
         var highlight = false
         mStackRows.forEach { row ->
-            mAdapter?.insert(row, 0)
+            mAdapter.insert(row, 0)
             when {
                 row.isFavorite -> {
                     // お気に入りしたのが自分じゃない時
@@ -259,10 +226,40 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     open var mSearchWord = ""
 
 
-    /**
-     * 読み込み用のAsyncTaskを実行する
-     */
-    protected abstract suspend fun taskExecute()
+    private suspend fun load(additional: Boolean) {
+        if(isLoading || !hasNext) return
+        isLoading = true
+
+        val statuses = getNewStatuses(additional)
+
+        when {
+            statuses.isNullOrEmpty() -> {
+                if(statuses?.isEmpty() == true) hasNext = false
+                mSwipeRefreshLayout.isRefreshing = false
+                mListView.visibility = View.VISIBLE
+            }
+            additional -> {
+                mMaxId = statuses.last().id
+                mAdapter.extensionAddAllFromStatuses(statuses)
+                mListView.visibility = View.VISIBLE
+            }
+            else -> {
+                mAdapter.clear()
+                mMaxId = statuses.last().id
+                mAdapter.extensionAddAllFromStatuses(statuses)
+            }
+        }
+
+        mListView.visibility = View.VISIBLE
+        isLoading = false
+
+        if(!additional) goToTop()
+    }
+
+    protected abstract suspend fun getNewStatuses(additional: Boolean): List<Status>?
+
+    protected fun getRequestMaxId(additional: Boolean): Long?
+        = mMaxId.takeIf { it > 0 && additional }?.minus(1)
 
     /**
      *
@@ -278,7 +275,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = BasicSettings.fastScrollOn }
 
     @Suppress("UNUSED_PARAMETER")
-    fun onEventMainThread(event: StatusActionEvent) { mAdapter?.notifyDataSetChanged() }
+    fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 
     /**
      * ストリーミングAPIからツイ消しイベントを受信
@@ -287,7 +284,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      */
     open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
         launch {
-            val removePositions = mAdapter?.removeStatus(event.statusId!!) ?: ArrayList(0)
+            val removePositions = mAdapter.removeStatus(event.statusId!!)
             for (removePosition in removePositions) {
                 if (removePosition >= 0) {
                     val visiblePosition = mListView.firstVisiblePosition
