@@ -7,6 +7,7 @@ import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
 import android.support.v4.app.FragmentActivity
+import android.util.TypedValue
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ListView
@@ -193,16 +194,23 @@ class TabSettingsActivity: FragmentActivity() {
         override fun getView(position: Int, view: View?, parent: ViewGroup?): View? {
             return (view ?: mInflater.inflate(this.mLayout, null))?.apply {
                 val tab = tabs[position]
-                tab_icon.setText(tab.icon)
+                val color = TypedValue().also {
+                    theme?.resolveAttribute(R.attr.menu_text_color, it, true)
+                }.data
+
+                tab_icon.setImageResource(tab.icon)
+                tab_icon.setColorFilter(color)
                 name.text = tab.displayString
 
                 handle.apply {
                     if (mRemoveMode) {
-                        setText(R.string.fontello_trash)
+                        setImageResource(R.drawable.ic_delete)
+                        setColorFilter(color)
                         setOnTouchListener(null)
                         setOnClickListener { mAdapter.remove(tab) }
                     } else {
-                        setText(R.string.fontello_menu)
+                        setImageResource(R.drawable.ic_reorder)
+                        setColorFilter(color)
                         setOnClickListener(null)
                         setOnTouchListener { _, event ->
                             if (event.action == MotionEvent.ACTION_DOWN) {
