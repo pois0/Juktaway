@@ -210,7 +210,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
                     mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
                 }
             } else {
-                mAdapter.addAllFromStatuses(statuses)
+                mAdapter.addAllFromStatusesSuspend(statuses)
             }
         }
     }

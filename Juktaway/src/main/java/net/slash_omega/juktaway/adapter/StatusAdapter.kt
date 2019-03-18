@@ -44,7 +44,7 @@ import java.util.*
  * Created on 2018/11/13.
  */
 
-class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapter<Row>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
+class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapter<Row>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
     companion object {
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
@@ -99,6 +99,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapt
 
         Dispatchers.Default.doAsync {
             mIdSet.addAll(statuses.map { it.status!!.id })
+
         }
 
         logger.addSplit("doAsync")
@@ -132,12 +133,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity) : ArrayAdapt
         super.addAll(statuses)
 
         limitation()
-    }
-
-    fun addAllFromStatuses(statusesParam: List<Status>) {
-        launch {
-            addAllFromStatusesSuspend(statusesParam)
-        }
     }
 
     suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {

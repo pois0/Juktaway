@@ -45,8 +45,8 @@ class AroundFragment: DialogFragment() {
                 onItemLongClickListener = StatusLongClickListener(a)
             }
             arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { origin ->
-                mAdapter.add(Row.newStatus(origin))
                 GlobalScope.launch(Dispatchers.Main) {
+                    mAdapter.addSuspend(Row.newStatus(origin))
                     val beforeList = runCatching {
                         currentClient.timeline.userTimelineByUserId(origin.user.id, count = 3, maxId = origin.id - 1).await()
                     }.getOrNull() ?: run {

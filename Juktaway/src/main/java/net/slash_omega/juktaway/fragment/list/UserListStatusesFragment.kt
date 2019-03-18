@@ -93,7 +93,7 @@ class UserListStatusesFragment : Fragment() {
 
             if (statuses.isNullOrEmpty()) return@launch
             mMaxId = statuses.first().id
-            mAdapter.addAllFromStatuses(statuses)
+            mAdapter.addAllFromStatusesSuspend(statuses)
             mAutoLoader = true
             mListView.visibility = View.VISIBLE
         }
