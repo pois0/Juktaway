@@ -25,7 +25,7 @@ import net.slash_omega.juktaway.util.nullToBlank
 class SearchAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<String>(mContext, mLayout), Filterable {
     private val mStrings = mutableListOf<String>()
     private val mSavedSearches = mutableListOf<SavedSearch>()
-    private lateinit var mSearchWord: String
+    private var mSearchWord: String = ""
     var savedMode = false
         private set
 

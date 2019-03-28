@@ -4,7 +4,6 @@ plugins {
     id 'kotlin-android-extensions'
     id 'kotlinx-serialization'
     id 'com.cookpad.android.licensetools'
-    id 'com.github.triplet.play' version '2.1.0'
 }
 
 dependencies {
@@ -38,8 +37,8 @@ android {
 
         multiDexEnabled true
         
-        versionCode 7
-        versionName '3.0.2'
+        versionCode 8
+        versionName '3.0.3'
         applicationId "net.slash_omega.juktaway"
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
@@ -100,13 +99,6 @@ android {
         exclude 'META-INF/atomicfu.kotlin_module'
         exclude 'META-INF/kotlinx-coroutines-io.kotlin_module'
     }
-}
-
-play {
-    serviceAccountCredentials = file(properties.getProperty("SERVICE_CREDENTIAL_LOCATION"))
-    track = "internal"
-    userFraction = 1.0
-    defaultToAppBundles = true
 }
 
 allprojects {
