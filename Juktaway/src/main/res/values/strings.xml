@@ -213,7 +213,7 @@
     <string name="toast_update_profile_success">Saved.</string>
     <string name="toast_update_status_already">You have been tweet already.</string>
     <string name="toast_update_status_failure">Failed.</string>
-    <string name="twitter_callback_url">https://auth.juktaway.slash-omega.net</string>
+    <string name="twitter_callback_url" translatable="false">https://auth.juktaway.slash-omega.net</string>
     <string name="widget_title_post_mode">Post Only Mode</string>
     <string name="label_search_tweet">" Tweet Search"</string>
     <string name="label_search_user">" User Search"</string>
@@ -227,8 +227,8 @@
     <string name="label_account_setting">Account Setting</string>
     <string name="toast_update_status_not_Follow">you cannot send messages to users who are not following you.</string>
     <string name="toast_create_user_list_failure_name_blank">A list\'s name can\'t be blank.</string>
-    <string name="pref_title_quick_post_on">Quick post</string>
-    <string name="pref_description_quick_post_on">Quick post bar to display on top of the tab</string>
+    <string name="pref_title_display_main_quick_post">Quick post</string>
+    <string name="pref_description_display_main_quick_post_on">Quick post bar to display on top of the tab</string>
     <string name="menu_destroy_block">Unblock</string>
     <string name="confirm_create_official_mute">Do you want to mute?</string>
     <string name="confirm_destroy_official_mute">Do you want to unmute?？</string>
@@ -250,7 +250,7 @@
     <string name="toast_create_no_retweet_success">Success turn off retweets.</string>
     <string name="toast_destroy_no_retweet_failure">Failure turn on retweets.</string>
     <string name="toast_destroy_no_retweet_success">Success turn on retweets.</string>
-    <string name="pref_title_talk_order_newest">The latest order of conversation</string>
+    <string name="layout_tweet_talk_order_title">The latest order of conversation</string>
     <string name="pref_description_talk_order_newest">Display the conversation from newest to oldest.</string>
     <string name="menu_send_kusoripu">Send repooply</string>
     <string name="signin_csck_blank">Concumer Key Or Consumer Secret is blank.</string>
@@ -263,7 +263,7 @@
     <string name="add_consumer_succeeded">Succeeded to add the consumer.</string>
     <string name="select_consumer">Select Consumer&#8230;</string>
     <string name="not_select_consumer">Select consumer</string>
-    <string name="pref_layout_title">Layouts</string>
+
     <string name="pref_operation_title">Operations</string>
     <string name="quick_posting_menu_title">Quick posting menu</string>
     <string name="quick_posting_menu_fix_initial_tweet">Fix current text to initial text</string>
@@ -271,4 +271,23 @@
     <string name="title_user">User</string>
     <string name="update_status_success">Succeeded to tweet.</string>
     <string name="menu_user_to_tab">To Tab</string>
+    <string name="pref_title_display_tweet_favorite_button">Change favorite button into heart-shaped</string>
+    <string name="pref_title_display_tweet_millisec">Show the posted time in milliseconds</string>
+    <string name="layout_tweet_show_icon_title">Display the author icon in the tweet</string>
+    <string name="pref_title_display_general">General</string>
+    <string name="pref_title_display_main">Main Activity</string>
+    <string name="pref_title_display_tweet">Tweet</string>
+    <string name="pref_title_display_picture_quality">Quality of pictures</string>
+    <string name="pref_title_display_video_quality">Quality of videos</string>
+    <string name="pref_title_api">Twitter API</string>
+    <string name="pref_title_operation">Operations</string>
+    <string name="pref_title_about">About this app</string>
+    <string name="pref_title_about_feedback">Send feedback</string>
+    <string name="pref_title_about_icon_author">App icon was created by</string>
+    <string name="pref_description_about_icon_author" translatable="false">しー (@GTXTitanX)</string>
+    <string name="pref_title_about_licenses">Licenses of third-party software</string>
+    <string name="pref_title_about_official_account">Official account</string>
+    <string name="pref_title_about_material_icon">License of Material Design Icons</string>
+    <string name="pref_description_about_material_icon">This app includes material design icon desinged by Google
+    </string>
 </resources>

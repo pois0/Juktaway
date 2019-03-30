@@ -23,7 +23,7 @@
 
     <ListPreference
         android:key="page_count"
-        android:title="@string/pref_title_page_count"
+        android:title="@string/pref_title_api_page_count"
         android:defaultValue="100"
         android:entries="@array/pref_page_count_titles"
         android:entryValues="@array/pref_page_count_values"

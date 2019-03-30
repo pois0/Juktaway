@@ -2,7 +2,7 @@
 
     <ListPreference
         android:key="display_account_name"
-        android:title="@string/pref_title_display_account_name"
+        android:title="@string/pref_title_display_main_account_name"
         android:defaultValue="screen_name"
         android:entries="@array/pref_display_account_name_titles"
         android:entryValues="@array/pref_display_account_name_values"
@@ -16,19 +16,19 @@
 
     <CheckBoxPreference
         android:key="fast_scroll_on"
-        android:title="@string/pref_title_fast_scroll_on"
-        android:summary="@string/pref_description_fast_scroll_on"
+        android:title="@string/pref_title_display_fast_scroll"
+        android:summary="@string/pref_description_display_general_fast_scroll"
         android:defaultValue="true"/>
 
     <CheckBoxPreference
         android:key="quickMode"
-        android:title="@string/pref_title_quick_post_on"
-        android:summary="@string/pref_description_quick_post_on"
+        android:title="@string/pref_title_display_main_quick_post"
+        android:summary="@string/pref_description_display_main_quick_post_on"
         android:defaultValue="true"/>
 
     <ListPreference
         android:key="font_size"
-        android:title="@string/pref_title_font_size"
+        android:title="@string/pref_title_display_general_font_size"
         android:defaultValue="13"
         android:entries="@array/pref_font_size_titles"
         android:entryValues="@array/pref_font_size_values"
@@ -37,7 +37,7 @@
 
     <ListPreference
         android:key="themeName"
-        android:title="@string/pref_title_theme"
+        android:title="@string/pref_title_display_general_theme"
         android:defaultValue="black"
         android:entries="@array/pref_theme_titles"
         android:entryValues="@array/pref_theme_values"
@@ -55,7 +55,7 @@
 
     <CheckBoxPreference
         android:key="talk_order_newest"
-        android:title="@string/pref_title_talk_order_newest"
+        android:title="@string/layout_tweet_talk_order_title"
         android:summary="@string/pref_description_talk_order_newest"
         android:defaultValue="false"/>
 

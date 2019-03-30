@@ -35,7 +35,7 @@ class SettingsActivity: Activity() {
             if (preferenceManager == null) return
             preferenceManager.sharedPreferencesName = "settings"
 
-            addPreferencesFromResource(R.xml.pref_general)
+            addPreferencesFromResource(R.xml.pref_newgeneral)
 
             (findPreference("display_account_name") as? ListPreference)?.apply {
                 summary = entry

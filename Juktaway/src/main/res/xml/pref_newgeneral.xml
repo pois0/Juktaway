@@ -1,66 +1,63 @@
 <?xml version="1.0" encoding="utf-8"?>
 <PreferenceScreen xmlns:android="http://schemas.android.com/apk/res/android">
     <PreferenceScreen
-            android:key="pref_layout_screen"
-            android:title="@string/pref_layout_title"
+            android:key="pref_display_screen"
+            android:title="@string/pref_title_display"
             android:persistent="false">
         <PreferenceCategory
-                android:key="pref_layout_general"
-                android:title="">
+                android:key="pref_display_general"
+                android:title="@string/pref_title_display_general">
             <ListPreference
-                    android:key="layout_general_theme"
-                    android:title="@string/pref_title_theme"
+                    android:key="display_general_theme"
+                    android:title="@string/pref_title_display_general_theme"
                     android:defaultValue="black"
                     android:entries="@array/pref_theme_titles"
                     android:entryValues="@array/pref_theme_values"
                     android:negativeButtonText="@null"
                     android:positiveButtonText="@null" />
             <ListPreference
-                    android:key="layout_general_font_size"
-                    android:title="@string/pref_title_font_size"
+                    android:key="display_general_font_size"
+                    android:title="@string/pref_title_display_general_font_size"
                     android:defaultValue="13"
                     android:entries="@array/pref_font_size_titles"
                     android:entryValues="@array/pref_font_size_values"
                     android:negativeButtonText="@null"
                     android:positiveButtonText="@null" />
             <CheckBoxPreference
-                    android:key="layout_general_fast_scroll"
-                    android:title="@string/pref_title_fast_scroll_on"
-                    android:summary="@string/pref_description_fast_scroll_on"
+                    android:key="display_general_fast_scroll"
+                    android:title="@string/pref_title_display_fast_scroll"
+                    android:summary="@string/pref_description_display_general_fast_scroll"
                     android:defaultValue="true" />
         </PreferenceCategory>
         <PreferenceCategory
-                android:key="pref_layout_main"
-                android:title="">
+                android:key="pref_display_main"
+                android:title="@string/pref_title_display_main">
             <ListPreference
-                    android:key="layout_main_user_name"
-                    android:title="@string/pref_title_display_account_name"
+                    android:key="display_main_user_name"
+                    android:title="@string/pref_title_display_main_account_name"
                     android:defaultValue="screen_name"
                     android:entries="@array/pref_display_account_name_titles"
                     android:entryValues="@array/pref_display_account_name_values" />
             <CheckBoxPreference
-                    android:key="layout_main_quick_post"
-                    android:title="@string/pref_title_quick_post_on"
-                    android:summary="@string/pref_description_quick_post_on"
+                    android:key="display_main_quick_post"
+                    android:title="@string/pref_title_display_main_quick_post"
+                    android:summary="@string/pref_description_display_main_quick_post_on"
                     android:defaultValue="true" />
         </PreferenceCategory>
         <PreferenceCategory
-                android:key="pref_layout_tweet"
-                android:title="">
-            <ListPreference
-                    android:key="layout_tweet_favorite_button"
-                    android:title=""
-                    android:defaultValue="star"
-                    android:entries=""
-                    android:entryValues="" />
+                android:key="pref_display_tweet"
+                android:title="@string/pref_title_display_tweet">
             <CheckBoxPreference
-                    android:key="layout_tweet_millisec"
-                    android:title=""
-                    android:defaultValue="true"
-                    android:summary="" />
+                    android:key="display_tweet_favorite_button"
+                    android:title="@string/pref_title_display_tweet_favorite_button"
+                    android:defaultValue="false" />
+            <CheckBoxPreference
+                    android:key="display_tweet_millisec"
+                    android:title="@string/pref_title_display_tweet_millisec"
+                    android:defaultValue="true" />
             <CheckBoxPreference
                     android:key="layout_tweet_show_icon"
-                    android:title=""
+                    android:title= "@string/layout_tweet_show_icon_title"
                     android:defaultValue="true" />
             <CheckBoxPreference
                     android:key="layout_tweet_icon_shape"
@@ -74,26 +71,26 @@
                     android:defaultValue="true" />
             <CheckBoxPreference
                     android:key="layout_tweet_talk_order"
-                    android:title="@string/pref_title_talk_order_newest"
+                    android:title="@string/layout_tweet_talk_order_title"
                     android:summary="@string/pref_description_talk_order_newest"
                     android:defaultValue="false" />
         </PreferenceCategory>
         <ListPreference
-                android:key="layout_picture_quality"
-                android:title=""
-                android:defaultValue=""
-                android:entries=""
-                android:entryValues="" />
+                android:key="display_picture_quality"
+                android:title="@string/pref_title_display_picture_quality"
+                android:defaultValue="Middle"
+                android:entries="@array/pref_quality_picture_entries"
+                android:entryValues="@array/pref_quality_picture_values" />
         <ListPreference
                 android:key="layout_video_quality"
-                android:title=""
-                android:defaultValue=""
-                android:entries=""
-                android:entryValues="" />
+                android:title="@string/pref_title_display_video_quality"
+                android:defaultValue="medium"
+                android:entries="@array/pref_quality_video_entries"
+                android:entryValues="@array/pref_quality_video_values" />
     </PreferenceScreen>
     <PreferenceScreen
             android:key="pref_operation_screen"
-            android:title="">
+            android:title="@string/pref_title_operation">
         <ListPreference
                 android:key="long_tap"
                 android:title="@string/pref_title_log_tap"
@@ -105,14 +102,60 @@
     </PreferenceScreen>
     <PreferenceScreen
             android:key="pref_api_screen"
-            android:title="">
-
+            android:title="@string/pref_title_api">
+        <ListPreference
+                android:key="api_page_count"
+                android:title="@string/pref_title_api_page_count"
+                android:defaultValue="200"
+                android:entries="@array/pref_page_count_titles"
+                android:entryValues="@array/pref_page_count_values" />
     </PreferenceScreen>
     <PreferenceScreen
             android:key="pref_mute_category"
             android:title="@string/pref_title_mute">
         <intent
                 android:targetPackage="@string/android_package_name"
-                android:targetClass="net.slashOmega.juktaway.MuteActivity"/>
+                android:targetClass="net.slash_omega.juktaway.MuteActivity" />
+    </PreferenceScreen>
+    <PreferenceScreen
+            android:key="pref_about"
+            android:title="@string/pref_title_about">
+        <Preference
+                android:key="about_feedback"
+                android:title="@string/pref_title_about_feedback" />
+        <PreferenceScreen
+                android:key="about_official_account"
+                android:title="@string/pref_title_about_official_account">
+            <intent
+                    android:targetPackage="@string/android_package_name"
+                    android:targetClass="net.slash_omega.juktaway.ProfileActivity">
+                <extra android:name="screenName" android:value="Juktaway" />
+            </intent>
+        </PreferenceScreen>
+        <PreferenceScreen
+                android:key="about_third_party"
+                android:title="@string/pref_title_about_licenses">
+            <intent
+                    android:targetPackage="@string/android_package_name"
+                    android:targetClass="net.slash_omega.juktaway.LicenseActivity" />
+        </PreferenceScreen>
+        <PreferenceScreen
+                android:key="about_material_icon"
+                android:title="@string/pref_title_about_material_icon"
+                android:summary="@string/pref_description_about_material_icon">
+            <intent
+                    android:action="android.intent.action.VIEW"
+                    android:data="https://github.com/google/material-design-icons/blob/master/LICENSE" />
+        </PreferenceScreen>
+        <PreferenceScreen
+                android:key="about_icon_author"
+                android:title="@string/pref_title_about_icon_author"
+                android:summary="@string/pref_description_about_icon_author">
+            <intent
+                    android:targetPackage="@string/android_package_name"
+                    android:targetClass="net.slash_omega.juktaway.ProfileActivity">
+                <extra android:name="screenName" android:value="GTXTitanX" />
+            </intent>
+        </PreferenceScreen>
     </PreferenceScreen>
 </PreferenceScreen>
