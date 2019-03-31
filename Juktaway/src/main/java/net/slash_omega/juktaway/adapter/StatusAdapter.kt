@@ -565,9 +565,8 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = TimeUtil.getAbsoluteTime(
-                                    if (preferences.display.tweet.shouldDisplayMilliSec) s.idObj.toDate() else s.createdAt.date
-                            )
+                            text = (if (preferences.display.tweet.shouldDisplayMilliSec) s.idObj.toDate() else s.createdAt.date)
+                                    .absoluteTime
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()

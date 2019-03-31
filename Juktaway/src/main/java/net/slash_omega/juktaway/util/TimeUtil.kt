@@ -3,9 +3,13 @@ package net.slash_omega.juktaway.util
 import java.text.SimpleDateFormat
 import java.util.*
 
-object TimeUtil {
-    private val DATE_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss'.'SSS", Locale.ENGLISH)
 
+private val DATE_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss'.'SSS", Locale.ENGLISH)
+
+val Date.absoluteTime: String
+    get() = DATE_FORMAT.format(this)
+
+object TimeUtil {
     /**
      * 相対時刻取得
      *
@@ -21,15 +25,5 @@ object TimeUtil {
             diff < 86400 -> (diff / 3600).toString() + "h"
             else -> (diff / 86400).toString() + "d"
         }
-    }
-
-    /**
-     * 絶対時刻取得
-     *
-     * @param date 日付
-     * @return 絶対時刻
-     */
-    fun getAbsoluteTime(date: Date): String {
-        return DATE_FORMAT.format(date)
     }
 }

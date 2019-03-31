@@ -377,7 +377,7 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun setupTab() {
-        currentTabs = TabManager.loadTabs().takeIf { it != currentTabs } ?: return
+        currentTabs = TabManager.loadTabs()
         val outValueTextColor = TypedValue()
         val outValueBackground = TypedValue()
         theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
