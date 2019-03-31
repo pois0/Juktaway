@@ -19,6 +19,7 @@ import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.VideoActivity
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import org.jetbrains.anko.startActivity
 import java.io.File
 
@@ -39,7 +40,7 @@ fun ImageView.displayImage(url: Uri) {
 fun ImageView.displayRoundedImage(url: String) {
     if ((tag as? String) == url) return
     tag = url
-    if (BasicSettings.userIconRoundedOn) {
+    if (preferences.display.tweet.isAuthorIconRounded) {
         ImageLoader.getInstance().displayImage(url, this, ImageUtil.sRoundedDisplayImageOptions)
     } else {
         ImageLoader.getInstance().displayImage(url, this)
@@ -80,7 +81,7 @@ object ImageUtil {
         val tag = view.tag as? String
         if (tag != null && tag == url) return
         view.tag = url
-        if (BasicSettings.userIconRoundedOn) {
+        if (preferences.display.tweet.isAuthorIconRounded) {
             ImageLoader.getInstance().displayImage(url, view, sRoundedDisplayImageOptions)
         } else {
             ImageLoader.getInstance().displayImage(url, view)

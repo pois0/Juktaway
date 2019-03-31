@@ -4,77 +4,148 @@ import android.content.Context
 import android.content.SharedPreferences
 import net.slash_omega.juktaway.app
 
+val preferences: Preferences
+    get() = sealedPreferences
+
+private lateinit var sealedPreferences: Preferences
+
+data class Preferences(
+        val display: DisplayPreferences,
+        val operation: OperationPreferences,
+        val api: ApiPreferences
+) {
+    data class DisplayPreferences(
+            val general: DisplayGeneralPreferences,
+            val main: DisplayMainPreferences,
+            val tweet: DisplayTweetPreferences,
+            val pictureQuality: PictureQuality,
+            val videoQuality: VideoQuality
+    ) {
+        data class DisplayGeneralPreferences(
+                val fontSize: Int,
+                val theme: String,
+                val isFastScrollEnabled: Boolean
+        )
+
+        data class DisplayMainPreferences(
+                val userName: UserName,
+                var isQuickPostVisible: Boolean
+        ) {
+            enum class UserName {
+                SCREEN_NAME, DISPLAY_NAME, NONE;
+
+                companion object {
+                    fun fromString(str: String) = when (str) {
+                        "screen_name" -> SCREEN_NAME
+                        "display_name" -> DISPLAY_NAME
+                        else -> NONE
+                    }
+                }
+            }
+        }
+
+        data class DisplayTweetPreferences(
+                val isFavoriteButtonHeartShaped: Boolean,
+                val shouldDisplayMilliSec: Boolean,
+                val shouldShowAuthorIcon: Boolean,
+                val isAuthorIconRounded: Boolean,
+                val shouldShowThumbnail: Boolean,
+                val isTalkSortedByNewest: Boolean
+        )
+
+        enum class PictureQuality(val size: String) {
+            HIGH("large"), MEDIUM("medium"), LOW("small"), LOWEST("thumb");
+
+            companion object {
+                fun fromString(str: String) = when (str) {
+                    "high" -> HIGH
+                    "medium" -> MEDIUM
+                    "low" -> LOW
+                    else -> LOWEST
+                }
+            }
+        }
+
+        enum class VideoQuality(val rank: Int) {
+            HIGH(2), MEDIUM(1), LOW(0);
+
+            companion object {
+                fun formString(str: String) = when (str) {
+                    "high" -> HIGH
+                    "medium" -> MEDIUM
+                    else -> LOW
+                }
+            }
+        }
+    }
+
+    data class OperationPreferences(val longTap: LongTapAction) {
+        enum class LongTapAction {
+            QUOTE, TALK, SHOW_AROUND, SHARE_URL, REPLY_ALL, NOTHING;
+
+            companion object {
+                fun fromString(str: String) = when (str) {
+                    "quote" -> QUOTE
+                    "talk" -> TALK
+                    "show_around" -> SHOW_AROUND
+                    "share_url" -> SHARE_URL
+                    "reply_all" -> REPLY_ALL
+                    else -> NOTHING
+                }
+            }
+        }
+    }
+
+    data class ApiPreferences(val pageCount: Int)
+}
+
 object BasicSettings {
+    private val firstTheme by lazy { sharedPreferences.getString("display_general_theme", "black")!! }
 
     private const val PREF_NAME_SETTINGS = "settings"
-    var fontSize: Int = 0
-        private set
-    lateinit var longTapAction: String
-        private set
-    lateinit var themeName: String
-        private set
-    lateinit var displayAccountName: DisplayAccountName
-        private set
-    var userIconRoundedOn: Boolean = false
-        private set
-    var displayThumbnailOn: Boolean = false
-        private set
-    var fastScrollOn: Boolean = false
-        private set
-    var talkOrderNewest: Boolean = false
-        private set
-    lateinit var userIconSize: UserIconSize
-        private set
-    var pageCount: Int = 0
-        private set
-
-    private const val STREAMING_MODE = "streamingMode"
-    private var mStreamingMode: Boolean = false
-
-    private const val QUICK_MODE = "quickMode"
 
     private val sharedPreferences: SharedPreferences
         get() = app.getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE)
 
-    val quickMode: Boolean
-        get() = sharedPreferences.getBoolean(QUICK_MODE, false)
-
-    val keepScreenOn: Boolean
-        get() = sharedPreferences.getBoolean("keep_screen_on", true)
-
-    enum class DisplayAccountName(val string: String) {
-        SCREEN_NAME("SCREEN_NAME"),
-        DISPLAY_NAME("DISPLAY_NAME"),
-        NONE("NONE")
-    }
-
-    enum class UserIconSize(val value: String) {
-        LARGE("large"), NORMAL("normal"), SMALL("small"), NONE("none");
-        companion object {
-            fun fromString(str: String) = UserIconSize.values().find { it.value == str } ?: throw IllegalArgumentException(str)
-        }
-    }
-
-
-    fun setQuickMod(quickMode: Boolean) {
-        sharedPreferences.edit().run {
-            putBoolean(QUICK_MODE, quickMode)
-            apply()
-        }
-    }
-
     fun init() {
-        val preferences = sharedPreferences
-        fontSize = preferences.getString("font_size", "12")?.toInt() ?: 13
-        longTapAction = preferences.getString("long_tap", "nothing") ?: "nothing"
-        themeName = preferences.getString("themeName", "black") ?: "black"
-        userIconRoundedOn = preferences.getBoolean("user_icon_rounded_on", true)
-        userIconSize = UserIconSize.fromString(preferences.getString("user_icon_size", "large") ?: "large")
-        displayThumbnailOn = preferences.getBoolean("display_thumbnail_on", true)
-        pageCount = preferences.getString("page_count", "200")?.toInt() ?: 0
-        mStreamingMode = sharedPreferences.getBoolean(STREAMING_MODE, false)
-        fastScrollOn = preferences.getBoolean("fast_scroll_on", true)
-        talkOrderNewest = preferences.getBoolean("talk_order_newest", false)
-        displayAccountName = DisplayAccountName.valueOf(preferences.getString("display_account_name", "screen_name")!!.toUpperCase())
+        sealedPreferences = sharedPreferences.let { pref ->
+            Preferences(
+                Preferences.DisplayPreferences(
+                    Preferences.DisplayPreferences.DisplayGeneralPreferences(
+                        pref.getString("display_general_font_size", "12")!!.toInt(),
+                        firstTheme,
+                        pref.getBoolean("display_general_fast_scroll", true)
+                    ),
+                    Preferences.DisplayPreferences.DisplayMainPreferences(
+                        Preferences.DisplayPreferences.DisplayMainPreferences.UserName.fromString(
+                                pref.getString("display_main_user_name", "")!!
+                        ),
+                        pref.getBoolean("display_main_quick_post", true)
+                    ),
+                    Preferences.DisplayPreferences.DisplayTweetPreferences(
+                        pref.getBoolean("display_tweet_favorite_button", false),
+                        pref.getBoolean("display_tweet_millisec", true),
+                        pref.getBoolean("display_tweet_show_icon", true),
+                        pref.getBoolean("display_tweet_icon_shape", false),
+                        pref.getBoolean("layout_tweet_thumbnail", false),
+                        pref.getBoolean("layout_tweet_talk_order", false)
+                    ),
+                    Preferences.DisplayPreferences.PictureQuality.fromString(
+                            pref.getString("display_picture_quality", "")!!
+                    ),
+                    Preferences.DisplayPreferences.VideoQuality.formString(
+                            pref.getString("layout_video_quality", "")!!
+                    )
+                ),
+                Preferences.OperationPreferences(
+                    Preferences.OperationPreferences.LongTapAction.fromString(
+                            pref.getString("operation_long_tap", "")!!
+                    )
+                ),
+                Preferences.ApiPreferences(
+                    pref.getString("api_page_count", "0")!!.toInt()
+                )
+            )
+        }
     }
 }

@@ -56,11 +56,11 @@
                     android:title="@string/pref_title_display_tweet_millisec"
                     android:defaultValue="true" />
             <CheckBoxPreference
-                    android:key="layout_tweet_show_icon"
+                    android:key="display_tweet_show_icon"
                     android:title= "@string/layout_tweet_show_icon_title"
                     android:defaultValue="true" />
             <CheckBoxPreference
-                    android:key="layout_tweet_icon_shape"
+                    android:key="display_tweet_icon_shape"
                     android:title="@string/pref_title_user_icon_rounded_on"
                     android:summary="@string/pref_description_user_icon_rounded_on"
                     android:defaultValue="false" />
@@ -92,7 +92,7 @@
             android:key="pref_operation_screen"
             android:title="@string/pref_title_operation">
         <ListPreference
-                android:key="long_tap"
+                android:key="operation_long_tap"
                 android:title="@string/pref_title_log_tap"
                 android:defaultValue="nothing"
                 android:entries="@array/pref_long_tap_titles"

@@ -29,6 +29,7 @@ import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
@@ -160,7 +161,7 @@ class SearchActivity: DividedFragmentActivity() {
             nextAction = null
             launch {
                 runCatching {
-                    currentClient.search.search("$text exclude:retweets", count = BasicSettings.pageCount).await()
+                    currentClient.search.search("$text exclude:retweets", count = preferences.api.pageCount).await()
                 }.onSuccess { result ->
                     val statuses = result.result.statuses
                     if (result.hasNext) nextAction = result.next

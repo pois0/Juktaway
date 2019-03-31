@@ -34,6 +34,7 @@ import net.slash_omega.juktaway.model.isFavorited
 import net.slash_omega.juktaway.model.isRetweeted
 import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.mute.Mute
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.*
 import net.slash_omega.juktaway.util.TwitterUtil.omitCount
@@ -225,7 +226,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         getItem(position)!!.takeIf { it.isStatus }?.let { row ->
             row.status?.let { status ->
                 val s = status.retweetedStatus ?: status
-                val fontSize = BasicSettings.fontSize.toFloat()
+                val fontSize = preferences.display.general.fontSize.toFloat()
                 relativeLayout {
                     bottomPadding = dip(3)
                     leftPadding = dip(6)
@@ -284,7 +285,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                         displayUserIcon(s.user)
                     }.run {
-                        val iconSize = if (BasicSettings.userIconSize == BasicSettings.UserIconSize.NONE) 0 else 48
+                        val iconSize = if (preferences.display.tweet.shouldShowAuthorIcon) 48 else 0
                         lparams(width = dip(iconSize), height = dip(iconSize)) {
                             below(R.id.action_container)
                             bottomMargin = dip(6)
@@ -386,7 +387,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                                 below(R.id.quoted_display_name)
                             }
 
-                            if (BasicSettings.displayThumbnailOn) {
+                            if (preferences.display.tweet.shouldShowThumbnail) {
                                 frameLayout {
                                     id = R.id.quoted_images_container_wrapper
 
@@ -429,7 +430,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     frameLayout {
                         id = R.id.images_container_wrapper
 
-                        if (BasicSettings.displayThumbnailOn) {
+                        if (preferences.display.tweet.shouldShowThumbnail) {
                             val container = linearLayout {
                                 id = R.id.images_container
                                 orientation = LinearLayout.VERTICAL
@@ -564,7 +565,9 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = TimeUtil.getAbsoluteTime(s.idObj.toDate())
+                            text = TimeUtil.getAbsoluteTime(
+                                    if (preferences.display.tweet.shouldDisplayMilliSec) s.idObj.toDate() else s.createdAt.date
+                            )
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()

@@ -25,6 +25,7 @@ import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import kotlin.collections.ArrayList
 
@@ -272,7 +273,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      * 高速スクロールの設定が変わったら切り替える
      */
     @Suppress("UNUSED_PARAMETER")
-    fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = BasicSettings.fastScrollOn }
+    fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = preferences.display.general.isFastScrollEnabled }
 
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }

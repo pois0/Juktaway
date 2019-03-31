@@ -23,6 +23,7 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.scope
 
@@ -86,7 +87,7 @@ class UserListStatusesFragment : Fragment() {
     private fun applyUserList() {
         activity?.scope?.launch(Dispatchers.Main) {
             val statuses = runCatching {
-                (if (mMaxId > 0) currentClient.timeline.listTimeline(mListId, maxId = mMaxId - 1, count = BasicSettings.pageCount)
+                (if (mMaxId > 0) currentClient.timeline.listTimeline(mListId, maxId = mMaxId - 1, count = preferences.api.pageCount)
                 else currentClient.timeline.listTimeline(mListId)).await()
             }.getOrNull()
             mFooter.visibility = View.GONE

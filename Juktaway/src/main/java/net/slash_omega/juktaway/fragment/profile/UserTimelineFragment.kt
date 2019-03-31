@@ -14,7 +14,7 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 
@@ -34,8 +34,8 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         launch {
             val timeline = runCatching {
                 currentClient.timeline.run {
-                    if (mMaxId > 0 && !mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
-                    else userTimelineByUserId(user.id, count = BasicSettings.pageCount)
+                    if (mMaxId > 0 && !mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = preferences.api.pageCount)
+                    else userTimelineByUserId(user.id, count = preferences.api.pageCount)
                 }.await()
             }.getOrNull()
 

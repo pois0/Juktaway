@@ -7,6 +7,7 @@ import jp.nephy.penicillin.endpoints.timeline.listTimeline
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 class UserListFragment: BaseFragment() {
@@ -18,6 +19,6 @@ class UserListFragment: BaseFragment() {
     }
 
     override suspend fun getNewStatuses(additional: Boolean) = runCatching {
-        currentClient.timeline.listTimeline(userListId, maxId = getRequestMaxId(additional), count = BasicSettings.pageCount).await()
+        currentClient.timeline.listTimeline(userListId, maxId = getRequestMaxId(additional), count = preferences.api.pageCount).await()
     }.getOrNull()
 }

@@ -10,7 +10,8 @@ import jp.nephy.jsonkt.toJsonString
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.TalkFragment
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.Preferences.OperationPreferences.LongTapAction.*
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.util.ActionUtil
 import net.slash_omega.juktaway.util.uri
 
@@ -23,25 +24,25 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
     override fun onItemLongClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long): Boolean {
         return adapterView?.let { getAdapter(it) }?.getItem(position)?.takeUnless{it.isDirectMessage}?.status?.let { status ->
             val source = status.retweetedStatus ?: status
-            when (BasicSettings.longTapAction) {
-                "talk" ->
+            when (preferences.operation.longTap) {
+                TALK ->
                     if (source.inReplyToStatusId != null) {
                         TalkFragment().apply {
                             arguments = Bundle().apply { putString("status", source.toJsonString()) }
                         }.show(activity.supportFragmentManager, "dialog")
                         true
                     } else false
-                "quote" -> {
+                QUOTE -> {
                     ActionUtil.doQuote(source, activity)
                     true
                 }
-                "show_around" -> {
+                SHOW_AROUND -> {
                     AroundFragment().apply {
                         arguments = Bundle().apply { putString("status", source.toJsonString()) }
                     }.show(activity.supportFragmentManager, "dialog")
                     true
                 }
-                "share_url" -> {
+                SHARE_URL -> {
                     activity.startActivity(Intent().apply {
                         action = Intent.ACTION_SEND
                         type = "text/plain"
@@ -49,7 +50,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                     })
                     true
                 }
-                "reply_all" -> {
+                REPLY_ALL -> {
                     ActionUtil.doReplyAll(source, activity)
                     true
                 }

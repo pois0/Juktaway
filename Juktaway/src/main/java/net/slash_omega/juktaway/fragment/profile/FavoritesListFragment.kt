@@ -12,7 +12,7 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 /**
@@ -27,8 +27,8 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
         launch {
             val statuses = runCatching {
                 currentClient.favorites.run {
-                    if (mMaxId > 0) listByUserId(user.id, maxId = mMaxId - 1, count = BasicSettings.pageCount)
-                    else listByUserId(user.id, count = BasicSettings.pageCount)
+                    if (mMaxId > 0) listByUserId(user.id, maxId = mMaxId - 1, count = preferences.api.pageCount)
+                    else listByUserId(user.id, count = preferences.api.pageCount)
                 }.await()
             }.getOrNull()
 

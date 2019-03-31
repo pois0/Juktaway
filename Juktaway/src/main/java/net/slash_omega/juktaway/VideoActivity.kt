@@ -14,6 +14,7 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_video.*
 import kotlinx.coroutines.*
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.parseWithClient
@@ -41,7 +42,6 @@ class VideoActivity: DividedFragmentActivity() {
             return@onCreate
         }
 
-        // TODO 画質を選べるように
         when (extra.getString("arg")) {
             "statusJson" -> setVideoURI(extra.getString("statusJson")!!.toJsonObject().parseWithClient<Status>())
             "statusUrl" -> pattern.matcher(extra.getString("statusUrl"))?.takeIf { it.find() }?.let { m ->
@@ -75,7 +75,12 @@ class VideoActivity: DividedFragmentActivity() {
 
     private fun setVideoURI(status: Status) = status.extendedEntities?.let { entities ->
         if (entities.media.any { it.type == videoType }) {
-            entities.media.first { it.type == videoType }.videoInfo?.variants?.get(1)
+            entities.media.first { it.type == videoType }.videoInfo?.variants?.filter { it.bitrate != null }
+                    ?.sortedBy { it.bitrate!! }
+                    ?.let {
+                        it.runCatching { get(preferences.display.videoQuality.rank) }
+                                .getOrDefault(it.firstOrNull())
+                    }
         } else {
             entities.media.first { it.type == animatedGifType }.videoInfo?.variants?.get(0)
         }

@@ -11,7 +11,8 @@ import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import kotlinx.coroutines.withContext
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.Preferences.DisplayPreferences.PictureQuality.*
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.isIdentifierSet
 import net.slash_omega.juktaway.util.ImageUtil
@@ -24,14 +25,12 @@ import org.jetbrains.anko.db.*
  */
 
 fun ImageView.displayUserIcon(user: CommonUser) {
-    val url = when (BasicSettings.userIconSize) {
-            BasicSettings.UserIconSize.LARGE -> ProfileImageSize.Bigger
-            BasicSettings.UserIconSize.NORMAL -> ProfileImageSize.Normal
-            BasicSettings.UserIconSize.SMALL -> ProfileImageSize.Mini
-            else -> null
-        }?.let { user.profileImageUrlHttpsWithVariantSize(it) } ?: return
+    val url = user.profileImageUrlHttpsWithVariantSize( when (preferences.display.pictureQuality) {
+        HIGH -> ProfileImageSize.Bigger
+        else -> ProfileImageSize.Mini
+    })
 
-    if (BasicSettings.userIconRoundedOn) {
+    if (preferences.display.tweet.isAuthorIconRounded) {
         ImageUtil.displayImage(url, this)
     } else {
         ImageUtil.displayRoundedImage(url, this)

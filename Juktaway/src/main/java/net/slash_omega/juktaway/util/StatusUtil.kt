@@ -5,20 +5,21 @@ import android.text.Spanned
 import android.text.style.UnderlineSpan
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.models.Status
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import java.util.*
 import java.util.regex.Pattern
 
 val Status.videoUrl: String
     get() {
-        //TODO
         extendedEntities?.run {
             for (entity in media) {
-                entity.videoInfo?.variants?.run {
-                    for (v in this) {
-                        if (v.url.lastIndexOf("mp4") != -1) return v.url
-                    }
-                }
+                return entity.videoInfo?.variants?.filter { it.bitrate != null }
+                        ?.sortedBy { it.bitrate!! }
+                        ?.let {
+                            it.runCatching { get(preferences.display.videoQuality.rank) }
+                                    .getOrDefault(it.firstOrNull())
+                        }?.url ?: continue
             }
         }
         return ""

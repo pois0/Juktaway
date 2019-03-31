@@ -43,6 +43,8 @@ import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.model.icon
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.Preferences
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.intentFor
@@ -227,8 +229,7 @@ class MainActivity: DividedFragmentActivity() {
         super.onStart()
 
         with (window) {
-            if (BasicSettings.keepScreenOn) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            else clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
+            addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
         }
     }
 
@@ -277,7 +278,7 @@ class MainActivity: DividedFragmentActivity() {
         EventBus.getDefault().post(BasicSettingsChangeEvent())
 
         title = mMainPagerAdapter.getPageTitle(mViewPager.currentItem)
-        if (BasicSettings.quickMode) showQuickPanel() else hideQuickPanel()
+        if (preferences.display.main.isQuickPostVisible) showQuickPanel() else hideQuickPanel()
 
         mSwitchIdentifier?.let {
             launch { Core.switchToken(it) }
@@ -339,10 +340,10 @@ class MainActivity: DividedFragmentActivity() {
                 action_bar_sub_title.text = matcher.group(1)
             } else {
                 action_bar_title.text = title
-                action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
-                    BasicSettings.DisplayAccountName.SCREEN_NAME ->
+                action_bar_sub_title.text = when (preferences.display.main.userName) {
+                    Preferences.DisplayPreferences.DisplayMainPreferences.UserName.SCREEN_NAME ->
                         "@" + currentIdentifier.screenName
-                    BasicSettings.DisplayAccountName.DISPLAY_NAME ->
+                    Preferences.DisplayPreferences.DisplayMainPreferences.UserName.DISPLAY_NAME ->
                         UserIconManager.getName(currentIdentifier.userId)
                     else -> ""
                 }
@@ -361,7 +362,7 @@ class MainActivity: DividedFragmentActivity() {
             isFocusableInTouchMode = true
             isEnabled = true
         }
-        BasicSettings.setQuickMod(true)
+        preferences.display.main.isQuickPostVisible = true
     }
 
     private fun hideQuickPanel() {
@@ -372,7 +373,7 @@ class MainActivity: DividedFragmentActivity() {
             clearFocus()
         }
         quick_tweet_layout.visibility = View.GONE
-        BasicSettings.setQuickMod(false)
+        preferences.display.main.isQuickPostVisible = false
     }
 
     private fun setupTab() {
@@ -444,7 +445,7 @@ class MainActivity: DividedFragmentActivity() {
         })
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
-        if (BasicSettings.quickMode) showQuickPanel()
+        if (preferences.display.main.isQuickPostVisible) showQuickPanel()
     }
 
     private fun showTopView() {
