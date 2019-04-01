@@ -18,7 +18,8 @@ class UserListFragment: BaseFragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    override suspend fun getNewStatuses(additional: Boolean) = runCatching {
-        currentClient.timeline.listTimeline(userListId, maxId = getRequestMaxId(additional), count = preferences.api.pageCount).await()
+    override suspend fun getNewStatuses(loadType: LoadStatusesType) = runCatching {
+        currentClient.timeline.listTimeline(userListId, maxId = loadType.requestMaxId, sinceId = loadType.requestSinceId,
+                count = preferences.api.pageCount).await()
     }.getOrNull()
 }

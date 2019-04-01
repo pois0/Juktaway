@@ -8,6 +8,7 @@ import android.support.v4.view.ViewPager
 import net.slash_omega.juktaway.fragment.main.tab.*
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.twitter.currentIdentifier
+import org.jetbrains.anko.bundleOf
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 
@@ -24,10 +25,23 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
      */
     private class TabInfo(val mClass: KClass<out Fragment>, val args: Bundle?, var tabTitle: String)
 
+    private var currentTabPosition = -1
     private val mTabs = mutableListOf<TabInfo>()
+
+    private fun bundleBase(tab: Tab) = bundleOf("reloadInterval" to tab.autoReload)
 
     init {
         mViewPager.adapter = this
+        mViewPager.addOnPageChangeListener(object: ViewPager.OnPageChangeListener {
+            override fun onPageScrollStateChanged(p0: Int) {}
+            override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
+
+            override fun onPageSelected(position: Int) {
+                if (currentTabPosition >= 0) findFragmentByPosition(currentTabPosition).isAutoReloadEnable = false
+                currentTabPosition = position
+                findFragmentByPosition(position).isAutoReloadEnable = true
+            }
+        })
     }
 
     override fun getItem(p: Int)
@@ -49,17 +63,17 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
 
     fun addTab(tab: Tab) {
         val info = when (tab.type) {
-            HOME_TAB_ID -> TabInfo(TimelineFragment::class, null, tab.displayString)
-            MENTION_TAB_ID -> TabInfo(InteractionsFragment::class, null, tab.displayString)
+            HOME_TAB_ID -> TabInfo(TimelineFragment::class, bundleBase(tab), tab.displayString)
+            MENTION_TAB_ID -> TabInfo(InteractionsFragment::class, bundleBase(tab), tab.displayString)
             //DM_TAB_ID -> TabInfo(DirectMessagesFragment::class, null, tab.displayString)
-            FAVORITE_TAB_ID -> TabInfo(FavoritesFragment::class, null, tab.displayString)
-            SEARCH_TAB_ID -> TabInfo(SearchFragment::class, Bundle().apply {
+            FAVORITE_TAB_ID -> TabInfo(FavoritesFragment::class, bundleBase(tab), tab.displayString)
+            SEARCH_TAB_ID -> TabInfo(SearchFragment::class, bundleBase(tab).apply {
                     putString("searchWord", tab.word)
                 }, tab.displayString)
-            LIST_TAB_ID -> TabInfo(UserListFragment::class, Bundle().apply {
+            LIST_TAB_ID -> TabInfo(UserListFragment::class, bundleBase(tab).apply {
                 putLong("userListId", tab.id)
             }, tab.displayString)
-            USER_TAB_ID -> TabInfo(UserFragment::class, Bundle().apply {
+            USER_TAB_ID -> TabInfo(UserFragment::class, bundleBase(tab).apply {
                 putLong("userId", tab.id)
             }, tab.displayString)
             else -> return

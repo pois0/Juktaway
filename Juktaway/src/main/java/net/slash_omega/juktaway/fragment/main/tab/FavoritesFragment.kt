@@ -8,7 +8,7 @@ import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 class FavoritesFragment: BaseFragment() {
-    override suspend fun getNewStatuses(additional: Boolean) = runCatching {
-        currentClient.favorites.list(maxId = getRequestMaxId(additional), count = preferences.api.pageCount).await()
+    override suspend fun getNewStatuses(loadType: LoadStatusesType) = runCatching {
+        currentClient.favorites.list(maxId = loadType.requestMaxId, sinceId = loadType.requestSinceId, count = preferences.api.pageCount).await()
     }.getOrNull()
 }

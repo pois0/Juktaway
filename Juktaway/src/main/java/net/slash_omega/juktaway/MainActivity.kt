@@ -86,7 +86,7 @@ class MainActivity: DividedFragmentActivity() {
     }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
-    private var currentTabs: List<Tab>? = null
+    private var currentTabs: List<Tab> = TabManager.loadTabs()
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
@@ -362,6 +362,7 @@ class MainActivity: DividedFragmentActivity() {
             isFocusableInTouchMode = true
             isEnabled = true
         }
+
         preferences.display.main.isQuickPostVisible = true
     }
 
@@ -376,8 +377,8 @@ class MainActivity: DividedFragmentActivity() {
         preferences.display.main.isQuickPostVisible = false
     }
 
-    private fun setupTab() {
-        currentTabs = TabManager.loadTabs()
+    private fun setupTab(isFirst: Boolean = false) {
+        currentTabs = TabManager.loadTabs().takeIf { it != currentTabs || isFirst } ?: return
         val outValueTextColor = TypedValue()
         val outValueBackground = TypedValue()
         theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
@@ -387,7 +388,7 @@ class MainActivity: DividedFragmentActivity() {
         mMainPagerAdapter.clearTab()
 
         var pos = 0
-        for (tab in currentTabs!!) {
+        for (tab in currentTabs) {
             tab_menus.addView(ImageButton(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                         (60 * resources.displayMetrics.density + 0.5f).toInt(),
@@ -446,6 +447,7 @@ class MainActivity: DividedFragmentActivity() {
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
         if (preferences.display.main.isQuickPostVisible) showQuickPanel()
+        setupTab(true)
     }
 
     private fun showTopView() {

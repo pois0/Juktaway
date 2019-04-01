@@ -106,7 +106,7 @@ private data class OldTabData(val tabs: ArrayList<OldTab>)
 class OldTab(var id: Long, @Optional var name: String = "")
 
 @Serializable
-data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Int) {
+data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Long) {
     override fun equals(other: Any?) = other is Tab && type == other.type && when (type) {
         SEARCH_TAB_ID -> word == other.word
         LIST_TAB_ID, USER_TAB_ID -> id == other.id

@@ -32,7 +32,6 @@ import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.model.displayUserIcon
 import net.slash_omega.juktaway.model.isFavorited
 import net.slash_omega.juktaway.model.isRetweeted
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.mute.Mute
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -156,6 +155,26 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         super.insert(row, index)
         if (row.isStatus) mIdSet.add(row.status!!.id)
         // limitation()
+    }
+
+    suspend fun insertAllFromStatus(statusesParam: Collection<Status>, index: Int): Int = coroutineScope {
+        setNotifyOnChange(false)
+
+        var position = index
+        val statuses = withContext(Dispatchers.Default) {
+            statusesParam.filterNot(Mute::isMute).map { Row.newStatus(it) }.filter { !exists(it) }
+        }
+
+        val job = launch(Dispatchers.Default) { mIdSet.addAll(statuses.map { it.status!!.id }) }
+
+        statuses.forEach {
+            super.insert(it, position++)
+        }
+
+        job.join()
+        notifyDataSetChanged()
+
+        statuses.size
     }
 
     override fun remove(row: Row) {

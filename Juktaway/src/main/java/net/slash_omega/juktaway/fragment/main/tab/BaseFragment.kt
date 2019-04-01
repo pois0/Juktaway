@@ -3,6 +3,7 @@ package net.slash_omega.juktaway.fragment.main.tab
 import android.os.Bundle
 import android.support.v4.app.Fragment
 import android.support.v4.widget.SwipeRefreshLayout
+import android.util.Log
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,23 +12,21 @@ import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.pull_to_refresh_list.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import kotlinx.coroutines.channels.Channel
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.action.GoToTopEvent
 import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingCreateStatusEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.Row
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import kotlin.collections.ArrayList
+import kotlin.system.measureTimeMillis
 
 abstract class BaseFragment: Fragment(), CoroutineScope {
     override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
@@ -40,7 +39,12 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected var hasNext = true
     private var mScrolling = false
     private var mMaxId = 0L // 読み込んだ最新のツイートID
+    private var mSinceId = 0L
     private val mStackRows = ArrayList<Row>()
+
+    private val statusChannel = Channel<List<Status>>(30)
+    private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
+    var isAutoReloadEnable = false
 
     protected lateinit var mListView: ListView
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
@@ -69,7 +73,46 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
             // 最後までスクロールされたかどうかの判定
             if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
-                launch { load(true) }
+                launch { load(LoadStatusesType.ADDITIONAL) }
+            }
+        }
+    }
+
+    private val autoReloadJob by lazy {
+        launch(Dispatchers.Default, CoroutineStart.LAZY) {
+            var delayed = 0L
+            route@ while (isActive) {
+                delay(autoReloadInterval - delayed)
+
+                while (!isAutoReloadEnable || isLoading) {
+                    if (!isActive) break@route
+                    delay(500)
+                }
+
+                delayed = measureTimeMillis {
+                    getNewStatuses(LoadStatusesType.NEW).takeUnless { it.isNullOrEmpty() }?.let {
+                        statusChannel.send(it)
+                    }
+                }
+            }
+        }
+    }
+
+    private val displayStatusJob by lazy {
+        launch(Dispatchers.Main, CoroutineStart.LAZY) {
+            for (statuses in statusChannel) {
+                mSinceId = statuses.last().id
+
+                val position = mListView.firstVisiblePosition
+                val y = mListView.getChildAt(0)?.top ?: 0
+
+                val size = mAdapter.insertAllFromStatus(statuses, 0)
+
+                if (position == 0 && y == 0) {
+                    mListView.setSelection(0)
+                } else {
+                    mListView.setSelectionFromTop(position + size, y)
+                }
             }
         }
     }
@@ -77,6 +120,10 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
+        if (autoReloadInterval > 0) {
+            autoReloadJob.start()
+            displayStatusJob.start()
+        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -91,7 +138,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         }
 
         mSwipeRefreshLayout = sr_layout.apply {
-            setOnRefreshListener { launch { load(false) } }
+            setOnRefreshListener { launch { load(LoadStatusesType.RELOAD) } }
         }
     }
 
@@ -107,7 +154,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             // Status(ツイート)をViewに描写するアダプター
             mAdapter = StatusAdapter(activity!!)
             mListView.visibility = View.GONE
-            launch { load(false) }
+            launch { load(LoadStatusesType.RELOAD) }
         }
 
         mListView.adapter = mAdapter
@@ -123,8 +170,14 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         super.onPause()
     }
 
+    override fun onDestroy() {
+        println("stopped")
+        super.onDestroy()
+        statusChannel.close()
+    }
+
     fun reload() {
-        launch { load(false) }
+        launch { load(LoadStatusesType.RELOAD) }
     }
 
     protected fun clear() {
@@ -227,40 +280,51 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     open var mSearchWord = ""
 
 
-    private suspend fun load(additional: Boolean) {
+    private suspend fun load(loadType: LoadStatusesType) {
         if(isLoading || !hasNext) return
         isLoading = true
 
-        val statuses = getNewStatuses(additional)
+        val statuses = getNewStatuses(loadType)
 
-        when {
-            statuses.isNullOrEmpty() -> {
-                if(statuses?.isEmpty() == true) hasNext = false
-                mSwipeRefreshLayout.isRefreshing = false
-                mListView.visibility = View.VISIBLE
+        if (statuses.isNullOrEmpty()) {
+            if(statuses?.isEmpty() == true) hasNext = false
+            mSwipeRefreshLayout.isRefreshing = false
+        } else {
+            when (loadType) {
+                LoadStatusesType.ADDITIONAL -> {
+                    mListView.visibility = View.VISIBLE
+                    mAdapter.extensionAddAllFromStatuses(statuses)
+                }
+                LoadStatusesType.RELOAD -> {
+                    mAdapter.clear()
+                    mAdapter.extensionAddAllFromStatuses(statuses)
+                }
+                LoadStatusesType.NEW -> {
+                    mAdapter.insertAllFromStatus(statuses, 0)
+                }
             }
-            additional -> {
-                mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatuses(statuses)
-                mListView.visibility = View.VISIBLE
-            }
-            else -> {
-                mAdapter.clear()
-                mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatuses(statuses)
-            }
+
+            if (!loadType.limitMin) mMaxId = statuses.first().id
+            if (!loadType.limitMax) mSinceId = statuses.last().id
         }
 
         mListView.visibility = View.VISIBLE
         isLoading = false
 
-        if(!additional) goToTop()
+        if(loadType == LoadStatusesType.RELOAD) goToTop()
     }
 
-    protected abstract suspend fun getNewStatuses(additional: Boolean): List<Status>?
+    protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
 
-    protected fun getRequestMaxId(additional: Boolean): Long?
-        = mMaxId.takeIf { it > 0 && additional }?.minus(1)
+    enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
+        RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
+    }
+
+    protected val LoadStatusesType.requestMaxId: Long?
+        get() = mMaxId.takeIf { it > 0 && limitMax }?.minus(1)
+
+    protected val LoadStatusesType.requestSinceId: Long?
+        get() = mSinceId.takeIf { it > 0 && limitMin }?.plus(1)
 
     /**
      *
@@ -277,37 +341,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
-
-    /**
-     * ストリーミングAPIからツイ消しイベントを受信
-     *
-     * @param event ツイート
-     */
-    open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        launch {
-            val removePositions = mAdapter.removeStatus(event.statusId!!)
-            for (removePosition in removePositions) {
-                if (removePosition >= 0) {
-                    val visiblePosition = mListView.firstVisiblePosition
-                    if (visiblePosition > removePosition) {
-                        val view = mListView.getChildAt(0)
-                        val y = view?.top ?: 0
-                        mListView.setSelectionFromTop(visiblePosition - 1, y)
-                        break
-                    }
-                }
-            }
-        }
-    }
-
-    /**
-     * ストリーミングAPIからツイートイベントを受信
-     *
-     * @param event ツイート
-     */
-    open fun onEventMainThread(event: StreamingCreateStatusEvent) {
-        addStack(event.row)
-    }
 
     /**
      * アカウント変更通知を受け、表示中のタブはリロード、表示されていたいタブはクリアを行う

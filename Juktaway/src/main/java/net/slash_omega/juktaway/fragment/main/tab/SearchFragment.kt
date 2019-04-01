@@ -11,6 +11,7 @@ import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.Search
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.model.TabManager
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 class SearchFragment: BaseFragment() {
@@ -23,10 +24,15 @@ class SearchFragment: BaseFragment() {
         super.onActivityCreated(savedInstanceState)
     }
 
-    override suspend fun getNewStatuses(additional: Boolean) = runCatching {
-        (action?.takeIf { additional } ?: currentClient.search.search("$mSearchWord exclude:retweets")).await()
+    override suspend fun getNewStatuses(loadType: LoadStatusesType) = runCatching {
+        (action?.takeIf { loadType.limitMax }
+                ?: currentClient.search.search("$mSearchWord exclude:retweets",
+                        count = preferences.api.pageCount,  sinceId = loadType.requestSinceId)
+        ).await()
     }.getOrNull()?.also {
-        action = it.next
-        hasNext = it.hasNext
+        if (!loadType.limitMin) {
+            action = it.next
+            hasNext = it.hasNext
+        }
     }?.result?.statuses
 }

@@ -4,10 +4,8 @@ import android.content.Context
 import android.content.SharedPreferences
 import net.slash_omega.juktaway.app
 
-val preferences: Preferences
-    get() = sealedPreferences
-
-private lateinit var sealedPreferences: Preferences
+lateinit var preferences: Preferences
+    private set
 
 data class Preferences(
         val display: DisplayPreferences,
@@ -108,7 +106,7 @@ object BasicSettings {
         get() = app.getSharedPreferences(PREF_NAME_SETTINGS, Context.MODE_PRIVATE)
 
     fun init() {
-        sealedPreferences = sharedPreferences.let { pref ->
+        preferences = sharedPreferences.let { pref ->
             Preferences(
                 Preferences.DisplayPreferences(
                     Preferences.DisplayPreferences.DisplayGeneralPreferences(
