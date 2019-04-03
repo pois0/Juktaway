@@ -13,6 +13,7 @@ import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.coroutines.*
 import kotlinx.coroutines.channels.Channel
+import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.action.GoToTopEvent
@@ -36,13 +37,14 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private var mScrolling = false
     private var statusIdMax = 0L // 読み込んだ最新のツイートID
     private var statusIdMin = 0L
+    private val position by lazy { arguments?.getInt("position", -1) ?: -1 }
 
     private val statusChannel = Channel<List<Status>>(30)
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
-    var isAutoReloadEnable = false
 
     protected lateinit var mListView: ListView
     private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
+    private var isRunning = false
 
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
@@ -59,7 +61,9 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
                         EventBus.getDefault().post(GoToTopEvent())
                     }
                 }
-                AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL, AbsListView.OnScrollListener.SCROLL_STATE_FLING -> mScrolling = true
+                AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL, AbsListView.OnScrollListener.SCROLL_STATE_FLING ->  {
+                    mScrolling = true
+                }
             }
         }
 
@@ -77,7 +81,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
 
-                while (!isAutoReloadEnable || isLoading) {
+                while (position != (activity as MainActivity).currentTabPosition || !isRunning || isLoading) {
                     if (!isActive) break@route
                     delay(500)
                 }
@@ -155,11 +159,13 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
+        isRunning = true
         EventBus.getDefault().register(this)
     }
 
     override fun onPause() {
         EventBus.getDefault().unregister(this)
+        isRunning = false
         super.onPause()
     }
 

@@ -2,9 +2,9 @@ package net.slash_omega.juktaway.adapter.main
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentActivity
 import android.support.v4.app.FragmentStatePagerAdapter
 import android.support.v4.view.ViewPager
+import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.fragment.main.tab.*
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -15,7 +15,7 @@ import kotlin.reflect.jvm.jvmName
 /**
  * Created on 2018/10/20.
  */
-class MainPagerAdapter(private val mContext: FragmentActivity, private val mViewPager: ViewPager) : FragmentStatePagerAdapter(mContext.supportFragmentManager) {
+class MainPagerAdapter(private val mContext: MainActivity, private val mViewPager: ViewPager) : FragmentStatePagerAdapter(mContext.supportFragmentManager) {
     /**
      * タブ内のActivity、引数を設定する。
      *
@@ -25,10 +25,9 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
      */
     private class TabInfo(val mClass: KClass<out Fragment>, val args: Bundle?, var tabTitle: String)
 
-    private var currentTabPosition = -1
     private val mTabs = mutableListOf<TabInfo>()
 
-    private fun bundleBase(tab: Tab) = bundleOf("reloadInterval" to tab.autoReload)
+    private fun bundleBase(tab: Tab, pos: Int) = bundleOf("reloadInterval" to tab.autoReload, "position" to pos)
 
     init {
         mViewPager.adapter = this
@@ -37,9 +36,7 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
             override fun onPageScrolled(p0: Int, p1: Float, p2: Int) {}
 
             override fun onPageSelected(position: Int) {
-                if (currentTabPosition >= 0) findFragmentByPosition(currentTabPosition).isAutoReloadEnable = false
-                currentTabPosition = position
-                findFragmentByPosition(position).isAutoReloadEnable = true
+                mContext.currentTabPosition = position
             }
         })
     }
@@ -61,19 +58,20 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
 
     fun findFragmentByPosition(pos: Int) = instantiateItem(mViewPager, pos) as BaseFragment
 
-    fun addTab(tab: Tab) {
+    fun addTab(tab: Tab, pos: Int) {
+        val base = bundleBase(tab, pos)
         val info = when (tab.type) {
-            HOME_TAB_ID -> TabInfo(TimelineFragment::class, bundleBase(tab), tab.displayString)
-            MENTION_TAB_ID -> TabInfo(InteractionsFragment::class, bundleBase(tab), tab.displayString)
+            HOME_TAB_ID -> TabInfo(TimelineFragment::class, base, tab.displayString)
+            MENTION_TAB_ID -> TabInfo(InteractionsFragment::class, base, tab.displayString)
             //DM_TAB_ID -> TabInfo(DirectMessagesFragment::class, null, tab.displayString)
-            FAVORITE_TAB_ID -> TabInfo(FavoritesFragment::class, bundleBase(tab), tab.displayString)
-            SEARCH_TAB_ID -> TabInfo(SearchFragment::class, bundleBase(tab).apply {
+            FAVORITE_TAB_ID -> TabInfo(FavoritesFragment::class, base, tab.displayString)
+            SEARCH_TAB_ID -> TabInfo(SearchFragment::class, base.apply {
                     putString("searchWord", tab.word)
                 }, tab.displayString)
-            LIST_TAB_ID -> TabInfo(UserListFragment::class, bundleBase(tab).apply {
+            LIST_TAB_ID -> TabInfo(UserListFragment::class, base.apply {
                 putLong("userListId", tab.id)
             }, tab.displayString)
-            USER_TAB_ID -> TabInfo(UserFragment::class, bundleBase(tab).apply {
+            USER_TAB_ID -> TabInfo(UserFragment::class, base.apply {
                 putLong("userId", tab.id)
             }, tab.displayString)
             else -> return

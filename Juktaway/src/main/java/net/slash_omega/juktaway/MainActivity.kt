@@ -87,6 +87,7 @@ class MainActivity: DividedFragmentActivity() {
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
     private lateinit var currentTabs: List<Tab>
+    internal var currentTabPosition = -1
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
@@ -404,7 +405,7 @@ class MainActivity: DividedFragmentActivity() {
                 setOnClickListener(mMenuOnClickListener)
                 setOnLongClickListener(mMenuOnLongClickListener)
             })
-            mMainPagerAdapter.addTab(tab)
+            mMainPagerAdapter.addTab(tab, pos - 1)
         }
 
         mMainPagerAdapter.notifyDataSetChanged()
