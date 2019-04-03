@@ -290,4 +290,8 @@
     <string name="pref_title_about_material_icon">License of Material Design Icons</string>
     <string name="pref_description_about_material_icon">This app includes material design icon desinged by Google
     </string>
+    <string name="dialog_title_tab_interval">Auto-loading Preference</string>
+    <string name="dialog_text_enable_autoloading">Enable auto loading</string>
+    <string name="dialog_tab_hint">milliseconds</string>
+    <string name="dialog_text_tab_interval">Interval(ms)</string>
 </resources>

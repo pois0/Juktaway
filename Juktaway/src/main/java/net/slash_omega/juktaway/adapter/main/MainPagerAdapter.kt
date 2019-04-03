@@ -45,7 +45,7 @@ class MainPagerAdapter(private val mContext: FragmentActivity, private val mView
     }
 
     override fun getItem(p: Int)
-            = mTabs[p].let { Fragment.instantiate(mContext, it.mClass.jvmName, it.args) as BaseFragment }
+                = mTabs[p].let { Fragment.instantiate(mContext, it.mClass.jvmName, it.args) as BaseFragment }
 
     override fun getItemPosition(o: Any) = POSITION_NONE
 

@@ -10,6 +10,13 @@
             android:layout_alignParentEnd="true"
             android:background="@drawable/button_stateful_transparent"
             android:layout_margin="8dp"/>
+    <ImageView
+            android:id="@+id/timer"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_toStartOf="@+id/handle"
+            android:layout_marginTop="8dp"
+            android:src="@drawable/ic_timer" />
 
     <ImageView
             android:id="@+id/tab_icon"

@@ -27,7 +27,7 @@ object TabManager {
     private const val OLD_SEARCH_TAB_ID = -5L
 
     private const val TABS = "mTabs-"
-    private var mTabs = mutableListOf<Tab>()
+    var mTabs = mutableListOf<Tab>()
     private val keyName: String
         get() = TABS + currentIdentifier.userId.toString()
     private val preference: SharedPreferences
@@ -35,9 +35,7 @@ object TabManager {
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs(): MutableList<Tab> {
-        mTabs.clear()
-        mTabs.addAll(
-                preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
+        mTabs = (preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
                     Json.parseList<Tab>(json)
                 } ?: preference.getString("$keyName/v2", "")?.takeIf { it.isNotBlank() }?.let { oldJson ->
                     Json.parse<OldTabData>(oldJson).let { data ->
@@ -45,8 +43,7 @@ object TabManager {
                         data.tabs.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
                         translateTab(data.tabs)
                     }
-                } ?: generalTabs
-        )
+                } ?: generalTabs).toMutableList()
         return mTabs
     }
 

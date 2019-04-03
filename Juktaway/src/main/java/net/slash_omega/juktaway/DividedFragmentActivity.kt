@@ -15,8 +15,8 @@ abstract class DividedFragmentActivity: FragmentActivity(), CoroutineScope {
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
 
-    override fun onStop() {
+    override fun onDestroy() {
         job.cancelChildren()
-        super.onStop()
+        super.onDestroy()
     }
 }

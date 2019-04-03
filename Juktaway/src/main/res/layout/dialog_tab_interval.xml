@@ -1,0 +1,44 @@
+<?xml version="1.0" encoding="utf-8"?>
+<RelativeLayout xmlns:android="http://schemas.android.com/apk/res/android"
+              android:layout_width="match_parent"
+              android:layout_height="wrap_content">
+    <CheckBox
+            android:id="@+id/enable"
+            android:layout_width="32dp"
+            android:layout_height="32dp"
+            android:layout_alignParentEnd="true"
+            android:layout_margin="8dp" />
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_text_enable_autoloading"
+            android:layout_toStartOf="@id/enable"
+            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@id/enable"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:paddingHorizontal="8dp" />
+    <EditText
+            android:id="@+id/interval"
+            android:layout_width="200dp"
+            android:layout_height="wrap_content"
+            android:textSize="18sp"
+            android:hint="@string/dialog_tab_hint"
+            android:inputType="numberDecimal"
+            android:layout_alignParentEnd="true"
+            android:layout_below="@+id/enable"
+            android:layout_margin="8dp"
+            android:importantForAutofill="no"/>
+    <TextView
+            android:layout_width="wrap_content"
+            android:layout_height="wrap_content"
+            android:text="@string/dialog_text_tab_interval"
+            android:layout_toStartOf="@id/enable"
+            android:layout_margin="8dp"
+            android:layout_alignParentStart="true"
+            android:layout_alignBaseline="@id/interval"
+            android:textSize="18sp"
+            android:layout_gravity="center"
+            android:paddingHorizontal="8dp" />
+</RelativeLayout>

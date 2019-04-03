@@ -34,8 +34,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         }
     protected var hasNext = true
     private var mScrolling = false
-    private var mMaxId = 0L // 読み込んだ最新のツイートID
-    private var mSinceId = 0L
+    private var statusIdMax = 0L // 読み込んだ最新のツイートID
+    private var statusIdMin = 0L
 
     private val statusChannel = Channel<List<Status>>(30)
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
@@ -94,7 +94,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private val displayStatusJob by lazy {
         launch(Dispatchers.Main, CoroutineStart.LAZY) {
             for (statuses in statusChannel) {
-                mSinceId = statuses.last().id
+                statusIdMin = statuses.last().id
 
                 val position = mListView.firstVisiblePosition
                 val y = mListView.getChildAt(0)?.top ?: 0
@@ -183,7 +183,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         return true
     }
 
-    val isTop by lazy { mListView.firstVisiblePosition == 0 }
+    val isTop
+        get() = mListView.firstVisiblePosition == 0
 
     open var mSearchWord = ""
 
@@ -211,8 +212,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
                 }
             }
 
-            if (!loadType.limitMin) mMaxId = statuses.first().id
-            if (!loadType.limitMax) mSinceId = statuses.last().id
+            if (!loadType.limitMin) statusIdMax = statuses.first().id
+            if (!loadType.limitMax) statusIdMin = statuses.last().id
         }
 
         mListView.visibility = View.VISIBLE
@@ -228,10 +229,10 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     protected val LoadStatusesType.requestMaxId: Long?
-        get() = mMaxId.takeIf { it > 0 && limitMax }?.minus(1)
+        get() = statusIdMin.takeIf { it > 0 && limitMax }?.minus(1)
 
     protected val LoadStatusesType.requestSinceId: Long?
-        get() = mSinceId.takeIf { it > 0 && limitMin }?.plus(1)
+        get() = statusIdMax.takeIf { it > 0 && limitMin }?.plus(1)
 
     /**
      *

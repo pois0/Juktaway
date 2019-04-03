@@ -2,22 +2,31 @@ package net.slash_omega.juktaway
 
 import android.annotation.SuppressLint
 import android.app.Activity
+import android.app.AlertDialog
+import android.app.Dialog
 import android.content.Context
+import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
+import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentActivity
 import android.util.TypedValue
 import android.view.*
 import android.widget.ArrayAdapter
+import android.widget.CheckBox
+import android.widget.EditText
 import android.widget.ListView
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.TwitterList
 import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_tab_settings.*
+import kotlinx.android.synthetic.main.dialog_tab_interval.view.*
 import kotlinx.android.synthetic.main.row_tag.view.*
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.util.parseWithClient
+import org.jetbrains.anko.bundleOf
+import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivityForResult
 
 /**
@@ -144,6 +153,11 @@ class TabSettingsActivity: FragmentActivity() {
         }
     }
 
+    internal fun updateTab(pos: Int, interval: Long) {
+        val current = mAdapter.tabs[pos]
+        mAdapter.tabs[pos] = Tab(current.type, current.id, current.word, interval)
+    }
+
     inner class TabAdapter(context: Context, private val mLayout: Int, list: List<Tab>): ArrayAdapter<Tab>(context, mLayout, list) {
         private val mInflater = context.getSystemService(Context.LAYOUT_INFLATER_SERVICE) as LayoutInflater
         internal var currentTab: Tab? = null
@@ -200,6 +214,7 @@ class TabSettingsActivity: FragmentActivity() {
 
                 tab_icon.setImageResource(tab.icon)
                 tab_icon.setColorFilter(color)
+                timer.setColorFilter(color)
                 name.text = tab.displayString
 
                 handle.apply {
@@ -221,8 +236,60 @@ class TabSettingsActivity: FragmentActivity() {
                     }
                 }
 
+                timer.onClick {
+                    AutoLoadDialog().apply {
+                        arguments = bundleOf("position" to position, "interval" to tab.autoReload)
+                    }.show(supportFragmentManager, "auto-load-dialog")
+                }
+
                 setBackgroundColor(if (currentTab == tab) HIGH_LIGHT_COLOR else DEFAULT_COLOR)
             }
         }
+    }
+}
+
+class AutoLoadDialog: DialogFragment() {
+    private var intervalValue
+        get() = intervalView.text.toString().toLongOrNull() ?: -1
+        set(v) { intervalView.setText(v.takeIf { it > 0 }?.toString() ?: "") }
+
+    private var isChecked
+        get() = enableView.isChecked
+        set(v) { enableView.isChecked = v }
+
+    private lateinit var intervalView: EditText
+    private lateinit var enableView: CheckBox
+
+    override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
+        return AlertDialog.Builder(activity)
+                .setView(activity!!.layoutInflater.inflate(R.layout.dialog_tab_interval, null).apply {
+                    intervalView = interval
+                    enableView = enable
+                })
+                .setTitle(R.string.dialog_title_tab_interval)
+                .setPositiveButton(R.string.button_save, onPositiveClicked)
+                .setNegativeButton(R.string.button_cancel) { _, _ -> }
+                .create()
+    }
+
+    override fun onResume() {
+        super.onResume()
+        val intervalArg = arguments?.getLong("interval")
+
+        intervalValue = intervalArg ?: -1
+        isChecked = intervalArg?.let { it > 0 } ?: false
+
+        enableView.setOnCheckedChangeListener { _, isChecked ->
+            intervalView.also {
+                it.isClickable = isChecked
+                it.isFocusable = isChecked
+                it.isFocusableInTouchMode = isChecked
+            }
+        }
+    }
+
+    private val onPositiveClicked = DialogInterface.OnClickListener { _, _ ->
+        (activity as TabSettingsActivity).updateTab(arguments!!.getInt("position"), intervalValue)
+        dismiss()
     }
 }
