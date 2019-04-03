@@ -86,7 +86,7 @@ class MainActivity: DividedFragmentActivity() {
     }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
-    private var currentTabs: List<Tab> = TabManager.loadTabs()
+    private lateinit var currentTabs: List<Tab>
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
@@ -106,6 +106,8 @@ class MainActivity: DividedFragmentActivity() {
             finish()
             return
         }
+
+        currentTabs = TabManager.loadTabs()
 
         actionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
