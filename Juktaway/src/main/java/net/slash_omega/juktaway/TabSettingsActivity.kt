@@ -146,7 +146,6 @@ class TabSettingsActivity: FragmentActivity() {
                 mAdapter.addAll(add.map { it.toTab() })
                 mAdapter.removeAll(remove.map { it.toTab() })
                 mAdapter.notifyDataSetChanged()
-                println(mAdapter.count)
                 //mListView.invalidateViews()
                 setResult(Activity.RESULT_OK)
             }

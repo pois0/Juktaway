@@ -62,7 +62,6 @@ class PostService: Service(), CoroutineScope {
 
             stopForeground(Service.STOP_FOREGROUND_REMOVE)
 
-            println("toasted")
             manager.notify(1, NotificationCompat.Builder(this@PostService, channelId)
                     .setContentTitle("Juktaway Posting Service")
                     .setContentText(getString(message))
@@ -70,7 +69,6 @@ class PostService: Service(), CoroutineScope {
                     .setPriority(NotificationCompat.PRIORITY_LOW)
                     .build()
             )
-            println("notify")
         }
 
         startForeground(1, NotificationCompat.Builder(this, channelId)
