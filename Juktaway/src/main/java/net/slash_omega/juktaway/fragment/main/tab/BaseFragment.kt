@@ -26,7 +26,9 @@ import net.slash_omega.juktaway.settings.preferences
 import kotlin.system.measureTimeMillis
 
 abstract class BaseFragment: Fragment(), CoroutineScope {
-    override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
+    override val coroutineContext by lazy { mainActivity.coroutineContext }
+    private val mainActivity by lazy { activity as MainActivity }
+
     protected lateinit var mAdapter: StatusAdapter
     protected var isLoading = false
         set(value) {
@@ -52,7 +54,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      * 3. スクロール中はスクロール中のフラグを立てる
      */
     private val mOnScrollListener = object : AbsListView.OnScrollListener {
-
         override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {
             when (scrollState) {
                 AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
@@ -81,7 +82,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
 
-                while (position != (activity as MainActivity).currentTabPosition || !isRunning || isLoading) {
+                while (position != mainActivity.currentTabPosition || !isRunning || isLoading) {
                     if (!isActive) break@route
                     delay(500)
                 }
@@ -170,7 +171,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     override fun onDestroy() {
-        println("stopped")
         super.onDestroy()
         statusChannel.close()
     }
