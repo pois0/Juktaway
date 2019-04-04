@@ -19,7 +19,6 @@ import android.widget.LinearLayout
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
-import jp.nephy.penicillin.extensions.idObj
 import jp.nephy.penicillin.extensions.models.fullText
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
@@ -584,8 +583,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                             id = R.id.datetime
                             textColor = Color.parseColor("#666666")
                             textSize = 10f //sp
-                            text = (if (preferences.display.tweet.shouldDisplayMilliSec) s.idObj.toDate() else s.createdAt.date)
-                                    .absoluteTime
+                            text = s.createdAtString
                         }.lparams {
                             below(R.id.via)
                             alignParentRight()

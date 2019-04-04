@@ -1,13 +1,20 @@
 package net.slash_omega.juktaway.util
 
+import jp.nephy.penicillin.extensions.createdAt
+import jp.nephy.penicillin.extensions.idObj
+import jp.nephy.penicillin.models.Status
+import net.slash_omega.juktaway.settings.preferences
 import java.text.SimpleDateFormat
 import java.util.*
 
 
-private val DATE_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss'.'SSS", Locale.ENGLISH)
+private val DATE_DETAILED_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss'.'SSS", Locale.ENGLISH)
 
-val Date.absoluteTime: String
-    get() = DATE_FORMAT.format(this)
+private val DATE_CONCISE_FORMAT = SimpleDateFormat("yyyy'/'MM'/'dd' 'HH':'mm':'ss", Locale.ENGLISH)
+
+val Status.createdAtString: String
+    get() = if (preferences.display.tweet.shouldDisplayMilliSec) DATE_DETAILED_FORMAT.format(idObj.toDate())
+            else DATE_CONCISE_FORMAT.format(createdAt.date)
 
 object TimeUtil {
     /**
