@@ -28,7 +28,7 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
@@ -87,7 +87,7 @@ class MainActivity: DividedFragmentActivity() {
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
     private lateinit var currentTabs: List<Tab>
-    internal var currentTabPosition = -1
+    internal var currentTabPosition = 0
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
