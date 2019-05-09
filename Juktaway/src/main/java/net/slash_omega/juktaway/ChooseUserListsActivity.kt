@@ -7,7 +7,6 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonArray
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.list
@@ -26,7 +25,7 @@ import org.jetbrains.anko.collections.forEachWithIndex
 /**
  * Created on 2018/08/29.
  */
-class ChooseUserListsActivity: DividedFragmentActivity() {
+class ChooseUserListsActivity: ScopedFragmentActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
     private lateinit var initial: List<UserListWithRegistered>
 

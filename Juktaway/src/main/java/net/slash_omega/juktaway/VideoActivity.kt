@@ -26,7 +26,7 @@ private val pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)
 private const val videoType = "video"
 private const val animatedGifType = "animated_gif"
 
-class VideoActivity: DividedFragmentActivity() {
+class VideoActivity: ScopedFragmentActivity() {
     private var musicWasPlaying = false
 
     override fun onCreate(savedInstanceState: Bundle?) {

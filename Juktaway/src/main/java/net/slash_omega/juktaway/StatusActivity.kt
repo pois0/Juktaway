@@ -31,7 +31,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/29.
  */
-class StatusActivity: DividedFragmentActivity() {
+class StatusActivity: ScopedFragmentActivity() {
     private lateinit var mAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {

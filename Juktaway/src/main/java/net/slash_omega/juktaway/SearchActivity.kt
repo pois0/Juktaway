@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -28,7 +27,6 @@ import net.slash_omega.juktaway.listener.PressEnterListener
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.model.TabManager
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.KeyboardUtil
@@ -39,7 +37,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/24.
  */
-class SearchActivity: DividedFragmentActivity() {
+class SearchActivity: ScopedFragmentActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
     }

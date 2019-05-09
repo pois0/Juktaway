@@ -44,7 +44,7 @@ import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
-class ProfileActivity: DividedFragmentActivity() {
+class ProfileActivity: ScopedFragmentActivity() {
     companion object {
         private const val OPTION_MENU_DESTROY_BLOCK = 4
         private const val OPTION_MENU_GROUP_RELATION = 1

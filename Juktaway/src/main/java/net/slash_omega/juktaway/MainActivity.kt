@@ -54,7 +54,7 @@ import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class MainActivity: DividedFragmentActivity() {
+class MainActivity: ScopedFragmentActivity() {
     companion object {
         private const val REQUEST_ACCOUNT_SETTING = 200
         private const val REQUEST_SETTINGS = 300

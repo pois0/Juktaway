@@ -34,7 +34,7 @@ import org.jetbrains.anko.toast
 import java.net.URL
 import java.util.regex.Pattern
 
-class ScaleImageActivity: DividedFragmentActivity() {
+class ScaleImageActivity: ScopedFragmentActivity() {
     companion object {
         val pattern: Pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/photo/(\\d+)/?.*")
         const val REQUEST_PERMISSIONS_STORAGE = 1

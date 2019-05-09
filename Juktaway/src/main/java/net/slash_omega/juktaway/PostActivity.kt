@@ -52,7 +52,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 @SuppressLint("SetTextI18n", "InflateParams")
-class PostActivity: DividedFragmentActivity() {
+class PostActivity: ScopedFragmentActivity() {
     companion object {
         private const val REQUEST_GALLERY = 1
         private const val REQUEST_CAMERA = 2

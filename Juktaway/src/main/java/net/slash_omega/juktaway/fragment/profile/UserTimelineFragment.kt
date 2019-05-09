@@ -83,7 +83,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun View.init() {
         mListView.onItemClickListener = StatusClickListener(activity!!)
         mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
-        mSwipeRefreshLayout = sr_layout.apply {
+        mSwipeRefreshLayout = swipe_refresh_layout.apply {
             setOnRefreshListener { reload() }
         }
     }

@@ -20,7 +20,7 @@ import org.jetbrains.anko.startActivity
 /**
  * Created on 2018/08/23.
  */
-class AccountSettingActivity: DividedFragmentActivity(), RemoveAccountListener {
+class AccountSettingActivity: ScopedFragmentActivity(), RemoveAccountListener {
     private lateinit var mAccountAdapter: IdentifierAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {

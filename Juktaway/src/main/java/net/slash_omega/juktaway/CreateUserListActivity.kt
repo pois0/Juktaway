@@ -17,7 +17,7 @@ import org.jetbrains.anko.toast
 
 private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
-class CreateUserListActivity: DividedFragmentActivity() {
+class CreateUserListActivity: ScopedFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -52,7 +52,7 @@ class CreateUserListActivity: DividedFragmentActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?) = item?.run {
-            if (itemId == R.id.home) finish()
+            if (itemId == android.R.id.home) finish()
             true
         } ?: false
 }

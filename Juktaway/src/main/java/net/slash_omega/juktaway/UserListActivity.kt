@@ -24,7 +24,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/27.
  */
-class UserListActivity: DividedFragmentActivity() {
+class UserListActivity: ScopedFragmentActivity() {
     companion object {
         private var mCurrentPosition = 0
         private var mColorBlue: Int = 0

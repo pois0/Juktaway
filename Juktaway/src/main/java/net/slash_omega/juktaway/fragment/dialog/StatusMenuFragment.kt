@@ -17,7 +17,7 @@ import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.DividedFragmentActivity
+import net.slash_omega.juktaway.ScopedFragmentActivity
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.SearchActivity
@@ -55,10 +55,10 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
 
     override val coroutineContext by lazy { mActivity.coroutineContext }
 
-    private lateinit var mActivity: DividedFragmentActivity
+    private lateinit var mActivity: ScopedFragmentActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        mActivity = (activity as DividedFragmentActivity?)!!
+        mActivity = (activity as ScopedFragmentActivity?)!!
         ThemeUtil.setTheme(activity!!)
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)

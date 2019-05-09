@@ -2,7 +2,6 @@ package net.slash_omega.juktaway.fragment.main.tab
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -23,6 +22,7 @@ import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.settings.preferences
+import net.slash_omega.juktaway.util.regenerableLaunch
 import kotlin.system.measureTimeMillis
 
 abstract class BaseFragment: Fragment(), CoroutineScope {
@@ -32,7 +32,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected lateinit var mAdapter: StatusAdapter
     protected var isLoading = false
         set(value) {
-            mSwipeRefreshLayout.isRefreshing = value
+            swipe_refresh_layout.isRefreshing = value
             field = value
         }
     protected var hasNext = true
@@ -45,8 +45,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
 
     protected lateinit var mListView: ListView
-    private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
-    private var isRunning = false
 
     /**
      * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
@@ -77,12 +75,12 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     private val autoReloadJob by lazy {
-        launch(Dispatchers.Default, CoroutineStart.LAZY) {
+        regenerableLaunch(Dispatchers.Default, CoroutineStart.LAZY) {
             var delayed = 0L
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
 
-                while (position != mainActivity.currentTabPosition || !isRunning || isLoading) {
+                while (position != mainActivity.currentTabPosition || isLoading) {
                     if (!isActive) break@route
                     delay(500)
                 }
@@ -97,7 +95,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     }
 
     private val displayStatusJob by lazy {
-        launch(Dispatchers.Main, CoroutineStart.LAZY) {
+        regenerableLaunch(Dispatchers.Main, CoroutineStart.LAZY) {
             for (statuses in statusChannel) {
                 statusIdMin = statuses.last().id
 
@@ -119,8 +117,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         super.onCreate(savedInstanceState)
         retainInstance = true
         if (autoReloadInterval > 0) {
-            autoReloadJob.start()
-            displayStatusJob.start()
+            autoReloadJob.job.start()
+            displayStatusJob.job.start()
         }
     }
 
@@ -135,8 +133,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             setOnScrollListener(mOnScrollListener)
         }
 
-        mSwipeRefreshLayout = sr_layout.apply {
-            setOnRefreshListener { launch { load(LoadStatusesType.RELOAD) } }
+        swipe_refresh_layout.setOnRefreshListener {
+            launch { load(LoadStatusesType.RELOAD) }
         }
     }
 
@@ -160,13 +158,13 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
-        isRunning = true
+        autoReloadJob.job.cancel()
         EventBus.getDefault().register(this)
     }
 
     override fun onPause() {
         EventBus.getDefault().unregister(this)
-        isRunning = false
+        autoReloadJob.restart()
         super.onPause()
     }
 
@@ -175,7 +173,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         statusChannel.close()
     }
 
-    fun reload() {
+    internal fun reload() {
         launch { load(LoadStatusesType.RELOAD) }
     }
 
@@ -195,21 +193,21 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     open var mSearchWord = ""
 
     private suspend fun load(loadType: LoadStatusesType) {
-        if(isLoading || !hasNext) return
+        if(loadType != LoadStatusesType.FORCE_RELOAD && (isLoading || !hasNext)) return
         isLoading = true
 
         val statuses = getNewStatuses(loadType)
 
         if (statuses.isNullOrEmpty()) {
             if(statuses?.isEmpty() == true) hasNext = false
-            mSwipeRefreshLayout.isRefreshing = false
+            swipe_refresh_layout.isRefreshing = false
         } else {
             when (loadType) {
                 LoadStatusesType.ADDITIONAL -> {
                     mListView.visibility = View.VISIBLE
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
-                LoadStatusesType.RELOAD -> {
+                LoadStatusesType.RELOAD, LoadStatusesType.FORCE_RELOAD -> {
                     mAdapter.clear()
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
@@ -231,7 +229,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
 
     enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
-        RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
+        RELOAD(false, false), FORCE_RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
     }
 
     protected val LoadStatusesType.requestMaxId: Long?
@@ -261,7 +259,5 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
      *
      * @param event アプリが表示しているタブのID
      */
-    fun onEventMainThread(event: PostAccountChangeEvent) {
-        reload()
-    }
+    fun onEventMainThread(event: PostAccountChangeEvent) = launch { load(LoadStatusesType.FORCE_RELOAD) }
 }

@@ -10,7 +10,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Created on 2019/02/03.
  */
-abstract class DividedFragmentActivity: FragmentActivity(), CoroutineScope {
+abstract class ScopedFragmentActivity: FragmentActivity(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job
