@@ -40,6 +40,7 @@ import java.io.File
 
 inline val Status.original
     get() = retweetedStatus ?: this
+
 suspend inline fun Status.favorite() = original.runCatching { favorite().await() }
         .onSuccess {
             showToast(R.string.toast_favorite_success)
@@ -110,6 +111,27 @@ suspend fun Status.destroyRetweet() = runCatching { currentClient.statuses.unret
         }
         .isSuccess
 
+fun Status.quote(context: Context) {
+    val text = " $urlString"
+    if (context is MainActivity) {
+        EventBus.getDefault().post(OpenEditorEvent(text, this, null, null))
+    } else {
+        context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to toJsonString())
+    }
+}
+
+suspend fun Status.delete() {
+    val res = runCatching {
+        currentClient.statuses.delete(id).await()
+    }.isSuccess
+    if (res) {
+        MessageUtil.showToast(R.string.toast_destroy_status_success)
+        EventBus.getDefault().post(StreamingDestroyStatusEvent(id))
+    } else {
+        MessageUtil.showToast(R.string.toast_destroy_status_failure)
+    }
+}
+
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
             (if (imageList.isNotEmpty()) statuses.createWithMedia(str,
@@ -134,18 +156,6 @@ suspend fun ApiClient.sendDirectMessage(rawMessage: String) = runCatching {
 }.exceptionOrNull()
 
 object ActionUtil {
-    suspend fun doDestroyStatus(statusId: Long) {
-        val res = runCatching {
-            currentClient.statuses.delete(statusId).await()
-        }.isSuccess
-        if (res) {
-            MessageUtil.showToast(R.string.toast_destroy_status_success)
-            EventBus.getDefault().post(StreamingDestroyStatusEvent(statusId))
-        } else {
-            MessageUtil.showToast(R.string.toast_destroy_status_failure)
-        }
-    }
-
     fun doReply(status: Status, context: Context) {
         val mentions = status.entities.userMentions
         val text = "@" + (if (status.user.id == currentIdentifier.userId && mentions.size == 1) mentions[0].screenName
@@ -197,15 +207,6 @@ object ActionUtil {
             EventBus.getDefault().post(StreamingDestroyMessageEvent(dm.id))
         } else {
             MessageUtil.showToast(R.string.toast_destroy_direct_message_failure)
-        }
-    }
-
-    fun doQuote(status: Status, context: Context) {
-        val text = " https://twitter.com/${status.user.screenName}/status/${status.id}"
-        if (context is MainActivity) {
-            EventBus.getDefault().post(OpenEditorEvent(text, status, null, null))
-        } else {
-            context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to status.toJsonString())
         }
     }
 }

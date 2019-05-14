@@ -30,7 +30,6 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.HeaderStatusClickListener
 import net.slash_omega.juktaway.listener.HeaderStatusLongClickListener
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.parseWithClient
@@ -53,10 +52,10 @@ class TalkFragment: DialogFragment(), CoroutineScope {
             when (scrollState) {
                 AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
                     if (mListView.firstVisiblePosition > 0) {
-                        mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                        mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                     }
                     if (mListView.lastVisiblePosition <= mAdapter.count) {
-                        mFooterView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                        mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                     }
                 }
             }
@@ -90,7 +89,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
             }
 
             launch {
-                mAdapter.addSuspend(Row.newStatus(status))
+                mAdapter.addSuspend(status)
 
                 if (preferences.display.tweet.isTalkSortedByNewest.not()) mListView.setSelectionFromTop(1, 0)
                 status.inReplyToStatusId?.let { loadTalk(it) }
@@ -132,7 +131,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
         if (preferences.display.tweet.isTalkSortedByNewest) {
             mAdapter.addAllFromStatusesSuspend(statusList)
         } else {
-            statusList.map { Row.newStatus(it) }.forEach { mAdapter.insertSuspend(it, 0) }
+            statusList.forEach { mAdapter.insertSuspend(it, 0) }
             val pos = mListView.lastVisiblePosition + statusList.size
             mListView.setSelectionFromTop(pos, 0)
         }
@@ -203,11 +202,11 @@ class TalkFragment: DialogFragment(), CoroutineScope {
 
                 val y = mListView.getChildAt(lastPos)?.top ?: 0
 
-                statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
+                statuses.forEach { mAdapter.insertSuspend(it, 0) }
                 mListView.setSelectionFromTop(lastPos + statuses.size, y)
 
                 if (mListView.firstVisiblePosition > 0) {
-                    mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                    mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                 }
             } else {
                 mAdapter.addAllFromStatusesSuspend(statuses)

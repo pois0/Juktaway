@@ -18,7 +18,6 @@ import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.VideoActivity
 import net.slash_omega.juktaway.app
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 import org.jetbrains.anko.startActivity
 import java.io.File

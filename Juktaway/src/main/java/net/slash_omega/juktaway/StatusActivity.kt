@@ -21,7 +21,6 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.parseWithClient
@@ -80,7 +79,7 @@ class StatusActivity: ScopedFragmentActivity() {
                 load(statusId)
             } else {
                 intent.getStringExtra("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
-                    mAdapter.addSuspend(Row.newStatus(it))
+                    mAdapter.addSuspend(it)
                     val inReplyToStatusId = it.inReplyToStatusId
                     if (inReplyToStatusId != null) {
                         MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
@@ -128,7 +127,7 @@ class StatusActivity: ScopedFragmentActivity() {
                     return@launch
                 }
 
-                mAdapter.addSuspend(Row.newStatus(status))
+                mAdapter.addSuspend(status)
                 mAdapter.notifyDataSetChanged()
                 statusId = status.inReplyToStatusId
             }

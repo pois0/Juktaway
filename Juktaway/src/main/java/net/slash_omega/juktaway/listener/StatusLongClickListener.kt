@@ -13,6 +13,7 @@ import net.slash_omega.juktaway.fragment.TalkFragment
 import net.slash_omega.juktaway.settings.Preferences.OperationPreferences.LongTapAction.*
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.util.ActionUtil
+import net.slash_omega.juktaway.util.quote
 import net.slash_omega.juktaway.util.uri
 
 /**
@@ -21,8 +22,10 @@ import net.slash_omega.juktaway.util.uri
 open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongClickListener {
     val activity = activity as FragmentActivity
 
-    override fun onItemLongClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long): Boolean {
-        return adapterView?.let { getAdapter(it) }?.getItem(position)?.takeUnless{it.isDirectMessage}?.status?.let { status ->
+
+    override fun onItemLongClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long)
+        = adapterView?.let { getAdapter(it) }?.getItem(position)?.let { status ->
+            println("created")
             val source = status.retweetedStatus ?: status
             when (preferences.operation.longTap) {
                 TALK ->
@@ -33,7 +36,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                         true
                     } else false
                 QUOTE -> {
-                    ActionUtil.doQuote(source, activity)
+                    source.quote(activity)
                     true
                 }
                 SHOW_AROUND -> {
@@ -57,7 +60,6 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                 else -> false
             }
         } ?: false
-    }
 
     open fun getAdapter(adapterView: AdapterView<*>): StatusAdapter {
         return adapterView.adapter as StatusAdapter

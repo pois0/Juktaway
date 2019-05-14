@@ -5,7 +5,6 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
-import android.widget.AbsListView
 import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.Status
@@ -15,8 +14,6 @@ import kotlinx.coroutines.channels.Channel
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
-import net.slash_omega.juktaway.event.action.GoToTopEvent
-import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
@@ -30,13 +27,12 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private val mainActivity by lazy { activity as MainActivity }
 
     protected lateinit var mAdapter: StatusAdapter
-    protected var isLoading = false
+    private var isLoading = false
         set(value) {
             swipe_refresh_layout.isRefreshing = value
             field = value
         }
     protected var hasNext = true
-    private var mScrolling = false
     private var statusIdMax = 0L // 読み込んだ最新のツイートID
     private var statusIdMin = 0L
     private val position by lazy { arguments?.getInt("position", -1) ?: -1 }
@@ -45,34 +41,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
 
     protected lateinit var mListView: ListView
-
-    /**
-     * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
-     * 2. スクロールが終わった瞬間に表示位置がトップだったらボタンのハイライトを消すためにイベント発行
-     * 3. スクロール中はスクロール中のフラグを立てる
-     */
-    private val mOnScrollListener = object : AbsListView.OnScrollListener {
-        override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {
-            when (scrollState) {
-                AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
-                    mScrolling = false
-                    if (isTop) {
-                        EventBus.getDefault().post(GoToTopEvent())
-                    }
-                }
-                AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL, AbsListView.OnScrollListener.SCROLL_STATE_FLING ->  {
-                    mScrolling = true
-                }
-            }
-        }
-
-        override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
-            // 最後までスクロールされたかどうかの判定
-            if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
-                launch { load(LoadStatusesType.ADDITIONAL) }
-            }
-        }
-    }
 
     private val autoReloadJob by lazy {
         regenerableLaunch(Dispatchers.Default, CoroutineStart.LAZY) {
@@ -130,7 +98,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mListView = list_view.apply {
             onItemClickListener = StatusClickListener(act)
             onItemLongClickListener = StatusLongClickListener(act)
-            setOnScrollListener(mOnScrollListener)
         }
 
         swipe_refresh_layout.setOnRefreshListener {
@@ -177,10 +144,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         launch { load(LoadStatusesType.RELOAD) }
     }
 
-    protected fun clear() {
-        mAdapter.clear()
-    }
-
     internal fun goToTop(): Boolean {
         mListView.setSelection(0)
         mListView.smoothScrollToPosition(0)
@@ -193,7 +156,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     open var mSearchWord = ""
 
     private suspend fun load(loadType: LoadStatusesType) {
-        if(loadType != LoadStatusesType.FORCE_RELOAD && (isLoading || !hasNext)) return
+        if(isLoading || !hasNext) return
         isLoading = true
 
         val statuses = getNewStatuses(loadType)
@@ -207,7 +170,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
                     mListView.visibility = View.VISIBLE
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
-                LoadStatusesType.RELOAD, LoadStatusesType.FORCE_RELOAD -> {
+                LoadStatusesType.RELOAD -> {
                     mAdapter.clear()
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
@@ -229,7 +192,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
 
     enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
-        RELOAD(false, false), FORCE_RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
+        RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
     }
 
     protected val LoadStatusesType.requestMaxId: Long?
@@ -253,11 +216,4 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     @Suppress("UNUSED_PARAMETER")
     fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
-
-    /**
-     * アカウント変更通知を受け、表示中のタブはリロード、表示されていたいタブはクリアを行う
-     *
-     * @param event アプリが表示しているタブのID
-     */
-    fun onEventMainThread(event: PostAccountChangeEvent) = launch { load(LoadStatusesType.FORCE_RELOAD) }
 }

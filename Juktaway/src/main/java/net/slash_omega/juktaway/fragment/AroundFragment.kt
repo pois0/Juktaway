@@ -19,7 +19,6 @@ import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.parseWithClient
@@ -46,7 +45,7 @@ class AroundFragment: DialogFragment() {
             }
             arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { origin ->
                 GlobalScope.launch(Dispatchers.Main) {
-                    mAdapter.addSuspend(Row.newStatus(origin))
+                    mAdapter.addSuspend(origin)
                     val beforeList = runCatching {
                         currentClient.timeline.userTimelineByUserId(origin.user.id, count = 3, maxId = origin.id - 1).await()
                     }.getOrNull() ?: run {
@@ -56,7 +55,7 @@ class AroundFragment: DialogFragment() {
                     mProgressBarBottom.visibility = View.GONE
 
                     if (beforeList.isEmpty()) return@launch
-                    mAdapter.addAll(beforeList.map { Row.newStatus(it) })
+                    mAdapter.addAllFromStatusesSuspend(beforeList)
                     mAdapter.notifyDataSetChanged()
                     val afterList = runCatching {
                         var lastId = beforeList[0].id - 1
@@ -77,7 +76,7 @@ class AroundFragment: DialogFragment() {
 
                     if (afterList.isEmpty()) return@launch
 
-                    afterList.map { Row.newStatus(it) }.forEachIndexed { i, status ->
+                    afterList.forEachIndexed { i, status ->
                         mAdapter.insert(status, i)
                     }
                     mAdapter.notifyDataSetChanged()

@@ -278,6 +278,13 @@ class AutoLoadDialog: DialogFragment() {
         intervalValue = intervalArg ?: -1
         isChecked = intervalArg?.let { it > 0 } ?: false
 
+        intervalView.also {
+            val isChecked = enableView.isChecked
+            it.isClickable = isChecked
+            it.isFocusable = isChecked
+            it.isFocusableInTouchMode = isChecked
+        }
+
         enableView.setOnCheckedChangeListener { _, isChecked ->
             intervalView.also {
                 it.isClickable = isChecked

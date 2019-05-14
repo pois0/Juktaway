@@ -35,7 +35,6 @@ import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
-import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.fragment.dialog.QuickPostMenuFragment
 import net.slash_omega.juktaway.model.Tab
@@ -94,7 +93,6 @@ class MainActivity: ScopedFragmentActivity() {
         private set
 
 
-    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
@@ -231,9 +229,7 @@ class MainActivity: ScopedFragmentActivity() {
     override fun onStart() {
         super.onStart()
 
-        with (window) {
-            addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
@@ -562,9 +558,7 @@ class MainActivity: ScopedFragmentActivity() {
     fun onEventMainThread(e: AccountChangeEvent) {
         setupTab()
         mAccessTokenAdapter.notifyDataSetChanged()
-        EventBus.getDefault().post(PostAccountChangeEvent())
     }
-
 
 
 //    fun onEventMainThread(e: NewRecordEvent) {

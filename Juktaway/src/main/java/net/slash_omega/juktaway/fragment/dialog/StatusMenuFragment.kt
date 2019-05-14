@@ -24,7 +24,6 @@ import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.RetweetersFragment
 import net.slash_omega.juktaway.fragment.TalkFragment
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.model.isFavorited
 import net.slash_omega.juktaway.model.isRetweeted
 import net.slash_omega.juktaway.settings.mute.SourceMute
@@ -39,16 +38,9 @@ import org.jetbrains.anko.startActivity
  */
 class StatusMenuFragment: DialogFragment(), CoroutineScope {
     companion object {
-        fun newInstance(row: Row) = StatusMenuFragment().apply {
+        fun newInstance(status: Status) = StatusMenuFragment().apply {
             arguments = Bundle().apply {
-                if (row.isDirectMessage) {
-                    putString("directMessage", row.message!!.toJsonString())
-                } else {
-                    putString("status", row.status!!.toJsonString())
-                }
-                if (row.isFavorite) {
-                    putString("favoriteSourceUser", row.source!!.toJsonString())
-                }
+                putString("status", status.toJsonString())
             }
         }
     }
@@ -118,7 +110,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
 
     private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
         val retweet = status.retweetedStatus
-        val source = retweet ?: status
+        val source = status.original
         val mentions = source.entities.userMentions
         val isPublic = !source.user.protected
 
@@ -147,7 +139,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         if (isPublic) {
             add(R.string.context_menu_qt) {
-                ActionUtil.doQuote(source, mActivity)
+                source.quote(mActivity)
                 dismiss()
             }
         }
@@ -181,7 +173,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
              */
             add(R.string.context_menu_destroy_status) {
                 launch {
-                    ActionUtil.doDestroyStatus(status.id)
+                    status.delete()
                     dismiss()
                 }
             }
