@@ -33,6 +33,7 @@ import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
+import net.slash_omega.juktaway.event.TabChangedEvent
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
@@ -85,12 +86,12 @@ class MainActivity: ScopedFragmentActivity() {
     }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
-    private lateinit var currentTabs: List<Tab>
     internal var currentTabPosition = 0
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
         private set
+    private var currentTabVersion = -1
 
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -105,8 +106,6 @@ class MainActivity: ScopedFragmentActivity() {
             finish()
             return
         }
-
-        currentTabs = TabManager.loadTabs()
 
         actionBar?.apply {
             setDisplayHomeAsUpEnabled(true)
@@ -260,8 +259,8 @@ class MainActivity: ScopedFragmentActivity() {
 
     override fun onResume() {
         super.onResume()
-        setupTab()
         EventBus.getDefault().register(this)
+        setupTab()
     }
 
     override fun onPostResume() {
@@ -376,8 +375,10 @@ class MainActivity: ScopedFragmentActivity() {
         preferences.display.main.isQuickPostVisible = false
     }
 
-    private fun setupTab(isFirst: Boolean = false) {
-        currentTabs = TabManager.mTabs.takeIf { isFirst || it != currentTabs } ?: return
+    private fun setupTab() {
+        if (TabManager.version == currentTabVersion) return
+        val currentTabs = TabManager.mTabs
+        currentTabVersion = TabManager.version
 
         val outValueTextColor = TypedValue()
         val outValueBackground = TypedValue()
@@ -447,7 +448,6 @@ class MainActivity: ScopedFragmentActivity() {
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
         if (preferences.display.main.isQuickPostVisible) showQuickPanel()
-        setupTab(true)
     }
 
     private fun showTopView() {

@@ -2,12 +2,14 @@ package net.slash_omega.juktaway.model
 
 import android.content.Context
 import android.content.SharedPreferences
+import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.TwitterList
 import jp.nephy.penicillin.models.User
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
+import net.slash_omega.juktaway.event.TabChangedEvent
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import java.util.ArrayList
 
@@ -27,11 +29,12 @@ object TabManager {
     private const val OLD_SEARCH_TAB_ID = -5L
 
     private const val TABS = "mTabs-"
-    var mTabs = mutableListOf<Tab>()
+    var mTabs = loadTabs()
     private val keyName: String
         get() = TABS + currentIdentifier.userId.toString()
     private val preference: SharedPreferences
         get() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    var version = 0
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs(): MutableList<Tab> {
@@ -77,6 +80,7 @@ object TabManager {
     @UseExperimental(ImplicitReflectionSerializer::class)
     private fun saveTabs() {
         preference.edit().putString("$keyName/v3", Json.stringify(mTabs)).apply()
+        version++
     }
 
     private fun translateTab(list: List<OldTab>) = list.map {

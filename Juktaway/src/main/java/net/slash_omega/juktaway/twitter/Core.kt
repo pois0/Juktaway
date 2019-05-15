@@ -106,8 +106,8 @@ object Core {
             currentClient = id.toClient()
             lastIdentifierAts = id.ats
             FavRetweetManager.clear()
-            EventBus.getDefault().post(AccountChangeEvent())
             TabManager.loadTabs()
+            EventBus.getDefault().post(AccountChangeEvent())
         }
     }
 

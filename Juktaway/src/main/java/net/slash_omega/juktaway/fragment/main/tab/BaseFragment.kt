@@ -103,22 +103,10 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         swipe_refresh_layout.setOnRefreshListener {
             launch { load(LoadStatusesType.RELOAD) }
         }
-    }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        /**
-         * mMainPagerAdapter.notifyDataSetChanged() された時に
-         * onCreateView と onActivityCreated がインスタンスが生きたまま呼ばれる
-         * 多重に初期化処理を実行しないように変数チェックを行う
-         */
-        if (::mAdapter.isInitialized.not()) {
-            // Status(ツイート)をViewに描写するアダプター
-            mAdapter = StatusAdapter(activity!!)
-            mListView.visibility = View.GONE
-            launch { load(LoadStatusesType.RELOAD) }
-        }
+        mAdapter = StatusAdapter(activity!!)
+        mListView.visibility = View.GONE
+        launch { load(LoadStatusesType.RELOAD) }
 
         mListView.adapter = mAdapter
     }
