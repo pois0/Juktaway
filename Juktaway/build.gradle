@@ -37,8 +37,8 @@ android {
 
         multiDexEnabled true
         
-        versionCode 16
-        versionName '3.1.0-Beta5'
+        versionCode 17
+        versionName '3.1.0-Beta6'
         applicationId "net.slash_omega.juktaway"
 
         proguardFiles getDefaultProguardFile('proguard-android.txt'), 'proguard-rules.pro'
