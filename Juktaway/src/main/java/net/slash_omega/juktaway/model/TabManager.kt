@@ -36,6 +36,7 @@ object TabManager {
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs(): MutableList<Tab> {
+        version++
         mTabs = (preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
                     Json.parseList<Tab>(json)
                 } ?: preference.getString("$keyName/v2", "")?.takeIf { it.isNotBlank() }?.let { oldJson ->
@@ -64,15 +65,15 @@ object TabManager {
     fun addUserTab(user: User) = addTab(Tab(USER_TAB_ID, user.id, user.screenName, -1))
 
     fun refreshUserTab(user: User) {
-        var i = 0
-        for (tab in mTabs) {
+        for ((i, tab) in mTabs.withIndex()) {
             if (tab.type == USER_TAB_ID && tab.id == user.id) {
-                if (tab.word == user.screenName) return else break
+                if (tab.word != user.screenName) {
+                    mTabs[i] = Tab(USER_TAB_ID, user.id, user.screenName, -1)
+                    saveTabs()
+                }
+                break
             }
-            i++
         }
-        mTabs[i] = Tab(USER_TAB_ID, user.id, user.screenName, -1)
-        saveTabs()
     }
 
     @UseExperimental(ImplicitReflectionSerializer::class)
