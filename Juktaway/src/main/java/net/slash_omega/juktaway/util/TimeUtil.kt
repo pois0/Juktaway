@@ -13,7 +13,7 @@ private val DATE_DETAILED_FORMAT = SimpleDateFormat("yyyy/MM'/'dd' 'HH':'mm':'ss
 private val DATE_CONCISE_FORMAT = SimpleDateFormat("yyyy'/'MM'/'dd' 'HH':'mm':'ss", Locale.ENGLISH)
 
 val Status.createdAtString: String
-    get() = if (preferences.display.tweet.shouldDisplayMilliSec) DATE_DETAILED_FORMAT.format(idObj.toDate())
+    get() = if (preferences.display.tweet.shouldDisplayMilliSec) DATE_DETAILED_FORMAT.format(idObj.date)
             else DATE_CONCISE_FORMAT.format(createdAt.date)
 
 object TimeUtil {

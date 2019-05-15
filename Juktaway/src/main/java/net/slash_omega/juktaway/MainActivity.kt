@@ -33,12 +33,10 @@ import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
-import net.slash_omega.juktaway.event.TabChangedEvent
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.fragment.dialog.QuickPostMenuFragment
-import net.slash_omega.juktaway.model.Tab
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.model.icon
