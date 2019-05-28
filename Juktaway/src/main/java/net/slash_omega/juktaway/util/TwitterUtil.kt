@@ -21,7 +21,7 @@ inline fun <reified M: PenicillinModel> JsonElement.parseWithClient() = parseMod
 
 object TwitterUtil {
 
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
+    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+\\$]+")
     private const val BATTERY_ROW_LEVEL = 14
 
     /**

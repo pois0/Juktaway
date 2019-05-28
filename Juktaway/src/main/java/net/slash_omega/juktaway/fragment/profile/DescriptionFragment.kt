@@ -31,8 +31,7 @@ class DescriptionFragment: Fragment() {
             if (!user.description.isNullOrEmpty()) {
                 var descStr = user.description
                 user.entities?.description?.urls?.forEach {
-                    val matcher = Pattern.compile(it.url).matcher(descStr)
-                    descStr = matcher.replaceAll(it.expandedUrl)
+                    descStr = descStr?.replace(it.url, it.expandedUrl)
                 }
                 description.text = descStr
                 description.visibility = View.VISIBLE

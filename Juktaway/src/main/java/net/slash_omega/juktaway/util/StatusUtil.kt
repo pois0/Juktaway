@@ -43,7 +43,7 @@ val Status.imageUrls: List<String>
     }
 
 object StatusUtil {
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
+    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+\\$]+")
     private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
     @Suppress("SpellCheckingInspection")
     private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
@@ -87,13 +87,11 @@ object StatusUtil {
     fun getExpandedText(status: Status): String {
         var text = status.fullText()
         for (url in status.entities.urls) {
-            val m = Pattern.compile(url.url).matcher(text)
-            text = m.replaceAll(url.expandedUrl)
+            text = text.replace(url.url, url.expandedUrl)
         }
 
         for (media in status.entities.media) {
-            val m = Pattern.compile(media.url).matcher(text)
-            text = m.replaceAll(media.expandedUrl)
+            text = text.replace(media.url, media.expandedUrl)
         }
         return text
     }
