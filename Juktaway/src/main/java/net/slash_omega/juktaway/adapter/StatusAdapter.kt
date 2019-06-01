@@ -86,9 +86,11 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     private var mLimit = limit
     private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
+    private val shouldShow get() = { status: Status -> status !in Mute && mIdSet.add(status.id) }
+
     suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.filter { it !in Mute && mIdSet.add(it.id) }
+            statusesParam.filter(shouldShow)
         }
 
         super.addAll(statuses)
@@ -100,14 +102,14 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     }
 
     suspend fun addSuspend(status: Status) {
-        if (withContext(Dispatchers.Default) { status !in Mute && mIdSet.add(status.id) }) return
+        if (withContext(Dispatchers.Default) { !shouldShow(status) }) return
         super.add(status)
         limitation()
     }
 
     suspend fun addAllSuspend(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.filter { it !in Mute && mIdSet.add(it.id) }
+            statusesParam.filter(shouldShow)
         }
 
         super.addAll(statuses)
@@ -120,7 +122,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     }
 
     suspend fun insertSuspend(status: Status, index: Int) {
-        if (withContext(Dispatchers.Default) { status !in Mute && mIdSet.add(status.id) }) return
+        if (withContext(Dispatchers.Default) { !shouldShow(status) }) return
         super.insert(status, index)
         // limitation()
     }
@@ -130,7 +132,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
         var position = index
         val statuses = withContext(Dispatchers.Default) {
-            statusesParam.filter { it !in Mute && mIdSet.add(it.id) }
+            statusesParam.filter(shouldShow)
         }
 
         statuses.forEach {
