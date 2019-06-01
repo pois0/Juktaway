@@ -76,9 +76,9 @@ class SearchAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<String>(
                 mSearchWord = constraint.toString()
                 mStrings.apply {
                     clear()
-                    add(mSearchWord + mContext?.getString(R.string.label_search_tweet).nullToBlank())
-                    add(mSearchWord + mContext?.getString(R.string.label_search_user).nullToBlank())
-                    add("@" + mSearchWord + mContext?.getString(R.string.label_display_profile).nullToBlank())
+                    add(mSearchWord + mContext.getString(R.string.label_search_tweet).nullToBlank())
+                    add(mSearchWord + mContext.getString(R.string.label_search_user).nullToBlank())
+                    add("@" + mSearchWord + mContext.getString(R.string.label_display_profile).nullToBlank())
                 }
             }
             return filterResults.apply {

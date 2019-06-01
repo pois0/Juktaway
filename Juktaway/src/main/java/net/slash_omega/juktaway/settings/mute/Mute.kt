@@ -1,6 +1,6 @@
 package net.slash_omega.juktaway.settings.mute
 
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 
@@ -27,7 +27,7 @@ object Mute {
                     status.entities.userMentions.map { it.id }.any { it in userMute } ||
                     status.retweetedStatus?.user?.id in userMute ||
                     source.via.name in sourceMute ||
-                    wordMute.any { source.fullText().contains(it) }
+                    wordMute.any { source.text.contains(it) }
         }.also { mutedIds[status.id] = it }
 
     operator fun contains(status: Status) = isMute(status)

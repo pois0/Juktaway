@@ -7,9 +7,12 @@ import android.os.Bundle
 import android.view.View
 import android.widget.AdapterView
 import android.widget.ArrayAdapter
+import io.ktor.client.engine.android.Android
 import jp.nephy.penicillin.PenicillinClient
+import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.session.config.account
 import jp.nephy.penicillin.core.session.config.application
+import jp.nephy.penicillin.core.session.config.httpClient
 import jp.nephy.penicillin.endpoints.account
 import jp.nephy.penicillin.endpoints.account.verifyCredentials
 import jp.nephy.penicillin.endpoints.oauth
@@ -164,51 +167,51 @@ class SignInActivity: Activity(), CoroutineScope {
 
     private fun verifyOAuth(param: String) {
         launch {
-            runCatching {
-                PenicillinClient {
-                    account {
-                        application(consumer!!.ck, consumer!!.cs)
-                    }
-                }.use { client ->
-                    client.oauth.accessToken(rtTemp, rtsTemp, param)
+            PenicillinClient {
+                account {
+                    application(consumer!!.ck, consumer!!.cs)
                 }
-            }.onSuccess { (at, ats, id, sn) ->
-                Core.addToken(Identifier(consumer!!.id, at, ats, id, sn))
+            }.use { client ->
+                try {
+                    val (at, ats, id, sn) = client.oauth.accessToken(rtTemp, rtsTemp, param)
+                    Core.addToken(Identifier(consumer!!.id, at, ats, id, sn))
 
-                MessageUtil.dismissProgressDialog()
-                toast(R.string.toast_sign_in_success)
-                UserIconManager.addUserIconMap(currentClient.account.verifyCredentials().await().result)
-                startActivity(intentFor<MainActivity>().apply {
-                    flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
-                })
-                finish()
-            }.onFailure {
-                it.printStackTrace()
-                MessageUtil.dismissProgressDialog()
-                toast(R.string.toast_sign_in_failure)
+                    MessageUtil.dismissProgressDialog()
+                    toast(R.string.toast_sign_in_success)
+                    UserIconManager.addUserIconMap(currentClient.account.verifyCredentials().await().result)
+                    startActivity(intentFor<MainActivity>().apply {
+                        flags = Intent.FLAG_ACTIVITY_NEW_TASK or Intent.FLAG_ACTIVITY_CLEAR_TASK
+                    })
+                    finish()
+                } catch (e: Exception) {
+                    e.printStackTrace()
+                    MessageUtil.dismissProgressDialog()
+                    toast(R.string.toast_sign_in_failure)
+                }
             }
         }
     }
 
     private fun addUserOAuth() {
         launch {
-            runCatching {
-                PenicillinClient {
-                    account {
-                        application(consumer!!.ck, consumer!!.cs)
-                    }
-                }.use { client ->
+            PenicillinClient {
+                account {
+                    application(consumer!!.ck, consumer!!.cs)
+                }
+                httpClient(Android)
+            }.use { client ->
+                try {
                     val (rt, rts) = client.oauth.requestToken()
                     rtTemp = rt
                     rtsTemp = rts
-                    client.oauth.authorizeUrl(rt)
+                    val url = client.oauth.authorizeUrl(rt)
+                    isPinPublished = true
+                    startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url.toString())))
+                } catch (e: PenicillinException) {
+                    println(e.response?.status?.value)
+                    e.printStackTrace()
+                    toast(R.string.toast_sign_in_failure)
                 }
-            }.onSuccess {
-                isPinPublished = true
-                startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(it.toString())))
-            }.onFailure {
-                it.printStackTrace()
-                toast(R.string.toast_sign_in_failure)
             }
             MessageUtil.dismissProgressDialog()
         }

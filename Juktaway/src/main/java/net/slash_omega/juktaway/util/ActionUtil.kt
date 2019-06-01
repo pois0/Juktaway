@@ -3,8 +3,8 @@ package net.slash_omega.juktaway.util
 import android.content.Context
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.directMessages
 import jp.nephy.penicillin.endpoints.directmessages.create
@@ -49,7 +49,7 @@ suspend inline fun Status.favorite() = original.runCatching { favorite().await()
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error?.code == 139 -> {
+                e is PenicillinTwitterApiException && e.error.code == 139 -> {
                     showToast(R.string.toast_favorite_already)
                     FavRetweetManager.setFav(id)
                 }
@@ -66,7 +66,7 @@ suspend fun Status.unfavorite() = original.runCatching { unfavorite().await() }
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                e is PenicillinTwitterApiException && e.error == TwitterApiError.ResourceNotFound -> {
                     showToast(R.string.toast_destroy_favorite_already)
                     FavRetweetManager.removeFav(original.id)
                 }
@@ -83,7 +83,7 @@ suspend fun Status.retweet() = runCatching { currentClient.statuses.retweet(orig
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error?.code == 37 -> {
+                e is PenicillinTwitterApiException && e.error.code == 37 -> {
                     showToast(R.string.toast_retweet_already)
                     FavRetweetManager.setRetweet(original.id)
                     EventBus.getDefault().post(StatusActionEvent())
@@ -101,7 +101,7 @@ suspend fun Status.destroyRetweet() = runCatching { currentClient.statuses.unret
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                e is PenicillinTwitterApiException && e.error == TwitterApiError.ResourceNotFound -> {
                     showToast(R.string.toast_destroy_retweet_already)
                     FavRetweetManager.removeRetweet(original.id)
                     EventBus.getDefault().post(StatusActionEvent())

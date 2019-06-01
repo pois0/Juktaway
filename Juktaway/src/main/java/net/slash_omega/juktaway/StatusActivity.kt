@@ -44,20 +44,23 @@ class StatusActivity: ScopedFragmentActivity() {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
         }
         val statusId = if (Intent.ACTION_VIEW == intent.action) {
-            val uri = intent.data
-            if (uri == null || uri.path == null) return
+            val uri = intent.data ?: return
+            val path = uri.path ?: return
             when {
-                uri.path!!.contains("photo") -> {
+                path.contains("photo") -> {
                     startActivity<ScaleImageActivity>("url" to uri.toString())
                     finish()
                     return
                 }
-                uri.path!!.contains("video") -> {
+                path.contains("video") -> {
                     startActivity<VideoActivity>("statusUrl" to uri.toString(), "arg" to "statusUrl")
                     finish()
                     return
                 }
-                else -> java.lang.Long.parseLong(uri.lastPathSegment!!)
+                else -> uri.lastPathSegment!!.toLongOrNull() ?: run {
+                    finish()
+                    return
+                }
             }
         } else intent.getLongExtra("id", -1L)
 
@@ -68,11 +71,10 @@ class StatusActivity: ScopedFragmentActivity() {
 
         // Status(ツイート)をViewに描写するアダプター
         mAdapter = StatusAdapter(this)
-        with (list) {
-            adapter = mAdapter
-            onItemClickListener = StatusClickListener(this@StatusActivity)
-            onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
-        }
+        list.adapter = mAdapter
+        list.onItemClickListener = StatusClickListener(this@StatusActivity)
+        list.onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
+
         launch {
             if (statusId > 0) {
                 MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
@@ -115,22 +117,22 @@ class StatusActivity: ScopedFragmentActivity() {
         launch { mAdapter.removeStatus(event.statusId!!) }
     }
 
-    private fun load(idParam: Long) {
-        var statusId = idParam.takeIf { it > 0 }
-        launch {
-            while (statusId != null) {
-                val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
-                MessageUtil.dismissProgressDialog()
 
-                if(status == null) {
-                    toast(R.string.toast_load_data_failure)
-                    return@launch
-                }
+    private suspend fun load(idParam: Long) {
+        var statusId: Long? = idParam
 
-                mAdapter.addSuspend(status)
-                mAdapter.notifyDataSetChanged()
-                statusId = status.inReplyToStatusId
+        while (statusId != null) {
+            val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
+            MessageUtil.dismissProgressDialog()
+
+            if(status == null) {
+                toast(R.string.toast_load_data_failure)
+                break
             }
+
+            mAdapter.addSuspend(status)
+            mAdapter.notifyDataSetChanged()
+            statusId = status.inReplyToStatusId
         }
     }
 }

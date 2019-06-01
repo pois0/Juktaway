@@ -25,9 +25,9 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
@@ -143,7 +143,7 @@ class PostActivity: ScopedFragmentActivity() {
         intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>()?.run { retweetedStatus ?: this }?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
-            in_reply_to_status.text = fullText()
+            in_reply_to_status.text = text
 
             // スクロール可能にするのに必要
             in_reply_to_status.movementMethod = ScrollingMovementMethod.getInstance()
@@ -428,7 +428,7 @@ class PostActivity: ScopedFragmentActivity() {
                 MessageUtil.dismissProgressDialog()
 
                 e?.apply {
-                    toast(if (this is PenicillinException && error == TwitterErrorMessage.YouCannotSendMessagesToUsersWhoAreNotFollowingYou)
+                    toast(if (this is PenicillinTwitterApiException && error == TwitterApiError.CannotSendMessagesToUsersWhoAreNotFollowingYou)
                                 R.string.toast_update_status_not_Follow
                             else
                                 R.string.toast_update_status_failure)

@@ -22,7 +22,6 @@ import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.scope
@@ -94,7 +93,7 @@ class UserListStatusesFragment : Fragment() {
 
             if (statuses.isNullOrEmpty()) return@launch
             mMaxId = statuses.first().id
-            mAdapter.addAllFromStatusesSuspend(statuses)
+            mAdapter.addAllSuspend(statuses)
             mAutoLoader = true
             mListView.visibility = View.VISIBLE
         }

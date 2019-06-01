@@ -18,7 +18,7 @@ import android.widget.LinearLayout
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.*
@@ -48,7 +48,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     = arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_destroy_retweet)
-                        .setMessage(it.fullText())
+                        .setMessage(it.text)
                         .setPositiveButton(getString(R.string.button_destroy_retweet)) { _, _  ->
                             activity!!.scope.launch {
                                 it.destroyRetweet()
@@ -65,7 +65,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     = arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
                 AlertDialog.Builder(activity)
                         .setTitle(R.string.confirm_retweet)
-                        .setMessage(it.fullText())
+                        .setMessage(it.text)
                         .setNeutralButton(R.string.button_quote) { _, _ ->
                             it.quote(activity!!)
                             dismiss()
@@ -105,7 +105,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         limitation()
     }
 
-    suspend fun addAllFromStatusesSuspend(statusesParam: List<Status>) {
+    suspend fun addAllSuspend(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
             statusesParam.filter { it !in Mute && mIdSet.add(it.id) }
         }
@@ -345,7 +345,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     textView {
                         id = R.id.quoted_status
                         textSize = 12f //sp
-                        text = qs.fullText()
+                        text = qs.text
                     }.lparams {
                         below(R.id.quoted_display_name)
                     }

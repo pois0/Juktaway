@@ -21,7 +21,8 @@ import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.create
 import jp.nephy.penicillin.extensions.await
@@ -180,7 +181,7 @@ class MainActivity: ScopedFragmentActivity() {
                         mInReplyToStatus = null
                         quick_tweet_edit.setText(statusInitialText)
                     }.onFailure { e ->
-                        toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                        toast(if ( e is PenicillinTwitterApiException && e.error == TwitterApiError.DuplicateStatus) R.string.toast_update_status_already
                         else R.string.toast_update_status_failure)
                     }
                     MessageUtil.dismissProgressDialog()

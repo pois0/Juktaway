@@ -24,7 +24,7 @@ class UserAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<User>(mCon
                 ImageUtil.displayRoundedImage(user.profileImageUrlWithVariantSize(ProfileImageSize.Bigger), icon)
                 display_name.text = user.name
                 screen_name.text = "@${user.screenName}"
-                user.description?.takeIf { it.isNotEmpty() }?.let {
+                user.description.takeIf { it.isNotEmpty() }?.let {
                     var text = it
                     user.entities?.description?.urls?.forEach { url ->
                         text = text.replace(url.url, url.expandedUrl)
@@ -36,7 +36,7 @@ class UserAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<User>(mCon
                 lock.visibility = if (user.protected) View.VISIBLE else View.INVISIBLE
 
                 setOnClickListener {
-                    mContext?.startActivity(Intent(it.context, ProfileActivity::class.java).apply {
+                    mContext.startActivity(Intent(it.context, ProfileActivity::class.java).apply {
                         putExtra("userJson", user.toJsonString())
                     })
                 }

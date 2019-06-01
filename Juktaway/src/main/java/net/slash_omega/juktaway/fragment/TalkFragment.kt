@@ -129,7 +129,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
             statusId = status.inReplyToStatusId ?: -1
         }
         if (preferences.display.tweet.isTalkSortedByNewest) {
-            mAdapter.addAllFromStatusesSuspend(statusList)
+            mAdapter.addAllSuspend(statusList)
         } else {
             statusList.forEach { mAdapter.insertSuspend(it, 0) }
             val pos = mListView.lastVisiblePosition + statusList.size
@@ -209,7 +209,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
                     mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                 }
             } else {
-                mAdapter.addAllFromStatusesSuspend(statuses)
+                mAdapter.addAllSuspend(statuses)
             }
         }
     }

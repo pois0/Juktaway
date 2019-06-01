@@ -3,7 +3,7 @@ package net.slash_omega.juktaway.util
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
@@ -86,7 +86,7 @@ object StatusUtil {
      * @return 短縮URLを展開したツイート本文
      */
     fun getExpandedText(status: Status): String {
-        var text = status.fullText()
+        var text = status.text
         for (url in status.entities.urls) {
             val m = Pattern.compile(url.url).matcher(text)
             text = m.replaceAll(url.expandedUrl)

@@ -55,7 +55,7 @@ class AroundFragment: DialogFragment() {
                     mProgressBarBottom.visibility = View.GONE
 
                     if (beforeList.isEmpty()) return@launch
-                    mAdapter.addAllFromStatusesSuspend(beforeList)
+                    mAdapter.addAllSuspend(beforeList)
                     mAdapter.notifyDataSetChanged()
                     val afterList = runCatching {
                         var lastId = beforeList[0].id - 1

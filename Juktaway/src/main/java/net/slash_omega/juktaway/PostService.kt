@@ -6,14 +6,12 @@ import android.app.Service
 import android.content.Context
 import android.content.Intent
 import android.support.v4.app.NotificationCompat
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import kotlinx.coroutines.*
 import net.slash_omega.juktaway.settings.PostStockSettings.addDraft
 import net.slash_omega.juktaway.twitter.Identifier
-import net.slash_omega.juktaway.util.showToast
 import net.slash_omega.juktaway.util.updateStatus
-import org.jetbrains.anko.toast
 import java.io.File
 import kotlin.coroutines.CoroutineContext
 
@@ -53,14 +51,14 @@ class PostService: Service(), CoroutineScope {
 
             val message = if (e != null) {
                 addDraft(text)
-                if (e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) {
+                if (e is PenicillinTwitterApiException && e.error == TwitterApiError.DuplicateStatus) {
                     R.string.toast_update_status_already
                 } else R.string.toast_update_status_failure
             } else {
                 R.string.update_status_success
             }
 
-            stopForeground(Service.STOP_FOREGROUND_REMOVE)
+            stopForeground(STOP_FOREGROUND_REMOVE)
 
             manager.notify(1, NotificationCompat.Builder(this@PostService, channelId)
                     .setContentTitle("Juktaway Posting Service")

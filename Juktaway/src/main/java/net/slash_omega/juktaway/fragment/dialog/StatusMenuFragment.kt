@@ -10,7 +10,7 @@ import android.support.v4.util.LongSparseArray
 import android.widget.ListView
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
@@ -114,7 +114,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         val mentions = source.entities.userMentions
         val isPublic = !source.user.protected
 
-        builder.setTitle(status.fullText())
+        builder.setTitle(status.text)
 
         /*
          * リプ

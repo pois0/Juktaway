@@ -43,7 +43,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
                 if (mReload) {
                     mAdapter.clear()
                     mMaxId = last().id - 1
-                    mAdapter.addAllFromStatusesSuspend(this)
+                    mAdapter.addAllSuspend(this)
                     mReload = false
                 } else {
                     mMaxId = last().id - 1

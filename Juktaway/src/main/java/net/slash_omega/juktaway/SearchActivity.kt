@@ -165,7 +165,7 @@ class SearchActivity: ScopedFragmentActivity() {
                     if (result.hasNext) nextAction = result.next
 
                     val count = mAdapter.count
-                    mAdapter.addAllFromStatusesSuspend(statuses)
+                    mAdapter.addAllSuspend(statuses)
                     mAdapter.notifyDataSetChanged()
 
                     search_list.visibility = View.VISIBLE
