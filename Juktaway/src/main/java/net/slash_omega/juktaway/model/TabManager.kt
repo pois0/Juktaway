@@ -84,11 +84,11 @@ object TabManager {
 
     private fun translateTab(list: List<OldTab>) = list.map {
         when {
-            it.id == TabManager.OLD_TIMELINE_TAB_ID -> homeTab
-            it.id == TabManager.OLD_INTERACTIONS_TAB_ID -> mentionTab
-            it.id == TabManager.OLD_DIRECT_MESSAGES_TAB_ID -> favoriteTab
-            it.id == TabManager.OLD_FAVORITES_TAB_ID -> dmTab
-            it.id <= TabManager.OLD_SEARCH_TAB_ID ->Tab(SEARCH_TAB_ID, 0, it.name, -1)
+            it.id == OLD_TIMELINE_TAB_ID -> homeTab
+            it.id == OLD_INTERACTIONS_TAB_ID -> mentionTab
+            it.id == OLD_DIRECT_MESSAGES_TAB_ID -> favoriteTab
+            it.id == OLD_FAVORITES_TAB_ID -> dmTab
+            it.id <= OLD_SEARCH_TAB_ID ->Tab(SEARCH_TAB_ID, 0, it.name, -1)
             else -> Tab(LIST_TAB_ID, it.id, it.name, -1)
         }
     }
@@ -103,7 +103,7 @@ object TabManager {
 private data class OldTabData(val tabs: ArrayList<OldTab>)
 
 @Serializable
-class OldTab(var id: Long, @Optional var name: String = "")
+class OldTab(@Required var id: Long, var name: String = "")
 
 @Serializable
 data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Long) {

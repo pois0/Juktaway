@@ -10,7 +10,6 @@ import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.pull_to_refresh_list.*
 import kotlinx.coroutines.*
-import kotlinx.coroutines.channels.Channel
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
@@ -37,16 +36,16 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     private var statusIdMin = 0L
     private val position by lazy { arguments?.getInt("position", -1) ?: -1 }
 
-    private val statusChannel = Channel<List<Status>>(30)
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
 
     protected lateinit var mListView: ListView
 
     private val autoReloadJob by lazy {
-        regenerableLaunch(Dispatchers.Default, CoroutineStart.LAZY) {
+        if (autoReloadInterval > 0) regenerableLaunch(Dispatchers.Default) {
             var delayed = 0L
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
+                println("load")
 
                 while (position != mainActivity.currentTabPosition || isLoading) {
                     if (!isActive) break@route
@@ -54,40 +53,30 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
                 }
 
                 delayed = measureTimeMillis {
-                    getNewStatuses(LoadStatusesType.NEW).takeUnless { it.isNullOrEmpty() }?.let {
-                        statusChannel.send(it)
+                    getNewStatuses(LoadStatusesType.NEW).takeUnless { it.isNullOrEmpty() }?.let { statuses ->
+                        launch(Dispatchers.Main) {
+                            statusIdMin = statuses.last().id
+
+                            val position = mListView.firstVisiblePosition
+                            val y = mListView.getChildAt(0)?.top ?: 0
+
+                            val size = mAdapter.insertAllFromStatus(statuses, 0)
+
+                            if (position == 0 && y == 0) {
+                                mListView.setSelection(0)
+                            } else {
+                                mListView.setSelectionFromTop(position + size, y)
+                            }
+                        }
                     }
                 }
             }
-        }
-    }
-
-    private val displayStatusJob by lazy {
-        regenerableLaunch(Dispatchers.Main, CoroutineStart.LAZY) {
-            for (statuses in statusChannel) {
-                statusIdMin = statuses.last().id
-
-                val position = mListView.firstVisiblePosition
-                val y = mListView.getChildAt(0)?.top ?: 0
-
-                val size = mAdapter.insertAllFromStatus(statuses, 0)
-
-                if (position == 0 && y == 0) {
-                    mListView.setSelection(0)
-                } else {
-                    mListView.setSelectionFromTop(position + size, y)
-                }
-            }
-        }
+        } else null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         retainInstance = true
-        if (autoReloadInterval > 0) {
-            autoReloadJob.job.start()
-            displayStatusJob.job.start()
-        }
     }
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View?
@@ -113,19 +102,19 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
-        autoReloadJob.job.cancel()
+        autoReloadJob?.restart()
         EventBus.getDefault().register(this)
     }
 
     override fun onPause() {
         EventBus.getDefault().unregister(this)
-        autoReloadJob.restart()
+        autoReloadJob?.cancel()
         super.onPause()
     }
 
     override fun onDestroy() {
+        coroutineContext.cancelChildren()
         super.onDestroy()
-        statusChannel.close()
     }
 
     internal fun reload() {

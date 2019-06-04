@@ -102,8 +102,10 @@ object Core {
 
     suspend fun switchToken(id: Identifier) {
         withContext(Dispatchers.Default) {
+            val oldClient = currentClient
             currentIdentifier = id
             currentClient = id.toClient()
+            oldClient.close()
             lastIdentifierAts = id.ats
             FavRetweetManager.clear()
             TabManager.loadTabs()

@@ -16,10 +16,13 @@ class RegenerableCoroutine(
         private val parent: CoroutineScope,
         private val context: CoroutineContext = EmptyCoroutineContext,
         private val start: CoroutineStart = CoroutineStart.DEFAULT,
-        private val block: suspend CoroutineScope.() -> Unit) {
+        private val block: suspend CoroutineScope.() -> Unit
+) {
+    private var job = parent.launch(context, start, block)
 
-    var job = parent.launch(context, start, block)
-        private set
+    fun start() = job.start()
+
+    fun cancel() = job.cancel()
 
     fun restart() {
         if (!job.isCancelled) job.cancel()
