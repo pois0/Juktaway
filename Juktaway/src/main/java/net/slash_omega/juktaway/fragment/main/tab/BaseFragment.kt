@@ -5,6 +5,7 @@ import android.support.v4.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
+import android.widget.AbsListView
 import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.Status
@@ -87,6 +88,16 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mListView = list_view.apply {
             onItemClickListener = StatusClickListener(act)
             onItemLongClickListener = StatusLongClickListener(act)
+            setOnScrollListener(object: AbsListView.OnScrollListener {
+                override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {}
+
+                override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+                    // 最後までスクロールされたかどうかの判定
+                    if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
+                        launch { load(LoadStatusesType.ADDITIONAL) }
+                    }
+                }
+            })
         }
 
         swipe_refresh_layout.setOnRefreshListener {

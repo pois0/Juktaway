@@ -18,7 +18,6 @@ import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.twitter.currentClient
@@ -112,11 +111,6 @@ class StatusActivity: ScopedFragmentActivity() {
     fun onEventMainThread(event: StatusActionEvent) {
         mAdapter.notifyDataSetChanged()
     }
-
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        launch { mAdapter.removeStatus(event.statusId!!) }
-    }
-
 
     private suspend fun load(idParam: Long) {
         var statusId: Long? = idParam
