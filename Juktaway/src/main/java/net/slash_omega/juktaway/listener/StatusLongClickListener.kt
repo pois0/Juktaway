@@ -25,7 +25,6 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
 
     override fun onItemLongClick(adapterView: AdapterView<*>?, view: View?, position: Int, id: Long)
         = adapterView?.let { getAdapter(it) }?.getItem(position)?.let { status ->
-            println("created")
             val source = status.retweetedStatus ?: status
             when (preferences.operation.longTap) {
                 TALK ->

@@ -208,7 +208,6 @@ class SignInActivity: Activity(), CoroutineScope {
                     isPinPublished = true
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url.toString())))
                 } catch (e: PenicillinException) {
-                    println(e.response?.status?.value)
                     e.printStackTrace()
                     toast(R.string.toast_sign_in_failure)
                 }

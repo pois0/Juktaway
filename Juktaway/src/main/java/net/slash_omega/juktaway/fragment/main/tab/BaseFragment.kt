@@ -46,7 +46,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             var delayed = 0L
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
-                println("load")
 
                 while (position != mainActivity.currentTabPosition || isLoading) {
                     if (!isActive) break@route
