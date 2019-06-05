@@ -124,7 +124,6 @@ class ScaleImageActivity: ScopedFragmentActivity() {
                     })
                 }
             }.onFailure { e ->
-                e.printStackTrace()
                 toast(R.string.toast_save_image_failure)
             }
         }

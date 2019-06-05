@@ -1,5 +1,9 @@
 package net.slash_omega.juktaway.util
 
+import android.os.Bundle
+import jp.nephy.jsonkt.toJsonString
+import jp.nephy.penicillin.models.Status
+
 /**
  * Created on 2018/11/13.
  */
@@ -20,3 +24,7 @@ fun String?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
 fun <T> Array<out T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
 
 fun <T> Collection<T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
+
+fun Status.generateJsonBundle(capacity: Int = 1) = Bundle(capacity).apply {
+    putString("status", toJsonString())
+}

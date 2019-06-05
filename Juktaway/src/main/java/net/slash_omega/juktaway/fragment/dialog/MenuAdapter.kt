@@ -19,11 +19,11 @@ class MenuAdapter(c: Context, i: Int): ArrayAdapterBase<Menu>(c, i) {
     }}
 
     fun add(resId: Int, callback: () -> Unit) {
-        add(Menu(resId, Runnable(callback)))
+        add(Menu(resId, callback))
     }
 
     fun add(label: String, callback: () -> Unit) {
-        add(Menu(label, Runnable(callback)))
+        add(Menu(label, callback))
     }
 
     override val View.mView: (Int, ViewGroup?) -> Unit
@@ -32,4 +32,8 @@ class MenuAdapter(c: Context, i: Int): ArrayAdapterBase<Menu>(c, i) {
 
 class Menu(val label: String, val callback: Runnable) {
     constructor(resId: Int, callback: Runnable): this(app.getString(resId), callback)
+
+    constructor(label: String, callback: () -> Unit): this(label, Runnable(callback))
+
+    constructor(resId: Int, callback: () -> Unit): this(app.getString(resId), Runnable(callback))
 }

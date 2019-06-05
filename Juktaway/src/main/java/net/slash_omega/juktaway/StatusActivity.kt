@@ -86,9 +86,9 @@ class StatusActivity: ScopedFragmentActivity() {
                         MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
                         load(inReplyToStatusId)
                     }
-                    mAdapter.notifyDataSetChanged()
                 }
             }
+            mAdapter.notifyDataSetChanged()
             list.visibility = View.VISIBLE
         }
     }
@@ -114,19 +114,21 @@ class StatusActivity: ScopedFragmentActivity() {
 
     private suspend fun load(idParam: Long) {
         var statusId: Long? = idParam
+        val statusList = mutableListOf<Status>()
 
         while (statusId != null) {
             val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
-            MessageUtil.dismissProgressDialog()
 
             if(status == null) {
                 toast(R.string.toast_load_data_failure)
                 break
             }
 
-            mAdapter.addSuspend(status)
-            mAdapter.notifyDataSetChanged()
+            statusList.add(status)
             statusId = status.inReplyToStatusId
         }
+
+        mAdapter.addAllSuspend(statusList.asReversed())
+        MessageUtil.dismissProgressDialog()
     }
 }

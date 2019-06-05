@@ -79,7 +79,7 @@ class EditProfileActivity: ScopedFragmentActivity(){
                         dialog.show(supportFragmentManager, "dialog")
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    toast(R.string.toast_load_data_failure)
                 }
             }
         }

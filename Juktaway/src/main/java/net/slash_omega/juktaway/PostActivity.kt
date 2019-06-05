@@ -367,7 +367,7 @@ class PostActivity: ScopedFragmentActivity() {
             toast(R.string.toast_set_image_success)
             tweet_button.isEnabled = true
         } catch (e: FileNotFoundException) {
-            e.printStackTrace()
+            toast(R.string.toast_load_data_failure)
         }
     }
 

@@ -39,9 +39,7 @@ import org.jetbrains.anko.startActivity
 class StatusMenuFragment: DialogFragment(), CoroutineScope {
     companion object {
         fun newInstance(status: Status) = StatusMenuFragment().apply {
-            arguments = Bundle().apply {
-                putString("status", status.toJsonString())
-            }
+            arguments = status.generateJsonBundle()
         }
     }
 
@@ -60,53 +58,11 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
                         adapter.getItem(i)?.callback?.run()
                     }
                 }).let {
-                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parseWithClient<DirectMessage>()
-                    if (message != null) onDirectMessage(message, adapter, it)
-                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parseWithClient(), adapter, it)
+                    onStatus(arguments!!.getString("status")!!.toJsonObject().parseWithClient(), adapter, it)
                 }
                 .create()
     }
 
-
-
-    private fun onDirectMessage(message: DirectMessage, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
-        builder.setTitle(message.senderScreenName)
-        /*
-         * 返信(DM)
-         */
-        add(R.string.context_menu_reply_direct_message) {
-            ActionUtil.doReplyDirectMessage(message, mActivity)
-            dismiss()
-        }
-
-        /*
-         * ツイ消し(DM)
-         */
-        add(R.string.context_menu_destroy_direct_message) {
-            launch {
-                ActionUtil.destroyDirectMessage(message.id)
-                dismiss()
-            }
-        }
-
-        /*
-         * ツイート内のメンション
-         */
-        for (mention in message.entities.userMentions) {
-            add("@" + mention.screenName) {
-                val intent = Intent(mActivity, ProfileActivity::class.java)
-                intent.putExtra("screenName", mention.screenName)
-                mActivity.startActivity(intent)
-            }
-        }
-
-        /*
-         * ツイート内のURL
-         */
-        val urls = message.entities.urls.map { it.expandedUrl }
-        addUrls(adapter, urls)
-        builder
-    }
 
     private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
         val retweet = status.retweetedStatus
@@ -230,7 +186,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         add(R.string.context_menu_talk) {
             TalkFragment().apply {
-                arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                arguments = source.generateJsonBundle()
             }.show(mActivity.supportFragmentManager, "dialog")
         }
 
@@ -239,7 +195,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         add(R.string.context_menu_show_around) {
             AroundFragment().apply {
-                arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                arguments = source.generateJsonBundle()
             }.show(mActivity.supportFragmentManager, "dialog")
         }
 
@@ -388,11 +344,11 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
     }
 
     private fun addUrls(adapter: MenuAdapter, urls: List<String>) {
-        for (url in urls) {
-            adapter.add(Menu(url, Runnable {
+        adapter.addAll(urls.map { url ->
+            Menu(url) {
                 mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
                 dismiss()
-            }))
-        }
+            }
+        })
     }
 }

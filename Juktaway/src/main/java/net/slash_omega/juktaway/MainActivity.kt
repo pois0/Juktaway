@@ -20,7 +20,6 @@ import android.widget.ImageButton
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
 import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.endpoints.statuses
@@ -496,14 +495,14 @@ class MainActivity: ScopedFragmentActivity() {
         if (action_bar_search_text.text == null) return@OnItemClickListener
         val searchWord = action_bar_search_text.string
         KeyboardUtil.hideKeyboard(action_bar_search_text)
-        mSearchAdapter?.let {
-            if (it.savedMode) {
-                startActivityForResult(intentFor<SearchActivity>().apply{
-                    putExtra("query", searchWord)
-                }, REQUEST_SEARCH)
-                return@OnItemClickListener
-            }
+
+        if (mSearchAdapter?.savedMode == true) {
+            startActivityForResult(intentFor<SearchActivity>().apply{
+                putExtra("query", searchWord)
+            }, REQUEST_SEARCH)
+            return@OnItemClickListener
         }
+
         when (i) {
             0 ->
                 startActivityForResult<SearchActivity>(REQUEST_SEARCH, "query" to searchWord)

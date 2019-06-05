@@ -122,7 +122,6 @@ class ProfileActivity: ScopedFragmentActivity() {
 
                 onLoadFinished()
             }.onFailure {
-                it.printStackTrace()
                 toast(R.string.toast_load_data_failure)
             }
             MessageUtil.dismissProgressDialog()

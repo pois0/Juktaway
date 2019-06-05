@@ -451,11 +451,11 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                         (if (s.isRetweeted()) {
                             DestroyRetweetDialogFragment().apply {
-                                arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
+                                arguments = s.generateJsonBundle()
                             }
                         } else {
                             RetweetDialogFragment().apply {
-                                arguments = Bundle(1).apply { putString("status", s.toJsonString()) }
+                                arguments = s.generateJsonBundle()
                             }
                         }).show(fragmentActivity.supportFragmentManager, "dialog")
                     }

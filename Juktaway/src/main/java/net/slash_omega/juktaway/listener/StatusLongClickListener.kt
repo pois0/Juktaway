@@ -13,6 +13,7 @@ import net.slash_omega.juktaway.fragment.TalkFragment
 import net.slash_omega.juktaway.settings.Preferences.OperationPreferences.LongTapAction.*
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.util.ActionUtil
+import net.slash_omega.juktaway.util.generateJsonBundle
 import net.slash_omega.juktaway.util.quote
 import net.slash_omega.juktaway.util.uri
 
@@ -30,7 +31,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                 TALK ->
                     if (source.inReplyToStatusId != null) {
                         TalkFragment().apply {
-                            arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                            arguments = source.generateJsonBundle()
                         }.show(activity.supportFragmentManager, "dialog")
                         true
                     } else false
@@ -40,7 +41,7 @@ open class StatusLongClickListener(activity: Activity): AdapterView.OnItemLongCl
                 }
                 SHOW_AROUND -> {
                     AroundFragment().apply {
-                        arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                        arguments = source.generateJsonBundle()
                     }.show(activity.supportFragmentManager, "dialog")
                     true
                 }
