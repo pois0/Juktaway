@@ -29,8 +29,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected lateinit var mAdapter: StatusAdapter
     private var isLoading = false
         set(value) {
-            swipe_refresh_layout.isRefreshing = value
             field = value
+            swipe_refresh_layout.isRefreshing = value
         }
     protected var hasNext = true
     private var statusIdMax = 0L // 読み込んだ最新のツイートID
@@ -43,7 +43,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     private val autoReloadJob by lazy {
         if (autoReloadInterval > 0) regenerableLaunch(Dispatchers.Default) {
-            var delayed = 0L
+            var delayed = autoReloadInterval - 1000
             route@ while (isActive) {
                 delay(autoReloadInterval - delayed)
 
@@ -52,24 +52,7 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
                     delay(500)
                 }
 
-                delayed = measureTimeMillis {
-                    getNewStatuses(LoadStatusesType.NEW).takeUnless { it.isNullOrEmpty() }?.let { statuses ->
-                        launch(Dispatchers.Main) {
-                            statusIdMin = statuses.last().id
-
-                            val position = mListView.firstVisiblePosition
-                            val y = mListView.getChildAt(0)?.top ?: 0
-
-                            val size = mAdapter.insertAllFromStatus(statuses, 0)
-
-                            if (position == 0 && y == 0) {
-                                mListView.setSelection(0)
-                            } else {
-                                mListView.setSelectionFromTop(position + size, y)
-                            }
-                        }
-                    }
-                }
+                delayed = measureTimeMillis { load(LoadStatusesType.NEW_ARRIVAL) }
             }
         } else null
     }
@@ -112,8 +95,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     override fun onResume() {
         super.onResume()
-        autoReloadJob?.restart()
         EventBus.getDefault().register(this)
+        autoReloadJob?.restart()
     }
 
     override fun onPause() {
@@ -142,27 +125,34 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     open var mSearchWord = ""
 
-    private suspend fun load(loadType: LoadStatusesType) {
-        if(isLoading || !hasNext) return
-        isLoading = true
+    private suspend fun load(loadType: LoadStatusesType) = withContext(Dispatchers.Main) {
+        if (isLoading || !hasNext) return@withContext
+        if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = true
 
         val statuses = getNewStatuses(loadType)
 
         if (statuses.isNullOrEmpty()) {
             if(statuses?.isEmpty() == true) hasNext = false
-            swipe_refresh_layout.isRefreshing = false
         } else {
             when (loadType) {
                 LoadStatusesType.ADDITIONAL -> {
-                    mListView.visibility = View.VISIBLE
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
                 LoadStatusesType.RELOAD -> {
                     mAdapter.clear()
                     mAdapter.extensionAddAllFromStatuses(statuses)
                 }
-                LoadStatusesType.NEW -> {
-                    mAdapter.insertAllFromStatus(statuses, 0)
+                LoadStatusesType.NEW_ARRIVAL -> {
+                    val position = mListView.firstVisiblePosition
+                    val y = mListView.getChildAt(0)?.top ?: 0
+
+                    val size = mAdapter.insertAllFromStatus(statuses, 0)
+
+                    if (position == 0 && y == 0) {
+                        mListView.setSelection(0)
+                    } else {
+                        mListView.setSelectionFromTop(position + size, y)
+                    }
                 }
             }
 
@@ -171,15 +161,15 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         }
 
         mListView.visibility = View.VISIBLE
-        isLoading = false
 
+        if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = false
         if(loadType == LoadStatusesType.RELOAD) goToTop()
     }
 
     protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
 
-    enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
-        RELOAD(false, false), ADDITIONAL(true, false), NEW(false, true)
+    protected enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
+        RELOAD(false, false), ADDITIONAL(true, false), NEW_ARRIVAL(false, true)
     }
 
     protected val LoadStatusesType.requestMaxId: Long?
@@ -188,14 +178,14 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     protected val LoadStatusesType.requestSinceId: Long?
         get() = statusIdMax.takeIf { it > 0 && limitMin }?.plus(1)
 
-    /**
+    /*
      *
      * !!! EventBus !!!
      *
      */
 
 
-    /**
+    /*
      * 高速スクロールの設定が変わったら切り替える
      */
     @Suppress("UNUSED_PARAMETER")
