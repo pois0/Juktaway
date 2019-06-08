@@ -316,9 +316,11 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 below(R.id.display_name)
             }
 
-            relativeLayout {
-                id = R.id.quoted_tweet
-                s.quotedStatus?.let { qs ->
+            var bottom = R.id.status
+
+            s.quotedStatus?.let { qs ->
+                relativeLayout {
+                    id = R.id.quoted_tweet
                     padding = dip(10)
                     backgroundResource = R.drawable.quoted_tweet_frame
 
@@ -382,20 +384,21 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     setOnClickListener {
                         startActivity<StatusActivity>("status" to qs.toJsonString())
                     }
+                }.lparams(width = matchParent) {
+                    below(R.id.status)
+                    rightOf(R.id.icon)
+                    if (s.quotedStatus != null) {
+                        topMargin = dip(10)
+                        bottomMargin = dip(4)
+                    }
                 }
-            }.lparams(width = matchParent) {
-                below(R.id.status)
-                rightOf(R.id.icon)
-                if (s.quotedStatus != null) {
-                    topMargin = dip(10)
-                    bottomMargin = dip(4)
-                }
+                bottom = R.id.quoted_tweet
             }
 
-            frameLayout {
-                id = R.id.images_container_wrapper
+            if (preferences.display.tweet.shouldShowThumbnail) {
+                frameLayout {
+                    id = R.id.images_container_wrapper
 
-                if (preferences.display.tweet.shouldShowThumbnail) {
                     val container = linearLayout {
                         id = R.id.images_container
                         orientation = LinearLayout.VERTICAL
@@ -411,12 +414,13 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     }
 
                     ImageUtil.displayThumbnailImages(fragmentActivity, container, this, play, s)
+                }.lparams {
+                    below(bottom)
+                    rightOf(R.id.icon)
+                    bottomMargin = dip(4)
+                    topMargin = dip(10)
                 }
-            }.lparams {
-                below(R.id.quoted_tweet)
-                rightOf(R.id.icon)
-                bottomMargin = dip(4)
-                topMargin = dip(10)
+                bottom = R.id.images_container_wrapper
             }
 
             relativeLayout {
@@ -536,7 +540,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     alignParentRight()
                 }
             }.lparams {
-                below(R.id.images_container_wrapper)
+                below(bottom)
                 rightOf(R.id.icon)
             }
 
