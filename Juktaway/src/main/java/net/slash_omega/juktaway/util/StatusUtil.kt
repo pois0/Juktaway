@@ -43,7 +43,7 @@ val Status.imageUrls: List<String>
     }
 
 object StatusUtil {
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
+    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+$]+")
     private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
     @Suppress("SpellCheckingInspection")
     private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
@@ -84,19 +84,10 @@ object StatusUtil {
      * @param status ツイート
      * @return 短縮URLを展開したツイート本文
      */
-    fun getExpandedText(status: Status): String {
-        var text = status.fullText()
-        for (url in status.entities.urls) {
-            val m = Pattern.compile(url.url).matcher(text)
-            text = m.replaceAll(url.expandedUrl)
-        }
-
-        for (media in status.entities.media) {
-            val m = Pattern.compile(media.url).matcher(text)
-            text = m.replaceAll(media.expandedUrl)
-        }
-        return text
-    }
+    fun getExpandedText(status: Status): String
+            = status.fullText()
+                    .let { status.entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
+                    .let { status.entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
 
     /**
      * ツイートに含まれる画像のURLをすべて取得する

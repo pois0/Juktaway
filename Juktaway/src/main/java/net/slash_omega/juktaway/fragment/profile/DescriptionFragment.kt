@@ -13,7 +13,6 @@ import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.util.parseWithClient
 import java.text.SimpleDateFormat
 import java.util.*
-import java.util.regex.Pattern
 
 /**
  * Created on 2018/11/18.
@@ -28,17 +27,10 @@ class DescriptionFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_profile_description, container, false)?.apply {
-            if (!user.description.isNullOrEmpty()) {
-                var descStr = user.description
-                user.entities?.description?.urls?.forEach {
-                    val matcher = Pattern.compile(it.url).matcher(descStr)
-                    descStr = matcher.replaceAll(it.expandedUrl)
-                }
-                description.text = descStr
-                description.visibility = View.VISIBLE
-            } else {
-                description.visibility = View.GONE
-            }
+            description.visibility = user.description.takeUnless { it.isNullOrEmpty() }?.let { desc ->
+                description.text = user.entities?.description?.urls?.fold(desc) { acc, url -> acc.replace(url.url, url.expandedUrl) }
+                View.VISIBLE
+            } ?: View.GONE
 
             if (!user.location.isNullOrEmpty()) {
                 location.text = user.location
