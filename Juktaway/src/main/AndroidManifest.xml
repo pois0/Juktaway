@@ -146,12 +146,6 @@
             android:name="net.slash_omega.juktaway.SettingsActivity"
             android:label="@string/title_activity_settings"/>
         <activity
-            android:name="net.slash_omega.juktaway.NotificationSettingsActivity"
-            android:label="@string/title_notification"/>
-        <activity
-            android:name="net.slash_omega.juktaway.PerformanceActivity"
-            android:label="@string/title_performance"/>
-        <activity
             android:name="net.slash_omega.juktaway.RegisterUserListActivity"
             android:label="@string/title_register_list"/>
         <activity
