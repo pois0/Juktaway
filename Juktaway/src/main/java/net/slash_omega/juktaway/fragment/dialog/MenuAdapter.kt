@@ -13,10 +13,10 @@ import net.slash_omega.juktaway.app
 class MenuAdapter(c: Context, i: Int): ArrayAdapterBase<Menu>(c, i) {
     private val mMenuList = mutableListOf<Menu>()
 
-    override fun add(menu: Menu?) { menu?.let {
+    override fun add(menu: Menu) {
         super.add(menu)
         mMenuList.add(menu)
-    }}
+    }
 
     fun add(resId: Int, callback: () -> Unit) {
         add(Menu(resId, callback))
@@ -28,11 +28,11 @@ class MenuAdapter(c: Context, i: Int): ArrayAdapterBase<Menu>(c, i) {
 
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ -> (this as TextView).text = mMenuList[pos].label }
+
+    override fun getCount() = mMenuList.size
 }
 
 class Menu(val label: String, val callback: Runnable) {
-    constructor(resId: Int, callback: Runnable): this(app.getString(resId), callback)
-
     constructor(label: String, callback: () -> Unit): this(label, Runnable(callback))
 
     constructor(resId: Int, callback: () -> Unit): this(app.getString(resId), Runnable(callback))

@@ -558,16 +558,6 @@ class MainActivity: ScopedFragmentActivity() {
         mAccessTokenAdapter.notifyDataSetChanged()
     }
 
-
-//    fun onEventMainThread(e: NewRecordEvent) {
-//        val pos = if (e.tabId > TabManager.OLD_SEARCH_TAB_ID) mMainPagerAdapter.findPositionById(e.tabId)
-//                else mMainPagerAdapter.findPositionBySearchWord(e.searchWord)
-//        if (pos < 0) return
-//        (tab_menus.getChildAt(pos) as Button?)?.let {
-//            ThemeUtil.setThemeTextColor(it, if (mViewPager.currentItem == pos && e.autoScroll) R.attr.menu_text_color else R.attr.holo_blue)
-//        }
-//    }
-
     fun fixStatusInitialText() { statusInitialText = quick_tweet_edit.text.toString() }
 
     fun unfixStatusInitialText() { statusInitialText = "" }

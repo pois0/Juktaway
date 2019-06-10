@@ -12,7 +12,6 @@ import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
-import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.CoroutineScope
