@@ -85,19 +85,10 @@ object StatusUtil {
      * @param status ツイート
      * @return 短縮URLを展開したツイート本文
      */
-    fun getExpandedText(status: Status): String {
-        var text = status.text
-        for (url in status.entities.urls) {
-            val m = Pattern.compile(url.url).matcher(text)
-            text = m.replaceAll(url.expandedUrl)
-        }
-
-        for (media in status.entities.media) {
-            val m = Pattern.compile(media.url).matcher(text)
-            text = m.replaceAll(media.expandedUrl)
-        }
-        return text
-    }
+    fun getExpandedText(status: Status): String
+            = status.text
+                    .let { status.entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
+                    .let { status.entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
 
     /**
      * ツイートに含まれる画像のURLをすべて取得する
