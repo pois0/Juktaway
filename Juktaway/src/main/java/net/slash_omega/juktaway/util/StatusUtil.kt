@@ -2,7 +2,10 @@ package net.slash_omega.juktaway.util
 
 import android.text.SpannableStringBuilder
 import android.text.Spanned
+import android.text.method.LinkMovementMethod
+import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
+import android.widget.TextView
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.settings.preferences
@@ -43,6 +46,41 @@ val Status.imageUrls: List<String>
         return imageUrls
     }
 
+val Status.expandedText: String
+    get () = text
+            .let { entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
+            .let { entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
+
+fun TextView.setTextFromStatus(status: Status) {
+    movementMethod = LinkMovementMethod.getInstance()
+    val str = status.text
+    val sb = SpannableStringBuilder().apply { append(str) }
+
+    val urlMatcher = StatusUtil.URL_PATTERN.matcher(str)
+    while (urlMatcher.find()) {
+        sb.setSpan(URLSpan(urlMatcher.group()), urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+
+    status.entities.urls.forEach { urlEntity ->
+        sb.setSpan(URLSpan(urlEntity.expandedUrl))
+    }
+
+
+    val mentionMatcher = StatusUtil.MENTION_PATTERN.matcher(str)
+    while (mentionMatcher.find()) {
+        us = UnderlineSpan()
+        sb.setSpan(us, mentionMatcher.start(), mentionMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+    }
+
+    val hashtagMatcher = StatusUtil.HASHTAG_PATTERN.matcher(str)
+    while (hashtagMatcher.find()) {
+        us = UnderlineSpan()
+        sb.setSpan(us, hashtagMatcher.start(), hashtagMatcher.end(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
+    }
+
+    text = sb
+}
+
 object StatusUtil {
     private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
     private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
@@ -50,33 +88,13 @@ object StatusUtil {
     private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
 
     /**
-     * source(via)からクライアント名を抜き出す
-     *
-     * @param source [クライアント名](クライアントURL)という文字列
-     * @return クライアント名
-     */
-    fun getClientName(source: String) = source.split("[<>]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().let {
-        it[if (it.size > 1) 2 else 0]
-    }
-
-    /**
      * 自分宛てのメンションかどうかを判定する
      *
      * @param status ツイート
      * @return true ... 自分宛てのメンション
      */
-    fun isMentionForMe(status: Status): Boolean {
-        val userId = currentIdentifier.userId
-        if (status.inReplyToUserId == userId) {
-            return true
-        }
-        val mentions = status.entities.userMentions
-        for (mention in mentions) {
-            if (mention.id == userId) {
-                return true
-            }
-        }
-        return false
+    fun isMentionForMe(status: Status): Boolean = currentIdentifier.userId.let { userId ->
+        status.inReplyToUserId == userId || status.entities.userMentions.any { it.id == userId }
     }
 
     /**
@@ -118,8 +136,7 @@ object StatusUtil {
 
         val urlMatcher = URL_PATTERN.matcher(str)
         while (urlMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+            sb.setSpan(URLSpan(urlMatcher.group()), urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
         }
 
 

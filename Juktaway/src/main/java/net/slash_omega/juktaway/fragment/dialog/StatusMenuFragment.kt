@@ -64,6 +64,15 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
 
 
     private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
+        fun addUrls(urls: List<String>) {
+            addAll(urls.map { url ->
+                Menu(url) {
+                    mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    dismiss()
+                }
+            })
+        }
+
         val retweet = status.retweetedStatus
         val source = status.original
         val mentions = source.entities.userMentions
@@ -202,13 +211,13 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          * ツイート内のURL
          */
         val urls = source.entities.urls.map { it.expandedUrl }
-        addUrls(adapter, urls)
+        addUrls(urls)
 
         /*
          * ツイート内のURL(画像)
          */
         val medias = source.entities.media.map { it.expandedUrl }
-        addUrls(adapter, medias)
+        addUrls(medias)
 
         /*
          * ツイート内のハッシュタグ
@@ -296,11 +305,11 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         /*
          * viaをミュート
          */
-        add(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.via.name))) {
+        add(String.format(mActivity.getString(R.string.context_menu_mute), source.via.name)) {
             AlertDialog.Builder(activity)
-                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.via.name)))
+                    .setMessage(String.format(getString(R.string.context_create_mute), source.via.name))
                     .setPositiveButton(R.string.button_ok) { _, _->
-                        SourceMute += StatusUtil.getClientName(source.via.name)
+                        SourceMute += source.via.name
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }
@@ -340,14 +349,5 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
                     .show()
         }
         builder
-    }
-
-    private fun addUrls(adapter: MenuAdapter, urls: List<String>) {
-        adapter.addAll(urls.map { url ->
-            Menu(url) {
-                mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                dismiss()
-            }
-        })
     }
 }

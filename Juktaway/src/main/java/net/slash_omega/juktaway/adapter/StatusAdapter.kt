@@ -9,6 +9,7 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
+import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -311,6 +312,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 tag = fontSize
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                 text = StatusUtil.generateUnderline(StatusUtil.getExpandedText(s))
+
             }.lparams {
                 rightOf(R.id.icon)
                 below(R.id.display_name)

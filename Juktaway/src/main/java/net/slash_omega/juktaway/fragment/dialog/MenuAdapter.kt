@@ -26,10 +26,13 @@ class MenuAdapter(c: Context, i: Int): ArrayAdapterBase<Menu>(c, i) {
         add(Menu(label, callback))
     }
 
+    override fun addAll(collection: Collection<Menu>) {
+        super.addAll(collection)
+        mMenuList.addAll(collection)
+    }
+
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ -> (this as TextView).text = mMenuList[pos].label }
-
-    override fun getCount() = mMenuList.size
 }
 
 class Menu(val label: String, val callback: Runnable) {
