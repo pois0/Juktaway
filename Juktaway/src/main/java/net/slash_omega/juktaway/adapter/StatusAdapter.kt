@@ -9,7 +9,6 @@ import android.support.v4.app.DialogFragment
 import android.support.v4.app.FragmentActivity
 import android.support.v4.content.ContextCompat
 import android.text.TextUtils
-import android.text.method.LinkMovementMethod
 import android.util.TypedValue
 import android.view.Gravity
 import android.view.View
@@ -311,7 +310,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 id = R.id.status
                 tag = fontSize
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
-                text = StatusUtil.generateUnderline(StatusUtil.getExpandedText(s))
+                setTextFromStatus(s, context)
 
             }.lparams {
                 rightOf(R.id.icon)
@@ -351,7 +350,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     textView {
                         id = R.id.quoted_status
                         textSize = 12f //sp
-                        text = qs.text
+                        setTextFromStatus(qs, context)
                     }.lparams {
                         below(R.id.quoted_display_name)
                     }
@@ -574,7 +573,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 }
             }
 
-            if (StatusUtil.isMentionForMe(s).not() && s.retweetedStatus == null) actionContainer.visibility = View.GONE
+            if (!s.isMentionForMe && s.retweetedStatus == null) actionContainer.visibility = View.GONE
         }
     }
 

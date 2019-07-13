@@ -1,17 +1,34 @@
 package net.slash_omega.juktaway.util
 
+import android.content.Context
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.method.LinkMovementMethod
+import android.text.style.ClickableSpan
 import android.text.style.URLSpan
 import android.text.style.UnderlineSpan
+import android.view.View
 import android.widget.TextView
+import jp.nephy.penicillin.extensions.models.firstIndex
+import jp.nephy.penicillin.extensions.models.lastIndex
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
+import jp.nephy.penicillin.models.UrlEntityModel
+import jp.nephy.penicillin.models.entities.MediaEntity
+import jp.nephy.penicillin.models.entities.StatusEntity
+import jp.nephy.penicillin.models.entities.URLEntity
+import net.slash_omega.juktaway.ProfileActivity
+import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
+import org.jetbrains.anko.startActivity
 import java.util.*
 import java.util.regex.Pattern
+import android.text.Layout
+import android.view.MotionEvent
+import android.text.Spannable
+import android.text.method.Touch
+
 
 val Status.videoUrl: String
     get() {
@@ -46,68 +63,77 @@ val Status.imageUrls: List<String>
         return imageUrls
     }
 
-val Status.expandedText: String
-    get () = text
-            .let { entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
-            .let { entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
+class MovementMethod : LinkMovementMethod() {
 
-fun TextView.setTextFromStatus(status: Status) {
-    movementMethod = LinkMovementMethod.getInstance()
+    override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
+        val action = event.action
+
+        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
+            var x = event.x.toInt()
+            var y = event.y.toInt()
+
+            x -= widget.totalPaddingLeft
+            y -= widget.totalPaddingTop
+
+            x += widget.scrollX
+            y += widget.scrollY
+
+            val layout = widget.layout
+            val line = layout.getLineForVertical(y)
+            val off = layout.getOffsetForHorizontal(line, x.toFloat())
+
+            if (off >= widget.text.length) {
+                // Return true so click won't be triggered in the leftover empty space
+                return true
+            }
+        }
+
+        return Touch.onTouchEvent(widget, buffer, event)
+    }
+}
+
+fun TextView.setTextFromStatus(status: Status, context: Context) {
+    movementMethod = MovementMethod()
     val str = status.text
-    val sb = SpannableStringBuilder().apply { append(str) }
+    var sb = SpannableStringBuilder().apply { append(str) }
 
-    val urlMatcher = StatusUtil.URL_PATTERN.matcher(str)
-    while (urlMatcher.find()) {
-        sb.setSpan(URLSpan(urlMatcher.group()), urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-
-    status.entities.urls.forEach { urlEntity ->
-        sb.setSpan(URLSpan(urlEntity.expandedUrl))
-    }
-
-
-    val mentionMatcher = StatusUtil.MENTION_PATTERN.matcher(str)
-    while (mentionMatcher.find()) {
-        us = UnderlineSpan()
-        sb.setSpan(us, mentionMatcher.start(), mentionMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-    }
-
-    val hashtagMatcher = StatusUtil.HASHTAG_PATTERN.matcher(str)
-    while (hashtagMatcher.find()) {
-        us = UnderlineSpan()
-        sb.setSpan(us, hashtagMatcher.start(), hashtagMatcher.end(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-    }
+    status.entities.let { e -> e.userMentions + e.media + e.hashtags + e.urls }
+            .sortedBy { it.firstIndex }
+            .fold(0) { gap, entity ->
+                val start = entity.firstIndex + gap
+                val end = entity.lastIndex + gap
+                when (entity) {
+                    is StatusEntity.UserMentionEntity -> {
+                        sb.setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        gap
+                    }
+                    is StatusEntity.HashtagEntity -> {
+                        sb.setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        gap
+                    }
+                    is MediaEntity -> {
+                        sb = sb.replace(start, end, entity.expandedUrl)
+                        sb.setSpan(UnderlineSpan(), start, start + entity.expandedUrl.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        gap + entity.expandedUrl.length - entity.url.length
+                    }
+                    is URLEntity -> {
+                        sb = sb.replace(start, end, entity.expandedUrl)
+                        sb.setSpan(UnderlineSpan(), start, start + entity.expandedUrl.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        gap + entity.expandedUrl.length - entity.url.length
+                    }
+                    else -> gap
+                }
+            }
 
     text = sb
 }
 
-object StatusUtil {
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+]+")
-    private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
-    @Suppress("SpellCheckingInspection")
-    private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
-
-    /**
-     * 自分宛てのメンションかどうかを判定する
-     *
-     * @param status ツイート
-     * @return true ... 自分宛てのメンション
-     */
-    fun isMentionForMe(status: Status): Boolean = currentIdentifier.userId.let { userId ->
-        status.inReplyToUserId == userId || status.entities.userMentions.any { it.id == userId }
+val Status.isMentionForMe: Boolean
+    get() = currentIdentifier.userId.let { userId ->
+        inReplyToUserId == userId || entities.userMentions.any { it.id == userId }
     }
 
-    /**
-     * 短縮URLを表示用URLに置換する
-     *
-     * @param status ツイート
-     * @return 短縮URLを展開したツイート本文
-     */
-    fun getExpandedText(status: Status): String
-            = status.text
-                    .let { status.entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
-                    .let { status.entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
-
+object StatusUtil {
     /**
      * ツイートに含まれる画像のURLをすべて取得する
      *
@@ -127,31 +153,5 @@ object StatusUtil {
         }
 
         return imageUrls
-    }
-
-    fun generateUnderline(str: String): SpannableStringBuilder {
-        // URL、メンション、ハッシュタグ が含まれていたら下線を付ける
-        val sb = SpannableStringBuilder().apply { append(str) }
-        var us: UnderlineSpan
-
-        val urlMatcher = URL_PATTERN.matcher(str)
-        while (urlMatcher.find()) {
-            sb.setSpan(URLSpan(urlMatcher.group()), urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-
-
-        val mentionMatcher = MENTION_PATTERN.matcher(str)
-        while (mentionMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, mentionMatcher.start(), mentionMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-
-        val hashtagMatcher = HASHTAG_PATTERN.matcher(str)
-        while (hashtagMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, hashtagMatcher.start(), hashtagMatcher.end(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-        }
-
-        return sb
     }
 }

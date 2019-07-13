@@ -19,6 +19,7 @@ dependencies {
     implementation 'com.romandanylyk:pageindicatorview:1.0.2@aar'
     implementation fileTree(include: '*.jar', dir: 'libs')
     implementation "jp.nephy:penicillin:$penicillin_version"
+    implementation 'me.saket:better-link-movement-method:2.2.0'
 }
 
 def properties = new Properties()

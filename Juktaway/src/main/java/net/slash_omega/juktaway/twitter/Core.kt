@@ -26,7 +26,7 @@ import java.util.concurrent.TimeUnit
  * Created on 2018/12/23.
  */
 
-lateinit var currentClient: ApiClient
+var currentClient: ApiClient = PenicillinClient {  }
     private set
 
 lateinit var currentIdentifier: Identifier

@@ -185,6 +185,7 @@ class SignInActivity: Activity(), CoroutineScope {
                     finish()
                 } catch (e: Exception) {
                     MessageUtil.dismissProgressDialog()
+                    e.printStackTrace()
                     toast(R.string.toast_sign_in_failure)
                 }
             }
@@ -207,6 +208,7 @@ class SignInActivity: Activity(), CoroutineScope {
                     isPinPublished = true
                     startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url.toString())))
                 } catch (e: PenicillinException) {
+                    e.printStackTrace()
                     toast(R.string.toast_sign_in_failure)
                 }
             }
