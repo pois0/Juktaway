@@ -123,8 +123,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     val isTop
         get() = mListView.firstVisiblePosition == 0
 
-    open var mSearchWord = ""
-
     private suspend fun load(loadType: LoadStatusesType) = withContext(Dispatchers.Main) {
         if (isLoading || !hasNext) return@withContext
         if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = true
