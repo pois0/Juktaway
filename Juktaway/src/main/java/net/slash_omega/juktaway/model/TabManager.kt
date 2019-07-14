@@ -9,7 +9,7 @@ import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import java.util.ArrayList
+import java.util.*
 
 const val HOME_TAB_ID = 0
 const val MENTION_TAB_ID = 1
@@ -105,6 +105,7 @@ private data class OldTabData(val tabs: ArrayList<OldTab>)
 @Serializable
 class OldTab(@Required var id: Long, var name: String = "")
 
+// Set autoReload not positive to disable auto reloading
 @Serializable
 data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Long) {
     override fun equals(other: Any?) = other is Tab && type == other.type && when (type) {

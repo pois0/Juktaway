@@ -21,7 +21,10 @@ import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
-import kotlinx.coroutines.*
+import kotlinx.coroutines.CoroutineScope
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.StatusActivity
@@ -43,6 +46,9 @@ import java.util.*
 
 class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapter<Status>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
     companion object {
+        private val grayColor = Color.parseColor("#666666")
+        private val lightGrayColor = Color.parseColor("#999999")
+
         class DestroyRetweetDialogFragment: DialogFragment() {
             override fun onCreateDialog(savedInstanceState: Bundle?)
                     = arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
@@ -87,6 +93,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     private val mIdSet = Collections.synchronizedSet(mutableSetOf<Long>())
 
     private val shouldShow get() = { status: Status -> status !in Mute && mIdSet.add(status.id) }
+    private val fontSize = preferences.display.general.fontSize.toFloat()
 
     suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
         val statuses = withContext(Dispatchers.Default) {
@@ -113,8 +120,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         }
 
         super.addAll(statuses)
-
-        // limitation()
     }
 
     override fun insert(status: Status, index: Int) {
@@ -127,7 +132,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         // limitation()
     }
 
-    suspend fun insertAllFromStatus(statusesParam: Collection<Status>, index: Int): Int = coroutineScope {
+    suspend fun insertAllFromStatus(statusesParam: Collection<Status>, index: Int): Int {
         setNotifyOnChange(false)
 
         var position = index
@@ -141,7 +146,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
         notifyDataSetChanged()
 
-        statuses.size
+        return statuses.size
     }
 
     override fun remove(status: Status) {
@@ -150,10 +155,9 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     }
 
     fun removeStatus(id: Long) {
-        (0 until count).mapNotNull { i ->
+        (0 until count).forEach { i ->
             getItem(i)!!.takeIf { it.id == id || it.retweetedStatus?.id == id }
-        }.forEach {
-            remove(it)
+                    ?.let{remove(it)}
         }
     }
 
@@ -176,7 +180,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     override fun getView(position: Int, convertView: View?, parent: ViewGroup): View = parent.context.run {
         val status = getItem(position)!!
         val s = status.retweetedStatus ?: status
-        val fontSize = preferences.display.general.fontSize.toFloat()
         relativeLayout {
             bottomPadding = dip(3)
             leftPadding = dip(6)
@@ -216,7 +219,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                 textView {
                     id = R.id.action_by_screen_name
-                    textColor = Color.parseColor("#666666")
+                    textColor = grayColor
                     textSize = 10f //sp
                     text = data.screenName
                 }.lparams(width = wrapContent, height = wrapContent) {
@@ -225,18 +228,26 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 }
             }.lparams(width = matchParent)
 
-            imageView {
-                id = R.id.icon
-                topPadding = dip(2)
-                contentDescription = resources.getString(R.string.description_icon)
-                setOnClickListener {
-                    startActivity(it.context.intentFor<ProfileActivity>("userJson" to s.user.toJsonString()))
-                }
+            if (preferences.display.tweet.shouldShowAuthorIcon) {
+                imageView {
+                    id = R.id.icon
+                    contentDescription = resources.getString(R.string.description_icon)
+                    setOnClickListener {
+                        startActivity(it.context.intentFor<ProfileActivity>("userJson" to s.user.toJsonString()))
+                    }
 
-                displayUserIcon(s.user)
-            }.run {
-                val iconSize = if (preferences.display.tweet.shouldShowAuthorIcon) 48 else 0
-                lparams(width = dip(iconSize), height = dip(iconSize)) {
+                    displayUserIcon(s.user)
+                }.lparams(width = dip(48), height = dip(48)) {
+                    below(R.id.action_container)
+                    bottomMargin = dip(6)
+                    rightMargin = dip(6)
+                    topMargin = dip(1)
+                }
+            } else {
+                space {
+                    id = R.id.icon
+                    topPadding = dip(2)
+                }.lparams(width = 0, height = 0) {
                     below(R.id.action_container)
                     bottomMargin = dip(6)
                     rightMargin = dip(6)
@@ -257,7 +268,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
             textView {
                 id = R.id.screen_name
-                textColor = Color.parseColor("#666666")
+                textColor = grayColor
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize - 2)
                 text = "@" + s.user.screenName
                 lines = 1
@@ -273,7 +284,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 imageView {
                     id = R.id.lock
                     setImageResource(R.drawable.ic_lock)
-                    setColorFilter(Color.parseColor("#666666"))
+                    setColorFilter(grayColor)
                 }.lparams(width = dip(10), height = dip(10)) {
                     endOf(R.id.screen_name)
                     sameBottom(R.id.screen_name)
@@ -287,7 +298,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 imageView {
                     id = R.id.verified
                     setImageResource(R.drawable.ic_verified)
-                    setColorFilter(Color.parseColor("#666666"))
+                    setColorFilter(grayColor)
                 }.lparams(width = dip(10), height = dip(10)) {
                     endOf(nameEnd)
                     sameBottom(R.id.screen_name)
@@ -298,7 +309,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
             textView {
                 id = R.id.datetime_relative
-                textColor = Color.parseColor("#666666")
+                textColor = grayColor
                 setTextSize(TypedValue.COMPLEX_UNIT_SP,fontSize - 2)
                 text = TimeUtil.getRelativeTime(s.createdAt.date)
             }.lparams {
@@ -311,7 +322,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 tag = fontSize
                 setTextSize(TypedValue.COMPLEX_UNIT_SP, fontSize)
                 setTextFromStatus(s, context)
-
             }.lparams {
                 rightOf(R.id.icon)
                 below(R.id.display_name)
@@ -336,7 +346,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                     textView {
                         id = R.id.quoted_screen_name
-                        textColor = Color.parseColor("#666666")
+                        textColor = grayColor
                         textSize = 10f //sp
                         text = "@" + qs.user.screenName
                         lines = 1
@@ -367,7 +377,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                             val play = fontelloTextView {
                                 id = R.id.quoted_play
                                 text = resources.getString(R.string.fontello_play)
-                                textColor = Color.parseColor("#ffffff")
+                                textColor = Color.WHITE
                                 textSize = 24f //sp
                             }.lparams {
                                 gravity = Gravity.CENTER
@@ -408,7 +418,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     val play = fontelloTextView {
                         id = R.id.play
                         text = resources.getString(R.string.fontello_play)
-                        textColor = Color.parseColor("#ffffff")
+                        textColor = Color.WHITE
                         textSize = 24f //sp
                     }.lparams {
                         gravity = Gravity.CENTER
@@ -431,7 +441,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     id = R.id.do_reply
                     padding = dip(6)
                     text = resources.getString(R.string.fontello_reply)
-                    textColor = Color.parseColor("#666666")
+                    textColor = grayColor
                     textSize = 14f
                     setOnClickListener {
                         ActionUtil.doReplyAll(s, fragmentActivity)
@@ -446,7 +456,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     leftPadding = dip(6)
                     text = resources.getString(R.string.fontello_retweet)
                     textColor = if (s.isRetweeted()) ContextCompat.getColor(fragmentActivity, R.color.holo_green_light)
-                            else Color.parseColor("#666666")
+                            else grayColor
                     textSize = 14f
                     setOnClickListener {
                         if (s.user.protected && s.user.id != currentIdentifier.userId) {
@@ -475,7 +485,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     if (s.retweetCount > 0) {
                         bottomPadding = dip(6)
                         topPadding = dip(6)
-                        textColor = Color.parseColor("#999999")
+                        textColor = lightGrayColor
                         text = s.retweetCount.omitCount()
                     }
                 }.lparams(width = dip(32)) {
@@ -489,19 +499,11 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     bottomPadding = dip(6)
                     leftPadding = dip(2)
                     text = resources.getString(R.string.fontello_star)
-                    textColor = if (s.isFavorited()) {
-                        ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light)
-                    } else {
-                        Color.parseColor("#666666")
-                    }
+                    textColor = if (s.isFavorited()) ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light) else grayColor
                     textSize = 14f
                     setOnClickListener {
                         launch {
-                            if (s.isFavorited()) {
-                                s.unfavorite()
-                            } else {
-                                s.favorite()
-                            }
+                            if (s.isFavorited()) s.unfavorite() else s.favorite()
                         }
                     }
                 }.lparams {
@@ -514,7 +516,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     if (s.favoriteCount > 0) {
                         bottomPadding = dip(6)
                         topPadding = dip(6)
-                        textColor = Color.parseColor("#999999")
+                        textColor = lightGrayColor
                         text = s.favoriteCount.omitCount()
                     }
                 }.lparams {
@@ -524,7 +526,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 textView {
                     id = R.id.via
                     bottomPadding = dip(2)
-                    textColor = Color.parseColor("#666666")
+                    textColor = grayColor
                     textSize = 8f //sp
                     text = "via ${s.via.name}"
                 }.lparams {
@@ -533,7 +535,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                 textView {
                     id = R.id.datetime
-                    textColor = Color.parseColor("#666666")
+                    textColor = grayColor
                     textSize = 10f //sp
                     text = s.createdAtString
                 }.lparams {
@@ -560,7 +562,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     textView {
                         id = R.id.retweet_by
                         textSize = 10f //sp
-                        text = "RT by ${status.user.name} @ ${status.user.screenName}"
+                        text = "RT by ${status.user.name} @${status.user.screenName}"
                     }.lparams {
                         rightOf(R.id.retweet_icon)
                         topMargin = dip(2)

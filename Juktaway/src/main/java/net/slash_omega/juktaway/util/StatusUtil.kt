@@ -3,7 +3,6 @@ package net.slash_omega.juktaway.util
 import android.content.Context
 import android.text.SpannableStringBuilder
 import android.text.Spanned
-import android.text.method.LinkMovementMethod
 import android.text.style.UnderlineSpan
 import android.widget.TextView
 import jp.nephy.penicillin.extensions.models.firstIndex
@@ -16,9 +15,6 @@ import jp.nephy.penicillin.models.entities.URLEntity
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import java.util.*
-import android.view.MotionEvent
-import android.text.Spannable
-import android.text.method.Touch
 
 
 val Status.videoUrl: String
@@ -49,42 +45,12 @@ val Status.imageUrls: List<String>
             }
         }
 
-        entities.media.takeNotEmpty()?.map { it.mediaUrl }?.forEach { imageUrls.add(it) }
+        entities.media.takeNotEmpty()?.map { it.mediaUrl }?.let{ imageUrls.addAll(it) }
 
         return imageUrls
     }
 
-class MovementMethod : LinkMovementMethod() {
-
-    override fun onTouchEvent(widget: TextView, buffer: Spannable, event: MotionEvent): Boolean {
-        val action = event.action
-
-        if (action == MotionEvent.ACTION_UP || action == MotionEvent.ACTION_DOWN) {
-            var x = event.x.toInt()
-            var y = event.y.toInt()
-
-            x -= widget.totalPaddingLeft
-            y -= widget.totalPaddingTop
-
-            x += widget.scrollX
-            y += widget.scrollY
-
-            val layout = widget.layout
-            val line = layout.getLineForVertical(y)
-            val off = layout.getOffsetForHorizontal(line, x.toFloat())
-
-            if (off >= widget.text.length) {
-                // Return true so click won't be triggered in the leftover empty space
-                return true
-            }
-        }
-
-        return Touch.onTouchEvent(widget, buffer, event)
-    }
-}
-
 fun TextView.setTextFromStatus(status: Status, context: Context) {
-    movementMethod = MovementMethod()
     val str = status.text
     var sb = SpannableStringBuilder().apply { append(str) }
 

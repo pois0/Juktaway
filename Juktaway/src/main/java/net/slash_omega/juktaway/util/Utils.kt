@@ -21,8 +21,6 @@ fun CharSequence?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
 
 fun String?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
 
-fun <T> Array<out T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
-
 fun <T> Collection<T>?.takeNotEmpty() = this.takeUnless { it.isNullOrEmpty() }
 
 fun Status.generateJsonBundle(capacity: Int = 1) = Bundle(capacity).apply {

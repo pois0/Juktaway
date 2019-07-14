@@ -19,11 +19,11 @@ import android.widget.EditText
 import android.widget.ListView
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.TwitterList
-import net.slash_omega.juktaway.util.ThemeUtil
 import kotlinx.android.synthetic.main.activity_tab_settings.*
 import kotlinx.android.synthetic.main.dialog_tab_interval.view.*
 import kotlinx.android.synthetic.main.row_tag.view.*
 import net.slash_omega.juktaway.model.*
+import net.slash_omega.juktaway.util.ThemeUtil
 import net.slash_omega.juktaway.util.parseWithClient
 import org.jetbrains.anko.bundleOf
 import org.jetbrains.anko.sdk27.coroutines.onClick
@@ -279,13 +279,13 @@ class AutoLoadDialog: DialogFragment() {
         isChecked = intervalArg?.let { it > 0 } ?: false
 
         intervalView.also {
-            val isChecked = enableView.isChecked
             it.isClickable = isChecked
             it.isFocusable = isChecked
             it.isFocusableInTouchMode = isChecked
         }
 
         enableView.setOnCheckedChangeListener { _, isChecked ->
+            intervalValue = -1
             intervalView.also {
                 it.isClickable = isChecked
                 it.isFocusable = isChecked
