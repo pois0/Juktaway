@@ -6,12 +6,11 @@ import android.text.Spanned
 import android.text.style.UnderlineSpan
 import android.widget.TextView
 import jp.nephy.penicillin.extensions.models.firstIndex
-import jp.nephy.penicillin.extensions.models.lastIndex
+import jp.nephy.penicillin.extensions.models.size
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
-import jp.nephy.penicillin.models.entities.MediaEntity
+import jp.nephy.penicillin.models.UrlEntityModel
 import jp.nephy.penicillin.models.entities.StatusEntity
-import jp.nephy.penicillin.models.entities.URLEntity
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import java.util.*
@@ -52,34 +51,36 @@ val Status.imageUrls: List<String>
 
 fun TextView.setTextFromStatus(status: Status, context: Context) {
     val str = status.text
-    var sb = SpannableStringBuilder().apply { append(str) }
+    val sb = SpannableStringBuilder()
 
-    status.entities.let { e -> e.userMentions + e.media + e.hashtags + e.urls }
+    status.entities.run { userMentions + hashtags + urls + media }
             .sortedBy { it.firstIndex }
-            .fold(0) { gap, entity ->
-                val start = entity.firstIndex + gap
-                val end = entity.lastIndex + gap
+            .fold(0) { acc, entity ->
                 when (entity) {
                     is StatusEntity.UserMentionEntity -> {
-                        sb.setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        gap
+                        val userMention = "@" + entity.screenName
+                        val start = str.indexOf(userMention, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(userMention, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size + 1 // TODO
                     }
                     is StatusEntity.HashtagEntity -> {
-                        sb.setSpan(UnderlineSpan(), start, end, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        gap
+                        val hashtag = "#" + entity.text
+                        val start = str.indexOf(hashtag, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(hashtag, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size + 1 // TODO
                     }
-                    is MediaEntity -> {
-                        sb = sb.replace(start, end, entity.expandedUrl)
-                        sb.setSpan(UnderlineSpan(), start, start + entity.expandedUrl.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        gap + entity.expandedUrl.length - entity.url.length
+                    else -> {
+                        entity as UrlEntityModel
+                        val start = str.indexOf(entity.url, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(entity.expandedUrl, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.url.length
                     }
-                    is URLEntity -> {
-                        sb = sb.replace(start, end, entity.expandedUrl)
-                        sb.setSpan(UnderlineSpan(), start, start + entity.expandedUrl.length, Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                        gap + entity.expandedUrl.length - entity.url.length
-                    }
-                    else -> gap
                 }
+            }.let {
+                sb.append(str.substring(it))
             }
 
     text = sb
