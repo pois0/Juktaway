@@ -47,6 +47,7 @@ import java.util.*
 class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapter<Status>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
     companion object {
         private val grayColor = Color.parseColor("#666666")
+        private val darkGrayColor = Color.parseColor("#444444")
         private val lightGrayColor = Color.parseColor("#999999")
 
         class DestroyRetweetDialogFragment: DialogFragment() {
@@ -87,6 +88,9 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
             } ?: throw IllegalStateException()
         }
     }
+
+    private val greenColor = ContextCompat.getColor(fragmentActivity, R.color.holo_green_light)
+    private val orangeColor = ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light)
 
     private val limit = 100
     private var mLimit = limit
@@ -437,27 +441,26 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
             relativeLayout {
                 id = R.id.menu_and_via_container
 
-                fontelloTextView {
+                imageView(R.drawable.ic_reply) {
                     id = R.id.do_reply
                     padding = dip(6)
-                    text = resources.getString(R.string.fontello_reply)
-                    textColor = grayColor
-                    textSize = 14f
+                    setColorFilter(grayColor)
                     setOnClickListener {
                         ActionUtil.doReplyAll(s, fragmentActivity)
                     }
-                }
+                }.lparams(width = dip(28), height = dip(28))
 
-                fontelloTextView {
+                imageView(R.drawable.ic_retweet) {
                     id = R.id.do_retweet
                     topPadding = dip(6)
-                    rightPadding = dip(4)
+                    rightPadding = dip(3)
                     bottomPadding = dip(6)
-                    leftPadding = dip(6)
-                    text = resources.getString(R.string.fontello_retweet)
-                    textColor = if (s.isRetweeted()) ContextCompat.getColor(fragmentActivity, R.color.holo_green_light)
-                            else grayColor
-                    textSize = 14f
+                    leftPadding = dip(9)
+                    setColorFilter(when {
+                        s.isRetweeted() -> greenColor
+                        s.user.protected && s.user.id != currentIdentifier.userId -> darkGrayColor
+                        else -> grayColor
+                    })
                     setOnClickListener {
                         if (s.user.protected && s.user.id != currentIdentifier.userId) {
                             MessageUtil.showToast(R.string.toast_protected_tweet_can_not_share)
@@ -474,7 +477,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                             }
                         }).show(fragmentActivity.supportFragmentManager, "dialog")
                     }
-                }.lparams {
+                }.lparams(width = dip(28), height = dip(28)) {
                     rightOf(R.id.do_reply)
                     leftMargin = dip(22)
                 }
@@ -484,7 +487,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     textSize = 10f
                     if (s.retweetCount > 0) {
                         bottomPadding = dip(6)
-                        topPadding = dip(6)
+                        topPadding = dip(7)
                         textColor = lightGrayColor
                         text = s.retweetCount.omitCount()
                     }
@@ -492,21 +495,19 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     rightOf(R.id.do_retweet)
                 }
 
-                fontelloTextView {
+                imageView(R.drawable.ic_star) {
                     id = R.id.do_fav
                     topPadding = dip(6)
                     rightPadding = dip(4)
+                    leftPadding = dip(8)
                     bottomPadding = dip(6)
-                    leftPadding = dip(2)
-                    text = resources.getString(R.string.fontello_star)
-                    textColor = if (s.isFavorited()) ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light) else grayColor
-                    textSize = 14f
+                    setColorFilter(if (s.isFavorited()) orangeColor else grayColor)
                     setOnClickListener {
                         launch {
                             if (s.isFavorited()) s.unfavorite() else s.favorite()
                         }
                     }
-                }.lparams {
+                }.lparams(width = dip(28), height = dip(28)) {
                     rightOf(R.id.retweet_count)
                 }
 
@@ -515,7 +516,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     textSize = 10f
                     if (s.favoriteCount > 0) {
                         bottomPadding = dip(6)
-                        topPadding = dip(6)
+                        topPadding = dip(7)
                         textColor = lightGrayColor
                         text = s.favoriteCount.omitCount()
                     }
