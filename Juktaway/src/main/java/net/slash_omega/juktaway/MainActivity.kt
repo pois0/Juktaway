@@ -54,6 +54,8 @@ import java.util.regex.Pattern
 
 class MainActivity: ScopedFragmentActivity() {
     companion object {
+        private val darkGrayColor = Color.parseColor("#444444")
+        private val grayColor = Color.parseColor("#666666")
         private const val REQUEST_ACCOUNT_SETTING = 200
         private const val REQUEST_SETTINGS = 300
         private const val REQUEST_TAB_SETTINGS = 400
@@ -485,6 +487,13 @@ class MainActivity: ScopedFragmentActivity() {
                 text = length.toString()
             }
             send_button.isEnabled = !(length < 0 || cs.toString().isEmpty())
+            if (length >= 0 && cs.toString().isNotEmpty()) {
+                send_button.isEnabled = true
+                send_button.setColorFilter(grayColor)
+            } else {
+                send_button.isEnabled = false
+                send_button.setColorFilter(darkGrayColor)
+            }
         }
 
         override fun afterTextChanged(p0: Editable?) {}
