@@ -90,26 +90,3 @@ val Status.isMentionForMe: Boolean
     get() = currentIdentifier.userId.let { userId ->
         inReplyToUserId == userId || entities.userMentions.any { it.id == userId }
     }
-
-object StatusUtil {
-    /**
-     * ツイートに含まれる画像のURLをすべて取得する
-     *
-     * @param status ツイート
-     * @return 画像のURL
-     */
-    fun getImageUrls(status: Status): List<String> {
-        val imageUrls = status.extendedEntities?.media.takeNotEmpty()?.map { it.mediaUrl }?.toMutableList() ?: mutableListOf()
-        status.entities.urls.map { it.expandedUrl }.forEach { url ->
-            for (set in ImageUrlTransformer.list) {
-                val matcher = set.pattern.matcher(url)
-                if (matcher.find()) {
-                    imageUrls.add(set.urlGenerator(url, matcher))
-                    break
-                }
-            }
-        }
-
-        return imageUrls
-    }
-}

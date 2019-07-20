@@ -13,7 +13,7 @@ import jp.nephy.penicillin.endpoints.statuses.show
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.activity_video.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil

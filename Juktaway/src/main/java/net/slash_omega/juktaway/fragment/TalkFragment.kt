@@ -49,14 +49,12 @@ class TalkFragment: DialogFragment(), CoroutineScope {
     private val mOnScrollListener = object: AbsListView.OnScrollListener {
         override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {}
         override fun onScrollStateChanged(p0: AbsListView?, scrollState: Int) {
-            when (scrollState) {
-                AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
-                    if (mListView.firstVisiblePosition > 0) {
-                        mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
-                    }
-                    if (mListView.lastVisiblePosition <= mAdapter.count) {
-                        mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
-                    }
+            if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                if (mListView.firstVisiblePosition > 0) {
+                    mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
+                }
+                if (mListView.lastVisiblePosition <= mAdapter.count) {
+                    mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                 }
             }
         }
@@ -72,8 +70,15 @@ class TalkFragment: DialogFragment(), CoroutineScope {
 
         arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { status ->
             val inReplyToAreaPixels = if (status.inReplyToStatusId != null) resources.displayMetrics.heightPixels else 0
-            val (headerH, footerH) = if (preferences.display.tweet.isTalkSortedByNewest) Pair(100, inReplyToAreaPixels)
-            else Pair(inReplyToAreaPixels, 100)
+            val headerH: Int
+            val footerH: Int
+            if (preferences.display.tweet.isTalkSortedByNewest) {
+                headerH = 100
+                footerH = inReplyToAreaPixels
+            } else {
+                headerH = inReplyToAreaPixels
+                footerH = 100
+            }
             mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, headerH)
             mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, footerH)
 

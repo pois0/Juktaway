@@ -88,7 +88,7 @@ object ImageUtil {
     }
 
     fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: TextView, status: Status) {
-        StatusUtil.getImageUrls(status).takeNotEmpty()?.let { imageUrls ->
+        status.imageUrls.takeNotEmpty()?.let { imageUrls ->
             group.removeAllViews()
             imageUrls.forEachIndexed { i, url ->
                 val image = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }

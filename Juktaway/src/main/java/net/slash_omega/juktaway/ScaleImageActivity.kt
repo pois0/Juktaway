@@ -27,7 +27,7 @@ import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.fragment.ScaleImageFragment
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
-import net.slash_omega.juktaway.util.StatusUtil
+import net.slash_omega.juktaway.util.imageUrls
 import net.slash_omega.juktaway.util.parseWithClient
 import net.slash_omega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
@@ -136,7 +136,7 @@ class ScaleImageActivity: ScopedFragmentActivity() {
     }
 
     private fun showStatus(status: Status, index: Int) {
-        val urls = StatusUtil.getImageUrls(status)
+        val urls = status.imageUrls
         if (urls.size == 1) symbol.visibility = View.GONE
         for (url in urls) {
             imageUrls.add(url)
