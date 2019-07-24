@@ -294,4 +294,6 @@
     <string name="dialog_text_enable_autoloading">Enable auto loading</string>
     <string name="dialog_tab_hint">milliseconds</string>
     <string name="dialog_text_tab_interval">Interval(ms)</string>
+    <string name="description_remove_user">Remove a user</string>
+    <string name="description_toggle_profile">Toggle visibility of user profile</string>
 </resources>

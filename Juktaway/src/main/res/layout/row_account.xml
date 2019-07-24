@@ -23,15 +23,12 @@
         android:layout_gravity="center"
         android:textSize="18sp"/>
 
-    <net.slash_omega.juktaway.widget.FontelloButton
+    <ImageView
         android:id="@+id/trash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
+        android:layout_height="24dp"
+        android:layout_width="40dp"
         android:layout_gravity="center"
-        android:padding="12dp"
-        android:background="@drawable/button_stateful_transparent"
-        android:text="@string/fontello_trash"
-        android:textColor="#666666"
-        android:textSize="24sp"/>
-
+        android:src="@drawable/ic_remove_circle"
+        android:tint="#666666"
+        android:contentDescription="@string/description_remove_user" />
 </LinearLayout>

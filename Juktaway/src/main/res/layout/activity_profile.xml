@@ -1,38 +1,38 @@
 <?xml version="1.0" encoding="utf-8"?>
 <LinearLayout xmlns:android="http://schemas.android.com/apk/res/android"
-              xmlns:tools="http://schemas.android.com/tools"
-              android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
-              android:orientation="vertical"
-              android:layout_width="match_parent">
+          xmlns:tools="http://schemas.android.com/tools"
+          android:layout_height="match_parent" xmlns:app="http://schemas.android.com/apk/res-auto"
+          android:orientation="vertical"
+          android:layout_width="match_parent">
 
     <FrameLayout
-        android:id="@+id/frame"
-        android:layout_width="match_parent"
-        android:layout_height="wrap_content">
+            android:id="@+id/frame"
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content">
 
         <ImageView
-            android:id="@+id/banner"
-            android:layout_width="match_parent"
-            android:layout_height="180dp"
-            android:adjustViewBounds="true"
-            android:contentDescription="@string/description_icon"
-            android:scaleType="fitXY"/>
+                android:id="@+id/banner"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"
+                android:adjustViewBounds="true"
+                android:contentDescription="@string/description_icon"
+                android:scaleType="fitXY"/>
 
         <android.support.v4.view.ViewPager
-            android:id="@+id/pager"
-            android:layout_width="match_parent"
-            android:layout_height="180dp"/>
+                android:id="@+id/pager"
+                android:layout_width="match_parent"
+                android:layout_height="180dp"/>
 
         <com.rd.PageIndicatorView
-            android:id="@+id/symbol"
-            android:layout_width="wrap_content"
-            android:layout_gravity="bottom|center"
-            android:layout_height="wrap_content"
-            android:padding="10dp"
-            app:piv_animationType="slide"
-            app:piv_dynamicCount="true"
-            app:piv_interactiveAnimation="true"
-            app:piv_radius="6dp"/>
+                android:id="@+id/symbol"
+                android:layout_width="wrap_content"
+                android:layout_gravity="bottom|center"
+                android:layout_height="wrap_content"
+                android:padding="10dp"
+                app:piv_animationType="slide"
+                app:piv_dynamicCount="true"
+                app:piv_interactiveAnimation="true"
+                app:piv_radius="6dp"/>
     </FrameLayout>
 
     <LinearLayout
@@ -95,15 +95,15 @@
             tools:text="1234567\nFAVOURITES"
             tools:ignore="SpUsage"/>
 
-        <net.slash_omega.juktaway.widget.FontelloTextView
-            android:id="@+id/collapse_label"
-            android:layout_width="36dp"
-            android:layout_height="match_parent"
-            android:gravity="center"
-            android:textSize="18sp"
-            tools:textColor="@android:color/background_dark"
-            android:textColor="?attr/holo_blue"
-            android:text="@string/fontello_up"/>
+        <ImageView
+                android:id="@+id/collapse_image"
+                android:src="@drawable/ic_keyboard_arrow_up"
+                android:layout_width="40dp"
+                android:layout_height="wrap_content"
+                android:layout_gravity="center"
+                android:tint="?attr/holo_blue"
+                android:contentDescription="@string/description_toggle_profile"
+        />
     </LinearLayout>
 
     <android.support.v4.view.ViewPager

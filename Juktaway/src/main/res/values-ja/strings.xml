@@ -282,4 +282,10 @@
     <string name="pref_title_about_official_account">公式アカウントの表示</string>
     <string name="pref_title_about_material_icon">Material Design Iconsのライセンス</string>
     <string name="pref_description_about_material_icon">このアプリはGoogleのMaterial Desing Iconsを使用しています</string>
+    <string name="dialog_title_tab_interval">自動更新の設定</string>
+    <string name="dialog_text_enable_autoloading">自動更新を有効にする</string>
+    <string name="dialog_tab_hint">ミリ秒</string>
+    <string name="dialog_text_tab_interval">インターバル(ms)</string>
+    <string name="description_remove_user">ユーザを削除する</string>
+    <string name="description_toggle_profile">ユーザープロフィールの表示を切り替える</string>
 </resources>

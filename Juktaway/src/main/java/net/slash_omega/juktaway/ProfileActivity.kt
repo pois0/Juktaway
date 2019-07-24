@@ -33,7 +33,9 @@ import jp.nephy.penicillin.extensions.models.profileBannerUrlWithVariantSize
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.fragment.profile.*
@@ -69,14 +71,14 @@ class ProfileActivity: ScopedFragmentActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        collapse_label.setOnClickListener {
+        collapse_image.setOnClickListener {
             with (frame) {
                 if (visibility == View.VISIBLE) {
                     visibility = View.GONE
-                    collapse_label.setText(R.string.fontello_down)
+                    collapse_image.setImageResource(R.drawable.ic_keyboard_arrow_down)
                 } else {
                     visibility = View.VISIBLE
-                    collapse_label.setText(R.string.fontello_up)
+                    collapse_image.setImageResource(R.drawable.ic_keyboard_arrow_up)
                 }
             }
         }

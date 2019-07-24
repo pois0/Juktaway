@@ -41,22 +41,25 @@
                 android:id="@+id/count"
                 android:layout_width="wrap_content"
                 android:layout_height="wrap_content"
+                android:layout_gravity="center"
                 android:layout_marginLeft="8dp"
                 android:textColor="?attr/menu_text_color_disabled"
                 android:text="@string/label_tweet_count"
                 tools:textColor="@android:color/white"/>
 
-            <net.slash_omega.juktaway.widget.FontelloButton
-                android:id="@+id/send_button"
-                android:layout_width="42dp"
-                android:layout_height="wrap_content"
-                android:layout_marginRight="8dp"
-                android:background="?attr/button_stateful"
-                android:text="@string/fontello_paper"
-                android:textSize="22sp"
-                android:enabled="false"
-                tools:background="@drawable/button_stateful"/>
+            <ImageButton
+                    android:id="@+id/send_button"
+                    android:src="@drawable/ic_send"
+                    android:layout_width="48dp"
+                    android:layout_height="wrap_content"
+                    android:layout_gravity="center"
+                    android:layout_marginEnd="4dp"
+                    android:background="?attr/button_stateful"
+                    android:clickable="false"
+                    android:tint="#333333"
+                    tools:background="@drawable/button_stateful"
 
+            />
         </LinearLayout>
 
         <TableLayout
