@@ -47,12 +47,12 @@ project.ext {
     // CIサーバなどでは -PdisablePreDex をつける。 preDexが省略されてビルドが速くなる
     preDexLibs = !project.hasProperty('disablePreDex')
 
-    kotlin_coroutines_version = '1.2.1'
+    kotlin_coroutines_version = '1.2.2'
     android_support_version = "28.0.3"
     anko_version = '0.10.8'
-    ktor_version = '1.2.1'
+    ktor_version = '1.2.3-rc'
     kotlin_serialization_version = '0.10.0'
-    penicillin_version = '4.2.3-eap-20'
+    penicillin_version = '4.2.3-eap-35'
 }
 
 task wrapper(type: Wrapper) {
