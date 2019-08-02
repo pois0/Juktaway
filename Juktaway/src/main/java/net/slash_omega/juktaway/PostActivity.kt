@@ -187,6 +187,7 @@ class PostActivity: ScopedFragmentActivity() {
                 // 直近のと一緒なら保存しない
                 with (mTextHistory) {
                     s?.let { if (isEmpty() || it.toString() != mTextHistory[size-1]) add(it.toString()) }
+                    undo.setColorFilter(Color.parseColor("#666666"))
                     undo.isEnabled = isNotEmpty()
                 }
             }

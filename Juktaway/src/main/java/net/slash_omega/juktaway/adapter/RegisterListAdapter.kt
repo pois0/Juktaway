@@ -64,5 +64,6 @@ class RegisterListAdapter(private val c: ScopedFragmentActivity, id: Int, userId
                     }
                 }
             }
+            trash.visibility = View.GONE
         }
 }

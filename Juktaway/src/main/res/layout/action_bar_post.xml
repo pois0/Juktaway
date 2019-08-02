@@ -11,18 +11,21 @@
         android:layout_width="0dp"
         android:layout_height="wrap_content"
         android:layout_weight="1"
+        android:layout_gravity="center"
         android:textSize="20dp"
         android:textColor="?attr/text_color"
         tools:text="Home"
         tools:ignore="SpUsage"/>
 
-    <net.slash_omega.juktaway.widget.FontelloButton
+    <ImageView
         android:id="@+id/undo"
         android:layout_width="58dp"
         android:layout_height="wrap_content"
-        android:text="@string/fontello_undo"
+        android:layout_gravity="center"
+        android:src="@drawable/ic_undo"
         android:enabled="false"
         android:background="@drawable/action_bar_stateful"
-        tools:paddingBottom="0dp"/>
+
+        tools:paddingBottom="0dp" />
 
 </LinearLayout>

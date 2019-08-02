@@ -155,14 +155,14 @@
                     android:gravity="center"
                     android:text="@string/label_tweet_count"/>
 
-                <net.slash_omega.juktaway.widget.FontelloButton
-                    android:id="@+id/tweet_button"
-                    android:layout_width="42dp"
-                    android:layout_height="wrap_content"
-                    tools:background="@android:color/background_dark"
-                    android:background="?attr/button_stateful"
-                    android:text="@string/fontello_paper"
-                    android:textSize="22sp"/>
+                <ImageButton
+                        android:id="@+id/tweet_button"
+                        android:layout_width="64dp"
+                        android:layout_height="48dp"
+                        android:layout_gravity="center"
+                        android:tint="#666666"
+                        android:src="@drawable/ic_send"
+                        android:background="?attr/button_stateful" />
             </LinearLayout>
         </LinearLayout>
     </LinearLayout>
