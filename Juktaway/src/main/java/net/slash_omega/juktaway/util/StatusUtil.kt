@@ -13,7 +13,6 @@ import jp.nephy.penicillin.models.UrlEntityModel
 import jp.nephy.penicillin.models.entities.StatusEntity
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import java.util.*
 
 
 val Status.videoUrl: String
@@ -33,18 +32,15 @@ val Status.videoUrl: String
 
 val Status.imageUrls: List<String>
     get() {
-        val imageUrls = ArrayList<String>()
+        val imageUrls = extendedEntities?.media.takeNotEmpty()?.map { it.mediaUrl }?.toMutableList() ?: mutableListOf()
         entities.urls.map { it.expandedUrl }.forEach { url ->
             for (set in ImageUrlTransformer.list) {
                 val matcher = set.pattern.matcher(url)
                 if (matcher.find()) {
                     imageUrls.add(set.urlGenerator(url, matcher))
-                    continue
                 }
             }
         }
-
-        entities.media.takeNotEmpty()?.map { it.mediaUrl }?.let{ imageUrls.addAll(it) }
 
         return imageUrls
     }
@@ -53,42 +49,37 @@ fun TextView.setTextFromStatus(status: Status, context: Context) {
     val str = status.text
     val sb = SpannableStringBuilder()
 
-    runCatching {
-        status.entities.run { userMentions + hashtags + urls + media }
-                .sortedBy { it.firstIndex }
-                .fold(0) { acc, entity ->
-                    when (entity) {
-                        is StatusEntity.UserMentionEntity -> {
-                            val userMention = "@" + entity.screenName
-                            val start = str.indexOf(userMention, acc, true).takeUnless { it < 0 } ?: return@fold acc
-                            sb.append(str.substring(acc, start))
-                            sb.append(userMention, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                            start + entity.size + 1 // TODO
-                        }
-                        is StatusEntity.HashtagEntity -> {
-                            val hashtag = "#" + entity.text
-                            val start = str.indexOf(hashtag, acc, true).takeUnless { it < 0 } ?: return@fold acc
-                            sb.append(str.substring(acc, start))
-                            sb.append(hashtag, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                            start + entity.size + 1 // TODO
-                        }
-                        else -> {
-                            entity as UrlEntityModel
-                            val start = str.indexOf(entity.url, acc, true).takeUnless { it < 0 } ?: return@fold acc
-                            sb.append(str.substring(acc, start))
-                            sb.append(entity.expandedUrl, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-                            start + entity.url.length
-                        }
+    status.entities.run { userMentions + hashtags + urls + media }
+            .sortedBy { it.firstIndex }
+            .fold(0) { acc, entity ->
+                when (entity) {
+                    is StatusEntity.UserMentionEntity -> {
+                        val userMention = "@" + entity.screenName
+                        val start = str.indexOf(userMention, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(userMention, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size
                     }
-                }.let {
-                    sb.append(str.substring(it))
+                    is StatusEntity.HashtagEntity -> {
+                        val hashtag = "#" + entity.text
+                        val start = str.indexOf(hashtag, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(hashtag, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size
+                    }
+                    else -> {
+                        entity as UrlEntityModel
+                        val start = str.indexOf(entity.url, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(entity.expandedUrl, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.url.length
+                    }
                 }
+            }.let {
+                sb.append(str.substring(it))
+            }
 
-    }.onSuccess {
-        text = sb
-    }.onFailure {
-        text = str
-    }
+    text = sb
 }
 
 val Status.isMentionForMe: Boolean

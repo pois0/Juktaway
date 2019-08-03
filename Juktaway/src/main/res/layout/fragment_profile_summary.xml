@@ -38,20 +38,17 @@
                 android:textSize="23sp"
                 tools:text="Justaway"/>
 
-            <net.slash_omega.juktaway.widget.FontelloTextView
+            <ImageView
                 android:id="@+id/lock"
-                android:layout_width="wrap_content"
-                android:layout_height="wrap_content"
+                android:layout_width="20dp"
+                android:layout_height="20dp"
                 android:layout_gravity="center"
                 android:shadowColor="@android:color/black"
-                android:shadowDx="3.0"
-                android:shadowDy="3.0"
-                android:shadowRadius="10.0"
-                android:textColor="@android:color/white"
-                android:textSize="20sp"
+                android:tint="@android:color/white"
+                android:background="#666666"
                 android:layout_marginTop="3dp"
-                android:layout_marginLeft="6dp"
-                android:text="@string/fontello_lock"/>
+                android:layout_marginStart="6dp"
+                android:src="@drawable/ic_lock" />
         </LinearLayout>
 
         <TextView

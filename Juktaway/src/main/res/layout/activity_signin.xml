@@ -52,13 +52,16 @@
             android:inputType="numberDecimal"
             android:ems="10"
             android:maxLength="7"
-            android:id="@+id/pin_code" android:hint="PIN Code" android:singleLine="true"/>
-    <net.slash_omega.juktaway.widget.FontelloButton
+            android:id="@+id/pin_code"
+            android:hint="PIN Code"
+            android:singleLine="true"/>
+    <ImageButton
             android:id="@+id/start_oauth_button"
             android:layout_width="128dp"
             android:layout_height="128dp"
-            android:textSize="64sp"
-            android:text="@string/fontello_twitter"/>
+            android:padding="0dp"
+            android:tint="#666666"
+            android:src="@drawable/ic_twitter_logo" />
 
     <TextView
             android:id="@+id/connect_with_twitter"
