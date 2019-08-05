@@ -8,7 +8,6 @@ import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.directMessages
 import jp.nephy.penicillin.endpoints.directmessages.create
-import jp.nephy.penicillin.endpoints.directmessages.delete
 import jp.nephy.penicillin.endpoints.media.MediaCategory
 import jp.nephy.penicillin.endpoints.media.MediaComponent
 import jp.nephy.penicillin.endpoints.media.MediaType
@@ -21,14 +20,12 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.endpoints.createWithMedia
 import jp.nephy.penicillin.extensions.models.favorite
 import jp.nephy.penicillin.extensions.models.unfavorite
-import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.PostActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyMessageEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.settings.PostStockSettings
@@ -187,26 +184,6 @@ object ActionUtil {
                     "selection" to selectionStart,
                     "selection_stop" to text.length,
                     "inReplyToStatus" to status.toJsonString())
-        }
-    }
-
-    fun doReplyDirectMessage(directMessage: DirectMessage, context: Context) {
-        val text = "D " + (if (currentIdentifier.userId == directMessage.sender.id) directMessage.recipient.screenName
-                else directMessage.sender.screenName) + " "
-        if (context is MainActivity) {
-            EventBus.getDefault().post(OpenEditorEvent(text, null, text.length, null))
-        } else {
-            context.startActivity<PostActivity>("status" to text, "selection" to text.length)
-        }
-    }
-
-    suspend fun destroyDirectMessage(id: Long) {
-        val dm = runCatching { currentClient.directMessages.delete(id).await().result }.getOrNull()
-        if (dm != null) {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_success)
-            EventBus.getDefault().post(StreamingDestroyMessageEvent(dm.id))
-        } else {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_failure)
         }
     }
 }

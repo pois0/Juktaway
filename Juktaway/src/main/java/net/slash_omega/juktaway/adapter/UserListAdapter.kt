@@ -26,14 +26,14 @@ class UserListAdapter(c: Context, id: Int): ArrayAdapterBase<TwitterList>(c, id)
             list_name.text = userList.name
             screen_name.text = userList.user.screenName
             description.text = userList.description
-            member_count.text = (userList.memberCount.toString()) + mContext?.getString(R.string.label_members)
+            member_count.text = (userList.memberCount.toString()) + mContext.getString(R.string.label_members)
             icon.setOnClickListener {
-                mContext?.startActivity(Intent(context, ProfileActivity::class.java).apply {
+                mContext.startActivity(Intent(context, ProfileActivity::class.java).apply {
                     putExtra("userJson", userList.user.toJsonString())
                 })
             }
             setOnClickListener {
-                mContext?.startActivity(Intent(context, UserListActivity::class.java).apply {
+                mContext.startActivity(Intent(context, UserListActivity::class.java).apply {
                     putExtra("userList", userList.toJsonString())
                 })
             }

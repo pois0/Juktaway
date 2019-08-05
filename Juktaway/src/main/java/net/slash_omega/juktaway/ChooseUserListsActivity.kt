@@ -12,15 +12,15 @@ import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.list
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.TwitterList
+import kotlinx.android.synthetic.main.activity_choose_user_lists.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.SubscribeUserListAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.model.DestroyUserListEvent
-import net.slash_omega.juktaway.util.ThemeUtil
-import kotlinx.android.synthetic.main.activity_choose_user_lists.*
-import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.model.*
+import net.slash_omega.juktaway.model.UserListCache
+import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.twitter.currentClient
-import org.jetbrains.anko.collections.forEachWithIndex
+import net.slash_omega.juktaway.util.ThemeUtil
 
 /**
  * Created on 2018/08/29.

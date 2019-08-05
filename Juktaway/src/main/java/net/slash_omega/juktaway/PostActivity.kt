@@ -202,6 +202,9 @@ class PostActivity: ScopedFragmentActivity() {
                         img_button.isEnabled = true
                     }
                 }
+                if (s.isNullOrBlank()) {
+                    disableTweetButton()
+                }
             }
         })
 
@@ -242,7 +245,6 @@ class PostActivity: ScopedFragmentActivity() {
                         PostStockSettings.removeDraft(draft)
                     }
                 }
-
             }
 
             mDraftDialog = AlertDialog.Builder(this)
@@ -275,7 +277,7 @@ class PostActivity: ScopedFragmentActivity() {
         mImgPath = savedInstanceState.getSerializable("image_path") as File
 
         mImgPath?.run {
-            if (exists()) tweet_button.isEnabled = true
+            if (exists()) enableTweetButton()
         }
     }
 
@@ -366,7 +368,7 @@ class PostActivity: ScopedFragmentActivity() {
                 }
             }
             toast(R.string.toast_set_image_success)
-            tweet_button.isEnabled = true
+            enableTweetButton()
         } catch (e: FileNotFoundException) {
             toast(R.string.toast_load_data_failure)
         }
@@ -382,12 +384,10 @@ class PostActivity: ScopedFragmentActivity() {
         count.setTextColor(textColor)
         count.text = length.toString()
 
-        when {
-            length < 0 -> // 文字数オーバー
-                tweet_button.isEnabled = false
-            str.isEmpty() -> // 何も入力されていない時も画像があれば投稿可
-                tweet_button.isEnabled = image_preview_container.childCount > 0
-            else -> tweet_button.isEnabled = true
+        if (length >= 0 || !(str.isEmpty() && image_preview_container.childCount == 0)) {
+            enableTweetButton()
+        } else {
+            disableTweetButton()
         }
     }
 
@@ -453,10 +453,20 @@ class PostActivity: ScopedFragmentActivity() {
                 } else {
                     status_text.setText("")
                     image_preview_container.removeAllViews()
-                    tweet_button.isEnabled = false
+                    disableTweetButton()
                 }
             }
         }
+    }
+
+    private fun enableTweetButton() {
+        tweet_button.isEnabled = true
+        tweet_button.setColorFilter(Color.WHITE)
+    }
+
+    private fun disableTweetButton() {
+        tweet_button.isEnabled = true
+        tweet_button.setColorFilter(Color.parseColor("#666666"))
     }
 
     private class DraftAdapter(context: PostActivity, val mLayout: Int, list: List<String>): ArrayAdapter<String>(context, mLayout, list) {

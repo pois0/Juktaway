@@ -2,11 +2,9 @@ package net.slash_omega.juktaway.listener
 
 import android.app.Activity
 import android.content.Intent
-import android.os.Bundle
 import android.support.v4.app.FragmentActivity
 import android.view.View
 import android.widget.AdapterView
-import jp.nephy.jsonkt.toJsonString
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.TalkFragment

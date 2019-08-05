@@ -7,7 +7,10 @@ import jp.nephy.penicillin.core.emulation.OfficialClient
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.core.session.config.*
 import jp.nephy.penicillin.endpoints.common.TweetMode.Extended
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
@@ -43,8 +46,7 @@ val identifierList
 val consumerList
     get() = runCatching {
         dbUse {
-            select(Core.consumerTable, "id", "name", "ck", "cs")
-                    .parseList(consumerParser)
+            select(consumerTable, "id", "name", "ck", "cs").parseList(consumerParser)
         }
     }.getOrNull() ?: emptyList()
 

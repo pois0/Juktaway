@@ -123,7 +123,7 @@ class ScaleImageActivity: ScopedFragmentActivity() {
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     })
                 }
-            }.onFailure { e ->
+            }.onFailure {
                 toast(R.string.toast_save_image_failure)
             }
         }

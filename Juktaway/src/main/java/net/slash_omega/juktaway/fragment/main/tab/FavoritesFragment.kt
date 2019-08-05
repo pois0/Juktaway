@@ -3,7 +3,6 @@ package net.slash_omega.juktaway.fragment.main.tab
 import jp.nephy.penicillin.endpoints.favorites
 import jp.nephy.penicillin.endpoints.favorites.list
 import jp.nephy.penicillin.extensions.await
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 

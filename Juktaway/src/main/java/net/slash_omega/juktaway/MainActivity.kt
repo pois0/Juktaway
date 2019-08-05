@@ -192,18 +192,14 @@ class MainActivity: ScopedFragmentActivity() {
 
         post_button.setOnClickListener {
             startActivity(intentFor<PostActivity>().also { intent ->
-                if (quick_tweet_layout.visibility == View.VISIBLE) {
-                    with (quick_tweet_edit) {
-                        if (string.isNotEmpty()) {
-                            intent.putExtra("status", string)
-                            intent.putExtra("selection", string.length)
-                            mInReplyToStatus?.run {
-                                intent.putExtra("inReplyToStatus", this.toJsonString())
-                            }
-                            setText(statusInitialText)
-                            clearFocus()
-                        }
+                quick_tweet_edit.takeIf { quick_tweet_layout.visibility == View.VISIBLE && it.string.isNotEmpty() }?.also { edit ->
+                    intent.putExtra("status", edit.string)
+                    intent.putExtra("selection", edit.string.length)
+                    mInReplyToStatus?.run {
+                        intent.putExtra("inReplyToStatus", this.toJsonString())
                     }
+                    edit.setText(statusInitialText)
+                    edit.clearFocus()
                 }
             })
         }
@@ -489,9 +485,11 @@ class MainActivity: ScopedFragmentActivity() {
             send_button.isEnabled = !(length < 0 || cs.toString().isEmpty())
             if (length >= 0 && cs.toString().isNotEmpty()) {
                 send_button.isEnabled = true
+                send_button.setColorFilter(Color.WHITE)
                 send_button.setColorFilter(whiteColor)
             } else {
                 send_button.isEnabled = false
+                send_button.setColorFilter(Color.parseColor("#666666"))
                 send_button.setColorFilter(grayColor)
             }
         }

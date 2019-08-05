@@ -4,9 +4,7 @@ import android.app.Activity
 import android.content.res.Resources
 import android.util.TypedValue
 import android.widget.ImageButton
-import android.widget.TextView
 import net.slash_omega.juktaway.R
-import net.slash_omega.juktaway.settings.BasicSettings
 import net.slash_omega.juktaway.settings.preferences
 
 object ThemeUtil {
@@ -18,14 +16,6 @@ object ThemeUtil {
                     R.style.BlackTheme
                 else R.style.WhiteTheme)
         sTheme = activity.theme
-    }
-
-    fun setThemeTextColor(view: TextView, resourceId: Int) {
-        sTheme?.run {
-            val outValue = TypedValue()
-            resolveAttribute(resourceId, outValue, true)
-            view.setTextColor(outValue.data)
-        }
     }
 
     fun setThemeTextColor(view: ImageButton, resourceId: Int) {

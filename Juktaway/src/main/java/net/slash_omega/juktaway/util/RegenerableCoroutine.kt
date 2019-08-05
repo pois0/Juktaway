@@ -27,5 +27,6 @@ class RegenerableCoroutine(
     fun restart() {
         if (!job.isCancelled) job.cancel()
         job = parent.launch(context, start, block)
+        job.start()
     }
 }

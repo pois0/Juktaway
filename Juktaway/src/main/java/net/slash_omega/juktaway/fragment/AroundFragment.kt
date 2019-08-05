@@ -22,6 +22,7 @@ import net.slash_omega.juktaway.listener.StatusLongClickListener
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.parseWithClient
+import kotlin.math.max
 
 class AroundFragment: DialogFragment() {
     private lateinit var mProgressBarTop: ProgressBar
@@ -62,7 +63,7 @@ class AroundFragment: DialogFragment() {
                         for(i in 0 until 5) {
                             val statuses = currentClient.timeline.userTimelineByUserId(origin.user.id, count = 200, maxId = lastId).await()
                             for ((j, row) in statuses.withIndex()) {
-                                if (row.id == origin.id && j > 0) return@runCatching statuses.subList(Math.max(0, j - 4), j - 1)
+                                if (row.id == origin.id && j > 0) return@runCatching statuses.subList(max(0, j - 4), j - 1)
                             }
                             lastId = statuses.last().id - 1
                         }
