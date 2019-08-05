@@ -25,9 +25,6 @@ class JuktawayApplication: Application() {
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
 
-
-        font = Typeface.createFromAsset(assets, "fontello.ttf")
-
         if (BuildConfig.DEBUG) Thread.setDefaultUncaughtExceptionHandler(MyUncaughtExceptionHandler(app))
     }
 

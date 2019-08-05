@@ -21,13 +21,4 @@
             android:id="@+id/trash"
             android:src="@drawable/ic_clear"
             android:tint="#666666" />
-
-<!--    <net.slash_omega.juktaway.widget.FontelloTextView-->
-<!--        android:id="@+id/trash"-->
-<!--        android:layout_width="wrap_content"-->
-<!--        android:layout_height="wrap_content"-->
-<!--        android:layout_gravity="center"-->
-<!--        android:text="@string/fontello_trash"-->
-<!--        android:textColor="#666666"-->
-<!--        android:textSize="28sp"/>-->
 </LinearLayout>

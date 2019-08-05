@@ -1,4 +1,27 @@
 <?xml version="1.0" encoding="utf-8"?>
 <resources>
     <item name="verified" type="id" />
+    <item name="datetime_relative" type="id" />
+    <item name="status" type="id" />
+    <item name="quoted_tweet" type="id" />
+    <item name="quoted_display_name" type="id" />
+    <item name="quoted_screen_name" type="id" />
+    <item name="quoted_status" type="id" />
+    <item name="quoted_play" type="id" />
+    <item name="quoted_images_container_wrapper" type="id" />
+    <item name="quoted_images_container" type="id" />
+    <item name="images_container_wrapper" type="id" />
+    <item name="menu_and_via_container" type="id" />
+    <item name="do_reply" type="id" />
+    <item name="play" type="id" />
+    <item name="images_container" type="id" />
+    <item name="do_retweet" type="id" />
+    <item name="retweet_count" type="id" />
+    <item name="do_fav" type="id" />
+    <item name="via" type="id" />
+    <item name="datetime" type="id" />
+    <item name="retweet_container" type="id" />
+    <item name="retweet_icon" type="id" />
+    <item name="retweet_by" type="id" />
+    <item name="fav_count" type="id" />
 </resources>

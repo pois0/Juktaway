@@ -59,14 +59,13 @@ class ChooseUserListsActivity: ScopedFragmentActivity() {
         button_save.setOnClickListener { _ ->
             val addList = mutableListOf<TwitterList>()
             val removeList = mutableListOf<TwitterList>()
-            (0 until mAdapter.count)
-                    .map { mAdapter.getItem(it)!! }
-                    .forEachWithIndex { i, lr ->
-                        if (lr.isRegistered == initial[i].isRegistered.not()) {
-                            if (lr.isRegistered) addList.add(lr.userList)
-                            else removeList.add(lr.userList)
-                        }
-                    }
+            for (i in 0 until mAdapter.count) {
+                val lr = mAdapter.getItem(i)!!
+                if (lr.isRegistered != initial[i].isRegistered) {
+                    if (lr.isRegistered) addList.add(lr.userList)
+                    else removeList.add(lr.userList)
+                }
+            }
             setResult(Activity.RESULT_OK, Intent().apply {
                 putExtra("add", addList.map{ it.toJsonString() }.toTypedArray())
                 putExtra("remove", removeList.map{ it.toJsonString() }.toTypedArray())

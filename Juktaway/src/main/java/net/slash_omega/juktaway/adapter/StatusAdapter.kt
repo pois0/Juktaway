@@ -28,7 +28,6 @@ import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.StatusActivity
-import net.slash_omega.juktaway.layouts.fontelloTextView
 import net.slash_omega.juktaway.model.displayUserIcon
 import net.slash_omega.juktaway.model.isFavorited
 import net.slash_omega.juktaway.model.isRetweeted
@@ -159,7 +158,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     }
 
     fun removeStatus(id: Long) {
-        (0 until count).forEach { i ->
+        for (i in 0 until count) {
             getItem(i)!!.takeIf { it.id == id || it.retweetedStatus?.id == id }
                     ?.let{remove(it)}
         }
@@ -189,48 +188,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
             leftPadding = dip(6)
             rightPadding = dip(7)
             topPadding = dip(4)
-
-
-            val data = s.retweetedStatus?.run {
-                RowData(R.string.fontello_retweet, ContextCompat.getColor(fragmentActivity, R.color.holo_green_light),
-                        user.name, user.screenName)
-
-            } ?: RowData(R.string.fontello_at, ContextCompat.getColor(fragmentActivity, R.color.holo_red_light),
-                    s.user.name, s.user.screenName)
-
-            val actionContainer = relativeLayout {
-                id = R.id.action_container
-
-                fontelloTextView {
-                    id = R.id.action_icon
-                    gravity = Gravity.END
-                    textSize = 12f //sp
-                    setText(data.textId)
-                    textColor = data.textColor
-                }.lparams(width = dip(48), height = wrapContent) {
-                    rightMargin = dip(6)
-                    bottomMargin = dip(2)
-                }
-
-                textView {
-                    id = R.id.action_by_display_name
-                    textSize = 12f //sp
-                    setTypeface(typeface, Typeface.BOLD)
-                    text = data.displayName
-                }.lparams(width = wrapContent, height = wrapContent) {
-                    rightOf(R.id.action_icon)
-                }
-
-                textView {
-                    id = R.id.action_by_screen_name
-                    textColor = grayColor
-                    textSize = 10f //sp
-                    text = data.screenName
-                }.lparams(width = wrapContent, height = wrapContent) {
-                    rightOf(R.id.action_by_display_name)
-                    leftMargin = dip(4)
-                }
-            }.lparams(width = matchParent)
+            if (s.isMentionForMe) setBackgroundColor(Color.parseColor("#20ff2020"))
 
             if (preferences.display.tweet.shouldShowAuthorIcon) {
                 imageView {
@@ -242,7 +200,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
                     displayUserIcon(s.user)
                 }.lparams(width = dip(48), height = dip(48)) {
-                    below(R.id.action_container)
                     bottomMargin = dip(6)
                     rightMargin = dip(6)
                     topMargin = dip(1)
@@ -252,7 +209,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     id = R.id.icon
                     topPadding = dip(2)
                 }.lparams(width = 0, height = 0) {
-                    below(R.id.action_container)
                     bottomMargin = dip(6)
                     rightMargin = dip(6)
                     topMargin = dip(1)
@@ -265,7 +221,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                 setTypeface(typeface, Typeface.BOLD)
                 text = s.user.name
             }.lparams {
-                below(R.id.action_container)
                 rightOf(R.id.icon)
                 bottomMargin = dip(6)
             }
@@ -378,11 +333,10 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                                 orientation = LinearLayout.VERTICAL
                             }
 
-                            val play = fontelloTextView {
+                            val play = imageView {
                                 id = R.id.quoted_play
-                                text = resources.getString(R.string.fontello_play)
-                                textColor = Color.WHITE
-                                textSize = 24f //sp
+                                setImageResource(R.drawable.ic_play_circle)
+                                setColorFilter(Color.WHITE)
                             }.lparams {
                                 gravity = Gravity.CENTER
                             }
@@ -419,11 +373,10 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                         orientation = LinearLayout.VERTICAL
                     }
 
-                    val play = fontelloTextView {
+                    val play = imageView {
                         id = R.id.play
-                        text = resources.getString(R.string.fontello_play)
-                        textColor = Color.WHITE
-                        textSize = 24f //sp
+                        setImageResource(R.drawable.ic_play_circle)
+                        setColorFilter(Color.WHITE)
                     }.lparams {
                         gravity = Gravity.CENTER
                     }
@@ -575,12 +528,6 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     bottomMargin = dip(2)
                 }
             }
-
-            if (!s.isMentionForMe && s.retweetedStatus == null) actionContainer.visibility = View.GONE
         }
-    }
-
-    private inner class RowData(val textId: Int, val textColor: Int, val displayName: String, screenNameParam: String) {
-        val screenName: String = "@$screenNameParam"
     }
 }

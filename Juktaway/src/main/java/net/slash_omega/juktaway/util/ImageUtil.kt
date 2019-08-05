@@ -87,7 +87,7 @@ object ImageUtil {
         }
     }
 
-    fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: TextView, status: Status) {
+    fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: View, status: Status) {
         status.imageUrls.takeNotEmpty()?.let { imageUrls ->
             group.removeAllViews()
             imageUrls.forEachIndexed { i, url ->
