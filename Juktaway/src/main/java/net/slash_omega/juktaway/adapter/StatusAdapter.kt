@@ -45,6 +45,12 @@ import java.util.*
 
 class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapter<Status>(fragmentActivity, 0), CoroutineScope by fragmentActivity.scope {
     companion object {
+        private val fav_image = if (preferences.display.tweet.isFavoriteButtonHeartShaped) {
+            R.drawable.ic_heart
+        } else {
+            R.drawable.ic_star
+        }
+
         private val grayColor = Color.parseColor("#666666")
         private val darkGrayColor = Color.parseColor("#444444")
         private val lightGrayColor = Color.parseColor("#999999")
@@ -90,6 +96,12 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
     private val greenColor = ContextCompat.getColor(fragmentActivity, R.color.holo_green_light)
     private val orangeColor = ContextCompat.getColor(fragmentActivity, R.color.holo_orange_light)
+
+    private val favColor = if (preferences.display.tweet.isFavoriteButtonHeartShaped) {
+        Color.parseColor("#E0245E")
+    } else {
+        orangeColor
+    }
 
     private val limit = 100
     private var mLimit = limit
@@ -450,13 +462,13 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     rightOf(R.id.do_retweet)
                 }
 
-                imageView(R.drawable.ic_star) {
+                imageView(fav_image) {
                     id = R.id.do_fav
                     topPadding = dip(6)
                     rightPadding = dip(4)
                     leftPadding = dip(8)
                     bottomPadding = dip(6)
-                    setColorFilter(if (s.isFavorited()) orangeColor else grayColor)
+                    setColorFilter(if (s.isFavorited()) favColor else grayColor)
                     setOnClickListener {
                         launch {
                             if (s.isFavorited()) s.unfavorite() else s.favorite()
