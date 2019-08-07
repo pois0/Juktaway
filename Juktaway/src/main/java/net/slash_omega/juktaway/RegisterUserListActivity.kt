@@ -24,9 +24,9 @@ class RegisterUserListActivity: ScopedFragmentActivity() {
                 lists.ownerships(count = 200).await().result.lists to
                         lists.membershipsByUserId(intent.getLongExtra("userId", -1)).await().result.lists
             }.getOrNull()?.let { (own, member) ->
-                val registeredMap = member.associateBy({ it.id }, { true })
+                val memberIdList = member.map { it.id }
                 own.forEach {
-                    mAdapter.add(UserListWithRegistered(it, registeredMap[it.id] != null))
+                    mAdapter.add(UserListWithRegistered(it, it.id in memberIdList))
                 }
             }
         }

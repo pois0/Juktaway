@@ -32,9 +32,9 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
             field = value
             swipe_refresh_layout.isRefreshing = value
         }
-    protected var hasNext = true
-    private var statusIdMax = 0L // 読み込んだ最新のツイートID
-    private var statusIdMin = 0L
+    @Volatile protected var hasNext = true
+    @Volatile private var statusIdMax = 0L // 読み込んだ最新のツイートID
+    @Volatile private var statusIdMin = 0L
     private val position by lazy { arguments?.getInt("position", -1) ?: -1 }
 
     private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
@@ -124,17 +124,19 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         get() = mListView.firstVisiblePosition == 0
 
     private suspend fun load(loadType: LoadStatusesType) = withContext(Dispatchers.Main) {
-        if (isLoading || !hasNext) return@withContext
+        if (isLoading || (loadType == LoadStatusesType.ADDITIONAL && !hasNext)) return@withContext
+        println("start load ${loadType.name} : $statusIdMin")
         if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = true
 
         val statuses = getNewStatuses(loadType)
 
-        if (statuses.isNullOrEmpty()) {
-            if(statuses?.isEmpty() == true) hasNext = false
-        } else {
+        if (loadType == LoadStatusesType.NEW_ARRIVAL && isLoading) return@withContext
+
+        if (statuses?.isNotEmpty() == true)  {
             when (loadType) {
                 LoadStatusesType.ADDITIONAL -> {
-                    mAdapter.extensionAddAllFromStatuses(statuses)
+                    println("add ${statuses.size}")
+                    mAdapter.addAllSuspend(statuses)
                 }
                 LoadStatusesType.RELOAD -> {
                     mAdapter.clear()
@@ -161,7 +163,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mListView.visibility = View.VISIBLE
 
         if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = false
-        if(loadType == LoadStatusesType.RELOAD) goToTop()
+        if (loadType == LoadStatusesType.RELOAD) goToTop()
+        println("finished load ${loadType.name} : $statusIdMin")
     }
 
     protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
@@ -177,13 +180,8 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         get() = statusIdMax.takeIf { it > 0 && limitMin }?.plus(1)
 
     /*
-     *
      * !!! EventBus !!!
      *
-     */
-
-
-    /*
      * 高速スクロールの設定が変わったら切り替える
      */
     @Suppress("UNUSED_PARAMETER")

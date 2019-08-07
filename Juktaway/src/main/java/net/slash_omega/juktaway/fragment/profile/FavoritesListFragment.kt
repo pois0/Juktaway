@@ -25,16 +25,19 @@ internal class FavoritesListFragment: ProfileListFragmentBase() {
 
     override fun showList() {
         launch {
-            val statuses = runCatching {
-                currentClient.favorites.run {
-                    if (mMaxId > 0) listByUserId(user.id, maxId = mMaxId - 1, count = preferences.api.pageCount)
-                    else listByUserId(user.id, count = preferences.api.pageCount)
-                }.await()
-            }.getOrNull()
+            val action = currentClient.favorites.run {
+                if (mMaxId > 0) {
+                    listByUserId(user.id, maxId = mMaxId - 1, count = preferences.api.pageCount)
+                } else {
+                    listByUserId(user.id, count = preferences.api.pageCount)
+                }
+            }
 
-            statuses?.takeIf { it.isNotEmpty() }?.run {
-                mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatuses(statuses)
+            action.runCatching { await() }.onSuccess { response ->
+                if (response.isEmpty()) return@onSuccess
+
+                mMaxId = response.last().id
+                mAdapter.extensionAddAllFromStatuses(response)
                 mAutoLoader = true
                 mListView.visibility = View.VISIBLE
             }

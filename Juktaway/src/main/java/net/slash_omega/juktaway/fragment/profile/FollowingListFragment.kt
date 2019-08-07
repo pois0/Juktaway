@@ -22,17 +22,18 @@ internal class FollowingListFragment: ProfileListFragmentBase() {
     override fun showList() {
         launch {
             val action = cursor ?: currentClient.friends.listUsersByScreenName(user.screenName)
-            val resp = tryAndTraceGet {
-                action.await().apply {
-                    if (hasNext) cursor = next
-                }
-            }
 
-            if (resp != null) {
-                resp.result.users.takeIf { it.isNotEmpty() }?.forEach { mAdapter.add(it) }
-                if (resp.hasNext) mAutoLoader = true
+            action.runCatching { await() }.onSuccess { response ->
+                mAdapter.addAll(response.result.users)
+
+                if (response.hasNext) {
+                    cursor = response.next
+                    mAutoLoader = true
+                }
+
                 mListView.visibility = View.VISIBLE
             }
+
             finishLoading()
         }
     }

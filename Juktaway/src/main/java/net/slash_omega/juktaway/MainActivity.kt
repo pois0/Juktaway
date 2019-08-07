@@ -326,7 +326,7 @@ class MainActivity: ScopedFragmentActivity() {
     }
 
     @SuppressLint("SetTextI18n")
-    override fun setTitle(title: CharSequence?) {
+    override fun setTitle(title: CharSequence) {
         launch {
             val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
             if (matcher.find()) {

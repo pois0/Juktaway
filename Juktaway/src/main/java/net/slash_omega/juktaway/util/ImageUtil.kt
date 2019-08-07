@@ -48,6 +48,8 @@ fun ImageView.displayRoundedImage(url: String) {
 fun File.mediaType() = ImageUtil.toMediaType(path.run { substring(lastIndexOf(".") + 1) })
 
 object ImageUtil {
+    private val imageLoader = ImageLoader.getInstance()
+
     internal val sRoundedDisplayImageOptions by lazy {
         DisplayImageOptions.Builder()
                 .cacheInMemory(true)
@@ -62,7 +64,7 @@ object ImageUtil {
                 .resetViewBeforeLoading(true)
                 .build()
 
-        ImageLoader.getInstance().init(
+        imageLoader.init(
                 ImageLoaderConfiguration.Builder(app)
                         .defaultDisplayImageOptions(defaultOptions)
                         .build())
@@ -80,9 +82,9 @@ object ImageUtil {
         if (tag != null && tag == url) return
         view.tag = url
         if (preferences.display.tweet.isAuthorIconRounded) {
-            ImageLoader.getInstance().displayImage(url, view, sRoundedDisplayImageOptions)
+            imageLoader.displayImage(url, view, sRoundedDisplayImageOptions)
         } else {
-            ImageLoader.getInstance().displayImage(url, view)
+            imageLoader.displayImage(url, view)
         }
     }
 

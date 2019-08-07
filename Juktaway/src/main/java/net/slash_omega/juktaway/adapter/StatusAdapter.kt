@@ -98,7 +98,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
     private val shouldShow get() = { status: Status -> status !in Mute && mIdSet.add(status.id) }
     private val fontSize = preferences.display.general.fontSize.toFloat()
 
-    suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) {
+    suspend fun extensionAddAllFromStatuses(statusesParam: List<Status>) = withContext(Dispatchers.Main) {
         val statuses = withContext(Dispatchers.Default) {
             statusesParam.filter(shouldShow)
         }
@@ -111,13 +111,14 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         launch { addSuspend(status) }
     }
 
-    suspend fun addSuspend(status: Status) {
-        if (withContext(Dispatchers.Default) { !shouldShow(status) }) return
-        super.add(status)
-        limitation()
+    suspend fun addSuspend(status: Status) = withContext(Dispatchers.Main) {
+        if (withContext(Dispatchers.Default) { shouldShow(status) }) {
+            super.add(status)
+            limitation()
+        }
     }
 
-    suspend fun addAllSuspend(statusesParam: List<Status>) {
+    suspend fun addAllSuspend(statusesParam: List<Status>) = withContext(Dispatchers.Main) {
         val statuses = withContext(Dispatchers.Default) {
             statusesParam.filter(shouldShow)
         }
@@ -129,13 +130,14 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         launch { insertSuspend(status, index) }
     }
 
-    suspend fun insertSuspend(status: Status, index: Int) {
-        if (withContext(Dispatchers.Default) { !shouldShow(status) }) return
-        super.insert(status, index)
+    suspend fun insertSuspend(status: Status, index: Int) = withContext(Dispatchers.Main) {
+        if (withContext(Dispatchers.Default) { shouldShow(status) }) {
+            super.insert(status, index)
+        }
         // limitation()
     }
 
-    suspend fun insertAllFromStatus(statusesParam: Collection<Status>, index: Int): Int {
+    suspend fun insertAllFromStatus(statusesParam: Collection<Status>, index: Int): Int = withContext(Dispatchers.Main) {
         setNotifyOnChange(false)
 
         var position = index
@@ -149,7 +151,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
 
         notifyDataSetChanged()
 
-        return statuses.size
+        statuses.size
     }
 
     override fun remove(status: Status) {
