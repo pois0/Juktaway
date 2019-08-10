@@ -51,7 +51,7 @@
                     android:id="@+id/send_button"
                     android:src="@drawable/ic_send"
                     android:layout_width="48dp"
-                    android:layout_height="wrap_content"
+                    android:layout_height="48dp"
                     android:layout_gravity="center"
                     android:layout_marginEnd="4dp"
                     android:background="?attr/button_stateful"
