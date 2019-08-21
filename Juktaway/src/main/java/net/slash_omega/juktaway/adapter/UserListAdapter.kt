@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import jp.nephy.penicillin.models.TwitterList
@@ -29,12 +29,12 @@ class UserListAdapter(c: Context, id: Int): ArrayAdapterBase<TwitterList>(c, id)
             member_count.text = (userList.memberCount.toString()) + mContext.getString(R.string.label_members)
             icon.setOnClickListener {
                 mContext.startActivity(Intent(context, ProfileActivity::class.java).apply {
-                    putExtra("userJson", userList.user.toJsonString())
+                    putExtra("userJson", userList.user.stringify())
                 })
             }
             setOnClickListener {
                 mContext.startActivity(Intent(context, UserListActivity::class.java).apply {
-                    putExtra("userList", userList.toJsonString())
+                    putExtra("userList", userList.json.stringify())
                 })
             }
         }}

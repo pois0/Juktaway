@@ -24,8 +24,6 @@ class JuktawayApplication: Application() {
         Core.initialize()
         BasicSettings.init()
         UserIconManager.warmUpUserIconMap()
-
-        if (BuildConfig.DEBUG) Thread.setDefaultUncaughtExceptionHandler(MyUncaughtExceptionHandler(app))
     }
 
     override fun onTerminate() {

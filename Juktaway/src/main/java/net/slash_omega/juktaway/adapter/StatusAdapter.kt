@@ -15,8 +15,8 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ArrayAdapter
 import android.widget.LinearLayout
+import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.createdAt
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
@@ -209,7 +209,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                     id = R.id.icon
                     contentDescription = resources.getString(R.string.description_icon)
                     setOnClickListener {
-                        startActivity(it.context.intentFor<ProfileActivity>("userJson" to s.user.toJsonString()))
+                        startActivity(it.context.intentFor<ProfileActivity>("userJson" to s.user.stringify()))
                     }
 
                     displayUserIcon(s.user)
@@ -365,7 +365,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
                         }
                     }
                     setOnClickListener {
-                        startActivity<StatusActivity>("status" to qs.toJsonString())
+                        startActivity<StatusActivity>("status" to qs.stringify())
                     }
                 }.lparams(width = matchParent) {
                     below(R.id.status)

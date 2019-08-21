@@ -52,9 +52,5 @@ project.ext {
     anko_version = '0.10.8'
     ktor_version = '1.2.3-rc'
     kotlin_serialization_version = '0.10.0'
-    penicillin_version = '4.2.3-eap-35'
-}
-
-task wrapper(type: Wrapper) {
-    gradleVersion = '4.10'
+    penicillin_version = '4.2.3-eap-36'
 }

@@ -11,7 +11,7 @@ import com.nostra13.universalimageloader.core.DisplayImageOptions
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.endpoints.media.MediaType
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.ScaleImageActivity
@@ -101,11 +101,11 @@ object ImageUtil {
                 image.setOnClickListener {
                     if (status.videoUrl.isEmpty()) {
                         context.startActivity(Intent(it.context, ScaleImageActivity::class.java).apply {
-                            putExtra("status", status.toJsonString())
+                            putExtra("status", status.stringify())
                             putExtra("index", i)
                         })
                     } else {
-                        context.startActivity<VideoActivity>("arg" to "statusJson", "statusJson" to status.toJsonString())
+                        context.startActivity<VideoActivity>("arg" to "statusJson", "statusJson" to status.stringify())
                     }
                 }
             }

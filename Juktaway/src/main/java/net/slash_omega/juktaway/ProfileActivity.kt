@@ -11,8 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.blocks
 import jp.nephy.penicillin.endpoints.blocks.createByUserId
 import jp.nephy.penicillin.endpoints.blocks.destroyByUserId
@@ -374,8 +374,8 @@ class ProfileActivity: ScopedFragmentActivity() {
         }
 
         val args = Bundle().apply {
-            putString("user", mUser.toJsonString())
-            putString("relationship", mRelationship.toJsonString())
+            putString("user", mUser.stringify())
+            putString("relationship", mRelationship.stringify())
         }
         SimplePagerAdapter(this, pager).apply {
             addTab(SummaryFragment::class, args)
@@ -419,7 +419,7 @@ class ProfileActivity: ScopedFragmentActivity() {
         })
 
         val listArgs = Bundle().apply {
-            putString("user", mUser.toJsonString())
+            putString("user", mUser.stringify())
         }
 
         SimplePagerAdapter(this, list_pager).apply {
@@ -457,7 +457,7 @@ class ProfileActivity: ScopedFragmentActivity() {
 
     private fun restart() {
         runCatching {
-            startActivity<ProfileActivity>("userJson" to mUser.toJsonString())
+            startActivity<ProfileActivity>("userJson" to mUser.stringify())
         }.onFailure {
             startActivity<ProfileActivity>("userId" to mUser.id)
         }

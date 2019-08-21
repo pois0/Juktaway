@@ -19,7 +19,7 @@ import android.widget.AdapterView
 import android.widget.ImageButton
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
 import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.endpoints.statuses
@@ -196,7 +196,7 @@ class MainActivity: ScopedFragmentActivity() {
                     intent.putExtra("status", edit.string)
                     intent.putExtra("selection", edit.string.length)
                     mInReplyToStatus?.run {
-                        intent.putExtra("inReplyToStatus", this.toJsonString())
+                        intent.putExtra("inReplyToStatus", stringify())
                     }
                     edit.setText(statusInitialText)
                     edit.clearFocus()
@@ -554,7 +554,7 @@ class MainActivity: ScopedFragmentActivity() {
                 putExtra("status", e.text)
                 e.selectionStart?.let { putExtra("selection", it) }
                 e.selectionStop?.let { putExtra("selection_stop", it) }
-                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it.toJsonString()) }
+                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it.stringify()) }
             })
         }
     }

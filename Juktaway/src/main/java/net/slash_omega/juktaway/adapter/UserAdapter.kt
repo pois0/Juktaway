@@ -5,7 +5,7 @@ import android.content.Context
 import android.content.Intent
 import android.view.View
 import android.view.ViewGroup
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.extensions.models.ProfileImageSize
 import jp.nephy.penicillin.extensions.models.profileImageUrlWithVariantSize
 import jp.nephy.penicillin.models.User
@@ -37,7 +37,7 @@ class UserAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<User>(mCon
 
                 setOnClickListener {
                     mContext.startActivity(Intent(it.context, ProfileActivity::class.java).apply {
-                        putExtra("userJson", user.toJsonString())
+                        putExtra("userJson", user.stringify())
                     })
                 }
             }

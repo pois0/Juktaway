@@ -8,17 +8,17 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.util.LongSparseArray
 import android.widget.ListView
+import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.ScopedFragmentActivity
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
+import net.slash_omega.juktaway.ScopedFragmentActivity
 import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.RetweetersFragment
@@ -236,7 +236,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         users.put(source.user.id, true)
         add("@" + source.user.screenName) {
-            mActivity.startActivity<ProfileActivity>("userJson" to source.user.toJsonString())
+            mActivity.startActivity<ProfileActivity>("userJson" to source.user.stringify())
         }
 
         /*
@@ -258,7 +258,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         if (retweet != null && users.get(status.user.id) == null) {
             users.put(status.user.id, true)
             add("@" + status.user.screenName) {
-                mActivity.startActivity<ProfileActivity>("userJson" to status.user.toJsonString())
+                mActivity.startActivity<ProfileActivity>("userJson" to status.user.stringify())
             }
         }
 

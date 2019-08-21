@@ -125,7 +125,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
     private suspend fun load(loadType: LoadStatusesType) = withContext(Dispatchers.Main) {
         if (isLoading || (loadType == LoadStatusesType.ADDITIONAL && !hasNext)) return@withContext
-        println("start load ${loadType.name} : $statusIdMin")
         if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = true
 
         val statuses = getNewStatuses(loadType)
@@ -135,7 +134,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         if (statuses?.isNotEmpty() == true)  {
             when (loadType) {
                 LoadStatusesType.ADDITIONAL -> {
-                    println("add ${statuses.size}")
                     mAdapter.addAllSuspend(statuses)
                 }
                 LoadStatusesType.RELOAD -> {
@@ -164,7 +162,6 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
 
         if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = false
         if (loadType == LoadStatusesType.RELOAD) goToTop()
-        println("finished load ${loadType.name} : $statusIdMin")
     }
 
     protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?

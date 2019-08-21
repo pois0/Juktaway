@@ -7,7 +7,7 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.list
 import jp.nephy.penicillin.extensions.await
@@ -67,8 +67,8 @@ class ChooseUserListsActivity: ScopedFragmentActivity() {
                 }
             }
             setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra("add", addList.map{ it.toJsonString() }.toTypedArray())
-                putExtra("remove", removeList.map{ it.toJsonString() }.toTypedArray())
+                putExtra("add", addList.map{ it.stringify() }.toTypedArray())
+                putExtra("remove", removeList.map{ it.stringify() }.toTypedArray())
             })
             finish()
         }

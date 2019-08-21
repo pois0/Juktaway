@@ -2,7 +2,7 @@ package net.slash_omega.juktaway.util
 
 import android.content.Context
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
 import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.core.session.ApiClient
@@ -113,7 +113,7 @@ fun Status.quote(context: Context) {
     if (context is MainActivity) {
         EventBus.getDefault().post(OpenEditorEvent(text, this, null, null))
     } else {
-        context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to toJsonString())
+        context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to stringify())
     }
 }
 
@@ -160,7 +160,7 @@ object ActionUtil {
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, status, text.length, null))
         } else {
-            context.startActivity<PostActivity>("status" to text, "selection" to text.length, "inReplyToStatus" to status.toJsonString())
+            context.startActivity<PostActivity>("status" to text, "selection" to text.length, "inReplyToStatus" to status.stringify())
         }
     }
 
@@ -183,7 +183,7 @@ object ActionUtil {
             context.startActivity<PostActivity>("status" to text,
                     "selection" to selectionStart,
                     "selection_stop" to text.length,
-                    "inReplyToStatus" to status.toJsonString())
+                    "inReplyToStatus" to status.stringify())
         }
     }
 }
