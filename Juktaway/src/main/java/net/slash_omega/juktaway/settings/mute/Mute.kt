@@ -1,9 +1,8 @@
 package net.slash_omega.juktaway.settings.mute
 
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
 import jp.nephy.penicillin.models.Status
-import net.slash_omega.juktaway.model.Row
 
 /**
  * Created on 2018/11/09.
@@ -22,18 +21,14 @@ object Mute {
         wordMute = WordMute.getAllItems()
     }
 
-    fun isMute(row: Row): Boolean = row.takeIf { it.isStatus }?.status?.let { isMute(it) } ?: false
-
     fun isMute(status: Status): Boolean = mutedIds[status.id] ?: run {
             val source = status.retweetedStatus ?: status
             status.user.id in userMute ||
                     status.entities.userMentions.map { it.id }.any { it in userMute } ||
                     status.retweetedStatus?.user?.id in userMute ||
                     source.via.name in sourceMute ||
-                    wordMute.any { source.fullText().contains(it) }
+                    wordMute.any { source.text.contains(it) }
         }.also { mutedIds[status.id] = it }
 
     operator fun contains(status: Status) = isMute(status)
-
-    operator fun contains(row: Row) = isMute(row)
 }

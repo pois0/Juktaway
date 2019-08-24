@@ -25,7 +25,7 @@ object KusoripuUtil {
         val count by int
         class UserModel(override val json: JsonObject): JsonModel {
             val count by int
-            val screen_name by string
+            val screenName by string("screen_name")
         }
         val target by model<UserModel>()
         class TextModel(override val json: JsonObject): JsonModel {

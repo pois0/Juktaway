@@ -12,7 +12,9 @@ import jp.nephy.penicillin.endpoints.savedsearches.list
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.SavedSearch
 import kotlinx.android.synthetic.main.row_auto_complete.view.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.twitter.currentClient
@@ -66,7 +68,7 @@ class SearchAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<String>(
 
     override fun getFilter(): Filter = object: Filter() {
         override fun performFiltering(constraint: CharSequence?): FilterResults {
-            val filterResults = Filter.FilterResults()
+            val filterResults = FilterResults()
             if (constraint.isNullOrEmpty()) {
                 mStrings.clear()
                 for (savedSearch in mSavedSearches) {
@@ -76,9 +78,9 @@ class SearchAdapter(mContext: Context, mLayout: Int) : ArrayAdapterBase<String>(
                 mSearchWord = constraint.toString()
                 mStrings.apply {
                     clear()
-                    add(mSearchWord + mContext?.getString(R.string.label_search_tweet).nullToBlank())
-                    add(mSearchWord + mContext?.getString(R.string.label_search_user).nullToBlank())
-                    add("@" + mSearchWord + mContext?.getString(R.string.label_display_profile).nullToBlank())
+                    add(mSearchWord + mContext.getString(R.string.label_search_tweet).nullToBlank())
+                    add(mSearchWord + mContext.getString(R.string.label_search_user).nullToBlank())
+                    add("@" + mSearchWord + mContext.getString(R.string.label_display_profile).nullToBlank())
                 }
             }
             return filterResults.apply {

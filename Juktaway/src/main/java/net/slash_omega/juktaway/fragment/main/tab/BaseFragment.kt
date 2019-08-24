@@ -2,7 +2,6 @@ package net.slash_omega.juktaway.fragment.main.tab
 
 import android.os.Bundle
 import android.support.v4.app.Fragment
-import android.support.v4.widget.SwipeRefreshLayout
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -11,66 +10,51 @@ import android.widget.ListView
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.pull_to_refresh_list.*
-import kotlinx.coroutines.CoroutineScope
-import kotlinx.coroutines.launch
+import kotlinx.coroutines.*
+import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.StatusAdapter
-import net.slash_omega.juktaway.event.action.GoToTopEvent
-import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingCreateStatusEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.Row
-import net.slash_omega.juktaway.settings.BasicSettings
-import net.slash_omega.juktaway.twitter.currentIdentifier
-import kotlin.collections.ArrayList
+import net.slash_omega.juktaway.settings.preferences
+import net.slash_omega.juktaway.util.regenerableLaunch
+import kotlin.system.measureTimeMillis
 
 abstract class BaseFragment: Fragment(), CoroutineScope {
-    override val coroutineContext by lazy { (activity as CoroutineScope).coroutineContext }
+    override val coroutineContext by lazy { mainActivity.coroutineContext }
+    private val mainActivity by lazy { activity as MainActivity }
+
     protected lateinit var mAdapter: StatusAdapter
-    protected var isLoading = false
+    private var isLoading = false
         set(value) {
-            mSwipeRefreshLayout.isRefreshing = value
             field = value
+            swipe_refresh_layout.isRefreshing = value
         }
-    protected var hasNext = true
-    private var mScrolling = false
-    private var mMaxId = 0L // 読み込んだ最新のツイートID
-    private val mStackRows = ArrayList<Row>()
+    @Volatile protected var hasNext = true
+    @Volatile private var statusIdMax = 0L // 読み込んだ最新のツイートID
+    @Volatile private var statusIdMin = 0L
+    private val position by lazy { arguments?.getInt("position", -1) ?: -1 }
+
+    private val autoReloadInterval by lazy { arguments?.getLong("reloadInterval") ?: -1L }
 
     protected lateinit var mListView: ListView
-    private lateinit var mSwipeRefreshLayout: SwipeRefreshLayout
 
-    /**
-     * 1. スクロールが終わった瞬間にストリーミングAPIから受信し溜めておいたツイートがあればそれを表示する
-     * 2. スクロールが終わった瞬間に表示位置がトップだったらボタンのハイライトを消すためにイベント発行
-     * 3. スクロール中はスクロール中のフラグを立てる
-     */
-    private val mOnScrollListener = object : AbsListView.OnScrollListener {
+    private val autoReloadJob by lazy {
+        if (autoReloadInterval > 0) regenerableLaunch(Dispatchers.Default) {
+            var delayed = autoReloadInterval - 1000
+            route@ while (isActive) {
+                delay(autoReloadInterval - delayed)
 
-        override fun onScrollStateChanged(view: AbsListView, scrollState: Int) {
-            when (scrollState) {
-                AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
-                    mScrolling = false
-                    if (mStackRows.size > 0) {
-                        showStack()
-                    } else if (isTop) {
-                        EventBus.getDefault().post(GoToTopEvent())
-                    }
+                while (position != mainActivity.currentTabPosition || isLoading) {
+                    if (!isActive) break@route
+                    delay(500)
                 }
-                AbsListView.OnScrollListener.SCROLL_STATE_TOUCH_SCROLL, AbsListView.OnScrollListener.SCROLL_STATE_FLING -> mScrolling = true
-            }
-        }
 
-        override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
-            // 最後までスクロールされたかどうかの判定
-            if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
-                launch { load(true) }
+                delayed = measureTimeMillis { load(LoadStatusesType.NEW_ARRIVAL) }
             }
-        }
+        } else null
     }
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -86,28 +70,25 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
         mListView = list_view.apply {
             onItemClickListener = StatusClickListener(act)
             onItemLongClickListener = StatusLongClickListener(act)
-            setOnScrollListener(mOnScrollListener)
+            setOnScrollListener(object: AbsListView.OnScrollListener {
+                override fun onScrollStateChanged(view: AbsListView?, scrollState: Int) {}
+
+                override fun onScroll(view: AbsListView, firstVisibleItem: Int, visibleItemCount: Int, totalItemCount: Int) {
+                    // 最後までスクロールされたかどうかの判定
+                    if (totalItemCount == firstVisibleItem + visibleItemCount && totalItemCount > 5 && !isLoading) {
+                        launch { load(LoadStatusesType.ADDITIONAL) }
+                    }
+                }
+            })
         }
 
-        mSwipeRefreshLayout = sr_layout.apply {
-            setOnRefreshListener { launch { load(false) } }
+        swipe_refresh_layout.setOnRefreshListener {
+            launch { load(LoadStatusesType.RELOAD) }
         }
-    }
 
-    override fun onActivityCreated(savedInstanceState: Bundle?) {
-        super.onActivityCreated(savedInstanceState)
-
-        /**
-         * mMainPagerAdapter.notifyDataSetChanged() された時に
-         * onCreateView と onActivityCreated がインスタンスが生きたまま呼ばれる
-         * 多重に初期化処理を実行しないように変数チェックを行う
-         */
-        if (::mAdapter.isInitialized.not()) {
-            // Status(ツイート)をViewに描写するアダプター
-            mAdapter = StatusAdapter(activity!!)
-            mListView.visibility = View.GONE
-            launch { load(false) }
-        }
+        mAdapter = StatusAdapter(activity!!)
+        mListView.visibility = View.GONE
+        launch { load(LoadStatusesType.RELOAD) }
 
         mListView.adapter = mAdapter
     }
@@ -115,205 +96,94 @@ abstract class BaseFragment: Fragment(), CoroutineScope {
     override fun onResume() {
         super.onResume()
         EventBus.getDefault().register(this)
+        autoReloadJob?.restart()
     }
 
     override fun onPause() {
         EventBus.getDefault().unregister(this)
+        autoReloadJob?.cancel()
         super.onPause()
     }
 
-    fun reload() {
-        launch { load(false) }
+    override fun onDestroy() {
+        coroutineContext.cancelChildren()
+        super.onDestroy()
     }
 
-    protected fun clear() {
-        mAdapter.clear()
+    internal fun reload() {
+        launch { load(LoadStatusesType.RELOAD) }
     }
 
     internal fun goToTop(): Boolean {
         mListView.setSelection(0)
         mListView.smoothScrollToPosition(0)
-        return if (mStackRows.size > 0) {
-            launch { showStack() }
-            false
-        } else true
+        return true
     }
 
-    val isTop by lazy { mListView.firstVisiblePosition == 0 }
+    val isTop
+        get() = mListView.firstVisiblePosition == 0
 
-    /**
-     * ツイートの表示処理、画面のスクロール位置によって適切な処理を行う、まだバグがある
-     */
-    private val mRender = Runnable {
-        if (mScrolling) return@Runnable
+    private suspend fun load(loadType: LoadStatusesType) = withContext(Dispatchers.Main) {
+        if (isLoading || (loadType == LoadStatusesType.ADDITIONAL && !hasNext)) return@withContext
+        if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = true
 
-        // 表示している要素の位置
-        val position = mListView.firstVisiblePosition
+        val statuses = getNewStatuses(loadType)
 
-        // 縦スクロール位置
-        val view = mListView.getChildAt(0)
-        val y = view?.top ?: 0
+        if (loadType == LoadStatusesType.NEW_ARRIVAL && isLoading) return@withContext
 
-        // 要素を上に追加（ addだと下に追加されてしまう ）
-        var highlight = false
-        mStackRows.forEach { row ->
-            mAdapter.insert(row, 0)
-            when {
-                row.isFavorite -> {
-                    // お気に入りしたのが自分じゃない時
-                    if (row.source!!.id != currentIdentifier.userId) highlight = true
+        if (statuses?.isNotEmpty() == true)  {
+            when (loadType) {
+                LoadStatusesType.ADDITIONAL -> {
+                    mAdapter.addAllSuspend(statuses)
                 }
-                row.isStatus -> {
-                    // 投稿主が自分じゃない時
-                    if (row.status!!.user.id != currentIdentifier.userId) highlight = true
+                LoadStatusesType.RELOAD -> {
+                    mAdapter.clear()
+                    mAdapter.extensionAddAllFromStatuses(statuses)
                 }
-                row.isDirectMessage -> {
-                    // 投稿主が自分じゃない時
-                    if (row.message!!.senderId != currentIdentifier.userId) highlight = true
-                }
-            }
-        }
-        mStackRows.clear()
+                LoadStatusesType.NEW_ARRIVAL -> {
+                    val position = mListView.firstVisiblePosition
+                    val y = mListView.getChildAt(0)?.top ?: 0
 
-        val autoScroll = position == 0 && y == 0 && mStackRows.size < 3
+                    val size = mAdapter.insertAllFromStatus(statuses, 0)
 
-        //if (highlight) EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, autoScroll))
-
-        if (autoScroll) {
-            mListView.setSelection(0)
-        } else {
-            // 少しでもスクロールさせている時は画面を動かさない様にスクロー位置を復元する
-            mListView.setSelectionFromTop(position + mStackRows.size, y)
-            // 未読の新規ツイートをチラ見せ
-            if (position == 0 && y == 0) {
-                mListView.smoothScrollToPositionFromTop(position + mStackRows.size, 120)
-            }
-        }
-    }
-
-    /**
-     * 新しいツイートを表示して欲しいというリクエストを一旦待たせ、
-     * 250ms以内に同じリクエストが来なかったら表示する。
-     * 250ms以内に同じリクエストが来た場合は、更に250ms待つ。
-     * 表示を連続で行うと処理が重くなる為この制御を入れている。
-     */
-    private fun showStack() {
-        mListView.removeCallbacks(mRender)
-        mListView.postDelayed(mRender, 250)
-    }
-
-    /**
-     * ストリーミングAPIからツイートやメッセージを受信した時の処理
-     * 1. 表示スべき内容かチェックし、不適切な場合はスルーする
-     * 2. すぐ表示すると流速が早い時にガクガクするので溜めておく
-     *
-     * @param row ツイート情報
-     */
-    fun addStack(row: Row) {
-        mStackRows.add(row)
-        if (!mScrolling && isTop) {
-            showStack()
-        } else {
-            //EventBus.getDefault().post(NewRecordEvent(tabId, mSearchWord, false))
-        }
-    }
-
-    /**
-     * タブ固有のID、ユーザーリストではリストのIDを、その他はマイナスの固定値を返す
-     */
-
-
-    open var mSearchWord = ""
-
-
-    private suspend fun load(additional: Boolean) {
-        if(isLoading || !hasNext) return
-        isLoading = true
-
-        val statuses = getNewStatuses(additional)
-
-        when {
-            statuses.isNullOrEmpty() -> {
-                if(statuses?.isEmpty() == true) hasNext = false
-                mSwipeRefreshLayout.isRefreshing = false
-                mListView.visibility = View.VISIBLE
-            }
-            additional -> {
-                mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatuses(statuses)
-                mListView.visibility = View.VISIBLE
-            }
-            else -> {
-                mAdapter.clear()
-                mMaxId = statuses.last().id
-                mAdapter.extensionAddAllFromStatuses(statuses)
-            }
-        }
-
-        mListView.visibility = View.VISIBLE
-        isLoading = false
-
-        if(!additional) goToTop()
-    }
-
-    protected abstract suspend fun getNewStatuses(additional: Boolean): List<Status>?
-
-    protected fun getRequestMaxId(additional: Boolean): Long?
-        = mMaxId.takeIf { it > 0 && additional }?.minus(1)
-
-    /**
-     *
-     * !!! EventBus !!!
-     *
-     */
-
-
-    /**
-     * 高速スクロールの設定が変わったら切り替える
-     */
-    @Suppress("UNUSED_PARAMETER")
-    fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = BasicSettings.fastScrollOn }
-
-    @Suppress("UNUSED_PARAMETER")
-    fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
-
-    /**
-     * ストリーミングAPIからツイ消しイベントを受信
-     *
-     * @param event ツイート
-     */
-    open fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        launch {
-            val removePositions = mAdapter.removeStatus(event.statusId!!)
-            for (removePosition in removePositions) {
-                if (removePosition >= 0) {
-                    val visiblePosition = mListView.firstVisiblePosition
-                    if (visiblePosition > removePosition) {
-                        val view = mListView.getChildAt(0)
-                        val y = view?.top ?: 0
-                        mListView.setSelectionFromTop(visiblePosition - 1, y)
-                        break
+                    if (position == 0 && y == 0) {
+                        mListView.setSelection(0)
+                    } else {
+                        mListView.setSelectionFromTop(position + size, y)
                     }
                 }
             }
+
+            if (!loadType.limitMin) statusIdMax = statuses.first().id
+            if (!loadType.limitMax) statusIdMin = statuses.last().id
         }
+
+        mListView.visibility = View.VISIBLE
+
+        if (loadType != LoadStatusesType.NEW_ARRIVAL) isLoading = false
+        if (loadType == LoadStatusesType.RELOAD) goToTop()
     }
 
-    /**
-     * ストリーミングAPIからツイートイベントを受信
-     *
-     * @param event ツイート
-     */
-    open fun onEventMainThread(event: StreamingCreateStatusEvent) {
-        addStack(event.row)
+    protected abstract suspend fun getNewStatuses(loadType: LoadStatusesType): List<Status>?
+
+    protected enum class LoadStatusesType(val limitMax: Boolean, val limitMin: Boolean) {
+        RELOAD(false, false), ADDITIONAL(true, false), NEW_ARRIVAL(false, true)
     }
 
-    /**
-     * アカウント変更通知を受け、表示中のタブはリロード、表示されていたいタブはクリアを行う
+    protected val LoadStatusesType.requestMaxId: Long?
+        get() = statusIdMin.takeIf { it > 0 && limitMax }?.minus(1)
+
+    protected val LoadStatusesType.requestSinceId: Long?
+        get() = statusIdMax.takeIf { it > 0 && limitMin }?.plus(1)
+
+    /*
+     * !!! EventBus !!!
      *
-     * @param event アプリが表示しているタブのID
+     * 高速スクロールの設定が変わったら切り替える
      */
-    fun onEventMainThread(event: PostAccountChangeEvent) {
-        reload()
-    }
+    @Suppress("UNUSED_PARAMETER")
+    fun onEventMainThread(event: BasicSettingsChangeEvent) { mListView.isFastScrollEnabled = preferences.display.general.isFastScrollEnabled }
+
+    @Suppress("UNUSED_PARAMETER")
+    fun onEventMainThread(event: StatusActionEvent) { mAdapter.notifyDataSetChanged() }
 }

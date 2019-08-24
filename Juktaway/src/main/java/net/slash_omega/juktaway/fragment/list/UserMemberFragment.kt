@@ -16,9 +16,7 @@ import jp.nephy.penicillin.extensions.cursor.hasNext
 import jp.nephy.penicillin.extensions.cursor.next
 import jp.nephy.penicillin.models.cursor.CursorUsers
 import kotlinx.android.synthetic.main.list_guruguru.*
-import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
-import kotlinx.coroutines.GlobalScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.UserAdapter

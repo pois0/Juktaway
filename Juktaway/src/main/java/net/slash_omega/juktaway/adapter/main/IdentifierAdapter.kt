@@ -5,7 +5,7 @@ import android.view.View
 import android.view.ViewGroup
 import kotlinx.android.synthetic.main.row_switch_account.view.*
 import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.DividedFragmentActivity
+import net.slash_omega.juktaway.ScopedFragmentActivity
 import net.slash_omega.juktaway.adapter.ArrayAdapterBase
 import net.slash_omega.juktaway.model.UserIconManager.displayUserIcon
 import net.slash_omega.juktaway.twitter.Core
@@ -16,7 +16,7 @@ import net.slash_omega.juktaway.twitter.identifierList
 /**
  * Created on 2018/10/20.
  */
-class IdentifierAdapter(private val mActivity: DividedFragmentActivity, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<Identifier>(mActivity, resourceId) {
+class IdentifierAdapter(private val mActivity: ScopedFragmentActivity, resourceId: Int, private val highlightColor: Int, private val defaultColor: Int) : ArrayAdapterBase<Identifier>(mActivity, resourceId) {
     init { identifierList.forEach { add(it) } }
 
     override val View.mView: (Int, ViewGroup?) -> Unit

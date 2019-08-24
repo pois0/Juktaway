@@ -1,6 +1,5 @@
 package net.slash_omega.juktaway
 
-import android.app.Activity
 import android.content.Context
 import android.os.Bundle
 import android.view.Menu
@@ -27,11 +26,8 @@ import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.PressEnterListener
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.OldTab
-import net.slash_omega.juktaway.model.SEARCH_TAB_ID
-import net.slash_omega.juktaway.model.Tab
 import net.slash_omega.juktaway.model.TabManager
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
@@ -41,7 +37,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/24.
  */
-class SearchActivity: DividedFragmentActivity() {
+class SearchActivity: ScopedFragmentActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
     }
@@ -127,10 +123,7 @@ class SearchActivity: DividedFragmentActivity() {
                 searchWords.text?.let {
                     createSavedSearch(it.toString())
                 }
-            R.id.search_to_tab -> {
-                TabManager.addSearchTab(searchWords.text.toString())
-                setResult(Activity.RESULT_OK)
-            }
+            R.id.search_to_tab -> TabManager.addSearchTab(searchWords.text.toString())
         }
         return true
     }
@@ -166,13 +159,13 @@ class SearchActivity: DividedFragmentActivity() {
             nextAction = null
             launch {
                 runCatching {
-                    currentClient.search.search("$text exclude:retweets", count = BasicSettings.pageCount).await()
+                    currentClient.search.search("$text exclude:retweets", count = preferences.api.pageCount).await()
                 }.onSuccess { result ->
                     val statuses = result.result.statuses
                     if (result.hasNext) nextAction = result.next
 
                     val count = mAdapter.count
-                    mAdapter.addAllFromStatusesSuspend(statuses)
+                    mAdapter.addAllSuspend(statuses)
                     mAdapter.notifyDataSetChanged()
 
                     search_list.visibility = View.VISIBLE

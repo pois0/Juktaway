@@ -16,36 +16,35 @@ import android.text.TextWatcher
 import android.util.TypedValue
 import android.view.*
 import android.widget.AdapterView
-import android.widget.Button
+import android.widget.ImageButton
 import android.widget.LinearLayout
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.jsonkt.stringify
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.endpoints.statuses
 import jp.nephy.penicillin.endpoints.statuses.create
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_main.*
 import kotlinx.android.synthetic.main.activity_main.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.SearchAdapter
 import net.slash_omega.juktaway.adapter.main.IdentifierAdapter
 import net.slash_omega.juktaway.adapter.main.MainPagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
-import net.slash_omega.juktaway.event.NewRecordEvent
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
-import net.slash_omega.juktaway.event.action.PostAccountChangeEvent
 import net.slash_omega.juktaway.event.settings.BasicSettingsChangeEvent
 import net.slash_omega.juktaway.fragment.dialog.QuickPostMenuFragment
 import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.model.UserIconManager
 import net.slash_omega.juktaway.model.icon
 import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.Preferences
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.*
-import net.slash_omega.juktaway.widget.FontelloButton
 import org.jetbrains.anko.intentFor
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.startActivityForResult
@@ -53,8 +52,10 @@ import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class MainActivity: DividedFragmentActivity() {
+class MainActivity: ScopedFragmentActivity() {
     companion object {
+        private val whiteColor = Color.parseColor("#FFFFFF")
+        private val grayColor = Color.parseColor("#666666")
         private const val REQUEST_ACCOUNT_SETTING = 200
         private const val REQUEST_SETTINGS = 300
         private const val REQUEST_TAB_SETTINGS = 400
@@ -85,13 +86,14 @@ class MainActivity: DividedFragmentActivity() {
     }}
     private var mFirstBoot = true
     private var mInReplyToStatus: Status? = null
+    internal var currentTabPosition = 0
 
     private var mSwitchIdentifier: Identifier? = null
     var statusInitialText: String = ""
         private set
+    private var currentTabVersion = -1
 
 
-    @SuppressLint("InflateParams")
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
         ThemeUtil.setTheme(this)
@@ -180,7 +182,7 @@ class MainActivity: DividedFragmentActivity() {
                         mInReplyToStatus = null
                         quick_tweet_edit.setText(statusInitialText)
                     }.onFailure { e ->
-                        toast(if ( e is PenicillinException && e.error == TwitterErrorMessage.StatusIsADuplicate) R.string.toast_update_status_already
+                        toast(if ( e is PenicillinTwitterApiException && e.error == TwitterApiError.DuplicateStatus) R.string.toast_update_status_already
                         else R.string.toast_update_status_failure)
                     }
                     MessageUtil.dismissProgressDialog()
@@ -190,18 +192,14 @@ class MainActivity: DividedFragmentActivity() {
 
         post_button.setOnClickListener {
             startActivity(intentFor<PostActivity>().also { intent ->
-                if (quick_tweet_layout.visibility == View.VISIBLE) {
-                    with (quick_tweet_edit) {
-                        if (string.isNotEmpty()) {
-                            intent.putExtra("status", string)
-                            intent.putExtra("selection", string.length)
-                            mInReplyToStatus?.run {
-                                intent.putExtra("inReplyToStatus", this.toJsonString())
-                            }
-                            setText(statusInitialText)
-                            clearFocus()
-                        }
+                quick_tweet_edit.takeIf { quick_tweet_layout.visibility == View.VISIBLE && it.string.isNotEmpty() }?.also { edit ->
+                    intent.putExtra("status", edit.string)
+                    intent.putExtra("selection", edit.string.length)
+                    mInReplyToStatus?.run {
+                        intent.putExtra("inReplyToStatus", stringify())
                     }
+                    edit.setText(statusInitialText)
+                    edit.clearFocus()
                 }
             })
         }
@@ -226,19 +224,13 @@ class MainActivity: DividedFragmentActivity() {
     override fun onStart() {
         super.onStart()
 
-        with (window) {
-            if (BasicSettings.keepScreenOn) addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-            else clearFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
-        }
+        window.addFlags(WindowManager.LayoutParams.FLAG_KEEP_SCREEN_ON)
     }
 
     override fun onActivityResult(requestCode: Int, resultCode: Int, data: Intent?) {
         super.onActivityResult(requestCode, resultCode, data)
 
         when (requestCode) {
-            REQUEST_TAB_SETTINGS -> {
-                if (resultCode == Activity.RESULT_OK) setupTab()
-            }
             REQUEST_ACCOUNT_SETTING -> {
                 if (resultCode == Activity.RESULT_OK)
                     mSwitchIdentifier = data?.getSerializableExtra("identifier") as Identifier
@@ -253,9 +245,7 @@ class MainActivity: DividedFragmentActivity() {
                 }
             }
             REQUEST_SEARCH -> {
-                if (resultCode == Activity.RESULT_OK) {
-                    setupTab()
-                } else if (resultCode == SearchActivity.RESULT_CREATE_SAVED_SEARCH) {
+                if (resultCode == SearchActivity.RESULT_CREATE_SAVED_SEARCH) {
                     mSearchAdapter?.reload()
                 }
                 cancelSearch()
@@ -266,6 +256,7 @@ class MainActivity: DividedFragmentActivity() {
     override fun onResume() {
         super.onResume()
         EventBus.getDefault().register(this)
+        setupTab()
     }
 
     override fun onPostResume() {
@@ -281,7 +272,7 @@ class MainActivity: DividedFragmentActivity() {
         EventBus.getDefault().post(BasicSettingsChangeEvent())
 
         title = mMainPagerAdapter.getPageTitle(mViewPager.currentItem)
-        if (BasicSettings.quickMode) showQuickPanel() else hideQuickPanel()
+        if (preferences.display.main.isQuickPostVisible) showQuickPanel() else hideQuickPanel()
 
         mSwitchIdentifier?.let {
             launch { Core.switchToken(it) }
@@ -334,36 +325,8 @@ class MainActivity: DividedFragmentActivity() {
         return true
     }
 
-    override fun onSaveInstanceState(outState: Bundle?) {
-        super.onSaveInstanceState(outState)
-
-        tab_menus.run {
-            val tabColors = IntArray(childCount)
-            for (i in 0 until childCount) {
-                (getChildAt(i) as? Button)?.run {
-                    tabColors[i] = currentTextColor
-                }
-            }
-            outState?.putIntArray("tabColors", tabColors)
-        }
-    }
-
-    override fun onRestoreInstanceState(savedInstanceState: Bundle?) {
-        super.onRestoreInstanceState(savedInstanceState)
-
-        savedInstanceState?.let {
-            with (tab_menus) {
-                it.getIntArray("tabColors")?.let { colors ->
-                    for (i in 0 until Math.min(childCount, colors.size)) {
-                        (getChildAt(i) as? Button)?.setTextColor(colors[i])
-                    }
-                }
-            }
-        }
-    }
-
     @SuppressLint("SetTextI18n")
-    override fun setTitle(title: CharSequence?) {
+    override fun setTitle(title: CharSequence) {
         launch {
             val matcher: Matcher = USER_LIST_PATTERN.matcher(title)
             if (matcher.find()) {
@@ -371,10 +334,10 @@ class MainActivity: DividedFragmentActivity() {
                 action_bar_sub_title.text = matcher.group(1)
             } else {
                 action_bar_title.text = title
-                action_bar_sub_title.text = when (BasicSettings.displayAccountName) {
-                    BasicSettings.DisplayAccountName.SCREEN_NAME ->
+                action_bar_sub_title.text = when (preferences.display.main.userName) {
+                    Preferences.DisplayPreferences.DisplayMainPreferences.UserName.SCREEN_NAME ->
                         "@" + currentIdentifier.screenName
-                    BasicSettings.DisplayAccountName.DISPLAY_NAME ->
+                    Preferences.DisplayPreferences.DisplayMainPreferences.UserName.DISPLAY_NAME ->
                         UserIconManager.getName(currentIdentifier.userId)
                     else -> ""
                 }
@@ -393,7 +356,8 @@ class MainActivity: DividedFragmentActivity() {
             isFocusableInTouchMode = true
             isEnabled = true
         }
-        BasicSettings.setQuickMod(true)
+
+        preferences.display.main.isQuickPostVisible = true
     }
 
     private fun hideQuickPanel() {
@@ -404,11 +368,14 @@ class MainActivity: DividedFragmentActivity() {
             clearFocus()
         }
         quick_tweet_layout.visibility = View.GONE
-        BasicSettings.setQuickMod(false)
+        preferences.display.main.isQuickPostVisible = false
     }
 
     private fun setupTab() {
-        val tabs = TabManager.loadTabs()
+        if (TabManager.version == currentTabVersion) return
+        val currentTabs = TabManager.mTabs
+        currentTabVersion = TabManager.version
+
         val outValueTextColor = TypedValue()
         val outValueBackground = TypedValue()
         theme?.resolveAttribute(R.attr.menu_text_color, outValueTextColor, true)
@@ -418,27 +385,26 @@ class MainActivity: DividedFragmentActivity() {
         mMainPagerAdapter.clearTab()
 
         var pos = 0
-        for (tab in tabs) {
-            tab_menus.addView(FontelloButton(this).apply {
+        for (tab in currentTabs) {
+            tab_menus.addView(ImageButton(this).apply {
                 layoutParams = LinearLayout.LayoutParams(
                         (60 * resources.displayMetrics.density + 0.5f).toInt(),
-                        LinearLayout.LayoutParams.WRAP_CONTENT
+                        (48 * resources.displayMetrics.density + 0.5f).toInt()
                 )
-                setText(tab.icon)
-                textSize = 22f
-                setTextColor(outValueTextColor.data)
+                setImageResource(tab.icon)
+                setColorFilter(outValueTextColor.data)
                 setBackgroundResource(outValueBackground.resourceId)
                 tag = pos++
                 setOnClickListener(mMenuOnClickListener)
                 setOnLongClickListener(mMenuOnLongClickListener)
             })
-            mMainPagerAdapter.addTab(tab)
+            mMainPagerAdapter.addTab(tab, pos - 1)
         }
 
         mMainPagerAdapter.notifyDataSetChanged()
 
         mViewPager.currentItem = 0
-        (tab_menus.getChildAt(0) as? Button)?.isSelected = true
+        (tab_menus.getChildAt(0) as? ImageButton)?.isSelected = true
         title = mMainPagerAdapter.getPageTitle(0)
     }
 
@@ -460,8 +426,6 @@ class MainActivity: DividedFragmentActivity() {
     }
 
     private fun setup() {
-        setupTab()
-
         footer.visibility = View.VISIBLE
 
         mViewPager.offscreenPageLimit = 10
@@ -471,7 +435,7 @@ class MainActivity: DividedFragmentActivity() {
                 if (mMainPagerAdapter.findFragmentByPosition(position).isTop) showTopView()
                 with (tab_menus) {
                     for (i in 0 until childCount) {
-                        (getChildAt(i) as Button?)?.isSelected = i == position
+                        (getChildAt(i) as ImageButton?)?.isSelected = i == position
                     }
                 }
                 title = mMainPagerAdapter.getPageTitle(position)
@@ -479,11 +443,11 @@ class MainActivity: DividedFragmentActivity() {
         })
 
         quick_tweet_edit.addTextChangedListener(mQuickTweetTextWatcher)
-        if (BasicSettings.quickMode) showQuickPanel()
+        if (preferences.display.main.isQuickPostVisible) showQuickPanel()
     }
 
     private fun showTopView() {
-        (tab_menus.getChildAt(mViewPager.currentItem) as? Button)?.let {
+        (tab_menus.getChildAt(mViewPager.currentItem) as? ImageButton)?.let {
             ThemeUtil.setThemeTextColor(it, R.attr.menu_text_color)
         }
     }
@@ -519,6 +483,15 @@ class MainActivity: DividedFragmentActivity() {
                 text = length.toString()
             }
             send_button.isEnabled = !(length < 0 || cs.toString().isEmpty())
+            if (length >= 0 && cs.toString().isNotEmpty()) {
+                send_button.isEnabled = true
+                send_button.setColorFilter(Color.WHITE)
+                send_button.setColorFilter(whiteColor)
+            } else {
+                send_button.isEnabled = false
+                send_button.setColorFilter(Color.parseColor("#666666"))
+                send_button.setColorFilter(grayColor)
+            }
         }
 
         override fun afterTextChanged(p0: Editable?) {}
@@ -529,14 +502,14 @@ class MainActivity: DividedFragmentActivity() {
         if (action_bar_search_text.text == null) return@OnItemClickListener
         val searchWord = action_bar_search_text.string
         KeyboardUtil.hideKeyboard(action_bar_search_text)
-        mSearchAdapter?.let {
-            if (it.savedMode) {
-                startActivityForResult(intentFor<SearchActivity>().apply{
-                    putExtra("query", searchWord)
-                }, REQUEST_SEARCH)
-                return@OnItemClickListener
-            }
+
+        if (mSearchAdapter?.savedMode == true) {
+            startActivityForResult(intentFor<SearchActivity>().apply{
+                putExtra("query", searchWord)
+            }, REQUEST_SEARCH)
+            return@OnItemClickListener
         }
+
         when (i) {
             0 ->
                 startActivityForResult<SearchActivity>(REQUEST_SEARCH, "query" to searchWord)
@@ -581,7 +554,7 @@ class MainActivity: DividedFragmentActivity() {
                 putExtra("status", e.text)
                 e.selectionStart?.let { putExtra("selection", it) }
                 e.selectionStop?.let { putExtra("selection_stop", it) }
-                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it.toJsonString()) }
+                e.inReplyToStatus?.let { putExtra("inReplytoStatus", it.stringify()) }
             })
         }
     }
@@ -590,17 +563,7 @@ class MainActivity: DividedFragmentActivity() {
     fun onEventMainThread(e: AccountChangeEvent) {
         setupTab()
         mAccessTokenAdapter.notifyDataSetChanged()
-        EventBus.getDefault().post(PostAccountChangeEvent())
     }
-
-//    fun onEventMainThread(e: NewRecordEvent) {
-//        val pos = if (e.tabId > TabManager.OLD_SEARCH_TAB_ID) mMainPagerAdapter.findPositionById(e.tabId)
-//                else mMainPagerAdapter.findPositionBySearchWord(e.searchWord)
-//        if (pos < 0) return
-//        (tab_menus.getChildAt(pos) as Button?)?.let {
-//            ThemeUtil.setThemeTextColor(it, if (mViewPager.currentItem == pos && e.autoScroll) R.attr.menu_text_color else R.attr.holo_blue)
-//        }
-//    }
 
     fun fixStatusInitialText() { statusInitialText = quick_tweet_edit.text.toString() }
 

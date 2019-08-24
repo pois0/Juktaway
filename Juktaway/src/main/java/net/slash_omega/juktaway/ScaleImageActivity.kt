@@ -27,14 +27,14 @@ import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.fragment.ScaleImageFragment
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
-import net.slash_omega.juktaway.util.StatusUtil
+import net.slash_omega.juktaway.util.imageUrls
 import net.slash_omega.juktaway.util.parseWithClient
 import net.slash_omega.juktaway.util.tryAndTraceGet
 import org.jetbrains.anko.toast
 import java.net.URL
 import java.util.regex.Pattern
 
-class ScaleImageActivity: DividedFragmentActivity() {
+class ScaleImageActivity: ScopedFragmentActivity() {
     companion object {
         val pattern: Pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/photo/(\\d+)/?.*")
         const val REQUEST_PERMISSIONS_STORAGE = 1
@@ -123,8 +123,7 @@ class ScaleImageActivity: DividedFragmentActivity() {
                         setNotificationVisibility(DownloadManager.Request.VISIBILITY_VISIBLE_NOTIFY_COMPLETED)
                     })
                 }
-            }.onFailure { e ->
-                e.printStackTrace()
+            }.onFailure {
                 toast(R.string.toast_save_image_failure)
             }
         }
@@ -137,7 +136,7 @@ class ScaleImageActivity: DividedFragmentActivity() {
     }
 
     private fun showStatus(status: Status, index: Int) {
-        val urls = StatusUtil.getImageUrls(status)
+        val urls = status.imageUrls
         if (urls.size == 1) symbol.visibility = View.GONE
         for (url in urls) {
             imageUrls.add(url)

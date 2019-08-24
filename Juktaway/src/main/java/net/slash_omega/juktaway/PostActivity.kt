@@ -25,9 +25,9 @@ import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.ImageView
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
 import kotlinx.android.synthetic.main.action_bar_post.*
 import kotlinx.android.synthetic.main.activity_post.*
@@ -45,13 +45,14 @@ import net.slash_omega.juktaway.twitter.Identifier
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.twitter.identifierList
 import net.slash_omega.juktaway.util.*
+import org.jetbrains.anko.startService
 import org.jetbrains.anko.toast
 import org.jetbrains.anko.wrapContent
 import java.io.File
 import java.io.FileNotFoundException
 
 @SuppressLint("SetTextI18n", "InflateParams")
-class PostActivity: DividedFragmentActivity() {
+class PostActivity: ScopedFragmentActivity() {
     companion object {
         private const val REQUEST_GALLERY = 1
         private const val REQUEST_CAMERA = 2
@@ -142,7 +143,7 @@ class PostActivity: DividedFragmentActivity() {
         intent.getStringExtra("inReplyToStatus")?.toJsonObject()?.parseWithClient<Status>()?.run { retweetedStatus ?: this }?.run {
             mInReplyToStatusId = id
             ImageUtil.displayRoundedImage(user.profileImageUrl, in_reply_to_user_icon)
-            in_reply_to_status.text = fullText()
+            in_reply_to_status.text = text
 
             // スクロール可能にするのに必要
             in_reply_to_status.movementMethod = ScrollingMovementMethod.getInstance()
@@ -186,7 +187,6 @@ class PostActivity: DividedFragmentActivity() {
                 // 直近のと一緒なら保存しない
                 with (mTextHistory) {
                     s?.let { if (isEmpty() || it.toString() != mTextHistory[size-1]) add(it.toString()) }
-                    undo.isEnabled = isNotEmpty()
                 }
             }
 
@@ -199,6 +199,9 @@ class PostActivity: DividedFragmentActivity() {
                     } else {
                         img_button.isEnabled = true
                     }
+                }
+                if (s.isNullOrBlank()) {
+                    disableTweetButton()
                 }
             }
         })
@@ -240,7 +243,6 @@ class PostActivity: DividedFragmentActivity() {
                         PostStockSettings.removeDraft(draft)
                     }
                 }
-
             }
 
             mDraftDialog = AlertDialog.Builder(this)
@@ -273,7 +275,7 @@ class PostActivity: DividedFragmentActivity() {
         mImgPath = savedInstanceState.getSerializable("image_path") as File
 
         mImgPath?.run {
-            if (exists()) tweet_button.isEnabled = true
+            if (exists()) enableTweetButton()
         }
     }
 
@@ -364,9 +366,9 @@ class PostActivity: DividedFragmentActivity() {
                 }
             }
             toast(R.string.toast_set_image_success)
-            tweet_button.isEnabled = true
+            enableTweetButton()
         } catch (e: FileNotFoundException) {
-            e.printStackTrace()
+            toast(R.string.toast_load_data_failure)
         }
     }
 
@@ -380,12 +382,10 @@ class PostActivity: DividedFragmentActivity() {
         count.setTextColor(textColor)
         count.text = length.toString()
 
-        when {
-            length < 0 -> // 文字数オーバー
-                tweet_button.isEnabled = false
-            str.isEmpty() -> // 何も入力されていない時も画像があれば投稿可
-                tweet_button.isEnabled = image_preview_container.childCount > 0
-            else -> tweet_button.isEnabled = true
+        if (length >= 0 || !(str.isEmpty() && image_preview_container.childCount == 0)) {
+            enableTweetButton()
+        } else {
+            disableTweetButton()
         }
     }
 
@@ -421,14 +421,13 @@ class PostActivity: DividedFragmentActivity() {
 
     private fun tweet() {
         launch {
-            MessageUtil.showProgressDialog(this@PostActivity, getString(R.string.progress_sending))
             val text = status_text.text.toString()
             if (text.startsWith("D ")) {
                 val e = (switch_account_spinner.selectedItem as Identifier).sendDirectMessage(text)
                 MessageUtil.dismissProgressDialog()
 
                 e?.apply {
-                    toast(if (this is PenicillinException && error == TwitterErrorMessage.YouCannotSendMessagesToUsersWhoAreNotFollowingYou)
+                    toast(if (this is PenicillinTwitterApiException && error == TwitterApiError.CannotSendMessagesToUsersWhoAreNotFollowingYou)
                                 R.string.toast_update_status_not_Follow
                             else
                                 R.string.toast_update_status_failure)
@@ -437,37 +436,35 @@ class PostActivity: DividedFragmentActivity() {
                     if (!mWidgetMode) finish()
                 }
             } else {
-                val mImagePathList = arrayListOf<File>().apply {
-                    image_preview_container.let { container ->
-                        for (i in 0 until container.childCount) {
-                            add(container.getChildAt(i).tag as File)
-                        }
-                    }
+                val mImagePathList = (0 until image_preview_container.childCount).map {
+                    image_preview_container.getChildAt(it).tag as File
                 }
 
-                val e = runCatching {
-                    (switch_account_spinner.selectedItem as Identifier).updateStatus(text,
-                            mInReplyToStatusId.takeIf { it > 0 }, mImagePathList)
-                }.run { getOrNull() ?: exceptionOrNull() }
-                e?.printStackTrace()
-                MessageUtil.dismissProgressDialog()
-                (e as? PenicillinException)?.let {
-                    val message = when (e.error) {
-                        TwitterErrorMessage.StatusIsADuplicate -> R.string.toast_update_status_already
-                        else -> R.string.toast_update_status_failure
-                    }
-                    toast(message)
-                } ?: run {
+                startService<PostService>("text" to text,
+                        "replyStatusId" to mInReplyToStatusId,
+                        "imagePathList" to mImagePathList,
+                        "identifier" to switch_account_spinner.selectedItem as Identifier
+                )
+
+                if (!mWidgetMode) {
+                    finish()
+                } else {
                     status_text.setText("")
-                    if (!mWidgetMode) {
-                        finish()
-                    } else {
-                        image_preview_container.removeAllViews()
-                        tweet_button.isEnabled = false
-                    }
+                    image_preview_container.removeAllViews()
+                    disableTweetButton()
                 }
             }
         }
+    }
+
+    private fun enableTweetButton() {
+        tweet_button.isEnabled = true
+        tweet_button.setColorFilter(Color.WHITE)
+    }
+
+    private fun disableTweetButton() {
+        tweet_button.isEnabled = true
+        tweet_button.setColorFilter(Color.parseColor("#666666"))
     }
 
     private class DraftAdapter(context: PostActivity, val mLayout: Int, list: List<String>): ArrayAdapter<String>(context, mLayout, list) {

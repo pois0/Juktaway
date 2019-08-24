@@ -1,24 +1,30 @@
 package net.slash_omega.juktaway.util
 
+import android.content.Context
 import android.text.SpannableStringBuilder
 import android.text.Spanned
 import android.text.style.UnderlineSpan
-import jp.nephy.penicillin.extensions.models.fullText
+import android.widget.TextView
+import jp.nephy.penicillin.extensions.models.firstIndex
+import jp.nephy.penicillin.extensions.models.size
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.models.Status
+import jp.nephy.penicillin.models.UrlEntityModel
+import jp.nephy.penicillin.models.entities.StatusEntity
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import java.util.*
-import java.util.regex.Pattern
+
 
 val Status.videoUrl: String
     get() {
-        //TODO
         extendedEntities?.run {
             for (entity in media) {
-                entity.videoInfo?.variants?.run {
-                    for (v in this) {
-                        if (v.url.lastIndexOf("mp4") != -1) return v.url
-                    }
-                }
+                return entity.videoInfo?.variants?.filter { it.bitrate != null }
+                        ?.sortedBy { it.bitrate!! }
+                        ?.let {
+                            it.runCatching { get(preferences.display.videoQuality.rank) }
+                                    .getOrDefault(it.firstOrNull())
+                        }?.url ?: continue
             }
         }
         return ""
@@ -26,83 +32,12 @@ val Status.videoUrl: String
 
 val Status.imageUrls: List<String>
     get() {
-        val imageUrls = ArrayList<String>()
+        val imageUrls = extendedEntities?.media.takeNotEmpty()?.map { it.mediaUrl }?.toMutableList() ?: mutableListOf()
         entities.urls.map { it.expandedUrl }.forEach { url ->
             for (set in ImageUrlTransformer.list) {
                 val matcher = set.pattern.matcher(url)
                 if (matcher.find()) {
                     imageUrls.add(set.urlGenerator(url, matcher))
-                    continue
-                }
-            }
-        }
-
-        entities.media.takeNotEmpty()?.map { it.mediaUrl }?.forEach { imageUrls.add(it) }
-
-        return imageUrls
-    }
-
-object StatusUtil {
-    private val URL_PATTERN = Pattern.compile("(http://|https://)[\\w.\\-/:#?=&;%~+$]+")
-    private val MENTION_PATTERN = Pattern.compile("@[a-zA-Z0-9_]+")
-    @Suppress("SpellCheckingInspection")
-    private val HASHTAG_PATTERN = Pattern.compile("#\\S+")
-
-    /**
-     * source(via)からクライアント名を抜き出す
-     *
-     * @param source [クライアント名](クライアントURL)という文字列
-     * @return クライアント名
-     */
-    fun getClientName(source: String) = source.split("[<>]".toRegex()).dropLastWhile { it.isEmpty() }.toTypedArray().let {
-        it[if (it.size > 1) 2 else 0]
-    }
-
-    /**
-     * 自分宛てのメンションかどうかを判定する
-     *
-     * @param status ツイート
-     * @return true ... 自分宛てのメンション
-     */
-    fun isMentionForMe(status: Status): Boolean {
-        val userId = currentIdentifier.userId
-        if (status.inReplyToUserId == userId) {
-            return true
-        }
-        val mentions = status.entities.userMentions
-        for (mention in mentions) {
-            if (mention.id == userId) {
-                return true
-            }
-        }
-        return false
-    }
-
-    /**
-     * 短縮URLを表示用URLに置換する
-     *
-     * @param status ツイート
-     * @return 短縮URLを展開したツイート本文
-     */
-    fun getExpandedText(status: Status): String
-            = status.fullText()
-                    .let { status.entities.urls.fold(it) { acc, url -> acc.replace(url.url, url.expandedUrl) } }
-                    .let { status.entities.media.fold(it) { acc, media -> acc.replace(media.url, media.expandedUrl) } }
-
-    /**
-     * ツイートに含まれる画像のURLをすべて取得する
-     *
-     * @param status ツイート
-     * @return 画像のURL
-     */
-    fun getImageUrls(status: Status): List<String> {
-        val imageUrls = status.extendedEntities?.media.takeNotEmpty()?.map { it.mediaUrl }?.toMutableList() ?: mutableListOf()
-        status.entities.urls.map { it.expandedUrl }.forEach { url ->
-            for (set in ImageUrlTransformer.list) {
-                val matcher = set.pattern.matcher(url)
-                if (matcher.find()) {
-                    imageUrls.add(set.urlGenerator(url, matcher))
-                    break
                 }
             }
         }
@@ -110,30 +45,44 @@ object StatusUtil {
         return imageUrls
     }
 
-    fun generateUnderline(str: String): SpannableStringBuilder {
-        // URL、メンション、ハッシュタグ が含まれていたら下線を付ける
-        val sb = SpannableStringBuilder().apply { append(str) }
-        var us: UnderlineSpan
+fun TextView.setTextFromStatus(status: Status, context: Context) {
+    val str = status.text
+    val sb = SpannableStringBuilder()
 
-        val urlMatcher = URL_PATTERN.matcher(str)
-        while (urlMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, urlMatcher.start(), urlMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
+    status.entities.run { userMentions + hashtags + urls + media }
+            .sortedBy { it.firstIndex }
+            .fold(0) { acc, entity ->
+                when (entity) {
+                    is StatusEntity.UserMentionEntity -> {
+                        val userMention = "@" + entity.screenName
+                        val start = str.indexOf(userMention, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(userMention, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size
+                    }
+                    is StatusEntity.HashtagEntity -> {
+                        val hashtag = "#" + entity.text
+                        val start = str.indexOf(hashtag, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(hashtag, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.size
+                    }
+                    else -> {
+                        entity as UrlEntityModel
+                        val start = str.indexOf(entity.url, acc, true).takeUnless { it < 0 } ?: return@fold acc
+                        sb.append(str.substring(acc, start))
+                        sb.append(entity.expandedUrl, UnderlineSpan(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
+                        start + entity.url.length
+                    }
+                }
+            }.let {
+                sb.append(str.substring(it))
+            }
 
-
-        val mentionMatcher = MENTION_PATTERN.matcher(str)
-        while (mentionMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, mentionMatcher.start(), mentionMatcher.end(), Spanned.SPAN_EXCLUSIVE_EXCLUSIVE)
-        }
-
-        val hashtagMatcher = HASHTAG_PATTERN.matcher(str)
-        while (hashtagMatcher.find()) {
-            us = UnderlineSpan()
-            sb.setSpan(us, hashtagMatcher.start(), hashtagMatcher.end(), Spanned.SPAN_INCLUSIVE_INCLUSIVE)
-        }
-
-        return sb
-    }
+    text = sb
 }
+
+val Status.isMentionForMe: Boolean
+    get() = currentIdentifier.userId.let { userId ->
+        inReplyToUserId == userId || entities.userMentions.any { it.id == userId }
+    }

@@ -19,7 +19,7 @@ import org.jetbrains.anko.toast
 
 private const val REQ_PICK_PROFILE_IMAGE = 1
 
-class EditProfileActivity: DividedFragmentActivity(){
+class EditProfileActivity: ScopedFragmentActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         launch {
             val user = currentClient.account.verifyCredentials().await().result
@@ -79,7 +79,7 @@ class EditProfileActivity: DividedFragmentActivity(){
                         dialog.show(supportFragmentManager, "dialog")
                     }
                 } catch (e: Exception) {
-                    e.printStackTrace()
+                    toast(R.string.toast_load_data_failure)
                 }
             }
         }

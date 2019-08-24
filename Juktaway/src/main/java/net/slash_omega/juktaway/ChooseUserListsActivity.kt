@@ -7,26 +7,25 @@ import android.os.Bundle
 import android.view.MenuItem
 import android.widget.ListView
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonArray
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.list
 import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.models.TwitterList
+import kotlinx.android.synthetic.main.activity_choose_user_lists.*
+import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.SubscribeUserListAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.model.DestroyUserListEvent
-import net.slash_omega.juktaway.util.ThemeUtil
-import kotlinx.android.synthetic.main.activity_choose_user_lists.*
-import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.model.*
+import net.slash_omega.juktaway.model.UserListCache
+import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.twitter.currentClient
-import org.jetbrains.anko.collections.forEachWithIndex
+import net.slash_omega.juktaway.util.ThemeUtil
 
 /**
  * Created on 2018/08/29.
  */
-class ChooseUserListsActivity: DividedFragmentActivity() {
+class ChooseUserListsActivity: ScopedFragmentActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
     private lateinit var initial: List<UserListWithRegistered>
 
@@ -60,17 +59,16 @@ class ChooseUserListsActivity: DividedFragmentActivity() {
         button_save.setOnClickListener { _ ->
             val addList = mutableListOf<TwitterList>()
             val removeList = mutableListOf<TwitterList>()
-            (0 until mAdapter.count)
-                    .map { mAdapter.getItem(it)!! }
-                    .forEachWithIndex { i, lr ->
-                        if (lr.isRegistered == initial[i].isRegistered.not()) {
-                            if (lr.isRegistered) addList.add(lr.userList)
-                            else removeList.add(lr.userList)
-                        }
-                    }
+            for (i in 0 until mAdapter.count) {
+                val lr = mAdapter.getItem(i)!!
+                if (lr.isRegistered != initial[i].isRegistered) {
+                    if (lr.isRegistered) addList.add(lr.userList)
+                    else removeList.add(lr.userList)
+                }
+            }
             setResult(Activity.RESULT_OK, Intent().apply {
-                putExtra("add", addList.map{ it.toJsonString() }.toTypedArray())
-                putExtra("remove", removeList.map{ it.toJsonString() }.toTypedArray())
+                putExtra("add", addList.map{ it.stringify() }.toTypedArray())
+                putExtra("remove", removeList.map{ it.stringify() }.toTypedArray())
             })
             finish()
         }

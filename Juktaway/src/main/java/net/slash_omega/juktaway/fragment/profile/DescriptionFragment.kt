@@ -27,12 +27,12 @@ class DescriptionFragment: Fragment() {
 
     override fun onCreateView(inflater: LayoutInflater, container: ViewGroup?, savedInstanceState: Bundle?): View? =
         inflater.inflate(R.layout.fragment_profile_description, container, false)?.apply {
-            description.visibility = user.description.takeUnless { it.isNullOrEmpty() }?.let { desc ->
+            description.visibility = user.description.takeUnless { it.isEmpty() }?.let { desc ->
                 description.text = user.entities?.description?.urls?.fold(desc) { acc, url -> acc.replace(url.url, url.expandedUrl) }
                 View.VISIBLE
             } ?: View.GONE
 
-            if (!user.location.isNullOrEmpty()) {
+            if (user.location.isNotEmpty()) {
                 location.text = user.location
                 location.visibility = View.VISIBLE
             } else {

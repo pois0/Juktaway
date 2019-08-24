@@ -7,11 +7,15 @@ import jp.nephy.penicillin.core.emulation.OfficialClient
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.core.session.config.*
 import jp.nephy.penicillin.endpoints.common.TweetMode.Extended
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.GlobalScope
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.event.action.AccountChangeEvent
 import net.slash_omega.juktaway.model.FavRetweetManager
+import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.twitter.Core.consumerParser
 import net.slash_omega.juktaway.twitter.Core.consumerTable
 import net.slash_omega.juktaway.twitter.Core.identifierParser
@@ -25,7 +29,7 @@ import java.util.concurrent.TimeUnit
  * Created on 2018/12/23.
  */
 
-lateinit var currentClient: ApiClient
+var currentClient: ApiClient = PenicillinClient {  }
     private set
 
 lateinit var currentIdentifier: Identifier
@@ -42,8 +46,7 @@ val identifierList
 val consumerList
     get() = runCatching {
         dbUse {
-            select(Core.consumerTable, "id", "name", "ck", "cs")
-                    .parseList(consumerParser)
+            select(consumerTable, "id", "name", "ck", "cs").parseList(consumerParser)
         }
     }.getOrNull() ?: emptyList()
 
@@ -101,10 +104,13 @@ object Core {
 
     suspend fun switchToken(id: Identifier) {
         withContext(Dispatchers.Default) {
+            val oldClient = currentClient
             currentIdentifier = id
             currentClient = id.toClient()
+            oldClient.close()
             lastIdentifierAts = id.ats
             FavRetweetManager.clear()
+            TabManager.loadTabs()
             EventBus.getDefault().post(AccountChangeEvent())
         }
     }

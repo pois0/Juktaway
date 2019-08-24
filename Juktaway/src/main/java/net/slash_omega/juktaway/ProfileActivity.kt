@@ -11,8 +11,8 @@ import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
 import de.greenrobot.event.EventBus
+import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.blocks
 import jp.nephy.penicillin.endpoints.blocks.createByUserId
 import jp.nephy.penicillin.endpoints.blocks.destroyByUserId
@@ -33,17 +33,20 @@ import jp.nephy.penicillin.extensions.models.profileBannerUrlWithVariantSize
 import jp.nephy.penicillin.models.Relationship
 import jp.nephy.penicillin.models.User
 import kotlinx.android.synthetic.main.activity_profile.*
-import kotlinx.coroutines.*
+import kotlinx.coroutines.Dispatchers
+import kotlinx.coroutines.launch
+import kotlinx.coroutines.withContext
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.fragment.profile.*
+import net.slash_omega.juktaway.model.TabManager
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
-class ProfileActivity: DividedFragmentActivity() {
+class ProfileActivity: ScopedFragmentActivity() {
     companion object {
         private const val OPTION_MENU_DESTROY_BLOCK = 4
         private const val OPTION_MENU_GROUP_RELATION = 1
@@ -68,14 +71,14 @@ class ProfileActivity: DividedFragmentActivity() {
             setDisplayHomeAsUpEnabled(true)
         }
 
-        collapse_label.setOnClickListener {
+        collapse_image.setOnClickListener {
             with (frame) {
                 if (visibility == View.VISIBLE) {
                     visibility = View.GONE
-                    collapse_label.setText(R.string.fontello_down)
+                    collapse_image.setImageResource(R.drawable.ic_keyboard_arrow_down)
                 } else {
                     visibility = View.VISIBLE
-                    collapse_label.setText(R.string.fontello_up)
+                    collapse_image.setImageResource(R.drawable.ic_keyboard_arrow_up)
                 }
             }
         }
@@ -121,7 +124,6 @@ class ProfileActivity: DividedFragmentActivity() {
 
                 onLoadFinished()
             }.onFailure {
-                it.printStackTrace()
                 toast(R.string.toast_load_data_failure)
             }
             MessageUtil.dismissProgressDialog()
@@ -314,6 +316,7 @@ class ProfileActivity: DividedFragmentActivity() {
                 R.id.open_twilog ->
                     startActivity(Intent(Intent.ACTION_VIEW,
                             Uri.parse("http://twilog.org/" + mUser.screenName)))
+                R.id.user_to_tab -> TabManager.addUserTab(mUser)
                 R.id.report_spam ->
                     AlertDialog.Builder(this@ProfileActivity)
                             .setMessage(R.string.confirm_report_spam)
@@ -371,8 +374,8 @@ class ProfileActivity: DividedFragmentActivity() {
         }
 
         val args = Bundle().apply {
-            putString("user", mUser.toJsonString())
-            putString("relationship", mRelationship.toJsonString())
+            putString("user", mUser.stringify())
+            putString("relationship", mRelationship.stringify())
         }
         SimplePagerAdapter(this, pager).apply {
             addTab(SummaryFragment::class, args)
@@ -416,7 +419,7 @@ class ProfileActivity: DividedFragmentActivity() {
         })
 
         val listArgs = Bundle().apply {
-            putString("user", mUser.toJsonString())
+            putString("user", mUser.stringify())
         }
 
         SimplePagerAdapter(this, list_pager).apply {
@@ -454,7 +457,7 @@ class ProfileActivity: DividedFragmentActivity() {
 
     private fun restart() {
         runCatching {
-            startActivity<ProfileActivity>("userJson" to mUser.toJsonString())
+            startActivity<ProfileActivity>("userJson" to mUser.stringify())
         }.onFailure {
             startActivity<ProfileActivity>("userId" to mUser.id)
         }

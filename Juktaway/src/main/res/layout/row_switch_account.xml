@@ -11,25 +11,26 @@
             android:layout_width="32dp"
             android:layout_height="32dp"
             android:layout_marginEnd="8dp"
-            tools:src="@drawable/ic_launcher"
+            android:layout_centerVertical="true"
             android:contentDescription="@string/description_icon"/>
 
     <TextView
             android:id="@+id/screen_name"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
-            android:layout_marginEnd="8dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:layout_toEndOf="@id/icon"
-            android:textSize="18sp"
+            android:textSize="16sp"
+            android:layout_alignTop="@+id/icon"
             tools:text="justawayfactory"/>
     <TextView
             android:id="@+id/consumer_name"
             android:layout_width="wrap_content"
-            android:layout_height="32dp"
+            android:layout_height="wrap_content"
             android:layout_gravity="center"
             android:gravity="center"
             android:textSize="12sp"
-            android:layout_toEndOf="@+id/screen_name"
-            tools:text="Twitter for Android" android:layout_alignTop="@+id/icon"/>
+            android:layout_below="@+id/screen_name"
+            tools:text="Twitter for Android"
+            android:layout_toEndOf="@+id/icon"/>
 </RelativeLayout>

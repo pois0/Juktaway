@@ -5,7 +5,7 @@ import android.view.MenuItem
 import io.ktor.http.HttpStatusCode
 import jp.nephy.penicillin.core.exceptions.PenicillinException
 import jp.nephy.penicillin.endpoints.lists
-import jp.nephy.penicillin.endpoints.lists.ListCreationMode
+import jp.nephy.penicillin.endpoints.lists.ListVisibilityMode
 import jp.nephy.penicillin.endpoints.lists.create
 import jp.nephy.penicillin.extensions.await
 import net.slash_omega.juktaway.util.MessageUtil
@@ -17,7 +17,7 @@ import org.jetbrains.anko.toast
 
 private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
-class CreateUserListActivity: DividedFragmentActivity() {
+class CreateUserListActivity: ScopedFragmentActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)
@@ -33,8 +33,8 @@ class CreateUserListActivity: DividedFragmentActivity() {
             MessageUtil.showProgressDialog(this, getString(R.string.progress_process))
             launch {
                 val listName = list_name.text.toString()
-                val privacy = if (privacy_radio_group.checkedRadioButtonId == R.id.public_radio) ListCreationMode.Public
-                        else ListCreationMode.Private
+                val privacy = if (privacy_radio_group.checkedRadioButtonId == R.id.public_radio) ListVisibilityMode.Public
+                        else ListVisibilityMode.Private
                 val description = list_description.text.toString()
                 runCatching {
                     currentClient.lists.create(listName, privacy, description).await()
@@ -52,7 +52,7 @@ class CreateUserListActivity: DividedFragmentActivity() {
     }
 
     override fun onOptionsItemSelected(item: MenuItem?) = item?.run {
-            if (itemId == R.id.home) finish()
+            if (itemId == android.R.id.home) finish()
             true
         } ?: false
 }

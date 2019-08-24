@@ -2,13 +2,12 @@ package net.slash_omega.juktaway.util
 
 import android.content.Context
 import de.greenrobot.event.EventBus
-import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.core.exceptions.PenicillinException
-import jp.nephy.penicillin.core.exceptions.TwitterErrorMessage
+import jp.nephy.jsonkt.stringify
+import jp.nephy.penicillin.core.exceptions.PenicillinTwitterApiException
+import jp.nephy.penicillin.core.exceptions.TwitterApiError
 import jp.nephy.penicillin.core.session.ApiClient
 import jp.nephy.penicillin.endpoints.directMessages
 import jp.nephy.penicillin.endpoints.directmessages.create
-import jp.nephy.penicillin.endpoints.directmessages.delete
 import jp.nephy.penicillin.endpoints.media.MediaCategory
 import jp.nephy.penicillin.endpoints.media.MediaComponent
 import jp.nephy.penicillin.endpoints.media.MediaType
@@ -21,14 +20,12 @@ import jp.nephy.penicillin.extensions.await
 import jp.nephy.penicillin.extensions.endpoints.createWithMedia
 import jp.nephy.penicillin.extensions.models.favorite
 import jp.nephy.penicillin.extensions.models.unfavorite
-import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.PostActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.event.action.OpenEditorEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyMessageEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.model.FavRetweetManager
 import net.slash_omega.juktaway.settings.PostStockSettings
@@ -40,6 +37,7 @@ import java.io.File
 
 inline val Status.original
     get() = retweetedStatus ?: this
+
 suspend inline fun Status.favorite() = original.runCatching { favorite().await() }
         .onSuccess {
             showToast(R.string.toast_favorite_success)
@@ -48,7 +46,7 @@ suspend inline fun Status.favorite() = original.runCatching { favorite().await()
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error?.code == 139 -> {
+                e is PenicillinTwitterApiException && e.error.code == 139 -> {
                     showToast(R.string.toast_favorite_already)
                     FavRetweetManager.setFav(id)
                 }
@@ -65,7 +63,7 @@ suspend fun Status.unfavorite() = original.runCatching { unfavorite().await() }
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                e is PenicillinTwitterApiException && e.error == TwitterApiError.ResourceNotFound -> {
                     showToast(R.string.toast_destroy_favorite_already)
                     FavRetweetManager.removeFav(original.id)
                 }
@@ -82,7 +80,7 @@ suspend fun Status.retweet() = runCatching { currentClient.statuses.retweet(orig
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error?.code == 37 -> {
+                e is PenicillinTwitterApiException && e.error.code == 37 -> {
                     showToast(R.string.toast_retweet_already)
                     FavRetweetManager.setRetweet(original.id)
                     EventBus.getDefault().post(StatusActionEvent())
@@ -100,7 +98,7 @@ suspend fun Status.destroyRetweet() = runCatching { currentClient.statuses.unret
         }
         .onFailure { e ->
             when {
-                e is PenicillinException && e.error == TwitterErrorMessage.SorryThatPageDoesNotExist -> {
+                e is PenicillinTwitterApiException && e.error == TwitterApiError.ResourceNotFound -> {
                     showToast(R.string.toast_destroy_retweet_already)
                     FavRetweetManager.removeRetweet(original.id)
                     EventBus.getDefault().post(StatusActionEvent())
@@ -109,6 +107,27 @@ suspend fun Status.destroyRetweet() = runCatching { currentClient.statuses.unret
             }
         }
         .isSuccess
+
+fun Status.quote(context: Context) {
+    val text = " $urlString"
+    if (context is MainActivity) {
+        EventBus.getDefault().post(OpenEditorEvent(text, this, null, null))
+    } else {
+        context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to stringify())
+    }
+}
+
+suspend fun Status.delete() {
+    val res = runCatching {
+        currentClient.statuses.delete(id).await()
+    }.isSuccess
+    if (res) {
+        MessageUtil.showToast(R.string.toast_destroy_status_success)
+        EventBus.getDefault().post(StreamingDestroyStatusEvent(id))
+    } else {
+        MessageUtil.showToast(R.string.toast_destroy_status_failure)
+    }
+}
 
 suspend fun Identifier.updateStatus(str: String, inReplyToStatusId: Long? = null, imageList: List<File> = emptyList()) = runCatching {
         asClient {
@@ -134,18 +153,6 @@ suspend fun ApiClient.sendDirectMessage(rawMessage: String) = runCatching {
 }.exceptionOrNull()
 
 object ActionUtil {
-    suspend fun doDestroyStatus(statusId: Long) {
-        val res = runCatching {
-            currentClient.statuses.delete(statusId).await()
-        }.isSuccess
-        if (res) {
-            MessageUtil.showToast(R.string.toast_destroy_status_success)
-            EventBus.getDefault().post(StreamingDestroyStatusEvent(statusId))
-        } else {
-            MessageUtil.showToast(R.string.toast_destroy_status_failure)
-        }
-    }
-
     fun doReply(status: Status, context: Context) {
         val mentions = status.entities.userMentions
         val text = "@" + (if (status.user.id == currentIdentifier.userId && mentions.size == 1) mentions[0].screenName
@@ -153,7 +160,7 @@ object ActionUtil {
         if (context is MainActivity) {
             EventBus.getDefault().post(OpenEditorEvent(text, status, text.length, null))
         } else {
-            context.startActivity<PostActivity>("status" to text, "selection" to text.length, "inReplyToStatus" to status.toJsonString())
+            context.startActivity<PostActivity>("status" to text, "selection" to text.length, "inReplyToStatus" to status.stringify())
         }
     }
 
@@ -176,36 +183,7 @@ object ActionUtil {
             context.startActivity<PostActivity>("status" to text,
                     "selection" to selectionStart,
                     "selection_stop" to text.length,
-                    "inReplyToStatus" to status.toJsonString())
-        }
-    }
-
-    fun doReplyDirectMessage(directMessage: DirectMessage, context: Context) {
-        val text = "D " + (if (currentIdentifier.userId == directMessage.sender.id) directMessage.recipient.screenName
-                else directMessage.sender.screenName) + " "
-        if (context is MainActivity) {
-            EventBus.getDefault().post(OpenEditorEvent(text, null, text.length, null))
-        } else {
-            context.startActivity<PostActivity>("status" to text, "selection" to text.length)
-        }
-    }
-
-    suspend fun destroyDirectMessage(id: Long) {
-        val dm = runCatching { currentClient.directMessages.delete(id).await().result }.getOrNull()
-        if (dm != null) {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_success)
-            EventBus.getDefault().post(StreamingDestroyMessageEvent(dm.id))
-        } else {
-            MessageUtil.showToast(R.string.toast_destroy_direct_message_failure)
-        }
-    }
-
-    fun doQuote(status: Status, context: Context) {
-        val text = " https://twitter.com/${status.user.screenName}/status/${status.id}"
-        if (context is MainActivity) {
-            EventBus.getDefault().post(OpenEditorEvent(text, status, null, null))
-        } else {
-            context.startActivity<PostActivity>("status" to text, "inReplyToStatus" to status.toJsonString())
+                    "inReplyToStatus" to status.stringify())
         }
     }
 }

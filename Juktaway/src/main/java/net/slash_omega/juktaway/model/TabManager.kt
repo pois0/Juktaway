@@ -3,12 +3,13 @@ package net.slash_omega.juktaway.model
 import android.content.Context
 import android.content.SharedPreferences
 import jp.nephy.penicillin.models.TwitterList
+import jp.nephy.penicillin.models.User
 import kotlinx.serialization.*
 import kotlinx.serialization.json.Json
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import java.util.ArrayList
+import java.util.*
 
 const val HOME_TAB_ID = 0
 const val MENTION_TAB_ID = 1
@@ -26,18 +27,17 @@ object TabManager {
     private const val OLD_SEARCH_TAB_ID = -5L
 
     private const val TABS = "mTabs-"
-    private var mTabs = mutableListOf<Tab>()
+    var mTabs = loadTabs()
     private val keyName: String
         get() = TABS + currentIdentifier.userId.toString()
     private val preference: SharedPreferences
         get() = app.getSharedPreferences("settings", Context.MODE_PRIVATE)
+    var version = 0
 
     @UseExperimental(ImplicitReflectionSerializer::class)
     fun loadTabs(): MutableList<Tab> {
-        mTabs.clear()
-        mTabs.addAll(
-                preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
-                    println(json)
+        version++
+        mTabs = (preference.getString("$keyName/v3", "")?.takeIf { it.isNotBlank() }?.let { json ->
                     Json.parseList<Tab>(json)
                 } ?: preference.getString("$keyName/v2", "")?.takeIf { it.isNotBlank() }?.let { oldJson ->
                     Json.parse<OldTabData>(oldJson).let { data ->
@@ -45,8 +45,7 @@ object TabManager {
                         data.tabs.removeAll { it.id == OLD_DIRECT_MESSAGES_TAB_ID }
                         translateTab(data.tabs)
                     }
-                } ?: generalTabs
-        )
+                } ?: generalTabs).toMutableList()
         return mTabs
     }
 
@@ -63,18 +62,33 @@ object TabManager {
 
     fun addSearchTab(searchWord: String) = addTab(Tab(SEARCH_TAB_ID, 0, searchWord, -1))
 
+    fun addUserTab(user: User) = addTab(Tab(USER_TAB_ID, user.id, user.screenName, -1))
+
+    fun refreshUserTab(user: User) {
+        for ((i, tab) in mTabs.withIndex()) {
+            if (tab.type == USER_TAB_ID && tab.id == user.id) {
+                if (tab.word != user.screenName) {
+                    mTabs[i] = Tab(USER_TAB_ID, user.id, user.screenName, -1)
+                    saveTabs()
+                }
+                break
+            }
+        }
+    }
+
     @UseExperimental(ImplicitReflectionSerializer::class)
     private fun saveTabs() {
         preference.edit().putString("$keyName/v3", Json.stringify(mTabs)).apply()
+        version++
     }
 
     private fun translateTab(list: List<OldTab>) = list.map {
         when {
-            it.id == TabManager.OLD_TIMELINE_TAB_ID -> homeTab
-            it.id == TabManager.OLD_INTERACTIONS_TAB_ID -> mentionTab
-            it.id == TabManager.OLD_DIRECT_MESSAGES_TAB_ID -> favoriteTab
-            it.id == TabManager.OLD_FAVORITES_TAB_ID -> dmTab
-            it.id <= TabManager.OLD_SEARCH_TAB_ID ->Tab(SEARCH_TAB_ID, 0, it.name, -1)
+            it.id == OLD_TIMELINE_TAB_ID -> homeTab
+            it.id == OLD_INTERACTIONS_TAB_ID -> mentionTab
+            it.id == OLD_DIRECT_MESSAGES_TAB_ID -> favoriteTab
+            it.id == OLD_FAVORITES_TAB_ID -> dmTab
+            it.id <= OLD_SEARCH_TAB_ID ->Tab(SEARCH_TAB_ID, 0, it.name, -1)
             else -> Tab(LIST_TAB_ID, it.id, it.name, -1)
         }
     }
@@ -89,10 +103,11 @@ object TabManager {
 private data class OldTabData(val tabs: ArrayList<OldTab>)
 
 @Serializable
-class OldTab(var id: Long, @Optional var name: String = "")
+class OldTab(@Required var id: Long, var name: String = "")
 
+// Set autoReload not positive to disable auto reloading
 @Serializable
-data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Int) {
+data class Tab(val type: Int, val id: Long, val word: String, val autoReload: Long) {
     override fun equals(other: Any?) = other is Tab && type == other.type && when (type) {
         SEARCH_TAB_ID -> word == other.word
         LIST_TAB_ID, USER_TAB_ID -> id == other.id
@@ -104,12 +119,13 @@ data class Tab(val type: Int, val id: Long, val word: String, val autoReload: In
 
 val Tab.icon: Int
     get() = when (type) {
-        HOME_TAB_ID -> R.string.fontello_home
-        MENTION_TAB_ID -> R.string.fontello_at
-        DM_TAB_ID -> R.string.fontello_mail
-        FAVORITE_TAB_ID -> R.string.fontello_star
-        SEARCH_TAB_ID -> R.string.fontello_search
-        LIST_TAB_ID -> R.string.fontello_list
+        HOME_TAB_ID -> R.drawable.ic_home
+        MENTION_TAB_ID -> R.drawable.ic_atmark
+        DM_TAB_ID -> R.drawable.ic_email
+        FAVORITE_TAB_ID -> R.drawable.ic_star
+        SEARCH_TAB_ID -> R.drawable.ic_search
+        LIST_TAB_ID -> R.drawable.ic_list_bulleted
+        USER_TAB_ID -> R.drawable.ic_person
         else -> 0
     }
 

@@ -14,7 +14,7 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 
 
@@ -32,26 +32,30 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
         mFooter.visibility = View.GONE
         mSwipeRefreshLayout.isRefreshing = true
         launch {
-            val timeline = runCatching {
-                currentClient.timeline.run {
-                    if (mMaxId > 0 && !mReload) userTimelineByUserId(user.id, maxId = mMaxId, count = BasicSettings.pageCount)
-                    else userTimelineByUserId(user.id, count = BasicSettings.pageCount)
-                }.await()
-            }.getOrNull()
+            val action = currentClient.timeline.run {
+                if (mMaxId > 0 && !mReload) {
+                    userTimelineByUserId(user.id, maxId = mMaxId, count = preferences.api.pageCount)
+                } else {
+                    userTimelineByUserId(user.id, count = preferences.api.pageCount)
+                }
+            }
 
-            timeline?.takeIf { it.isNotEmpty() }?.run {
+            action.runCatching { await() }.onSuccess { response ->
+                if (response.isEmpty()) return@onSuccess
+
                 if (mReload) {
                     mAdapter.clear()
-                    mMaxId = last().id - 1
-                    mAdapter.addAllFromStatusesSuspend(this)
+                    mMaxId = response.last().id - 1
+                    mAdapter.addAllSuspend(response)
                     mReload = false
                 } else {
-                    mMaxId = last().id - 1
-                    mAdapter.extensionAddAllFromStatuses(this)
+                    mMaxId = response.last().id - 1
+                    mAdapter.extensionAddAllFromStatuses(response)
                     mAutoLoader = true
                     mListView.visibility = View.VISIBLE
                 }
             }
+
             mSwipeRefreshLayout.isRefreshing = false
             finishLoading()
         }
@@ -83,7 +87,7 @@ internal class UserTimelineFragment: ProfileListFragmentBase() {
     override fun View.init() {
         mListView.onItemClickListener = StatusClickListener(activity!!)
         mListView.onItemLongClickListener = StatusLongClickListener(activity!!)
-        mSwipeRefreshLayout = sr_layout.apply {
+        mSwipeRefreshLayout = swipe_refresh_layout.apply {
             setOnRefreshListener { reload() }
         }
     }

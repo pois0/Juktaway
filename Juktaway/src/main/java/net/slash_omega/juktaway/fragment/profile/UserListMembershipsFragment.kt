@@ -25,17 +25,14 @@ internal class UserListMembershipsFragment: ProfileListFragmentBase() {
     private var nextCursor: CursorJsonObjectApiAction<CursorLists>? = null
     override fun showList() {
         launch {
-            val action = runCatching {
-                (nextCursor ?: currentClient.lists.membershipsByUserId(user.id)).await()
-            }.getOrNull()
+            val action = nextCursor ?: currentClient.lists.membershipsByUserId(user.id)
+            action.runCatching { await() }.onSuccess { response ->
+                if (response.hasNext) {
+                    nextCursor = response.next
+                    mAutoLoader = true
+                }
 
-            if (action?.hasNext == true) {
-                nextCursor = action.next
-                mAutoLoader = true
-            }
-
-            action?.result?.run {
-                lists.forEach { mAdapter.add(it) }
+                mAdapter.addAll(response.result.lists)
                 mListView.visibility = View.VISIBLE
             }
 

@@ -213,7 +213,7 @@
     <string name="toast_update_profile_success">Saved.</string>
     <string name="toast_update_status_already">You have been tweet already.</string>
     <string name="toast_update_status_failure">Failed.</string>
-    <string name="twitter_callback_url">https://auth.juktaway.slash-omega.net</string>
+    <string name="twitter_callback_url" translatable="false">https://auth.juktaway.slash-omega.net</string>
     <string name="widget_title_post_mode">Post Only Mode</string>
     <string name="label_search_tweet">" Tweet Search"</string>
     <string name="label_search_user">" User Search"</string>
@@ -227,8 +227,8 @@
     <string name="label_account_setting">Account Setting</string>
     <string name="toast_update_status_not_Follow">you cannot send messages to users who are not following you.</string>
     <string name="toast_create_user_list_failure_name_blank">A list\'s name can\'t be blank.</string>
-    <string name="pref_title_quick_post_on">Quick post</string>
-    <string name="pref_description_quick_post_on">Quick post bar to display on top of the tab</string>
+    <string name="pref_title_display_main_quick_post">Quick post</string>
+    <string name="pref_description_display_main_quick_post_on">Quick post bar to display on top of the tab</string>
     <string name="menu_destroy_block">Unblock</string>
     <string name="confirm_create_official_mute">Do you want to mute?</string>
     <string name="confirm_destroy_official_mute">Do you want to unmute?？</string>
@@ -250,13 +250,12 @@
     <string name="toast_create_no_retweet_success">Success turn off retweets.</string>
     <string name="toast_destroy_no_retweet_failure">Failure turn on retweets.</string>
     <string name="toast_destroy_no_retweet_success">Success turn on retweets.</string>
-    <string name="pref_title_talk_order_newest">The latest order of conversation</string>
+    <string name="layout_tweet_talk_order_title">The latest order of conversation</string>
     <string name="pref_description_talk_order_newest">Display the conversation from newest to oldest.</string>
     <string name="menu_send_kusoripu">Send repooply</string>
     <string name="signin_csck_blank">Concumer Key Or Consumer Secret is blank.</string>
     <string name="repooply_version">To repooply requires Android 5.0 or higher.</string>
     <string name="menu_license">Show Licenses</string>
-    <string name="license" translatable="false">&lt;ul&gt;&lt;li&gt;Android Arch-Common&lt;/li&gt;&lt;li&gt;Android Arch-Runtime&lt;/li&gt;&lt;li&gt;Android Lifecycle ViewModel&lt;/li&gt;&lt;li&gt;Android Lifecycle Runtime&lt;/li&gt;&lt;li&gt;Android Lifecycle LiveData Core&lt;/li&gt;&lt;li&gt;Android Lifecycle-Common&lt;/li&gt;&lt;li&gt;Android Support Library core utils&lt;/li&gt;&lt;li&gt;Android Support Library media compat&lt;/li&gt;&lt;li&gt;Android Support Library Annotations&lt;/li&gt;&lt;li&gt;Android Support Library v4&lt;/li&gt;&lt;li&gt;Android Support Library core UI&lt;/li&gt;&lt;li&gt;Android Support Library fragment&lt;/li&gt;&lt;li&gt;Android Support Library compat&lt;/li&gt;&lt;li&gt;Android Support AnimatedVectorDrawable&lt;/li&gt;&lt;li&gt;Android Support VectorDrawable&lt;/li&gt;&lt;li&gt;Android AppCompat Library v7&lt;/li&gt;&lt;li&gt;Android Multi-Dex Library&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: The Android Open Source Project&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;kotlinx.serialization&lt;/li&gt;&lt;li&gt;kotlinx.coroutines&lt;/li&gt;&lt;li&gt;kotlin-reflect&lt;/li&gt;&lt;li&gt;kotlin-stdlib&lt;/li&gt;&lt;li&gt;kotlin-stdlib-common&lt;/li&gt;&lt;li&gt;kotlin-stdlib-jdk7&lt;/li&gt;&lt;li&gt;kotlin-stdlib-jdk8&lt;/li&gt;&lt;li&gt;kotlinx-io&lt;/li&gt;&lt;li&gt;atomicfu&lt;/li&gt;&lt;li&gt;Anko&lt;/li&gt;&lt;li&gt;IntelliJ IDEA Annotations&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: JetBrains&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;ktor&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: ktor.io&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;config&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: lightbend&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;PageIndicatorView&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Roman Danylyk&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Guava&lt;/li&gt;&lt;li&gt;Gson&lt;/li&gt;&lt;li&gt;J2ObjC Annotations&lt;/li&gt;&lt;li&gt;error-prone annotations&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Google Inc.&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;FindBugs-jsr305&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Google&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://opensource.org/licenses/bsd-license.php&quot;&gt;&lt;br&gt;The 2-Clause BSD License&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;EventBus&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Markus Junginger, greenrobot&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;SmoothProgressBar&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Antoine Merle&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;SLF4J&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: QOS.ch&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://opensource.org/licenses/mit-license.php&quot;&gt;&lt;br&gt;MIT License&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Animal Sniffer Annotations&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: mojohaus&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://opensource.org/licenses/mit-license.php&quot;&gt;&lt;br&gt;MIT License&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;The Checker Framework&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: The Checker Framework developers&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;https://www.gnu.org/licenses/old-licenses/gpl-2.0.html.en&quot;&gt;&lt;br&gt;GNU General Public License, version 2 (GPL2), with the classpath exception&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;Universal Image Loader Library&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Sergey Tarasevich&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;ul&gt;&lt;li&gt;ActionBar-PullToRefresh&lt;/li&gt;&lt;/ul&gt;&lt;p&gt;Author: Chris Banes&lt;/p&gt;&lt;p&gt;License: &lt;a href=&quot;http://www.apache.org/licenses/LICENSE-2.0.txt&quot;&gt;&lt;br&gt;Apache License Version 2.0&lt;/a&gt;&lt;/p&gt;&lt;p&gt;&lt;strong&gt;This app is originated from Justaway developed by s-aska. I appreciate it a lot.&lt;/strong&gt;&lt;/p&gt;</string>
     <string name="title_license">License</string>
     <string name="add_consumer">Add Consumer</string>
     <string name="add_consumer_button_text" translatable="false">+</string>
@@ -264,10 +263,37 @@
     <string name="add_consumer_succeeded">Succeeded to add the consumer.</string>
     <string name="select_consumer">Select Consumer&#8230;</string>
     <string name="not_select_consumer">Select consumer</string>
-    <string name="pref_layout_title">Layouts</string>
+
     <string name="pref_operation_title">Operations</string>
     <string name="quick_posting_menu_title">Quick posting menu</string>
     <string name="quick_posting_menu_fix_initial_tweet">Fix current text to initial text</string>
     <string name="quick_posting_menu_unfixed_success">Unfixed initial text.</string>
     <string name="title_user">User</string>
+    <string name="update_status_success">Succeeded to tweet.</string>
+    <string name="menu_user_to_tab">To Tab</string>
+    <string name="pref_title_display_tweet_favorite_button">Change favorite button into heart-shaped</string>
+    <string name="pref_title_display_tweet_millisec">Show the posted time in milliseconds</string>
+    <string name="layout_tweet_show_icon_title">Display the author icon in the tweet</string>
+    <string name="pref_title_display_general">General</string>
+    <string name="pref_title_display_main">Main Activity</string>
+    <string name="pref_title_display_tweet">Tweet</string>
+    <string name="pref_title_display_picture_quality">Quality of pictures</string>
+    <string name="pref_title_display_video_quality">Quality of videos</string>
+    <string name="pref_title_api">Twitter API</string>
+    <string name="pref_title_operation">Operations</string>
+    <string name="pref_title_about">About this app</string>
+    <string name="pref_title_about_feedback">Send feedback</string>
+    <string name="pref_title_about_icon_author">App icon was created by</string>
+    <string name="pref_description_about_icon_author" translatable="false">しー (@GTXTitanX)</string>
+    <string name="pref_title_about_licenses">Licenses of third-party software</string>
+    <string name="pref_title_about_official_account">Official account</string>
+    <string name="pref_title_about_material_icon">License of Material Design Icons</string>
+    <string name="pref_description_about_material_icon">This app includes material design icon desinged by Google
+    </string>
+    <string name="dialog_title_tab_interval">Auto-loading Preference</string>
+    <string name="dialog_text_enable_autoloading">Enable auto loading</string>
+    <string name="dialog_tab_hint">milliseconds</string>
+    <string name="dialog_text_tab_interval">Interval(ms)</string>
+    <string name="description_remove_user">Remove a user</string>
+    <string name="description_toggle_profile">Toggle visibility of user profile</string>
 </resources>

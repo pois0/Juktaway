@@ -30,8 +30,7 @@ import net.slash_omega.juktaway.event.action.StatusActionEvent
 import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.HeaderStatusClickListener
 import net.slash_omega.juktaway.listener.HeaderStatusLongClickListener
-import net.slash_omega.juktaway.model.Row
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.parseWithClient
 import java.util.*
@@ -50,14 +49,12 @@ class TalkFragment: DialogFragment(), CoroutineScope {
     private val mOnScrollListener = object: AbsListView.OnScrollListener {
         override fun onScroll(p0: AbsListView?, p1: Int, p2: Int, p3: Int) {}
         override fun onScrollStateChanged(p0: AbsListView?, scrollState: Int) {
-            when (scrollState) {
-                AbsListView.OnScrollListener.SCROLL_STATE_IDLE -> {
-                    if (mListView.firstVisiblePosition > 0) {
-                        mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
-                    }
-                    if (mListView.lastVisiblePosition <= mAdapter.count) {
-                        mFooterView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
-                    }
+            if (scrollState == AbsListView.OnScrollListener.SCROLL_STATE_IDLE) {
+                if (mListView.firstVisiblePosition > 0) {
+                    mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
+                }
+                if (mListView.lastVisiblePosition <= mAdapter.count) {
+                    mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                 }
             }
         }
@@ -73,8 +70,15 @@ class TalkFragment: DialogFragment(), CoroutineScope {
 
         arguments?.getString("status")?.toJsonObject()?.parseWithClient<Status>()?.let { status ->
             val inReplyToAreaPixels = if (status.inReplyToStatusId != null) resources.displayMetrics.heightPixels else 0
-            val (headerH, footerH) = if (BasicSettings.talkOrderNewest) Pair(100, inReplyToAreaPixels)
-            else Pair(inReplyToAreaPixels, 100)
+            val headerH: Int
+            val footerH: Int
+            if (preferences.display.tweet.isTalkSortedByNewest) {
+                headerH = 100
+                footerH = inReplyToAreaPixels
+            } else {
+                headerH = inReplyToAreaPixels
+                footerH = 100
+            }
             mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, headerH)
             mFooterView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, footerH)
 
@@ -90,9 +94,9 @@ class TalkFragment: DialogFragment(), CoroutineScope {
             }
 
             launch {
-                mAdapter.addSuspend(Row.newStatus(status))
+                mAdapter.addSuspend(status)
 
-                if (!BasicSettings.talkOrderNewest) mListView.setSelectionFromTop(1, 0)
+                if (preferences.display.tweet.isTalkSortedByNewest.not()) mListView.setSelectionFromTop(1, 0)
                 status.inReplyToStatusId?.let { loadTalk(it) }
                 loadTalkReply(status)
             }
@@ -119,7 +123,7 @@ class TalkFragment: DialogFragment(), CoroutineScope {
 
     fun onEventMainThread(event: StreamingDestroyStatusEvent) { GlobalScope.launch(Dispatchers.Main) { mAdapter.removeStatus(event.statusId!!) } }
 
-    private fun Dialog.removeGuruGuru() { (if (BasicSettings.talkOrderNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
+    private fun Dialog.removeGuruGuru() { (if (preferences.display.tweet.isTalkSortedByNewest) guruguru_footer else guruguru_header).visibility = View.GONE }
 
     private suspend fun loadTalk(idParam: Long) {
         var statusId = idParam
@@ -129,10 +133,10 @@ class TalkFragment: DialogFragment(), CoroutineScope {
             statusList.add(status)
             statusId = status.inReplyToStatusId ?: -1
         }
-        if (BasicSettings.talkOrderNewest) {
-            mAdapter.addAllFromStatusesSuspend(statusList)
+        if (preferences.display.tweet.isTalkSortedByNewest) {
+            mAdapter.addAllSuspend(statusList)
         } else {
-            statusList.map { Row.newStatus(it) }.forEach { mAdapter.insertSuspend(it, 0) }
+            statusList.forEach { mAdapter.insertSuspend(it, 0) }
             val pos = mListView.lastVisiblePosition + statusList.size
             mListView.setSelectionFromTop(pos, 0)
         }
@@ -195,22 +199,22 @@ class TalkFragment: DialogFragment(), CoroutineScope {
         }.onSuccess { statuses ->
             if (dialog == null) return
             dialog.run {
-                if (BasicSettings.talkOrderNewest) guruguru_header else guruguru_footer
+                if (preferences.display.tweet.isTalkSortedByNewest) guruguru_header else guruguru_footer
             }.visibility = View.GONE
 
-            if (BasicSettings.talkOrderNewest) {
+            if (preferences.display.tweet.isTalkSortedByNewest) {
                 val lastPos = mListView.lastVisiblePosition
 
                 val y = mListView.getChildAt(lastPos)?.top ?: 0
 
-                statuses.forEach { mAdapter.insertSuspend(Row.newStatus(it), 0) }
+                statuses.forEach { mAdapter.insertSuspend(it, 0) }
                 mListView.setSelectionFromTop(lastPos + statuses.size, y)
 
                 if (mListView.firstVisiblePosition > 0) {
-                    mHeaderView.layoutParams = AbsListView.LayoutParams(AbsListView.LayoutParams.MATCH_PARENT, 0)
+                    mHeaderView.layoutParams = LayoutParams(LayoutParams.MATCH_PARENT, 0)
                 }
             } else {
-                mAdapter.addAllFromStatuses(statuses)
+                mAdapter.addAllSuspend(statuses)
             }
         }
     }

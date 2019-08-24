@@ -14,12 +14,11 @@
         android:layout_gravity="center"
         android:textSize="18sp"/>
 
-    <net.slash_omega.juktaway.widget.FontelloTextView
-        android:id="@+id/trash"
-        android:layout_width="wrap_content"
-        android:layout_height="wrap_content"
-        android:layout_gravity="center"
-        android:text="@string/fontello_trash"
-        android:textColor="#666666"
-        android:textSize="28sp"/>
+    <ImageView
+            android:layout_width="28dp"
+            android:layout_height="wrap_content"
+            android:layout_gravity="center"
+            android:id="@+id/trash"
+            android:src="@drawable/ic_clear"
+            android:tint="#666666" />
 </LinearLayout>

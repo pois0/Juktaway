@@ -14,8 +14,11 @@ import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.twitter.currentClient
 import java.util.regex.Pattern
 
+inline val Status.urlString: String
+    get() = "https://twitter.com/${user.screenName}/status/$id"
+
 val Status.uri: Uri
-    get() =  Uri.parse("https://twitter.com/" + user.screenName + "/status/" + id.toString())
+    get() =  Uri.parse(urlString)
 
 inline fun <reified M: PenicillinModel> JsonElement.parseWithClient() = parseModel<M>(currentClient)
 

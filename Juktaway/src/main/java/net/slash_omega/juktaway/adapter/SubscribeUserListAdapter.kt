@@ -8,7 +8,6 @@ import android.view.View
 import android.view.ViewGroup
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
 import jp.nephy.penicillin.endpoints.lists
 import jp.nephy.penicillin.endpoints.lists.delete
 import jp.nephy.penicillin.endpoints.lists.unsubscribe
@@ -43,7 +42,7 @@ class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
                 val dialog = if (currentIdentifier.userId == userList?.user?.id) DestroyUserListDialogFragment()
                         else DestroyUserListSubscriptionDialogFragment()
                 dialog.arguments = Bundle(1).apply {
-                    putString("userList", userList?.toJsonString())
+                    putString("userList", userList?.json?.toString())
                 }
                 EventBus.getDefault().post(AlertDialogEvent(dialog))
             }

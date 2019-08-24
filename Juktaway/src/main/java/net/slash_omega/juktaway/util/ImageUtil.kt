@@ -7,18 +7,17 @@ import android.view.View
 import android.view.ViewGroup
 import android.widget.ImageView
 import android.widget.LinearLayout
-import android.widget.TextView
 import com.nostra13.universalimageloader.core.DisplayImageOptions
 import com.nostra13.universalimageloader.core.ImageLoader
 import com.nostra13.universalimageloader.core.ImageLoaderConfiguration
 import com.nostra13.universalimageloader.core.display.FadeInBitmapDisplayer
-import jp.nephy.jsonkt.toJsonString
+import jp.nephy.jsonkt.stringify
 import jp.nephy.penicillin.endpoints.media.MediaType
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.ScaleImageActivity
 import net.slash_omega.juktaway.VideoActivity
 import net.slash_omega.juktaway.app
-import net.slash_omega.juktaway.settings.BasicSettings
+import net.slash_omega.juktaway.settings.preferences
 import org.jetbrains.anko.startActivity
 import java.io.File
 
@@ -39,7 +38,7 @@ fun ImageView.displayImage(url: Uri) {
 fun ImageView.displayRoundedImage(url: String) {
     if ((tag as? String) == url) return
     tag = url
-    if (BasicSettings.userIconRoundedOn) {
+    if (preferences.display.tweet.isAuthorIconRounded) {
         ImageLoader.getInstance().displayImage(url, this, ImageUtil.sRoundedDisplayImageOptions)
     } else {
         ImageLoader.getInstance().displayImage(url, this)
@@ -49,6 +48,8 @@ fun ImageView.displayRoundedImage(url: String) {
 fun File.mediaType() = ImageUtil.toMediaType(path.run { substring(lastIndexOf(".") + 1) })
 
 object ImageUtil {
+    private val imageLoader = ImageLoader.getInstance()
+
     internal val sRoundedDisplayImageOptions by lazy {
         DisplayImageOptions.Builder()
                 .cacheInMemory(true)
@@ -63,7 +64,7 @@ object ImageUtil {
                 .resetViewBeforeLoading(true)
                 .build()
 
-        ImageLoader.getInstance().init(
+        imageLoader.init(
                 ImageLoaderConfiguration.Builder(app)
                         .defaultDisplayImageOptions(defaultOptions)
                         .build())
@@ -80,15 +81,15 @@ object ImageUtil {
         val tag = view.tag as? String
         if (tag != null && tag == url) return
         view.tag = url
-        if (BasicSettings.userIconRoundedOn) {
-            ImageLoader.getInstance().displayImage(url, view, sRoundedDisplayImageOptions)
+        if (preferences.display.tweet.isAuthorIconRounded) {
+            imageLoader.displayImage(url, view, sRoundedDisplayImageOptions)
         } else {
-            ImageLoader.getInstance().displayImage(url, view)
+            imageLoader.displayImage(url, view)
         }
     }
 
-    fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: TextView, status: Status) {
-        StatusUtil.getImageUrls(status).takeNotEmpty()?.let { imageUrls ->
+    fun displayThumbnailImages(context: Context, group: ViewGroup, wrapperGroup: ViewGroup, play: View, status: Status) {
+        status.imageUrls.takeNotEmpty()?.let { imageUrls ->
             group.removeAllViews()
             imageUrls.forEachIndexed { i, url ->
                 val image = ImageView(context).apply { scaleType = ImageView.ScaleType.CENTER_CROP }
@@ -100,11 +101,11 @@ object ImageUtil {
                 image.setOnClickListener {
                     if (status.videoUrl.isEmpty()) {
                         context.startActivity(Intent(it.context, ScaleImageActivity::class.java).apply {
-                            putExtra("status", status.toJsonString())
+                            putExtra("status", status.stringify())
                             putExtra("index", i)
                         })
                     } else {
-                        context.startActivity<VideoActivity>("arg" to "statusJson", "statusJson" to status.toJsonString())
+                        context.startActivity<VideoActivity>("arg" to "statusJson", "statusJson" to status.stringify())
                     }
                 }
             }

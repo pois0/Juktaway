@@ -10,6 +10,7 @@ import android.util.AttributeSet
 import android.view.GestureDetector
 import android.view.MotionEvent
 import android.view.View
+import kotlin.math.sqrt
 
 class ScaleImageView : AppCompatImageView, View.OnTouchListener {
     constructor(c: Context, attr: AttributeSet) : super(c, attr) {
@@ -218,8 +219,7 @@ class ScaleImageView : AppCompatImageView, View.OnTouchListener {
         if (event == null || mDetector.onTouchEvent(event)) return true
 
         val touchCount = event.pointerCount
-        val action = event.action and MotionEvent.ACTION_MASK
-        when (action) {
+        when (event.action and MotionEvent.ACTION_MASK) {
             MotionEvent.ACTION_DOWN, MotionEvent.ACTION_POINTER_DOWN -> {
                 if (touchCount >= 2) {
                     mPrevDistance = distance(event.getX(0), event.getX(1), event.getY(0), event.getY(1))
@@ -268,7 +268,7 @@ class ScaleImageView : AppCompatImageView, View.OnTouchListener {
         return true
     }
 
-    private fun displayDistance() = Math.sqrt((mWidth * mWidth + mHeight * mHeight).toDouble()).toFloat()
+    private fun displayDistance() = sqrt((mWidth * mWidth + mHeight * mHeight).toDouble()).toFloat()
 
     override fun onTouch(v: View, event: MotionEvent) = super.onTouchEvent(event)
 }

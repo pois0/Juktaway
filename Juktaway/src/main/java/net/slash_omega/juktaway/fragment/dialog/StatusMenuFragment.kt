@@ -8,23 +8,21 @@ import android.os.Bundle
 import android.support.v4.app.DialogFragment
 import android.support.v4.util.LongSparseArray
 import android.widget.ListView
+import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
-import jp.nephy.jsonkt.toJsonString
-import jp.nephy.penicillin.extensions.models.fullText
+import jp.nephy.penicillin.extensions.models.text
 import jp.nephy.penicillin.extensions.via
-import jp.nephy.penicillin.models.DirectMessage
 import jp.nephy.penicillin.models.Status
 import jp.nephy.penicillin.models.User
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
-import net.slash_omega.juktaway.DividedFragmentActivity
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
+import net.slash_omega.juktaway.ScopedFragmentActivity
 import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.RetweetersFragment
 import net.slash_omega.juktaway.fragment.TalkFragment
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.model.isFavorited
 import net.slash_omega.juktaway.model.isRetweeted
 import net.slash_omega.juktaway.settings.mute.SourceMute
@@ -39,26 +37,17 @@ import org.jetbrains.anko.startActivity
  */
 class StatusMenuFragment: DialogFragment(), CoroutineScope {
     companion object {
-        fun newInstance(row: Row) = StatusMenuFragment().apply {
-            arguments = Bundle().apply {
-                if (row.isDirectMessage) {
-                    putString("directMessage", row.message!!.toJsonString())
-                } else {
-                    putString("status", row.status!!.toJsonString())
-                }
-                if (row.isFavorite) {
-                    putString("favoriteSourceUser", row.source!!.toJsonString())
-                }
-            }
+        fun newInstance(status: Status) = StatusMenuFragment().apply {
+            arguments = status.generateJsonBundle()
         }
     }
 
     override val coroutineContext by lazy { mActivity.coroutineContext }
 
-    private lateinit var mActivity: DividedFragmentActivity
+    private lateinit var mActivity: ScopedFragmentActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        mActivity = (activity as DividedFragmentActivity?)!!
+        mActivity = (activity as ScopedFragmentActivity?)!!
         ThemeUtil.setTheme(activity!!)
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)
@@ -68,61 +57,28 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
                         adapter.getItem(i)?.callback?.run()
                     }
                 }).let {
-                    val message = arguments?.getString("directMessage")?.toJsonObject()?.parseWithClient<DirectMessage>()
-                    if (message != null) onDirectMessage(message, adapter, it)
-                    else onStatus(arguments!!.getString("status")!!.toJsonObject().parseWithClient(), adapter, it)
+                    onStatus(arguments!!.getString("status")!!.toJsonObject().parseWithClient(), adapter, it)
                 }
                 .create()
     }
 
 
-
-    private fun onDirectMessage(message: DirectMessage, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
-        builder.setTitle(message.senderScreenName)
-        /*
-         * 返信(DM)
-         */
-        add(R.string.context_menu_reply_direct_message) {
-            ActionUtil.doReplyDirectMessage(message, mActivity)
-            dismiss()
-        }
-
-        /*
-         * ツイ消し(DM)
-         */
-        add(R.string.context_menu_destroy_direct_message) {
-            launch {
-                ActionUtil.destroyDirectMessage(message.id)
-                dismiss()
-            }
-        }
-
-        /*
-         * ツイート内のメンション
-         */
-        for (mention in message.entities.userMentions) {
-            add("@" + mention.screenName) {
-                val intent = Intent(mActivity, ProfileActivity::class.java)
-                intent.putExtra("screenName", mention.screenName)
-                mActivity.startActivity(intent)
-            }
-        }
-
-        /*
-         * ツイート内のURL
-         */
-        val urls = message.entities.urls.map { it.expandedUrl }
-        addUrls(adapter, urls)
-        builder
-    }
-
     private fun onStatus(status: Status, adapter: MenuAdapter, builder: AlertDialog.Builder) = adapter.run {
+        fun addUrls(urls: List<String>) {
+            addAll(urls.map { url ->
+                Menu(url) {
+                    mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
+                    dismiss()
+                }
+            })
+        }
+
         val retweet = status.retweetedStatus
-        val source = retweet ?: status
+        val source = status.original
         val mentions = source.entities.userMentions
         val isPublic = !source.user.protected
 
-        builder.setTitle(status.fullText())
+        builder.setTitle(status.text)
 
         /*
          * リプ
@@ -147,7 +103,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         if (isPublic) {
             add(R.string.context_menu_qt) {
-                ActionUtil.doQuote(source, mActivity)
+                source.quote(mActivity)
                 dismiss()
             }
         }
@@ -181,7 +137,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
              */
             add(R.string.context_menu_destroy_status) {
                 launch {
-                    ActionUtil.doDestroyStatus(status.id)
+                    status.delete()
                     dismiss()
                 }
             }
@@ -238,7 +194,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         add(R.string.context_menu_talk) {
             TalkFragment().apply {
-                arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                arguments = source.generateJsonBundle()
             }.show(mActivity.supportFragmentManager, "dialog")
         }
 
@@ -247,7 +203,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         add(R.string.context_menu_show_around) {
             AroundFragment().apply {
-                arguments = Bundle().apply { putString("status", source.toJsonString()) }
+                arguments = source.generateJsonBundle()
             }.show(mActivity.supportFragmentManager, "dialog")
         }
 
@@ -255,13 +211,13 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          * ツイート内のURL
          */
         val urls = source.entities.urls.map { it.expandedUrl }
-        addUrls(adapter, urls)
+        addUrls(urls)
 
         /*
          * ツイート内のURL(画像)
          */
         val medias = source.entities.media.map { it.expandedUrl }
-        addUrls(adapter, medias)
+        addUrls(medias)
 
         /*
          * ツイート内のハッシュタグ
@@ -280,7 +236,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
          */
         users.put(source.user.id, true)
         add("@" + source.user.screenName) {
-            mActivity.startActivity<ProfileActivity>("userJson" to source.user.toJsonString())
+            mActivity.startActivity<ProfileActivity>("userJson" to source.user.stringify())
         }
 
         /*
@@ -302,7 +258,7 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         if (retweet != null && users.get(status.user.id) == null) {
             users.put(status.user.id, true)
             add("@" + status.user.screenName) {
-                mActivity.startActivity<ProfileActivity>("userJson" to status.user.toJsonString())
+                mActivity.startActivity<ProfileActivity>("userJson" to status.user.stringify())
             }
         }
 
@@ -349,11 +305,11 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
         /*
          * viaをミュート
          */
-        add(String.format(mActivity.getString(R.string.context_menu_mute), StatusUtil.getClientName(source.via.name))) {
+        add(String.format(mActivity.getString(R.string.context_menu_mute), source.via.name)) {
             AlertDialog.Builder(activity)
-                    .setMessage(String.format(getString(R.string.context_create_mute), StatusUtil.getClientName(source.via.name)))
+                    .setMessage(String.format(getString(R.string.context_create_mute), source.via.name))
                     .setPositiveButton(R.string.button_ok) { _, _->
-                        SourceMute += StatusUtil.getClientName(source.via.name)
+                        SourceMute += source.via.name
                         MessageUtil.showToast(R.string.toast_create_mute)
                         dismiss()
                     }
@@ -393,14 +349,5 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
                     .show()
         }
         builder
-    }
-
-    private fun addUrls(adapter: MenuAdapter, urls: List<String>) {
-        for (url in urls) {
-            adapter.add(Menu(url, Runnable {
-                mActivity.startActivity(Intent(Intent.ACTION_VIEW, Uri.parse(url)))
-                dismiss()
-            }))
-        }
     }
 }

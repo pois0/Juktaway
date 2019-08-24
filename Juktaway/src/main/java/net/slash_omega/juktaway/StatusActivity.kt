@@ -18,10 +18,8 @@ import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.adapter.StatusAdapter
 import net.slash_omega.juktaway.event.AlertDialogEvent
 import net.slash_omega.juktaway.event.action.StatusActionEvent
-import net.slash_omega.juktaway.event.model.StreamingDestroyStatusEvent
 import net.slash_omega.juktaway.listener.StatusClickListener
 import net.slash_omega.juktaway.listener.StatusLongClickListener
-import net.slash_omega.juktaway.model.Row
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.parseWithClient
@@ -31,7 +29,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/29.
  */
-class StatusActivity: DividedFragmentActivity() {
+class StatusActivity: ScopedFragmentActivity() {
     private lateinit var mAdapter: StatusAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {
@@ -45,20 +43,23 @@ class StatusActivity: DividedFragmentActivity() {
             (getSystemService(Context.NOTIFICATION_SERVICE) as NotificationManager).cancelAll()
         }
         val statusId = if (Intent.ACTION_VIEW == intent.action) {
-            val uri = intent.data
-            if (uri == null || uri.path == null) return
+            val uri = intent.data ?: return
+            val path = uri.path ?: return
             when {
-                uri.path!!.contains("photo") -> {
+                path.contains("photo") -> {
                     startActivity<ScaleImageActivity>("url" to uri.toString())
                     finish()
                     return
                 }
-                uri.path!!.contains("video") -> {
+                path.contains("video") -> {
                     startActivity<VideoActivity>("statusUrl" to uri.toString(), "arg" to "statusUrl")
                     finish()
                     return
                 }
-                else -> java.lang.Long.parseLong(uri.lastPathSegment!!)
+                else -> uri.lastPathSegment!!.toLongOrNull() ?: run {
+                    finish()
+                    return
+                }
             }
         } else intent.getLongExtra("id", -1L)
 
@@ -69,26 +70,25 @@ class StatusActivity: DividedFragmentActivity() {
 
         // Status(ツイート)をViewに描写するアダプター
         mAdapter = StatusAdapter(this)
-        with (list) {
-            adapter = mAdapter
-            onItemClickListener = StatusClickListener(this@StatusActivity)
-            onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
-        }
+        list.adapter = mAdapter
+        list.onItemClickListener = StatusClickListener(this@StatusActivity)
+        list.onItemLongClickListener = StatusLongClickListener(this@StatusActivity)
+
         launch {
             if (statusId > 0) {
                 MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
                 load(statusId)
             } else {
                 intent.getStringExtra("status")?.toJsonObject()?.parseWithClient<Status>()?.let {
-                    mAdapter.addSuspend(Row.newStatus(it))
+                    mAdapter.addSuspend(it)
                     val inReplyToStatusId = it.inReplyToStatusId
                     if (inReplyToStatusId != null) {
                         MessageUtil.showProgressDialog(this@StatusActivity, getString(R.string.progress_loading))
                         load(inReplyToStatusId)
                     }
-                    mAdapter.notifyDataSetChanged()
                 }
             }
+            mAdapter.notifyDataSetChanged()
             list.visibility = View.VISIBLE
         }
     }
@@ -112,26 +112,23 @@ class StatusActivity: DividedFragmentActivity() {
         mAdapter.notifyDataSetChanged()
     }
 
-    fun onEventMainThread(event: StreamingDestroyStatusEvent) {
-        launch { mAdapter.removeStatus(event.statusId!!) }
-    }
+    private suspend fun load(idParam: Long) {
+        var statusId: Long? = idParam
+        val statusList = mutableListOf<Status>()
 
-    private fun load(idParam: Long) {
-        var statusId = idParam.takeIf { it > 0 }
-        launch {
-            while (statusId != null) {
-                val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
-                MessageUtil.dismissProgressDialog()
+        while (statusId != null) {
+            val status = runCatching { currentClient.statuses.show(statusId!!).await().result }.getOrNull()
 
-                if(status == null) {
-                    toast(R.string.toast_load_data_failure)
-                    return@launch
-                }
-
-                mAdapter.addSuspend(Row.newStatus(status))
-                mAdapter.notifyDataSetChanged()
-                statusId = status.inReplyToStatusId
+            if(status == null) {
+                toast(R.string.toast_load_data_failure)
+                break
             }
+
+            statusList.add(status)
+            statusId = status.inReplyToStatusId
         }
+
+        mAdapter.addAllSuspend(statusList.asReversed())
+        MessageUtil.dismissProgressDialog()
     }
 }
