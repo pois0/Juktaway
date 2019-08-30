@@ -31,6 +31,7 @@ import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.KeyboardUtil
 import net.slash_omega.juktaway.util.ThemeUtil
+import net.slash_omega.juktaway.util.takeNotEmpty
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
@@ -84,7 +85,9 @@ class SearchActivity: ScopedFragmentActivity() {
 
         search_button.setOnClickListener { search() }
         tweet_button.setOnClickListener { v ->
-            if (searchWords.text != null) startActivity<PostActivity>("status" to v.toString())
+            searchWords.text.takeNotEmpty()?.let {
+                startActivity<PostActivity>("status" to it.toString())
+            }
         }
     }
 
