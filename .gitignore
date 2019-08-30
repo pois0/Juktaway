@@ -43,3 +43,4 @@ Juktaway/release/output.json
 Juktaway/debug/output.json
 Juktaway/src/main/res/values/tokens.xml
 api.json
+/Juktaway/src/main/res/logback.xml
