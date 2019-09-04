@@ -20,12 +20,12 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+        jcenter()
         maven("http://dl.bintray.com/populov/maven")
         maven("https://maven.google.com")
         maven("https://kotlin.bintray.com/kotlinx")
         maven("https://dl.bintray.com/kotlin/ktor")
         maven("https://dl.bintray.com/nephyproject/stable")
         maven("https://dl.bintray.com/nephyproject/dev")
-        jcenter()
     }
 }
