@@ -17,7 +17,7 @@ import org.jetbrains.anko.toast
 
 private val ERROR_CODE_NAME_BLANK = HttpStatusCode.Forbidden
 
-class CreateUserListActivity: ScopedFragmentActivity() {
+class CreateUserListActivity: ScopedAppCompatActivity() {
 
     override fun onCreate(savedInstanceState: Bundle?) {
         super.onCreate(savedInstanceState)

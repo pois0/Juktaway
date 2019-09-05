@@ -7,10 +7,10 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.view.GravityCompat
-import android.support.v4.view.ViewPager
-import android.support.v7.app.ActionBarDrawerToggle
-import android.support.v7.widget.Toolbar
+import androidx.core.view.GravityCompat
+import androidx.viewpager.widget.ViewPager
+import androidx.appcompat.app.ActionBarDrawerToggle
+import androidx.appcompat.widget.Toolbar
 import android.text.Editable
 import android.text.TextWatcher
 import android.util.TypedValue
@@ -52,7 +52,7 @@ import org.jetbrains.anko.toast
 import java.util.regex.Matcher
 import java.util.regex.Pattern
 
-class MainActivity: ScopedFragmentActivity() {
+class MainActivity: ScopedAppCompatActivity() {
     companion object {
         private val whiteColor = Color.parseColor("#FFFFFF")
         private val grayColor = Color.parseColor("#666666")

@@ -19,7 +19,7 @@ import org.jetbrains.anko.toast
 
 private const val REQ_PICK_PROFILE_IMAGE = 1
 
-class EditProfileActivity: ScopedFragmentActivity(){
+class EditProfileActivity: ScopedAppCompatActivity(){
     override fun onCreate(savedInstanceState: Bundle?) {
         launch {
             val user = currentClient.account.verifyCredentials().await().result

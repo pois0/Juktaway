@@ -1,8 +1,8 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
-import android.support.v4.view.ViewPager
+import androidx.fragment.app.FragmentActivity
+import androidx.viewpager.widget.ViewPager
 import android.view.MenuItem
 import android.widget.TextView
 import net.slash_omega.juktaway.adapter.SimplePagerAdapter

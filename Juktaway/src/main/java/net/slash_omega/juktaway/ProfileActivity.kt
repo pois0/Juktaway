@@ -5,11 +5,11 @@ import android.content.Intent
 import android.graphics.Color
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.view.ViewPager
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
 import android.widget.TextView
+import androidx.viewpager.widget.ViewPager
 import de.greenrobot.event.EventBus
 import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
@@ -46,7 +46,7 @@ import net.slash_omega.juktaway.util.*
 import org.jetbrains.anko.startActivity
 import org.jetbrains.anko.toast
 
-class ProfileActivity: ScopedFragmentActivity() {
+class ProfileActivity: ScopedAppCompatActivity() {
     companion object {
         private const val OPTION_MENU_DESTROY_BLOCK = 4
         private const val OPTION_MENU_GROUP_RELATION = 1

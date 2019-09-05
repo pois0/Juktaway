@@ -3,7 +3,7 @@ package net.slash_omega.juktaway.fragment.profile
 import android.annotation.SuppressLint
 import android.app.AlertDialog
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -24,7 +24,6 @@ import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.parseWithClient
 import org.jetbrains.anko.startActivity
-import org.jetbrains.anko.support.v4.startActivity
 
 class SummaryFragment: Fragment() {
     private var mFollowFlg = false
@@ -53,7 +52,7 @@ class SummaryFragment: Fragment() {
     override fun onViewCreated(view: View, savedInstanceState: Bundle?) {
         super.onViewCreated(view, savedInstanceState)
         icon.setOnClickListener {
-            startActivity<ScaleImageActivity>("url" to mUser.profileImageUrlWithVariantSize(ProfileImageSize.Original))
+            activity?.startActivity<ScaleImageActivity>("url" to mUser.profileImageUrlWithVariantSize(ProfileImageSize.Original))
         }
 
         ImageUtil.displayRoundedImage(mUser.profileImageUrlWithVariantSize(ProfileImageSize.Bigger), icon)

@@ -8,8 +8,8 @@ import android.content.pm.PackageManager
 import android.net.Uri
 import android.os.Bundle
 import android.os.Environment
-import android.support.v4.app.ActivityCompat
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.content.ContextCompat
 import android.view.Menu
 import android.view.MenuItem
 import android.view.View
@@ -34,7 +34,7 @@ import org.jetbrains.anko.toast
 import java.net.URL
 import java.util.regex.Pattern
 
-class ScaleImageActivity: ScopedFragmentActivity() {
+class ScaleImageActivity: ScopedAppCompatActivity() {
     companion object {
         val pattern: Pattern = Pattern.compile("https?://twitter\\.com/\\w+/status/(\\d+)/photo/(\\d+)/?.*")
         const val REQUEST_PERMISSIONS_STORAGE = 1

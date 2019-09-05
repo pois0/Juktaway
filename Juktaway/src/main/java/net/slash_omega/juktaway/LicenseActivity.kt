@@ -1,7 +1,7 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import android.view.MenuItem
 import kotlinx.android.synthetic.main.activity_license.*
 import net.slash_omega.juktaway.util.ThemeUtil

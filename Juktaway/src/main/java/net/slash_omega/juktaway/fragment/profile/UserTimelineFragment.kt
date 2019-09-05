@@ -1,6 +1,6 @@
 package net.slash_omega.juktaway.fragment.profile
 
-import android.support.v4.widget.SwipeRefreshLayout
+import androidx.swiperefreshlayout.widget.SwipeRefreshLayout
 import android.view.View
 import de.greenrobot.event.EventBus
 import jp.nephy.penicillin.endpoints.timeline

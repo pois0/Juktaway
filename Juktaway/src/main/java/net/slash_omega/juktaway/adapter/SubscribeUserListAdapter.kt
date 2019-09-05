@@ -3,7 +3,7 @@ package net.slash_omega.juktaway.adapter
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import android.view.View
 import android.view.ViewGroup
 import de.greenrobot.event.EventBus
@@ -27,7 +27,7 @@ import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.twitter.currentIdentifier
 import net.slash_omega.juktaway.util.parseWithClient
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2018/10/28.
@@ -72,12 +72,12 @@ class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
                         GlobalScope.launch(Dispatchers.Main) {
                             runCatching { currentClient.lists.delete(userList.id).await() }
                                     .onSuccess {
-                                        toast(R.string.toast_destroy_user_list_success)
+                                        activity?.toast(R.string.toast_destroy_user_list_success)
                                         EventBus.getDefault().post(DestroyUserListEvent(userList.id))
                                         UserListCache.userLists.remove(userList)
                                     }
                                     .onFailure {
-                                        toast(R.string.toast_destroy_user_list_failure)
+                                        activity?.toast(R.string.toast_destroy_user_list_failure)
                                     }
                             dismiss()
                         }
@@ -87,7 +87,7 @@ class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
         }
     }
 
-    class DestroyUserListSubscriptionDialogFragment:DialogFragment() {
+    class DestroyUserListSubscriptionDialogFragment: DialogFragment() {
         override fun onCreateDialog(savedInstanceState:Bundle?):Dialog {
             val userList = arguments?.getString("userList")?.toJsonObject()?.parseWithClient<TwitterList>() ?: return Dialog(activity!!)
             return AlertDialog.Builder(activity)
@@ -97,12 +97,12 @@ class SubscribeUserListAdapter(activity: ChooseUserListsActivity, id: Int)
                         GlobalScope.launch(Dispatchers.Main) {
                             runCatching { currentClient.lists.unsubscribe(userList.id).await() }
                                     .onSuccess {
-                                        toast(R.string.toast_destroy_user_list_subscription_success)
+                                        activity?.toast(R.string.toast_destroy_user_list_subscription_success)
                                         EventBus.getDefault().post(DestroyUserListEvent(userList.id))
                                         UserListCache.userLists.remove(userList)
                                     }
                                     .onFailure {
-                                        toast(R.string.toast_destroy_user_list_subscription_failure)
+                                        activity?.toast(R.string.toast_destroy_user_list_subscription_failure)
                                     }
                             dismiss()
                         }

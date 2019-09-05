@@ -25,7 +25,7 @@ import net.slash_omega.juktaway.util.ThemeUtil
 /**
  * Created on 2018/08/29.
  */
-class ChooseUserListsActivity: ScopedFragmentActivity() {
+class ChooseUserListsActivity: ScopedAppCompatActivity() {
     private lateinit var mAdapter: SubscribeUserListAdapter
     private lateinit var initial: List<UserListWithRegistered>
 

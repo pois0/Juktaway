@@ -5,9 +5,9 @@ import android.app.AlertDialog
 import android.graphics.Color
 import android.graphics.Typeface
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentActivity
-import android.support.v4.content.ContextCompat
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
+import androidx.core.content.ContextCompat
 import android.text.TextUtils
 import android.util.TypedValue
 import android.view.Gravity

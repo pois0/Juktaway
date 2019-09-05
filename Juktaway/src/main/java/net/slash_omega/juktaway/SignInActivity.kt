@@ -26,7 +26,6 @@ import kotlinx.coroutines.*
 import net.slash_omega.juktaway.twitter.*
 import net.slash_omega.juktaway.util.SharedPreference
 import org.jetbrains.anko.intentFor
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.toast
 import kotlin.coroutines.CoroutineContext
 
@@ -85,7 +84,7 @@ class SignInActivity: Activity(), CoroutineScope {
             override fun onNothingSelected(parent: AdapterView<*>?) {}
         }
 
-        add_consumer_button.onClick {
+        add_consumer_button.setOnClickListener {
             launch {
                 val consumerName = consumer_name.text.toString()
                 if (Core.addConsumer(consumerName, consumer_key.text.toString(), consumer_secret.text.toString())) {

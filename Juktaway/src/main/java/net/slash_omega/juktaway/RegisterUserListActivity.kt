@@ -15,7 +15,7 @@ import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.ThemeUtil
 import org.jetbrains.anko.startActivity
 
-class RegisterUserListActivity: ScopedFragmentActivity() {
+class RegisterUserListActivity: ScopedAppCompatActivity() {
     private lateinit var mAdapter: RegisterListAdapter
 
     override fun onCreate(savedInstanceState: Bundle?) {

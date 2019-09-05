@@ -1,11 +1,11 @@
 package net.slash_omega.juktaway.widget
 
 import android.content.Context
-import android.support.v4.view.ViewPager
+import androidx.viewpager.widget.ViewPager
 import android.util.AttributeSet
 import android.view.MotionEvent
 
-class ScaleImageViewPager(context: Context, attrs: AttributeSet) : ViewPager(context, attrs) {
+class ScaleImageViewPager(context: Context, attrs: AttributeSet): ViewPager(context, attrs) {
 
     private var mEnabled = true
 

@@ -2,8 +2,8 @@ package net.slash_omega.juktaway.fragment
 
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.util.LongSparseArray
+import androidx.fragment.app.DialogFragment
+import androidx.collection.LongSparseArray
 import android.view.View
 import android.view.Window
 import android.view.WindowManager

@@ -19,7 +19,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/29.
  */
-class UserSearchActivity: ScopedFragmentActivity() {
+class UserSearchActivity: ScopedAppCompatActivity() {
     private lateinit var mSearchWord: String
     private var mPage = 1
     private lateinit var mAdapter: UserAdapter

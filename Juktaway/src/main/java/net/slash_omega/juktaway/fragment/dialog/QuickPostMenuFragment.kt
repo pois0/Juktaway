@@ -3,12 +3,12 @@ package net.slash_omega.juktaway.fragment.dialog
 import android.app.AlertDialog
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import android.widget.ListView
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.util.ThemeUtil
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 
 /**
  * Created on 2019/01/20.
@@ -40,7 +40,7 @@ class QuickPostMenuFragment: DialogFragment() {
         if(mainActivity.statusInitialText.isNotBlank()) {
             add("Unfix initial text") {
                 mainActivity.unfixStatusInitialText()
-                toast(getString(R.string.quick_posting_menu_unfixed_success))
+                activity?.toast(getString(R.string.quick_posting_menu_unfixed_success))
                 dismiss()
             }
         }

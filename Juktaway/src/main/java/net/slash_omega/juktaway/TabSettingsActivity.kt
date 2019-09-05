@@ -9,14 +9,15 @@ import android.content.DialogInterface
 import android.content.Intent
 import android.graphics.Color
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.DialogFragment
+import androidx.fragment.app.FragmentActivity
 import android.util.TypedValue
 import android.view.*
 import android.widget.ArrayAdapter
 import android.widget.CheckBox
 import android.widget.EditText
 import android.widget.ListView
+import androidx.core.os.bundleOf
 import jp.nephy.jsonkt.toJsonObject
 import jp.nephy.penicillin.models.TwitterList
 import kotlinx.android.synthetic.main.activity_tab_settings.*
@@ -25,8 +26,6 @@ import kotlinx.android.synthetic.main.row_tag.view.*
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.util.ThemeUtil
 import net.slash_omega.juktaway.util.parseWithClient
-import org.jetbrains.anko.bundleOf
-import org.jetbrains.anko.sdk27.coroutines.onClick
 import org.jetbrains.anko.startActivityForResult
 
 /**
@@ -235,7 +234,7 @@ class TabSettingsActivity: FragmentActivity() {
                     }
                 }
 
-                timer.onClick {
+                timer.setOnClickListener {
                     AutoLoadDialog().apply {
                         arguments = bundleOf("position" to position, "interval" to tab.autoReload)
                     }.show(supportFragmentManager, "auto-load-dialog")

@@ -1,6 +1,6 @@
 package net.slash_omega.juktaway
 
-import android.support.v4.app.FragmentActivity
+import androidx.appcompat.app.AppCompatActivity
 import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.Job
@@ -10,7 +10,7 @@ import kotlin.coroutines.CoroutineContext
 /**
  * Created on 2019/02/03.
  */
-abstract class ScopedFragmentActivity: FragmentActivity(), CoroutineScope {
+abstract class ScopedAppCompatActivity: AppCompatActivity(), CoroutineScope {
     private val job = Job()
     override val coroutineContext: CoroutineContext
         get() = Dispatchers.Main + job

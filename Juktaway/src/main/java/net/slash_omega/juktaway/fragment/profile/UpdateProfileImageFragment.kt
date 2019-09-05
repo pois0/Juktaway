@@ -4,7 +4,7 @@ import android.app.AlertDialog.Builder
 import android.app.Dialog
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import android.view.Gravity
 import android.view.ViewGroup.LayoutParams
 import android.widget.ImageView
@@ -14,11 +14,12 @@ import jp.nephy.penicillin.endpoints.account
 import jp.nephy.penicillin.endpoints.account.updateProfileImage
 import kotlinx.coroutines.*
 import net.slash_omega.juktaway.R
+import net.slash_omega.juktaway.app
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
 import net.slash_omega.juktaway.util.displayImage
 import net.slash_omega.juktaway.util.mediaType
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 import java.io.File
 
 private const val imgPathArg = "imgPath"
@@ -55,7 +56,7 @@ class UpdateProfileImageFragment: DialogFragment() {
                         }
                     }.run {
                         MessageUtil.dismissProgressDialog()
-                        toast(if (isSuccess) R.string.toast_update_profile_image_success else R.string.toast_update_profile_image_failure)
+                        app.toast(if (isSuccess) R.string.toast_update_profile_image_success else R.string.toast_update_profile_image_failure)
                         dismiss()
                     }
                 }

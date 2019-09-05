@@ -15,9 +15,9 @@ import android.net.Uri
 import android.os.Bundle
 import android.os.Parcelable
 import android.provider.MediaStore
-import android.support.v4.app.ActivityCompat
-import android.support.v4.app.RemoteInput
-import android.support.v4.content.ContextCompat
+import androidx.core.app.ActivityCompat
+import androidx.core.app.RemoteInput
+import androidx.core.content.ContextCompat
 import android.text.Editable
 import android.text.TextWatcher
 import android.text.method.ScrollingMovementMethod
@@ -52,7 +52,7 @@ import java.io.File
 import java.io.FileNotFoundException
 
 @SuppressLint("SetTextI18n", "InflateParams")
-class PostActivity: ScopedFragmentActivity() {
+class PostActivity: ScopedAppCompatActivity() {
     companion object {
         private const val REQUEST_GALLERY = 1
         private const val REQUEST_CAMERA = 2

@@ -5,8 +5,8 @@ import android.app.Dialog
 import android.content.Intent
 import android.net.Uri
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
-import android.support.v4.util.LongSparseArray
+import androidx.fragment.app.DialogFragment
+import androidx.collection.LongSparseArray
 import android.widget.ListView
 import jp.nephy.jsonkt.stringify
 import jp.nephy.jsonkt.toJsonObject
@@ -18,7 +18,7 @@ import kotlinx.coroutines.CoroutineScope
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.ProfileActivity
 import net.slash_omega.juktaway.R
-import net.slash_omega.juktaway.ScopedFragmentActivity
+import net.slash_omega.juktaway.ScopedAppCompatActivity
 import net.slash_omega.juktaway.SearchActivity
 import net.slash_omega.juktaway.fragment.AroundFragment
 import net.slash_omega.juktaway.fragment.RetweetersFragment
@@ -44,10 +44,10 @@ class StatusMenuFragment: DialogFragment(), CoroutineScope {
 
     override val coroutineContext by lazy { mActivity.coroutineContext }
 
-    private lateinit var mActivity: ScopedFragmentActivity
+    private lateinit var mActivity: ScopedAppCompatActivity
 
     override fun onCreateDialog(savedInstanceState: Bundle?): Dialog {
-        mActivity = (activity as ScopedFragmentActivity?)!!
+        mActivity = (activity as ScopedAppCompatActivity?)!!
         ThemeUtil.setTheme(activity!!)
         val adapter = MenuAdapter(mActivity, R.layout.row_menu)
         return AlertDialog.Builder(mActivity)

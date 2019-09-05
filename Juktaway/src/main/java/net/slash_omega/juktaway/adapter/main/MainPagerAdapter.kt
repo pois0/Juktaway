@@ -1,14 +1,14 @@
 package net.slash_omega.juktaway.adapter.main
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
-import android.support.v4.app.FragmentStatePagerAdapter
-import android.support.v4.view.ViewPager
+import androidx.core.os.bundleOf
+import androidx.fragment.app.Fragment
+import androidx.fragment.app.FragmentStatePagerAdapter
+import androidx.viewpager.widget.ViewPager
 import net.slash_omega.juktaway.MainActivity
 import net.slash_omega.juktaway.fragment.main.tab.*
 import net.slash_omega.juktaway.model.*
 import net.slash_omega.juktaway.twitter.currentIdentifier
-import org.jetbrains.anko.bundleOf
 import kotlin.reflect.KClass
 import kotlin.reflect.jvm.jvmName
 

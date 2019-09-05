@@ -1,7 +1,7 @@
 package net.slash_omega.juktaway
 
 import android.os.Bundle
-import android.support.v4.view.ViewPager
+import androidx.viewpager.widget.ViewPager
 import android.view.Menu
 import android.view.MenuItem
 import jp.nephy.jsonkt.toJsonObject
@@ -24,7 +24,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/27.
  */
-class UserListActivity: ScopedFragmentActivity() {
+class UserListActivity: ScopedAppCompatActivity() {
     companion object {
         private var mCurrentPosition = 0
         private var mColorBlue: Int = 0

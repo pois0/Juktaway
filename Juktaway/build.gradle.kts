@@ -4,11 +4,14 @@ import org.jetbrains.kotlin.gradle.tasks.KotlinCompile
 
 val xCoroutinesVersion = "1.3.0"
 val xSerializationVersion = "0.10.0"
+
+val androidxVersion = "1.0.0"
+
 val ankoVersion = "0.10.8"
 val ktorVersion = "1.2.3-rc"
 val eventbusVersion = "2.2.0"
 val universalImageLoaderVersion = "1.9.5"
-val pageIndicatorViewVersion = "1.0.2"
+val pageIndicatorViewVersion = "1.0.3"
 val penicillinVersion = "4.2.3-eap-36"
 val jsonKtVersion = "5.0.0-eap-4"
 
@@ -27,13 +30,22 @@ plugins {
 dependencies {
     implementation(kotlin("stdlib"))
     implementation(kotlin("reflect"))
-    implementation("org.jetbrains.kotlinx", "kotlinx-coroutines-android", xCoroutinesVersion)
-    implementation("org.jetbrains.kotlinx", "kotlinx-serialization-runtime", xSerializationVersion)
-    implementation("org.jetbrains.anko", "anko", ankoVersion)
+
+    implementation(kotlinx("coroutines-android", xCoroutinesVersion))
+    implementation(kotlinx("serialization-runtime", xSerializationVersion))
+
+    implementation(androidx("core", "core-ktx"))
+    implementation(androidx("fragment"))
+    implementation(androidx("appcompat"))
+
+    implementation("org.jetbrains.anko", "anko-commons", ankoVersion)
+    implementation("org.jetbrains.anko", "anko-sqlite", ankoVersion)
+
     implementation("io.ktor", "ktor-client-android", ktorVersion)
     implementation("de.greenrobot", "eventbus", eventbusVersion)
     implementation("com.nostra13.universalimageloader", "universal-image-loader", universalImageLoaderVersion)
     implementation("com.romandanylyk", "pageindicatorview", pageIndicatorViewVersion)
+
     implementation("jp.nephy", "penicillin", penicillinVersion)
     implementation("jp.nephy", "jsonkt", jsonKtVersion)
 }
@@ -105,6 +117,10 @@ android {
             applicationIdSuffix = ".debug"
         }
     }
+
+    dataBinding {
+        isEnabled = true
+    }
 }
 
 gradle.projectsEvaluated {
@@ -118,4 +134,16 @@ gradle.projectsEvaluated {
             jvmTarget = "1.8"
         }
     }
+}
+
+fun DependencyHandler.kotlinx(module: String, version: String? = null): String {
+    val versionString = version?.let { ":$it" }.orEmpty()
+
+    return "org.jetbrains.kotlinx:kotlinx-$module$versionString"
+}
+
+fun DependencyHandler.androidx(repository: String, module: String? = repository, version: String? = androidxVersion): String {
+    val versionString = version?.let { ":$it" }.orEmpty()
+
+    return "androidx.$repository:$module$versionString"
 }

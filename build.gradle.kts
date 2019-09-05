@@ -20,6 +20,7 @@ buildscript {
 allprojects {
     repositories {
         mavenCentral()
+        google()
         jcenter()
         maven("http://dl.bintray.com/populov/maven")
         maven("https://maven.google.com")

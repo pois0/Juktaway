@@ -37,7 +37,7 @@ import org.jetbrains.anko.toast
 /**
  * Created on 2018/08/24.
  */
-class SearchActivity: ScopedFragmentActivity() {
+class SearchActivity: ScopedAppCompatActivity() {
     companion object {
         const val RESULT_CREATE_SAVED_SEARCH = 100
     }

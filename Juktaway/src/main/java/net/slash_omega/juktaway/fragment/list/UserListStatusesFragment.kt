@@ -1,7 +1,7 @@
 package net.slash_omega.juktaway.fragment.list
 
 import android.os.Bundle
-import android.support.v4.app.Fragment
+import androidx.fragment.app.Fragment
 import android.view.LayoutInflater
 import android.view.View
 import android.view.ViewGroup
@@ -26,7 +26,7 @@ import net.slash_omega.juktaway.settings.preferences
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.scope
 
-class UserListStatusesFragment : Fragment() {
+class UserListStatusesFragment: Fragment() {
     private lateinit var mAdapter: StatusAdapter
     private lateinit var mListView: ListView
     private var mListId: Long = 0

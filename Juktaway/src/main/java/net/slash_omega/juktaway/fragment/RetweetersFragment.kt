@@ -2,7 +2,7 @@ package net.slash_omega.juktaway.fragment
 
 import android.app.Dialog
 import android.os.Bundle
-import android.support.v4.app.DialogFragment
+import androidx.fragment.app.DialogFragment
 import android.view.View
 import android.view.Window
 import android.view.WindowManager
@@ -17,7 +17,7 @@ import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
 import net.slash_omega.juktaway.adapter.UserAdapter
 import net.slash_omega.juktaway.twitter.currentClient
-import org.jetbrains.anko.support.v4.toast
+import org.jetbrains.anko.toast
 
 class RetweetersFragment: DialogFragment() {
     private lateinit var mProgressBar: ProgressBar
@@ -37,7 +37,7 @@ class RetweetersFragment: DialogFragment() {
                 mProgressBar.visibility = View.GONE
 
                 if (statuses == null) {
-                    toast(R.string.toast_load_data_failure)
+                    activity?.toast(R.string.toast_load_data_failure)
                 } else {
                     statuses.forEach { mAdapter.add(it.user) }
                     mAdapter.notifyDataSetChanged()

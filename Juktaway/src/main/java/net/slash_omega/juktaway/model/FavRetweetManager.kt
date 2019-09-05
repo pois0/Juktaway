@@ -1,6 +1,6 @@
 package net.slash_omega.juktaway.model
 
-import android.support.v4.util.LongSparseArray
+import androidx.collection.LongSparseArray
 import jp.nephy.penicillin.models.Status
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.withContext

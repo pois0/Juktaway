@@ -1,6 +1,6 @@
 package net.slash_omega.juktaway.listener
 
-import android.support.v4.app.FragmentActivity
+import androidx.fragment.app.FragmentActivity
 import android.view.View
 import android.widget.AdapterView
 import net.slash_omega.juktaway.adapter.StatusAdapter

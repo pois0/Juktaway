@@ -10,7 +10,7 @@ import kotlinx.android.synthetic.main.row_subscribe_user_list.view.*
 import kotlinx.coroutines.Dispatchers
 import kotlinx.coroutines.launch
 import net.slash_omega.juktaway.R
-import net.slash_omega.juktaway.ScopedFragmentActivity
+import net.slash_omega.juktaway.ScopedAppCompatActivity
 import net.slash_omega.juktaway.model.UserListWithRegistered
 import net.slash_omega.juktaway.twitter.currentClient
 import net.slash_omega.juktaway.util.MessageUtil
@@ -18,7 +18,7 @@ import net.slash_omega.juktaway.util.MessageUtil
 /**
  * Created on 2018/11/13.
  */
-class RegisterListAdapter(private val c: ScopedFragmentActivity, id: Int, private val userId: Long): ArrayAdapterBase<UserListWithRegistered>(c, id) {
+class RegisterListAdapter(private val c: ScopedAppCompatActivity, id: Int, private val userId: Long): ArrayAdapterBase<UserListWithRegistered>(c, id) {
     override val View.mView: (Int, ViewGroup?) -> Unit
         get() = { pos, _ ->
             val registered = getItem(pos)!!
