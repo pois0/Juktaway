@@ -296,4 +296,10 @@
     <string name="dialog_text_tab_interval">Interval(ms)</string>
     <string name="description_remove_user">Remove a user</string>
     <string name="description_toggle_profile">Toggle visibility of user profile</string>
+    <string name="description_cell_status_private">Private Account</string>
+    <string name="description_cell_status_verified">Verified Account</string>
+    <string name="description_cell_status_play">Play movie</string>
+    <string name="description_cell_status_reply">Reply to this tweet</string>
+    <string name="description_cell_status_retweet">Retweet this tweet</string>
+    <string name="description_cell_status_favorite">Mark this tweet as favorite</string>
 </resources>

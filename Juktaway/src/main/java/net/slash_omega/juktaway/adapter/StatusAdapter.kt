@@ -191,6 +191,7 @@ class StatusAdapter(private val fragmentActivity: FragmentActivity): ArrayAdapte
         super.clear()
         mIdSet.clear()
         mLimit = limit
+        pre
     }
 
     @SuppressLint("SetTextI18n")

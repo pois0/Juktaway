@@ -1,0 +1,224 @@
+<?xml version="1.0" encoding="utf-8"?>
+<layout xmlns:tools="http://schemas.android.com/tools" xmlns:android="http://schemas.android.com/apk/res/android">
+    <data>
+        <variable name="status" type="net.slash_omega.juktaway.model.StatusModel"/>
+        <variable name="preference" type="net.slash_omega.juktaway.settings.Preferences"/>
+    </data>
+    <LinearLayout
+            android:layout_width="match_parent"
+            android:layout_height="wrap_content"
+            android:padding="4dp"
+            android:orientation="horizontal"
+            android:backgroundTint="@{ status.originalStatus.isMentionForMe ? @color/status_reply_for_me : @color/transparent }">
+        <ImageView
+                android:layout_width="48dp"
+                android:layout_height="48dp"
+                android:id="@+id/icon"
+                tools:src="@mipmap/ic_launcher"
+                android:contentDescription="@string/description_icon"
+                android:visibility="@{ preference.display.tweet.shouldShowAuthorIcon ? View.VISIBLE : View.GONE }"
+                android:layout_margin="2dp"
+        />
+        <RelativeLayout
+                android:layout_width="match_parent"
+                android:layout_height="wrap_content"
+                android:padding="2dp"
+                android:layout_marginStart="4dp">
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/display_name"
+                    tools:text="Twitter Japan"
+                    android:text='@{ status.status.user.name }'
+                    android:layout_alignParentStart="true"
+            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/screen_name"
+                    android:text='@{ "@" + status.status.user.screenName }'
+                    tools:text="\@TwitterJP"
+                    android:layout_toEndOf="@+id/display_name"
+                    android:layout_alignBaseline="@+id/display_name"
+                    android:layout_marginEnd="4dp"
+            />
+            <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:id="@+id/lock"
+                    android:src="@drawable/ic_lock"
+                    android:tint="@color/holo_blue_light"
+                    android:layout_toEndOf="@+id/screen_name"
+                    android:layout_alignBottom="@+id/display_name"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="2dp"
+                    android:contentDescription="@string/description_cell_status_private"
+                    android:visibility="@{ status.status.user.protected ? View.VISIBLE : View.GONE }"
+            />
+            <ImageView
+                    android:layout_width="10dp"
+                    android:layout_height="10dp"
+                    android:id="@+id/verified"
+                    android:src="@drawable/ic_verified"
+                    android:tint="@color/holo_blue_light"
+                    android:layout_toEndOf="@+id/lock"
+                    android:layout_alignBottom="@+id/display_name"
+                    android:layout_marginEnd="4dp"
+                    android:layout_marginBottom="2dp"
+                    android:contentDescription="@string/description_cell_status_verified"
+                    android:visibility="@{ status.status.user.verified }"
+            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/datetime_relative"
+                    android:text="@{ status.relativeDateTime }"
+                    android:layout_alignParentEnd="true"
+                    android:layout_alignBaseline="@+id/display_name"
+                    tools:ignore="RelativeOverlap"
+            />
+            <TextView
+                    android:layout_width="wrap_content"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/status"
+                    android:text="@{ status.displayText }"
+                    tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                    android:layout_below="@+id/display_name"
+            />
+            <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/quoted_tweet"
+                    android:padding="6dp"
+                    android:layout_marginVertical="4dp"
+                    android:background="@drawable/quoted_tweet_frame"
+                    android:layout_below="@+id/status"
+                    android:visibility="@{ status.status.isQuoteStatus ? View.VISIBLE : View.GONE }">
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/quoted_display_name"
+                        tools:text="Twitter Japan"
+                        android:text="@{ status.quoteUserDisplayName }"
+                        android:layout_marginHorizontal="4dp"
+                />
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/quoted_screen_name"
+                        android:text="@{ status.quoteUserScreenName }"
+                        tools:text="\@TwitterJP"
+                        android:layout_toEndOf="@+id/quoted_display_name"
+                        android:layout_alignBaseline="@+id/quoted_display_name"
+                        android:layout_marginHorizontal="4dp"
+                />
+                <TextView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/quoted_status"
+                        android:text="@{ status.quoteStatusDisplayText }"
+                        tools:text="Lorem ipsum dolor sit amet, consectetur adipiscing elit, sed do eiusmod tempor incididunt ut labore et dolore magna aliqua."
+                        android:layout_below="@+id/quoted_display_name"
+                        android:layout_marginTop="2dp"
+                />
+                <FrameLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/quoted_images_container_wrapper"
+                        android:layout_below="@+id/quoted_status"
+                        >
+                    <LinearLayout
+                            android:layout_width="match_parent"
+                            android:layout_height="wrap_content"
+                            android:orientation="vertical"
+                            tools:ignore="UselessLeaf,UselessParent"
+                    />
+                    <ImageView
+                            android:layout_width="wrap_content"
+                            android:layout_height="wrap_content"
+                            android:id="@+id/quoted_play"
+                            android:src="@drawable/ic_play_circle"
+                            android:layout_gravity="center"
+                            android:contentDescription="@string/description_cell_status_play"
+                    />
+                </FrameLayout>
+            </RelativeLayout>
+            <FrameLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/images_container_wrapper"
+                    android:layout_below="@+id/quoted_tweet"
+                    android:layout_marginTop="10dp">
+                <LinearLayout
+                        android:layout_width="match_parent"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/images_container"
+                        android:orientation="vertical"
+                />
+                <ImageView
+                        android:layout_width="wrap_content"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/play"
+                        android:layout_gravity="center"
+                        android:contentDescription="@string/description_cell_status_play"
+                />
+            </FrameLayout>
+            <RelativeLayout
+                    android:layout_width="match_parent"
+                    android:layout_height="wrap_content"
+                    android:id="@+id/menu_and_via_container"
+                    android:layout_below="@+id/images_container_wrapper">
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:id="@+id/do_reply"
+                        android:src="@drawable/ic_reply"
+                        android:contentDescription="@string/description_cell_status_reply"
+                />
+                <Space
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/reply_count"
+                        android:layout_toEndOf="@+id/do_reply"
+                />
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:id="@+id/do_retweet"
+                        android:src="@drawable/ic_retweet"
+                        android:layout_toEndOf="@+id/reply_count"
+                        android:contentDescription="@string/description_cell_status_retweet"
+                />
+                <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/retweet_count"
+                        android:text="@{ status.retweetCount }"
+                        tools:text="32823"
+                        android:textSize="10sp"
+                        android:layout_toEndOf="@+id/do_retweet"
+                        tools:ignore="SmallSp"
+                />
+                <ImageView
+                        android:layout_width="24dp"
+                        android:layout_height="24dp"
+                        android:id="@+id/do_fav"
+                        android:layout_toEndOf="@+id/retweet_count"
+                        tools:tint="#C0A000"
+                        android:layout_marginVertical="2dp"
+                        android:contentDescription="@string/description_cell_status_favorite"
+                />
+                <TextView
+                        android:layout_width="32dp"
+                        android:layout_height="wrap_content"
+                        android:id="@+id/fav_count"
+                        android:text="@{ status.favoriteCount }"
+                        tools:text="79234"
+                        android:textSize="10sp"
+                        android:layout_toEndOf="@+id/do_fav"
+                        tools:ignore="SmallSp"
+                />
+            </RelativeLayout>
+        </RelativeLayout>
+    </LinearLayout>
+</layout>

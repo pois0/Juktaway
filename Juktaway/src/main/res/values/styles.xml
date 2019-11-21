@@ -62,4 +62,7 @@
     <style name="Theme.MyTrans" parent="android:style/Theme.Translucent">
         <item name="android:windowBackground">@drawable/translucent_background</item>
     </style>
+
+    <color name="status_reply_for_me">#20ff2020</color>
+    <color name="transparent">#00000000</color>
 </resources>

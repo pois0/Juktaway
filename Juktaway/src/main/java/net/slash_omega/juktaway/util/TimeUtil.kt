@@ -5,6 +5,8 @@ import jp.nephy.penicillin.extensions.idObj
 import jp.nephy.penicillin.models.Status
 import net.slash_omega.juktaway.settings.preferences
 import java.text.SimpleDateFormat
+import java.time.Instant
+import java.time.temporal.ChronoUnit
 import java.util.*
 
 
@@ -16,15 +18,9 @@ val Status.createdAtString: String
     get() = if (preferences.display.tweet.shouldDisplayMilliSec) DATE_DETAILED_FORMAT.format(idObj.date)
             else DATE_CONCISE_FORMAT.format(createdAt.date)
 
-object TimeUtil {
-    /**
-     * 相対時刻取得
-     *
-     * @param date 日付
-     * @return 相対時刻
-     */
-    fun getRelativeTime(date: Date): String {
-        val diff = ((Date().time - date.time) / 1000).toInt()
+val Status.relativeTime: String
+    get() {
+        val diff = ChronoUnit.SECONDS.between(createdAt.instant, Instant.now())
         return when {
             diff < 1 -> "now"
             diff < 60 -> diff.toString() + "s"
@@ -33,4 +29,3 @@ object TimeUtil {
             else -> (diff / 86400).toString() + "d"
         }
     }
-}
